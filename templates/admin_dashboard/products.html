@@ -1,0 +1,447 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Products - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="container">
+        <div class="admin-header">
+            <div>
+                <h1>📦 Manage Products</h1>
+                <p class="text-muted">View and manage all products across the platform</p>
+            </div>
+            <div class="admin-nav">
+                <a href="{% url 'admin_dashboard' %}" class="nav-btn">Overview</a>
+                <a href="{% url 'admin_sellers' %}" class="nav-btn">Sellers</a>
+                <a href="{% url 'admin_products' %}" class="nav-btn active">Products</a>
+                <a href="{% url 'admin_analytics' %}" class="nav-btn">Analytics</a>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-card">
+            <form method="GET" class="filters-form">
+                <select name="status" class="filter-select">
+                    <option value="">All Products</option>
+                    <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="sold_out" {% if request.GET.status == 'sold_out' %}selected{% endif %}>Sold Out</option>
+                    <option value="archived" {% if request.GET.status == 'archived' %}selected{% endif %}>Archived</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'admin_products' %}" class="btn btn-secondary">Clear</a>
+            </form>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="section-card">
+            <h2>Products (Showing {{ products.count }} of total)</h2>
+            <div class="products-grid-large">
+                {% for product in products %}
+                <div class="product-card-detailed">
+                    <div class="product-image-section">
+                        {% if product.images.first %}
+                        <img src="{{ product.images.first.image.url }}" alt="Product">
+                        {% else %}
+                        <div class="product-placeholder">No Image</div>
+                        {% endif %}
+                        {% if product.images.count > 1 %}
+                        <div class="image-count">+{{ product.images.count|add:"-1" }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="product-details">
+                        <div class="product-header">
+                            <a href="{% url 'admin_seller_detail' product.seller.id %}" class="seller-link">
+                                <div class="seller-avatar">{{ product.seller.business_name|first }}</div>
+                                <div>
+                                    <div class="seller-name">{{ product.seller.business_name }}</div>
+                                    <div class="seller-username">@{{ product.seller.username }}</div>
+                                </div>
+                            </a>
+                        </div>
+
+                        <p class="product-description">{{ product.description|truncatewords:30 }}</p>
+
+                        {% if product.price %}
+                        <div class="product-price-large">₦{{ product.price|floatformat:0 }}</div>
+                        {% endif %}
+
+                        <div class="product-stats">
+                            <div class="stat-item">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                                <span>{{ product.views }} views</span>
+                            </div>
+                            <div class="stat-item">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                                </svg>
+                                <span>{{ product.whatsapp_clicks }} clicks</span>
+                            </div>
+                        </div>
+
+                        <div class="product-badges-row">
+                            {% if product.is_sold_out %}
+                            <span class="badge-status sold-out">Sold Out</span>
+                            {% elif product.is_archived %}
+                            <span class="badge-status archived">Archived</span>
+                            {% else %}
+                            <span class="badge-status active">Active</span>
+                            {% endif %}
+
+                            <span class="badge-date">{{ product.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-state">
+                    <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="1" y="3" width="15" height="13"/>
+                    </svg>
+                    <h3>No products found</h3>
+                    <p>Try adjusting your filters</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if products.count >= 100 %}
+            <div class="load-more-notice">
+                <p>Showing first 100 products. Use filters to narrow results.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-dashboard {
+        padding: 2.5rem 0 5rem;
+        background: var(--bg-secondary);
+        min-height: 100vh;
+    }
+    
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .text-muted {
+        color: var(--text-light);
+    }
+    
+    .admin-header {
+        background: var(--bg);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        border: 1px solid var(--border);
+    }
+    
+    .admin-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    
+    .admin-nav {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .nav-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        color: var(--text);
+        font-weight: 600;
+        transition: var(--transition);
+    }
+    
+    .nav-btn:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--primary-light);
+    }
+    
+    .nav-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .filters-card {
+        background: var(--bg);
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+    
+    .filters-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-select {
+        flex: 1;
+        min-width: 200px;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 0.9375rem;
+        background: var(--bg);
+        color: var(--text);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: var(--transition);
+    }
+    
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: var(--primary-dark);
+    }
+    
+    .btn-secondary {
+        background: var(--bg-secondary);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+        background: var(--bg-tertiary);
+    }
+    
+    .section-card {
+        background: var(--bg);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+    
+    .section-card h2 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+    }
+
+    .products-grid-large {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .product-card-detailed {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+
+    .product-card-detailed:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow);
+    }
+
+    .product-image-section {
+        position: relative;
+        width: 100%;
+        height: 240px;
+    }
+
+    .product-image-section img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--bg-tertiary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-light);
+        font-weight: 600;
+    }
+
+    .image-count {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.375rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .product-details {
+        padding: 1.25rem;
+    }
+
+    .product-header {
+        margin-bottom: 1rem;
+    }
+
+    .seller-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: var(--text);
+    }
+
+    .seller-link:hover .seller-name {
+        color: var(--primary);
+    }
+
+    .seller-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+    }
+
+    .seller-name {
+        font-weight: 700;
+        font-size: 0.9375rem;
+    }
+
+    .seller-username {
+        font-size: 0.8125rem;
+        color: var(--text-light);
+    }
+
+    .product-description {
+        font-size: 0.9375rem;
+        line-height: 1.5;
+        margin-bottom: 1rem;
+        color: var(--text);
+    }
+
+    .product-price-large {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        color: var(--primary);
+    }
+
+    .product-stats {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: var(--bg);
+        border-radius: var(--radius-sm);
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    .stat-item svg {
+        color: var(--text-light);
+    }
+
+    .product-badges-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .badge-status {
+        padding: 0.375rem 0.875rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .badge-status.active {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .badge-status.sold-out {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .badge-status.archived {
+        background: #E5E7EB;
+        color: #374151;
+    }
+
+    .badge-date {
+        padding: 0.375rem 0.875rem;
+        background: var(--bg);
+        border-radius: 50px;
+        font-size: 0.75rem;
+        color: var(--text-light);
+        margin-left: auto;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 4rem 2rem;
+    }
+
+    .empty-state svg {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--text-light);
+    }
+
+    .load-more-notice {
+        margin-top: 2rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: var(--radius-sm);
+        text-align: center;
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+</style>
+{% endblock %}

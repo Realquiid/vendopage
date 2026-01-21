@@ -1,0 +1,552 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="container">
+        <div class="admin-header">
+            <div>
+                <h1>📊 Platform Analytics</h1>
+                <p class="text-muted">Growth trends and platform insights</p>
+            </div>
+            <div class="admin-nav">
+                <a href="{% url 'admin_dashboard' %}" class="nav-btn">Overview</a>
+                <a href="{% url 'admin_sellers' %}" class="nav-btn">Sellers</a>
+                <a href="{% url 'admin_products' %}" class="nav-btn">Products</a>
+                <a href="{% url 'admin_analytics' %}" class="nav-btn active">Analytics</a>
+            </div>
+        </div>
+
+        <!-- Growth Stats -->
+        <div class="section-card">
+            <h2>📈 Growth Metrics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">New Sellers (7 Days)</div>
+                        <div class="stat-value">{{ new_sellers_7d }}</div>
+                        <div class="stat-sublabel">{{ new_sellers_30d }} in last 30 days</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #14B8A6 0%, #10B981 100%);">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect x="1" y="3" width="15" height="13"/>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">New Products (7 Days)</div>
+                        <div class="stat-value">{{ new_products_7d }}</div>
+                        <div class="stat-sublabel">{{ new_products_30d }} in last 30 days</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M18 20V10M12 20V4M6 20v-6"/>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Growth Rate</div>
+                        <div class="stat-value">
+                            {% if new_sellers_30d > 0 %}
+                                +{{ new_sellers_30d|floatformat:0 }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </div>
+                        <div class="stat-sublabel">Monthly seller growth</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #EC4899 0%, #7C3AED 100%);">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">Avg Products/Seller</div>
+                        <div class="stat-value">
+                            {% widthratio new_products_30d new_sellers_30d 1 %}
+                        </div>
+                        <div class="stat-sublabel">Last 30 days</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="section-card">
+            <h2>📂 Category Distribution</h2>
+            <div class="category-grid">
+                {% for category in category_stats %}
+                <div class="category-item">
+                    <div class="category-header">
+                        <div class="category-icon">
+                            {% if category.category == 'fashion' %}👗
+                            {% elif category.category == 'electronics' %}📱
+                            {% elif category.category == 'food' %}🍕
+                            {% elif category.category == 'beauty' %}💄
+                            {% elif category.category == 'home' %}🏠
+                            {% elif category.category == 'sports' %}⚽
+                            {% elif category.category == 'books' %}📚
+                            {% elif category.category == 'toys' %}🧸
+                            {% elif category.category == 'health' %}🏥
+                            {% elif category.category == 'automotive' %}🚗
+                            {% else %}🛍️
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="category-name">{{ category.category|title }}</div>
+                            <div class="category-count">{{ category.count }} sellers</div>
+                        </div>
+                    </div>
+                    <div class="category-bar">
+                        <div class="category-bar-fill" style="width: {{ category.count|floatformat:0 }}%;"></div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">No category data available</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Insights -->
+        <div class="grid-2">
+            <div class="section-card">
+                <h2>💡 Key Insights</h2>
+                <div class="insights-list">
+                    <div class="insight-item">
+                        <div class="insight-icon success">✓</div>
+                        <div>
+                            <div class="insight-title">Strong Weekly Growth</div>
+                            <div class="insight-desc">{{ new_sellers_7d }} new sellers joined in the last 7 days</div>
+                        </div>
+                    </div>
+
+                    <div class="insight-item">
+                        <div class="insight-icon info">ℹ</div>
+                        <div>
+                            <div class="insight-title">Content Activity</div>
+                            <div class="insight-desc">{{ new_products_7d }} new products listed this week</div>
+                        </div>
+                    </div>
+
+                    <div class="insight-item">
+                        <div class="insight-icon warning">⚠</div>
+                        <div>
+                            <div class="insight-title">Category Leader</div>
+                            <div class="insight-desc">
+                                {% if category_stats.first %}
+                                    {{ category_stats.first.category|title }} is the most popular category with {{ category_stats.first.count }} sellers
+                                {% else %}
+                                    No data available
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insight-item">
+                        <div class="insight-icon primary">★</div>
+                        <div>
+                            <div class="insight-title">Platform Momentum</div>
+                            <div class="insight-desc">Consistent growth across all metrics this month</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h2>📅 Time Period Summary</h2>
+                <div class="time-summary">
+                    <div class="time-block">
+                        <div class="time-label">Last 7 Days</div>
+                        <div class="time-stats">
+                            <div class="time-stat">
+                                <span class="time-number">{{ new_sellers_7d }}</span>
+                                <span class="time-desc">New Sellers</span>
+                            </div>
+                            <div class="time-stat">
+                                <span class="time-number">{{ new_products_7d }}</span>
+                                <span class="time-desc">New Products</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="time-divider"></div>
+
+                    <div class="time-block">
+                        <div class="time-label">Last 30 Days</div>
+                        <div class="time-stats">
+                            <div class="time-stat">
+                                <span class="time-number">{{ new_sellers_30d }}</span>
+                                <span class="time-desc">New Sellers</span>
+                            </div>
+                            <div class="time-stat">
+                                <span class="time-number">{{ new_products_30d }}</span>
+                                <span class="time-desc">New Products</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="section-card">
+            <h2>📥 Export Data</h2>
+            <div class="export-grid">
+                <button class="export-btn" onclick="alert('CSV export coming soon!')">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+                    </svg>
+                    <span>Download CSV Report</span>
+                </button>
+
+                <button class="export-btn" onclick="alert('PDF export coming soon!')">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                    <span>Generate PDF Report</span>
+                </button>
+
+                <button class="export-btn" onclick="window.print()">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polyline points="6 9 6 2 18 2 18 9"/>
+                        <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+                        <rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                    <span>Print Analytics</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-dashboard {
+        padding: 2.5rem 0 5rem;
+        background: var(--bg-secondary);
+        min-height: 100vh;
+    }
+    
+    .admin-header {
+        background: var(--bg);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        border: 1px solid var(--border);
+    }
+    
+    .admin-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    
+    .admin-nav {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .nav-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        color: var(--text);
+        font-weight: 600;
+        transition: var(--transition);
+    }
+    
+    .nav-btn:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--primary-light);
+    }
+    
+    .nav-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .section-card {
+        background: var(--bg);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+    
+    .section-card h2 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--bg);
+        padding: 1.75rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        display: flex;
+        gap: 1.25rem;
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .stat-content {
+        flex: 1;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-sublabel {
+        font-size: 0.8125rem;
+        color: var(--text-light);
+    }
+    
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+    }
+
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .category-item {
+        background: var(--bg-secondary);
+        padding: 1.25rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+    }
+
+    .category-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .category-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--bg);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .category-name {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .category-count {
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    .category-bar {
+        height: 6px;
+        background: var(--bg);
+        border-radius: 50px;
+        overflow: hidden;
+    }
+
+    .category-bar-fill {
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        transition: width 0.5s ease;
+    }
+
+    .insights-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .insight-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: var(--radius-sm);
+    }
+
+    .insight-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .insight-icon.success {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .insight-icon.info {
+        background: #DBEAFE;
+        color: #1E40AF;
+    }
+
+    .insight-icon.warning {
+        background: #FEF3C7;
+        color: #92400E;
+    }
+
+    .insight-icon.primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+    }
+
+    .insight-title {
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+
+    .insight-desc {
+        font-size: 0.875rem;
+        color: var(--text-light);
+    }
+
+    .time-summary {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        padding: 1rem 0;
+    }
+
+    .time-block {
+        text-align: center;
+    }
+
+    .time-label {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .time-stats {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+    }
+
+    .time-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .time-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .time-desc {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        margin-top: 0.5rem;
+    }
+
+    .time-divider {
+        height: 1px;
+        background: var(--border);
+    }
+
+    .export-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .export-btn {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1.5rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: var(--transition);
+        color: var(--text);
+        font-weight: 600;
+    }
+
+    .export-btn:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+        transform: translateY(-2px);
+    }
+
+    .export-btn svg {
+        color: inherit;
+    }
+</style>
+{% endblock %}

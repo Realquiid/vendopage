@@ -1,0 +1,411 @@
+{% extends 'base.html' %}
+
+{% block title %}Subscription - VendoPage{% endblock %}
+
+{% block content %}
+<div class="subscription-page">
+    <div class="container-narrow">
+        <div class="page-header">
+            <h1>Choose Your Plan</h1>
+            <p class="text-muted">Current plan: <strong>{{ user.get_subscription_type_display }}</strong></p>
+            {% if user.subscription_type == 'premium' and user.subscription_expires %}
+                <p class="text-muted">Expires: <strong>{{ user.subscription_expires|date:"F d, Y" }}</strong></p>
+            {% endif %}
+        </div>
+        
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card {% if user.subscription_type == 'free' %}active{% endif %}">
+                <div class="plan-header">
+                    <h3>Free Forever</h3>
+                    <div class="price">
+                        <span class="amount">₦0</span>
+                        <span class="period">/month</span>
+                    </div>
+                </div>
+                
+                <ul class="features">
+                    <li class="feature-item">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span><strong>UNLIMITED</strong> products</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Multiple images per product</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>WhatsApp integration</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Basic analytics</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>30-day product visibility</span>
+                    </li>
+                    <li class="feature-item disabled">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Shows "Powered by VendoPage" badge</span>
+                    </li>
+                </ul>
+                
+                {% if user.subscription_type == 'free' %}
+                    <button class="btn btn-secondary btn-full" disabled>Current Plan</button>
+                {% endif %}
+            </div>
+            
+            <!-- Premium Plan -->
+            <div class="pricing-card premium {% if user.subscription_type == 'premium' %}active{% endif %}">
+                <div class="plan-badge">⭐ Recommended</div>
+                <div class="plan-header">
+                    <h3>Premium</h3>
+                    <div class="price">
+                        <span class="amount">₦2,000</span>
+                        <span class="period">/month</span>
+                    </div>
+                    <p class="price-note">Was ₦4,000 - Save 50%!</p>
+                </div>
+                
+                <ul class="features">
+                    <li class="feature-item">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span><strong>Everything in Free</strong></span>
+                    </li>
+                    <li class="feature-item highlight">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span><strong>NO "Powered by" badge</strong></span>
+                    </li>
+                    <li class="feature-item highlight">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>100% your brand only</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Priority support</span>
+                    </li>
+                    <li class="feature-item">
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span>Premium badge on homepage</span>
+                    </li>
+                </ul>
+                
+                {% if user.subscription_type == 'premium' %}
+                    <button class="btn btn-secondary btn-full" disabled>Current Plan</button>
+                {% else %}
+                    <form method="POST" action="{% url 'upgrade_to_premium' %}" id="premium-form">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-full" id="upgrade-btn">
+                            <span class="btn-text">Upgrade to Premium - ₦2,000/month</span>
+                            <span class="btn-loader" style="display: none;">Processing...</span>
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <h4>💳 How do I pay?</h4>
+                <p>We use Flutterwave for secure payments. You can pay with your debit card, bank transfer, or USSD. All payments are processed securely.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h4>🔄 Can I cancel anytime?</h4>
+                <p>Yes! You can cancel anytime. Your subscription will remain active until the end of your billing period.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h4>📦 What happens to my products if I downgrade?</h4>
+                <p>Nothing! All your products stay. You'll just see the "Powered by VendoPage" badge again on your page.</p>
+            </div>
+            
+            <div class="faq-item">
+                <h4>🎯 Why upgrade to Premium?</h4>
+                <p>If you're serious about your business, the "Powered by VendoPage" badge can make your page look less professional. Premium removes it completely, so it's 100% YOUR brand.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>🔒 Is my payment secure?</h4>
+                <p>Absolutely! We use Flutterwave, a PCI-DSS certified payment processor. We never store your card details.</p>
+            </div>
+
+            <div class="faq-item">
+                <h4>📧 Will I get a receipt?</h4>
+                <p>Yes! You'll receive an email receipt immediately after payment, and you can view all your transaction history in your dashboard.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .subscription-page {
+        padding: 3rem 0 5rem;
+        background: var(--bg-secondary);
+        min-height: 100vh;
+    }
+    
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.75rem;
+    }
+    
+    .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 2rem;
+        margin-bottom: 4rem;
+    }
+    
+    .pricing-card {
+        background: white;
+        padding: 2.5rem 2rem;
+        border-radius: var(--radius-lg);
+        border: 2px solid var(--border);
+        transition: var(--transition);
+        position: relative;
+    }
+    
+    .pricing-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .pricing-card.premium {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.02) 0%, rgba(236, 72, 153, 0.02) 100%);
+    }
+    
+    .pricing-card.active {
+        border-color: var(--success);
+    }
+    
+    .plan-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        padding: 0.375rem 1.25rem;
+        border-radius: 50px;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        box-shadow: var(--shadow);
+    }
+    
+    .plan-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .plan-header h3 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        color: var(--text);
+    }
+    
+    .price {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .amount {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--text);
+    }
+    
+    .period {
+        font-size: 1.125rem;
+        color: var(--text-light);
+    }
+    
+    .price-note {
+        margin-top: 0.5rem;
+        color: var(--success);
+        font-weight: 600;
+        font-size: 0.875rem;
+    }
+    
+    .features {
+        list-style: none;
+        margin-bottom: 2rem;
+    }
+    
+    .feature-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.875rem 0;
+        border-bottom: 1px solid var(--bg-secondary);
+    }
+    
+    .feature-item:last-child {
+        border-bottom: none;
+    }
+    
+    .feature-item svg {
+        flex-shrink: 0;
+        color: var(--success);
+        margin-top: 0.125rem;
+    }
+    
+    .feature-item.disabled svg {
+        color: var(--text-light);
+        opacity: 0.5;
+    }
+    
+    .feature-item.disabled span {
+        color: var(--text-light);
+    }
+    
+    .feature-item.highlight {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
+        margin: 0 -1rem;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        border-radius: var(--radius-sm);
+    }
+    
+    .feature-item span {
+        flex: 1;
+        font-size: 0.9375rem;
+        line-height: 1.5;
+    }
+
+    #premium-form {
+        margin: 0;
+    }
+
+    .btn-loader {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-loader::after {
+        content: "";
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .faq-section {
+        background: white;
+        padding: 3rem 2.5rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+    }
+    
+    .faq-section h2 {
+        font-size: 1.875rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .faq-item {
+        margin-bottom: 2rem;
+    }
+    
+    .faq-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .faq-item h4 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: var(--text);
+    }
+    
+    .faq-item p {
+        color: var(--text-light);
+        line-height: 1.6;
+    }
+    
+    @media (max-width: 768px) {
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .pricing-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .amount {
+            font-size: 2.5rem;
+        }
+
+        .faq-section {
+            padding: 2rem 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('premium-form');
+        const btn = document.getElementById('upgrade-btn');
+        
+        if (form && btn) {
+            form.addEventListener('submit', function(e) {
+                // Show loading state
+                const btnText = btn.querySelector('.btn-text');
+                const btnLoader = btn.querySelector('.btn-loader');
+                
+                if (btnText && btnLoader) {
+                    btnText.style.display = 'none';
+                    btnLoader.style.display = 'inline-flex';
+                }
+                
+                btn.disabled = true;
+            });
+        }
+    });
+</script>
+{% endblock %}

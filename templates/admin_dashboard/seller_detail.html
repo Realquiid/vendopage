@@ -1,0 +1,554 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ seller.business_name }} - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="container">
+        <div class="admin-header">
+            <div>
+                <h1>👤 {{ seller.business_name }}</h1>
+                <p class="text-muted">@{{ seller.username }} • {{ seller.email }}</p>
+            </div>
+            <div class="admin-nav">
+                <a href="{% url 'admin_dashboard' %}" class="nav-btn">Overview</a>
+                <a href="{% url 'admin_sellers' %}" class="nav-btn">Sellers</a>
+                <a href="{% url 'admin_products' %}" class="nav-btn">Products</a>
+                <a href="{% url 'admin_analytics' %}" class="nav-btn">Analytics</a>
+            </div>
+        </div>
+
+        <!-- Seller Info & Actions -->
+        <div class="grid-2">
+            <div class="section-card">
+                <h2>Seller Information</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label">Business Name</div>
+                        <div class="info-value">{{ seller.business_name }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Username</div>
+                        <div class="info-value">@{{ seller.username }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ seller.email }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">WhatsApp</div>
+                        <div class="info-value">{{ seller.whatsapp_number }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Category</div>
+                        <div class="info-value">{{ seller.get_category_display }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Joined</div>
+                        <div class="info-value">{{ seller.created_at|date:"F d, Y" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Status</div>
+                        <div class="info-value">
+                            {% if seller.is_active %}
+                                <span class="status-badge active">Active</span>
+                            {% else %}
+                                <span class="status-badge inactive">Inactive</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Featured</div>
+                        <div class="info-value">
+                            {% if seller.is_featured %}
+                                <span class="status-badge featured">⭐ Yes</span>
+                            {% else %}
+                                <span class="status-badge">No</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <h2>Quick Actions</h2>
+                
+                <!-- Change Subscription -->
+                <form method="POST" class="action-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="change_subscription">
+                    <label>Subscription Type</label>
+                    <select name="subscription_type" class="form-select">
+                        <option value="free" {% if seller.subscription_type == 'free' %}selected{% endif %}>Free</option>
+                        <option value="premium" {% if seller.subscription_type == 'premium' %}selected{% endif %}>Premium</option>
+                        <option value="unlimited_admin" {% if seller.subscription_type == 'unlimited_admin' %}selected{% endif %}>Admin Unlimited</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Update Subscription</button>
+                </form>
+
+                <div class="action-buttons">
+                    <!-- Toggle Featured -->
+                    <form method="POST" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="toggle_featured">
+                        <button type="submit" class="btn btn-secondary">
+                            {% if seller.is_featured %}
+                                Remove from Featured
+                            {% else %}
+                                ⭐ Make Featured
+                            {% endif %}
+                        </button>
+                    </form>
+
+                    <!-- Deactivate -->
+                    {% if seller.is_active %}
+                    <form method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to deactivate this seller?')">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="deactivate">
+                        <button type="submit" class="btn btn-danger">Deactivate Account</button>
+                    </form>
+                    {% endif %}
+
+                    <!-- View Public Page -->
+                    {% if seller.slug %}
+                    <a href="{% url 'seller_page' seller.slug %}" target="_blank" class="btn btn-outline">
+                        View Public Page →
+                    </a>
+                    {% else %}
+                    <button class="btn btn-outline" disabled title="Slug not generated">
+                        No Public Page
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics -->
+        <div class="stats-grid" style="margin-bottom: 2rem;">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="1" y="3" width="15" height="13"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Total Products</div>
+                    <div class="stat-value">{{ products.count }}</div>
+                    <div class="stat-sublabel">All time</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #F59E0B 0%, #EF4444 100%);">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Page Views</div>
+                    <div class="stat-value">{{ seller.total_page_views }}</div>
+                    <div class="stat-sublabel">{{ seller.weekly_page_views }} this week</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #10B981 0%, #059669 100%);">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">WhatsApp Clicks</div>
+                    <div class="stat-value">{{ seller.weekly_whatsapp_clicks }}</div>
+                    <div class="stat-sublabel">This week</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #EC4899 0%, #7C3AED 100%);">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Subscription</div>
+                    <div class="stat-value">{{ seller.get_subscription_type_display }}</div>
+                    <div class="stat-sublabel">Current plan</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Products -->
+        <div class="section-card">
+            <h2>Recent Products ({{ products.count }} total)</h2>
+            <div class="products-grid">
+                {% for product in products %}
+                <div class="product-card-admin">
+                    {% if product.images.first %}
+                    <img src="{{ product.images.first.image.url }}" alt="Product">
+                    {% else %}
+                    <div class="product-placeholder">No Image</div>
+                    {% endif %}
+                    <div class="product-info">
+                        <div class="product-desc">{{ product.description|truncatewords:20 }}</div>
+                        {% if product.price %}
+                        <div class="product-price">₦{{ product.price|floatformat:0 }}</div>
+                        {% endif %}
+                        <div class="product-meta">
+                            <span>{{ product.views }} views</span>
+                            <span>{{ product.whatsapp_clicks }} clicks</span>
+                        </div>
+                        <div class="product-badges">
+                            {% if product.is_sold_out %}
+                            <span class="badge-sold">Sold Out</span>
+                            {% endif %}
+                            {% if product.is_archived %}
+                            <span class="badge-archived">Archived</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">No products yet</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .admin-dashboard {
+        padding: 2.5rem 0 5rem;
+        background: var(--bg-secondary);
+        min-height: 100vh;
+    }
+    
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .text-muted {
+        color: var(--text-light);
+    }
+    
+    .admin-header {
+        background: var(--bg);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        border: 1px solid var(--border);
+    }
+    
+    .admin-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    
+    .admin-nav {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .nav-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        color: var(--text);
+        font-weight: 600;
+        transition: var(--transition);
+    }
+    
+    .nav-btn:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--primary-light);
+    }
+    
+    .nav-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .section-card {
+        background: var(--bg);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+    }
+    
+    .section-card h2 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: var(--bg);
+        padding: 1.75rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        display: flex;
+        gap: 1.25rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .stat-content {
+        flex: 1;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-sublabel {
+        font-size: 0.8125rem;
+        color: var(--text-light);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .info-item {
+        padding: 1rem;
+        background: var(--bg-secondary);
+        border-radius: var(--radius-sm);
+    }
+
+    .info-label {
+        font-size: 0.8125rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .info-value {
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        background: var(--bg-tertiary);
+    }
+
+    .status-badge.active {
+        background: #D1FAE5;
+        color: #065F46;
+    }
+
+    .status-badge.inactive {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .status-badge.featured {
+        background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+        color: white;
+    }
+
+    .action-form {
+        margin-bottom: 1.5rem;
+    }
+
+    .action-form label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        margin-bottom: 1rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: center;
+        display: inline-block;
+    }
+    
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+        border: none;
+    }
+    
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-1px);
+    }
+    
+    .btn-secondary {
+        background: var(--bg-secondary);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+    
+    .btn-secondary:hover {
+        background: var(--bg-tertiary);
+    }
+    
+    .btn-danger {
+        background: #EF4444;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--border);
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        color: var(--text);
+        font-weight: 600;
+        text-align: center;
+        display: inline-block;
+    }
+
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .product-card-admin {
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+
+    .product-card-admin img,
+    .product-placeholder {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .product-placeholder {
+        background: var(--bg-tertiary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-light);
+    }
+
+    .product-info {
+        padding: 1rem;
+    }
+
+    .product-desc {
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-price {
+        font-weight: 700;
+        font-size: 1.125rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .product-meta {
+        display: flex;
+        gap: 1rem;
+        font-size: 0.75rem;
+        color: var(--text-light);
+        margin-bottom: 0.5rem;
+    }
+
+    .product-badges {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .badge-sold,
+    .badge-archived {
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.6875rem;
+        font-weight: 700;
+    }
+
+    .badge-sold {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
+
+    .badge-archived {
+        background: #E5E7EB;
+        color: #374151;
+    }
+</style>
+{% endblock %}

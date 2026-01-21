@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In - VendoPage{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-logo">
+            <div class="logo-icon-large">V</div>
+        </div>
+        
+        <div class="auth-header">
+            <h1>Welcome back</h1>
+            <p class="text-muted">Sign in to manage your product catalog</p>
+        </div>
+        
+        <form method="POST" class="auth-form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">Email or Username</label>
+                <div class="input-group">
+                    <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                        <circle cx="8.5" cy="7" r="4"/>
+                        <path d="M20 8v6M23 11h-6"/>
+                    </svg>
+                    <input type="text" name="username" class="form-input with-prefix" placeholder="Enter your email or username" required autofocus>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <input type="password" name="password" id="password" class="form-input with-prefix with-suffix" placeholder="Enter your password" required>
+                    <button type="button" class="input-suffix-icon" onclick="togglePassword()" aria-label="Toggle password visibility">
+                        <svg id="showIcon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg id="hideIcon" style="display:none;" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            {% if error %}
+            <div class="alert alert-error">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <button type="submit" class="btn btn-primary btn-full btn-lg">
+                Sign In
+            </button>
+        </form>
+        
+        <div class="auth-divider">
+            <span>or</span>
+        </div>
+        
+        <div class="auth-footer">
+            <p>Don't have an account? <a href="{% url 'register' %}">Create one free</a></p>
+        </div>
+    </div>
+    
+    <div class="auth-side">
+        <div class="auth-testimonial">
+            <div class="testimonial-icon">💬</div>
+            <blockquote>
+                "VendoPage changed my business. I used to repost products daily on WhatsApp Status. Now I just share my link once and customers can browse anytime!"
+            </blockquote>
+            <div class="testimonial-author">
+                <div class="author-avatar">A</div>
+                <div>
+                    <div class="author-name">Amina Bello</div>
+                    <div class="author-title">Fashion Seller, Lagos</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-page {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: var(--bg-secondary);
+    }
+    
+    .auth-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 3rem 2rem;
+        max-width: 480px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    
+    .auth-logo {
+        margin-bottom: 2rem;
+    }
+    
+    .logo-icon-large {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 800;
+        font-size: 1.75rem;
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        width: 100%;
+    }
+    
+    .auth-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+    }
+    
+    .auth-form {
+        width: 100%;
+        margin-bottom: 1.5rem;
+    }
+    
+    .input-prefix-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        pointer-events: none;
+    }
+    
+    .input-suffix-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+    
+    .input-suffix-icon:hover {
+        color: var(--primary);
+    }
+    
+    .form-input.with-prefix {
+        padding-left: 3rem;
+    }
+    
+    .form-input.with-suffix {
+        padding-right: 3rem;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: var(--radius-sm);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9375rem;
+        font-weight: 500;
+    }
+    
+    .alert-error {
+        background: #FEF2F2;
+        border: 1px solid #FCA5A5;
+        color: #DC2626;
+    }
+    
+    [data-theme="dark"] .alert-error {
+        background: rgba(220, 38, 38, 0.1);
+        border-color: rgba(220, 38, 38, 0.3);
+        color: #FCA5A5;
+    }
+    
+    .auth-divider {
+        position: relative;
+        text-align: center;
+        margin: 1.5rem 0;
+        width: 100%;
+    }
+    
+    .auth-divider::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 1px;
+        background: var(--border);
+    }
+    
+    .auth-divider span {
+        background: var(--bg-secondary);
+        padding: 0 1rem;
+        position: relative;
+        color: var(--text-light);
+        font-size: 0.875rem;
+    }
+    
+    .auth-footer {
+        text-align: center;
+        color: var(--text-light);
+        font-size: 0.9375rem;
+        width: 100%;
+    }
+    
+    .auth-footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+    
+    .auth-footer a:hover {
+        color: var(--primary-dark);
+    }
+    
+    /* Right Side */
+    .auth-side {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .auth-side::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 800px;
+        height: 800px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    
+    .auth-testimonial {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        padding: 2.5rem;
+        border-radius: var(--radius-lg);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        max-width: 500px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .testimonial-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .auth-testimonial blockquote {
+        color: white;
+        font-size: 1.125rem;
+        line-height: 1.7;
+        margin-bottom: 2rem;
+        font-weight: 400;
+    }
+    
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .author-avatar {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 1.125rem;
+    }
+    
+    .author-name {
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+    
+    .author-title {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.875rem;
+    }
+    
+    @media (max-width: 1024px) {
+        .auth-page {
+            grid-template-columns: 1fr;
+        }
+        
+        .auth-side {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .auth-container {
+            padding: 2rem 1.5rem;
+        }
+        
+        .auth-header h1 {
+            font-size: 1.75rem;
+        }
+    }
+</style>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const showIcon = document.getElementById('showIcon');
+        const hideIcon = document.getElementById('hideIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            showIcon.style.display = 'none';
+            hideIcon.style.display = 'block';
+        } else {
+            passwordInput.type = 'password';
+            showIcon.style.display = 'block';
+            hideIcon.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

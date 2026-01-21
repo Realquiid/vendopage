@@ -1,0 +1,631 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Your Free Page - VendoPage{% endblock %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-logo">
+            <div class="logo-icon-large">V</div>
+        </div>
+        
+        <div class="auth-header">
+            <h1>Start selling in 2 minutes</h1>
+            <p class="text-muted">Create your free product catalog. No credit card required.</p>
+        </div>
+        
+        <form method="POST" class="auth-form">
+            {% csrf_token %}
+            
+            <!-- Show all errors -->
+            {% if errors %}
+            <div class="alert alert-error">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <div>
+                    {% for error in errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% elif error %}
+            <div class="alert alert-error">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                {{ error }}
+            </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label class="form-label">Business Name *</label>
+                <div class="input-group">
+                    <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                    </svg>
+                    <input type="text" name="business_name" class="form-input with-prefix" placeholder="e.g. Bella's Fashion Store" value="{{ business_name }}" required>
+                </div>
+                <small class="form-hint">This will be visible to your customers</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">What do you sell? *</label>
+                <div class="category-grid">
+                    <label class="category-option">
+                        <input type="radio" name="category" value="fashion" {% if category == 'fashion' %}checked{% endif %} required>
+                        <div class="category-card">
+                            <span class="category-emoji">👗</span>
+                            <span class="category-name">Fashion</span>
+                        </div>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="category" value="beauty" {% if category == 'beauty' %}checked{% endif %}>
+                        <div class="category-card">
+                            <span class="category-emoji">💄</span>
+                            <span class="category-name">Beauty</span>
+                        </div>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="category" value="electronics" {% if category == 'electronics' %}checked{% endif %}>
+                        <div class="category-card">
+                            <span class="category-emoji">📱</span>
+                            <span class="category-name">Electronics</span>
+                        </div>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="category" value="food" {% if category == 'food' %}checked{% endif %}>
+                        <div class="category-card">
+                            <span class="category-emoji">🍕</span>
+                            <span class="category-name">Food</span>
+                        </div>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="category" value="home" {% if category == 'home' %}checked{% endif %}>
+                        <div class="category-card">
+                            <span class="category-emoji">🏠</span>
+                            <span class="category-name">Home</span>
+                        </div>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="category" value="sports" {% if category == 'sports' %}checked{% endif %}>
+                        <div class="category-card">
+                            <span class="category-emoji">⚽</span>
+                            <span class="category-name">Sports</span>
+                        </div>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="category" value="health" {% if category == 'health' %}checked{% endif %}>
+                        <div class="category-card">
+                            <span class="category-emoji">💪</span>
+                            <span class="category-name">Health</span>
+                        </div>
+                    </label>
+                    <label class="category-option">
+                        <input type="radio" name="category" value="other" {% if category == 'other' %}checked{% endif %}>
+                        <div class="category-card">
+                            <span class="category-emoji">🎯</span>
+                            <span class="category-name">Other</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">WhatsApp Number *</label>
+                <div class="input-group">
+                    <svg class="input-prefix-icon" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                    <input type="tel" name="whatsapp_number" class="form-input with-prefix" placeholder="234XXXXXXXXXX" value="{{ whatsapp_number }}" required>
+                </div>
+                <small class="form-hint">Include country code (e.g., 234 for Nigeria). No + or spaces.</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Email Address *</label>
+                <div class="input-group">
+                    <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                        <polyline points="22,6 12,13 2,6"/>
+                    </svg>
+                    <input type="email" name="email" class="form-input with-prefix" placeholder="you@example.com" value="{{ email }}" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Username *</label>
+                <div class="input-group">
+                    <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    <input type="text" name="username" class="form-input with-prefix" placeholder="Choose a username" value="{{ username }}" required>
+                </div>
+                <small class="form-hint">Your page will be: vendopage.com/<strong>username</strong></small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Password *</label>
+                <div class="input-group">
+                    <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                        <path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                    <input type="password" name="password" id="password" class="form-input with-prefix with-suffix" placeholder="Create a strong password" required>
+                    <button type="button" class="input-suffix-icon" onclick="togglePassword()" aria-label="Toggle password visibility">
+                        <svg id="showIcon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg id="hideIcon" style="display:none;" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-full btn-lg">
+                Create My Free Page (Unlimited Products!)
+            </button>
+            
+            <div class="form-footer">
+                <small class="text-muted">
+                    By signing up, you agree to our Terms of Service and Privacy Policy
+                </small>
+            </div>
+        </form>
+        
+        <div class="auth-divider">
+            <span>or</span>
+        </div>
+        
+        <div class="auth-footer">
+            <p>Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+        </div>
+    </div>
+    
+    <div class="auth-side">
+        <div class="features-showcase">
+            <h2>Why choose VendoPage?</h2>
+            <div class="feature-list">
+                <div class="feature-item">
+                    <div class="feature-check">✓</div>
+                    <div>
+                        <h4>Unlimited Products - FREE!</h4>
+                        <p>List as many products as you want. No limits, no fees.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-check">✓</div>
+                    <div>
+                        <h4>Always Visible Products</h4>
+                        <p>No more 24-hour story limits. Your catalog is permanent.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-check">✓</div>
+                    <div>
+                        <h4>Professional Storefront</h4>
+                        <p>Beautiful, mobile-friendly page that works on any device.</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-check">✓</div>
+                    <div>
+                        <h4>Direct WhatsApp Orders</h4>
+                        <p>Customers contact you instantly through WhatsApp.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-page {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        background: var(--bg-secondary);
+    }
+    
+    .auth-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 3rem 2rem;
+        max-width: 520px;
+        margin: 0 auto;
+        width: 100%;
+    }
+    
+    .auth-logo {
+        margin-bottom: 2rem;
+    }
+    
+    .logo-icon-large {
+        width: 56px;
+        height: 56px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 800;
+        font-size: 1.75rem;
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+        width: 100%;
+    }
+    
+    .auth-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+    }
+    
+    .auth-form {
+        width: 100%;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+    }
+    
+    .input-group {
+        position: relative;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 0.9375rem;
+        transition: var(--transition);
+        background: var(--bg);
+        color: var(--text);
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    
+    .btn {
+        padding: 0.875rem 1.5rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+        transition: var(--transition);
+        display: inline-block;
+        text-align: center;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-full {
+        width: 100%;
+    }
+    
+    .btn-lg {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+    }
+    
+    .form-hint {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 0.8125rem;
+        color: var(--text-light);
+    }
+    
+    .form-footer {
+        text-align: center;
+        margin-top: 1rem;
+    }
+    
+    .category-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .category-option {
+        cursor: pointer;
+    }
+    
+    .category-option input[type="radio"] {
+        display: none;
+    }
+    
+    .category-card {
+        padding: 1rem 0.5rem;
+        border: 2px solid var(--border);
+        border-radius: var(--radius-sm);
+        text-align: center;
+        transition: var(--transition);
+        background: var(--bg);
+    }
+    
+    .category-option input:checked + .category-card {
+        border-color: var(--primary);
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    
+    .category-card:hover {
+        border-color: var(--primary-light);
+        transform: translateY(-2px);
+    }
+    
+    .category-emoji {
+        display: block;
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .category-name {
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--text);
+    }
+    
+    .input-prefix-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        pointer-events: none;
+    }
+    
+    .input-suffix-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-light);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+    
+    .input-suffix-icon:hover {
+        color: var(--primary);
+    }
+    
+    .form-input.with-prefix {
+        padding-left: 3rem;
+    }
+    
+    .form-input.with-suffix {
+        padding-right: 3rem;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: var(--radius-sm);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        font-size: 0.9375rem;
+        font-weight: 500;
+    }
+    
+    .alert svg {
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+    }
+    
+    .alert-error {
+        background: #FEF2F2;
+        border: 1px solid #FCA5A5;
+        color: #DC2626;
+    }
+    
+    [data-theme="dark"] .alert-error {
+        background: rgba(220, 38, 38, 0.1);
+        border-color: rgba(220, 38, 38, 0.3);
+        color: #FCA5A5;
+    }
+    
+    .auth-divider {
+        position: relative;
+        text-align: center;
+        margin: 1.5rem 0;
+        width: 100%;
+    }
+    
+    .auth-divider::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 1px;
+        background: var(--border);
+    }
+    
+    .auth-divider span {
+        background: var(--bg-secondary);
+        padding: 0 1rem;
+        position: relative;
+        color: var(--text-light);
+        font-size: 0.875rem;
+    }
+    
+    .auth-footer {
+        text-align: center;
+        color: var(--text-light);
+        font-size: 0.9375rem;
+        width: 100%;
+    }
+    
+    .auth-footer a {
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+    
+    .auth-footer a:hover {
+        color: var(--primary-dark);
+    }
+    
+    /* Right Side */
+    .auth-side {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        padding: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .auth-side::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 800px;
+        height: 800px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    
+    .features-showcase {
+        max-width: 500px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .features-showcase h2 {
+        color: white;
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 2rem;
+    }
+    
+    .feature-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .feature-item {
+        display: flex;
+        gap: 1rem;
+        color: white;
+    }
+    
+    .feature-check {
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+    
+    .feature-item h4 {
+        font-size: 1.0625rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    
+    .feature-item p {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9375rem;
+        line-height: 1.5;
+    }
+    
+    @media (max-width: 1024px) {
+        .auth-page {
+            grid-template-columns: 1fr;
+        }
+        
+        .auth-side {
+            display: none;
+        }
+    }
+    
+    @media (max-width: 640px) {
+        .category-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        
+        .auth-container {
+            padding: 2rem 1.5rem;
+        }
+        
+        .auth-header h1 {
+            font-size: 1.75rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .category-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<script>
+    function togglePassword() {
+        const passwordInput = document.getElementById('password');
+        const showIcon = document.getElementById('showIcon');
+        const hideIcon = document.getElementById('hideIcon');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            showIcon.style.display = 'none';
+            hideIcon.style.display = 'block';
+        } else {
+            passwordInput.type = 'password';
+            showIcon.style.display = 'block';
+            hideIcon.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

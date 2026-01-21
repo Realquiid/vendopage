@@ -1,0 +1,509 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ seller.business_name }} - VendoPage{% endblock %}
+
+{% block content %}
+<div class="seller-profile">
+    <div class="container-narrow">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {% if seller.profile_picture %}
+                    <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
+                {% else %}
+                    <div class="avatar-placeholder">{{ seller.business_name|first }}</div>
+                {% endif %}
+            </div>
+            <h1 class="profile-name">{{ seller.business_name }}</h1>
+            {% if seller.bio %}
+                <p class="profile-bio">{{ seller.bio }}</p>
+            {% endif %}
+            <div class="profile-meta">
+                <span class="meta-item">{{ seller.get_category_display }}</span>
+                <span class="meta-divider">•</span>
+                <span class="meta-item">{{ products|length }} products</span>
+            </div>
+        </div>
+        
+        <!-- WhatsApp CTA -->
+        <a href="https://wa.me/{{ seller.whatsapp_number }}?text=Hi, I'm browsing your products on VendoPage!" 
+           class="btn btn-whatsapp">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            Message on WhatsApp
+        </a>
+    </div>
+</div>
+
+<div class="products-section">
+    <div class="container-narrow">
+        {% if products %}
+            <div class="products-grid">
+                {% for product in products %}
+                <div class="product-card">
+                    <!-- Image Gallery -->
+                    <div class="product-gallery" id="gallery-{{ product.id }}">
+                        {% if product.images.count > 1 %}
+                            <div class="carousel-container">
+                                <div class="carousel-track" id="track-{{ product.id }}">
+                                    {% for image in product.images.all %}
+                                    <div class="carousel-slide">
+                                        <img src="{{ image.image.url }}" alt="Product" loading="lazy">
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <button class="carousel-btn prev" onclick="moveSlide({{ product.id }}, -1)">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polyline points="15 18 9 12 15 6"/>
+                                    </svg>
+                                </button>
+                                <button class="carousel-btn next" onclick="moveSlide({{ product.id }}, 1)">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <polyline points="9 18 15 12 9 6"/>
+                                    </svg>
+                                </button>
+                                
+                                <div class="carousel-dots">
+                                    {% for image in product.images.all %}
+                                    <button class="dot {% if forloop.first %}active{% endif %}" 
+                                            onclick="goToSlide({{ product.id }}, {{ forloop.counter0 }})"></button>
+                                    {% endfor %}
+                                </div>
+                                
+                                <div class="image-count">{{ forloop.counter }}/{{ product.images.count }}</div>
+                            </div>
+                        {% else %}
+                            {% with product.get_primary_image as primary %}
+                            {% if primary %}
+                            <img src="{{ primary.image.url }}" alt="Product" loading="lazy" class="single-image">
+                            {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                        
+                        {% if product.price %}
+                        <div class="price-tag">₦{{ product.price|floatformat:0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Product Info -->
+                    <div class="product-info">
+                        {% if product.description %}
+                        <p class="product-desc">{{ product.description }}</p>
+                        {% endif %}
+                        
+                        <a href="https://wa.me/{{ seller.whatsapp_number }}?text={{ product.get_whatsapp_message|urlencode }}" 
+                           class="btn btn-whatsapp-sm"
+                           onclick="trackWhatsAppClick({{ product.id }})"
+                           target="_blank">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                            </svg>
+                            Ask About This
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="1" y="3" width="15" height="13"/>
+                </svg>
+                <p>No products available yet</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Powered by Badge (Free users only) -->
+{% if seller.shows_powered_by_badge %}
+<div class="powered-by">
+    <div class="container-narrow">
+        <a href="{% url 'register' %}" class="powered-badge">
+            <span>Powered by <strong>VendoPage</strong></span>
+            <span class="badge-cta">Create yours →</span>
+        </a>
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .seller-profile {
+        background: var(--bg);
+        padding: 3rem 0 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .container-narrow {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .profile-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-avatar {
+        width: 96px;
+        height: 96px;
+        margin: 0 auto 1.25rem;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid var(--border);
+    }
+    
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        font-weight: 800;
+    }
+    
+    .profile-name {
+        font-size: 1.75rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: var(--text);
+    }
+    
+    .profile-bio {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    
+    .profile-meta {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+    }
+    
+    .meta-item {
+        font-weight: 600;
+    }
+    
+    .meta-divider {
+        opacity: 0.5;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.875rem 1.75rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+        width: 100%;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .btn-whatsapp {
+        background: #25D366;
+        color: white;
+    }
+    
+    .btn-whatsapp:hover {
+        background: #128C7E;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    }
+    
+    .products-section {
+        padding: 3rem 0;
+        background: var(--bg-secondary);
+    }
+    
+    .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .product-card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        transition: var(--transition);
+    }
+    
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow);
+        border-color: var(--primary-light);
+    }
+    
+    .product-gallery {
+        position: relative;
+        background: var(--bg-secondary);
+    }
+    
+    .single-image {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+    }
+    
+    .carousel-container {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .carousel-track {
+        display: flex;
+        transition: transform 0.3s ease;
+    }
+    
+    .carousel-slide {
+        min-width: 100%;
+        aspect-ratio: 1;
+    }
+    
+    .carousel-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.95);
+        color: var(--text);
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        transition: var(--transition);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    .carousel-btn:hover {
+        background: white;
+        transform: translateY(-50%) scale(1.1);
+    }
+    
+    .carousel-btn.prev {
+        left: 0.75rem;
+    }
+    
+    .carousel-btn.next {
+        right: 0.75rem;
+    }
+    
+    .carousel-dots {
+        position: absolute;
+        bottom: 0.75rem;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 0.375rem;
+        z-index: 10;
+    }
+    
+    .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+        padding: 0;
+    }
+    
+    .dot.active {
+        background: white;
+        width: 20px;
+        border-radius: 3px;
+    }
+    
+    .image-count {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.25rem 0.625rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        z-index: 10;
+    }
+    
+    .price-tag {
+        position: absolute;
+        top: 0.75rem;
+        left: 0.75rem;
+        background: var(--primary);
+        color: white;
+        padding: 0.375rem 0.875rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9375rem;
+        box-shadow: var(--shadow-sm);
+        z-index: 10;
+    }
+    
+    .product-info {
+        padding: 1.25rem;
+    }
+    
+    .product-desc {
+        font-size: 0.9375rem;
+        color: var(--text);
+        line-height: 1.6;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .btn-whatsapp-sm {
+        background: #25D366;
+        color: white;
+        padding: 0.625rem 1rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        transition: var(--transition);
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .btn-whatsapp-sm:hover {
+        background: #128C7E;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: var(--text-light);
+    }
+    
+    .empty-state svg {
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .powered-by {
+        padding: 2rem 0;
+        background: var(--bg);
+        border-top: 1px solid var(--border);
+    }
+    
+    .powered-badge {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        color: var(--text-light);
+        font-size: 0.875rem;
+        transition: var(--transition);
+    }
+    
+    .powered-badge:hover {
+        border-color: var(--primary-light);
+        background: var(--bg);
+    }
+    
+    .powered-badge strong {
+        color: var(--text);
+    }
+    
+    .badge-cta {
+        color: var(--primary);
+        font-weight: 600;
+    }
+    
+    @media (max-width: 768px) {
+        .products-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .profile-name {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+<script>
+    const carousels = {};
+    
+    function initCarousel(id) {
+        const track = document.getElementById(`track-${id}`);
+        const dots = document.querySelectorAll(`#gallery-${id} .dot`);
+        if (!track) return;
+        
+        carousels[id] = { current: 0, total: dots.length, track, dots };
+    }
+    
+    function moveSlide(id, dir) {
+        if (!carousels[id]) initCarousel(id);
+        const c = carousels[id];
+        c.current = (c.current + dir + c.total) % c.total;
+        updateCarousel(id);
+    }
+    
+    function goToSlide(id, index) {
+        if (!carousels[id]) initCarousel(id);
+        carousels[id].current = index;
+        updateCarousel(id);
+    }
+    
+    function updateCarousel(id) {
+        const c = carousels[id];
+        c.track.style.transform = `translateX(-${c.current * 100}%)`;
+        c.dots.forEach((dot, i) => dot.classList.toggle('active', i === c.current));
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.carousel-track').forEach(t => {
+            const id = t.id.split('-')[1];
+            initCarousel(id);
+        });
+    });
+    
+    function trackWhatsAppClick(id) {
+        fetch(`/api/product/${id}/track-whatsapp/`, { method: 'POST' });
+    }
+</script>
+{% endblock %}

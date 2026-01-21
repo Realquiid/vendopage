@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Sellers - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <div class="container">
+        <div class="admin-header">
+            <div>
+                <h1>👥 Manage Sellers</h1>
+                <p class="text-muted">View and manage all seller accounts</p>
+            </div>
+            <div class="admin-nav">
+                <a href="{% url 'admin_dashboard' %}" class="nav-btn">Overview</a>
+                <a href="{% url 'admin_sellers' %}" class="nav-btn active">Sellers</a>
+                <a href="{% url 'admin_products' %}" class="nav-btn">Products</a>
+                <a href="{% url 'admin_analytics' %}" class="nav-btn">Analytics</a>
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="filters-card">
+            <form method="GET" class="filters-form">
+                <input type="text" name="search" value="{{ request.GET.search }}" placeholder="Search by name, email, username..." class="filter-input">
+                <select name="subscription" class="filter-select">
+                    <option value="">All Subscriptions</option>
+                    <option value="free" {% if request.GET.subscription == 'free' %}selected{% endif %}>Free</option>
+                    <option value="premium" {% if request.GET.subscription == 'premium' %}selected{% endif %}>Premium</option>
+                    <option value="unlimited_admin" {% if request.GET.subscription == 'unlimited_admin' %}selected{% endif %}>Admin Unlimited</option>
+                </select>
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{% url 'admin_sellers' %}" class="btn btn-secondary">Clear</a>
+            </form>
+        </div>
+        
+        <!-- Sellers Table -->
+        <div class="table-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Seller</th>
+                        <th>Username</th>
+                        <th>Products</th>
+                        <th>Subscription</th>
+                        <th>Views (Week)</th>
+                        <th>WhatsApp Clicks</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for seller in sellers %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div class="table-avatar">{{ seller.business_name|first }}</div>
+                                <div>
+                                    <div class="table-name">{{ seller.business_name }}</div>
+                                    <div class="table-meta">{{ seller.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>@{{ seller.username }}</td>
+                        <td><strong>{{ seller.product_count }}</strong> products</td>
+                        <td>
+                            <span class="badge badge-{{ seller.subscription_type }}">
+                                {{ seller.get_subscription_type_display }}
+                            </span>
+                        </td>
+                        <td>{{ seller.weekly_page_views }}</td>
+                        <td>{{ seller.weekly_whatsapp_clicks }}</td>
+                        <td>{{ seller.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="{% url 'admin_seller_detail' seller.id %}" class="btn-small">View</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem;">
+                            No sellers found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+        .admin-dashboard {
+        padding: 2.5rem 0 5rem;
+        background: var(--bg-secondary);
+        min-height: 100vh;
+    }
+        .admin-header {
+        background: var(--bg);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+        border: 1px solid var(--border);
+    }
+    
+    .admin-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    
+    .admin-nav {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .nav-btn {
+        padding: 0.75rem 1.5rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        text-decoration: none;
+        color: var(--text);
+        font-weight: 600;
+        transition: var(--transition);
+    }
+    
+    .nav-btn:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--primary-light);
+    }
+    
+    .nav-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
+    .filters-card {
+        background: var(--bg);
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border);
+        margin-bottom: 2rem;
+    }
+    
+    .filters-form {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-input, .filter-select {
+        flex: 1;
+        min-width: 200px;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 0.9375rem;
+    }
+    
+    .table-card {
+        background: var(--bg);
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        overflow: hidden;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .data-table thead {
+        background: var(--bg-secondary);
+    }
+    
+    .data-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 700;
+        font-size: 0.875rem;
+        color: var(--text-light);
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .data-table tr:hover {
+        background: var(--bg-secondary);
+    }
+    
+    .table-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+    }
+    
+    .table-name {
+        font-weight: 600;
+    }
+    
+    .table-meta {
+        font-size: 0.8125rem;
+        color: var(--text-light);
+    }
+    
+    .badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    
+    .badge-free {
+        background: #E5E7EB;
+        color: #374151;
+    }
+    
+    .badge-premium {
+        background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+        color: white;
+    }
+    
+    .badge-unlimited_admin {
+        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+        color: white;
+    }
+    
+    .btn-small {
+        padding: 0.5rem 1rem;
+        background: var(--primary);
+        color: white;
+        text-decoration: none;
+        border-radius: var(--radius-sm);
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}

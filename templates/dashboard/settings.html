@@ -1,0 +1,547 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings - VendoPage{% endblock %}
+
+{% block content %}
+<div class="settings-page">
+    <div class="container-settings">
+        <div class="settings-header">
+            <h1>Settings</h1>
+            <p class="text-muted">Manage your account and business information</p>
+        </div>
+        
+        <div class="settings-grid">
+            <!-- Profile Settings -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h2>Profile Picture</h2>
+                    <p class="text-muted">This appears on your public storefront</p>
+                </div>
+                
+                <form method="POST" enctype="multipart/form-data" action="{% url 'update_profile_picture' %}">
+                    {% csrf_token %}
+                    <div class="profile-upload">
+                        <div class="current-avatar">
+                            {% if user.profile_picture %}
+                                <img src="{{ user.profile_picture.url }}" alt="Profile" id="avatarPreview">
+                            {% else %}
+                                <div class="avatar-placeholder" id="avatarPlaceholder">
+                                    {{ user.business_name|first }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="upload-controls">
+                            <input type="file" 
+                                   name="profile_picture" 
+                                   id="profilePicture" 
+                                   accept="image/*" 
+                                   style="display: none;"
+                                   onchange="previewImage(event)">
+                            <button type="button" onclick="document.getElementById('profilePicture').click()" class="btn btn-secondary">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <polyline points="21 15 16 10 5 21"/>
+                                </svg>
+                                Choose Photo
+                            </button>
+                            {% if user.profile_picture %}
+                            <button type="submit" name="remove_picture" value="true" class="btn btn-outline">Remove</button>
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary" id="uploadBtn" style="display: none;">
+                                Save Photo
+                            </button>
+                        </div>
+                        <p class="upload-hint">JPG, PNG or GIF. Max 5MB. Square images work best.</p>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Business Info -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h2>Business Information</h2>
+                    <p class="text-muted">Update your business details</p>
+                </div>
+                
+                <form method="POST" action="{% url 'update_business_info' %}" class="settings-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label>Business Name</label>
+                        <input type="text" name="business_name" value="{{ user.business_name }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Bio (Optional)</label>
+                        <textarea name="bio" rows="3" placeholder="Tell customers about your business...">{{ user.bio }}</textarea>
+                        <small>This appears on your public page</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select name="category" required>
+                            <option value="fashion" {% if user.category == 'fashion' %}selected{% endif %}>👗 Fashion & Clothing</option>
+                            <option value="beauty" {% if user.category == 'beauty' %}selected{% endif %}>💄 Beauty & Cosmetics</option>
+                            <option value="electronics" {% if user.category == 'electronics' %}selected{% endif %}>📱 Electronics</option>
+                            <option value="food" {% if user.category == 'food' %}selected{% endif %}>🍕 Food & Beverages</option>
+                            <option value="home" {% if user.category == 'home' %}selected{% endif %}>🏠 Home & Living</option>
+                            <option value="sports" {% if user.category == 'sports' %}selected{% endif %}>⚽ Sports & Fitness</option>
+                            <option value="health" {% if user.category == 'health' %}selected{% endif %}>💪 Health & Wellness</option>
+                            <option value="other" {% if user.category == 'other' %}selected{% endif %}>🎯 Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>WhatsApp Number</label>
+                        <input type="tel" name="whatsapp_number" value="{{ user.whatsapp_number }}" required>
+                        <small>Include country code (e.g., 234XXXXXXXXXX)</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+            
+            <!-- Account Settings -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h2>Account Settings</h2>
+                    <p class="text-muted">Manage your login credentials</p>
+                </div>
+                
+                <form method="POST" action="{% url 'update_account' %}" class="settings-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" name="email" value="{{ user.email }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" value="{{ user.username }}" disabled>
+                        <small>Username cannot be changed</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Update Email</button>
+                </form>
+                
+                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
+                
+                <form method="POST" action="{% url 'change_password' %}" class="settings-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" name="current_password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" name="new_password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" name="confirm_password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-secondary">Change Password</button>
+                </form>
+            </div>
+            
+            <!-- Public Page -->
+            <div class="settings-card">
+                <div class="card-header">
+                    <h2>Your Public Page</h2>
+                    <p class="text-muted">Share your storefront link</p>
+                </div>
+                
+                <div class="public-link-section">
+                    <div class="link-preview">
+                        <label>Your Page URL</label>
+                        <div class="link-display-box">
+                            <input type="text" value="vendopage.com/{{ user.slug }}" readonly id="publicPageLink">
+                            <button onclick="copyPublicLink()" class="copy-btn">
+                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-actions">
+                        <a href="/{{ user.slug }}" target="_blank" class="btn btn-outline">
+                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+                                <polyline points="15 3 21 3 21 9"/>
+                                <line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                            View Public Page
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Subscription Info -->
+            <div class="settings-card subscription-card">
+                <div class="card-header">
+                    <h2>Subscription</h2>
+                    <p class="text-muted">Your current plan</p>
+                </div>
+                
+                <div class="subscription-info">
+                    <div class="plan-badge">
+                        {% if user.subscription_type == 'premium' %}
+                        <div class="badge badge-premium">⭐ Premium</div>
+                        {% else %}
+                        <div class="badge badge-free">Free</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="plan-features">
+                        <div class="feature">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Unlimited Products</span>
+                        </div>
+                        <div class="feature">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>Custom Page URL</span>
+                        </div>
+                        <div class="feature">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>WhatsApp Integration</span>
+                        </div>
+                        {% if user.subscription_type == 'premium' %}
+                        <div class="feature">
+                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>No "Powered by" Badge</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    {% if user.subscription_type == 'free' %}
+                    <a href="{% url 'subscription' %}" class="btn btn-primary">
+                        ⭐ Upgrade to Premium
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .settings-page {
+        padding: 2.5rem 0 5rem;
+        background: var(--bg-secondary);
+        min-height: 100vh;
+    }
+    
+    .container-settings {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+    
+    .settings-header {
+        margin-bottom: 2rem;
+    }
+    
+    .settings-header h1 {
+        font-size: 2rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    
+    .text-muted {
+        color: var(--text-light);
+    }
+    
+    .settings-grid {
+        display: grid;
+        gap: 2rem;
+    }
+    
+    .settings-card {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+    }
+    
+    .card-header {
+        margin-bottom: 2rem;
+    }
+    
+    .card-header h2 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.375rem;
+    }
+    
+    .profile-upload {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+    
+    .current-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 3px solid var(--border);
+        box-shadow: var(--shadow);
+    }
+    
+    .current-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    
+    .avatar-placeholder {
+        width: 100%;
+        height: 100%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 800;
+    }
+    
+    .upload-controls {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .upload-hint {
+        font-size: 0.8125rem;
+        color: var(--text-light);
+        text-align: center;
+    }
+    
+    .settings-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        font-size: 0.9375rem;
+    }
+    
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 0.9375rem;
+    }
+    
+    .form-group input:disabled {
+        background: var(--bg-secondary);
+        color: var(--text-light);
+    }
+    
+    .form-group small {
+        font-size: 0.8125rem;
+        color: var(--text-light);
+    }
+    
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+    
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: var(--primary-dark);
+    }
+    
+    .btn-secondary {
+        background: var(--bg-secondary);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+    
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--text);
+    }
+    
+    .link-preview {
+        margin-bottom: 1.5rem;
+    }
+    
+    .link-preview label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .link-display-box {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .link-display-box input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--bg-secondary);
+    }
+    
+    .copy-btn {
+        padding: 0.75rem;
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .copy-btn:hover {
+        background: var(--primary-dark);
+    }
+    
+    .quick-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    .subscription-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+    
+    .plan-badge {
+        text-align: center;
+    }
+    
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.9375rem;
+    }
+    
+    .badge-premium {
+        background: linear-gradient(135deg, #7C3AED 0%, #EC4899 100%);
+        color: white;
+    }
+    
+    .badge-free {
+        background: var(--bg-secondary);
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+    
+    .plan-features {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .feature {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text);
+    }
+    
+    .feature svg {
+        color: var(--primary);
+        flex-shrink: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .upload-controls {
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        .upload-controls button {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('avatarPreview');
+                const placeholder = document.getElementById('avatarPlaceholder');
+                
+                if (preview) {
+                    preview.src = e.target.result;
+                } else if (placeholder) {
+                    placeholder.outerHTML = `<img src="${e.target.result}" alt="Preview" id="avatarPreview">`;
+                }
+                
+                document.getElementById('uploadBtn').style.display = 'inline-flex';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+    
+    function copyPublicLink() {
+        const input = document.getElementById('publicPageLink');
+        input.select();
+        document.execCommand('copy');
+        
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '✓';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+        }, 2000);
+    }
+</script>
+{% endblock %}
