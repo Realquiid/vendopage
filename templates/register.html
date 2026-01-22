@@ -579,36 +579,234 @@
         font-size: 0.9375rem;
         line-height: 1.5;
     }
-    
-    @media (max-width: 1024px) {
-        .auth-page {
-            grid-template-columns: 1fr;
-        }
-        
-        .auth-side {
-            display: none;
-        }
+    /* Prevent zoom on mobile inputs */
+
+@media (max-width: 768px) {
+
+    /* Prevent iOS from zooming on input focus */
+
+    input[type="text"],
+
+    input[type="email"],
+
+    input[type="tel"],
+
+    input[type="password"],
+
+    select,
+
+    textarea {
+
+        font-size: 16px !important; /* iOS won't zoom if font-size is 16px or larger */
+
     }
+
     
-    @media (max-width: 640px) {
-        .category-grid {
-            grid-template-columns: repeat(3, 1fr);
-        }
-        
-        .auth-container {
-            padding: 2rem 1.5rem;
-        }
-        
-        .auth-header h1 {
-            font-size: 1.75rem;
-        }
+
+    .form-input {
+
+        font-size: 16px !important;
+
     }
+
+}
+
+/* Fix margins and padding on mobile */
+
+@media (max-width: 1024px) {
+
+    .auth-page {
+
+        grid-template-columns: 1fr;
+
+    }
+
     
-    @media (max-width: 480px) {
-        .category-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+
+    .auth-side {
+
+        display: none;
+
     }
+
+    
+
+    /* Remove side margins/padding that cause horizontal scroll */
+
+    .auth-container {
+
+        padding: 2rem 1rem;
+
+        max-width: 100%;
+
+        box-sizing: border-box;
+
+    }
+
+    
+
+    .auth-form {
+
+        width: 100%;
+
+        box-sizing: border-box;
+
+    }
+
+    
+
+    .form-group {
+
+        width: 100%;
+
+        box-sizing: border-box;
+
+    }
+
+}
+
+@media (max-width: 640px) {
+
+    .category-grid {
+
+        grid-template-columns: repeat(3, 1fr);
+
+        gap: 0.5rem;
+
+    }
+
+    
+
+    .auth-container {
+
+        padding: 2rem 1rem;
+
+    }
+
+    
+
+    .auth-header h1 {
+
+        font-size: 1.5rem;
+
+        line-height: 1.2;
+
+    }
+
+    
+
+    .auth-header {
+
+        margin-bottom: 1.5rem;
+
+    }
+
+    
+
+    /* Make category cards smaller on mobile */
+
+    .category-card {
+
+        padding: 0.75rem 0.25rem;
+
+    }
+
+    
+
+    .category-emoji {
+
+        font-size: 1.5rem;
+
+        margin-bottom: 0.25rem;
+
+    }
+
+    
+
+    .category-name {
+
+        font-size: 0.75rem;
+
+    }
+
+    
+
+    /* Adjust button size */
+
+    .btn-lg {
+
+        padding: 0.875rem 1.25rem;
+
+        font-size: 0.9375rem;
+
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .category-grid {
+
+        grid-template-columns: repeat(2, 1fr);
+
+        gap: 0.5rem;
+
+    }
+
+    
+
+    .auth-container {
+
+        padding: 1.5rem 1rem;
+
+    }
+
+    
+
+    .auth-header h1 {
+
+        font-size: 1.375rem;
+
+    }
+
+    
+
+    .logo-icon-large {
+
+        width: 48px;
+
+        height: 48px;
+
+        font-size: 1.5rem;
+
+    }
+
+}
+
+/* Ensure no element causes horizontal scroll */
+
+* {
+
+    box-sizing: border-box;
+
+}
+
+.auth-page,
+
+.auth-container,
+
+.auth-form,
+
+.form-group,
+
+.input-group {
+
+    max-width: 100%;
+
+    overflow-x: hidden;
+
+}
+
 </style>
 
 <script>
