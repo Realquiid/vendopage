@@ -1,0 +1,62 @@
+<!-- templates/base_public.html -->
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Fixlyn{% endblock %}</title>
+    
+    <!-- Your existing CSS variables -->
+    <style>
+        :root {
+            --primary: #7C3AED;
+            --primary-dark: #6D28D9;
+            --primary-light: #A78BFA;
+            --secondary: #EC4899;
+            --success: #10B981;
+            --text: #1F2937;
+            --text-light: #6B7280;
+            --bg: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --bg-tertiary: #F3F4F6;
+            --border: #E5E7EB;
+            --radius: 8px;
+            --radius-sm: 6px;
+            --radius-lg: 12px;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --transition: all 0.2s ease;
+            --bg-rgb: 255, 255, 255;
+        }
+        
+        [data-theme="dark"] {
+            --text: #F9FAFB;
+            --text-light: #D1D5DB;
+            --bg: #111827;
+            --bg-secondary: #1F2937;
+            --bg-tertiary: #374151;
+            --border: #374151;
+            --bg-rgb: 17, 24, 39;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}{% endblock %}
+</body>
+</html>

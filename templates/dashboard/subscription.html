@@ -163,11 +163,23 @@
     </div>
 </div>
 
+
 <style>
+    * {
+        box-sizing: border-box;
+    }
+    
     .subscription-page {
         padding: 3rem 0 5rem;
         background: var(--bg-secondary);
         min-height: 100vh;
+        overflow-x: hidden;
+    }
+    
+    .container-narrow {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 1rem;
     }
     
     .page-header {
@@ -179,17 +191,22 @@
         font-size: 2.5rem;
         font-weight: 800;
         margin-bottom: 0.75rem;
+        color: var(--text);
+    }
+    
+    .text-muted {
+        color: var(--text-light);
     }
     
     .pricing-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 2rem;
         margin-bottom: 4rem;
     }
     
     .pricing-card {
-        background: white;
+        background: var(--bg);
         padding: 2.5rem 2rem;
         border-radius: var(--radius-lg);
         border: 2px solid var(--border);
@@ -204,7 +221,17 @@
     
     .pricing-card.premium {
         border-color: var(--primary);
-        background: linear-gradient(135deg, rgba(124, 58, 237, 0.02) 0%, rgba(236, 72, 153, 0.02) 100%);
+        background: var(--bg);
+        position: relative;
+    }
+    
+    .pricing-card.premium::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.03) 0%, rgba(236, 72, 153, 0.03) 100%);
+        border-radius: var(--radius-lg);
+        pointer-events: none;
     }
     
     .pricing-card.active {
@@ -230,6 +257,7 @@
         margin-bottom: 2rem;
         padding-bottom: 2rem;
         border-bottom: 1px solid var(--border);
+        position: relative;
     }
     
     .plan-header h3 {
@@ -267,6 +295,8 @@
     .features {
         list-style: none;
         margin-bottom: 2rem;
+        padding: 0;
+        position: relative;
     }
     
     .feature-item {
@@ -274,7 +304,7 @@
         align-items: flex-start;
         gap: 0.75rem;
         padding: 0.875rem 0;
-        border-bottom: 1px solid var(--bg-secondary);
+        border-bottom: 1px solid var(--border);
     }
     
     .feature-item:last-child {
@@ -297,21 +327,62 @@
     }
     
     .feature-item.highlight {
-        background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(236, 72, 153, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(236, 72, 153, 0.08) 100%);
         margin: 0 -1rem;
         padding-left: 1rem;
         padding-right: 1rem;
         border-radius: var(--radius-sm);
     }
     
+    [data-theme="dark"] .feature-item.highlight {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%);
+    }
+    
     .feature-item span {
         flex: 1;
         font-size: 0.9375rem;
         line-height: 1.5;
+        color: var(--text);
     }
 
     #premium-form {
         margin: 0;
+        position: relative;
+    }
+    
+    .btn {
+        padding: 0.875rem 1.5rem;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        width: 100%;
+    }
+    
+    .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .btn-secondary {
+        background: var(--bg-secondary);
+        color: var(--text);
+        border: 2px solid var(--border);
+        width: 100%;
+    }
+    
+    .btn-full {
+        width: 100%;
     }
 
     .btn-loader {
@@ -335,7 +406,7 @@
     }
     
     .faq-section {
-        background: white;
+        background: var(--bg);
         padding: 3rem 2.5rem;
         border-radius: var(--radius-lg);
         border: 1px solid var(--border);
@@ -346,6 +417,7 @@
         font-weight: 800;
         margin-bottom: 2rem;
         text-align: center;
+        color: var(--text);
     }
     
     .faq-item {
@@ -369,20 +441,49 @@
     }
     
     @media (max-width: 768px) {
+        .container-narrow {
+            padding: 0 1rem;
+        }
+        
         .page-header h1 {
-            font-size: 2rem;
+            font-size: 1.75rem;
         }
         
         .pricing-grid {
             grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .pricing-card {
+            padding: 2rem 1.5rem;
         }
         
         .amount {
-            font-size: 2.5rem;
+            font-size: 2.25rem;
         }
 
         .faq-section {
             padding: 2rem 1.5rem;
+        }
+        
+        .feature-item.highlight {
+            margin: 0 -0.5rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .page-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .amount {
+            font-size: 2rem;
+        }
+        
+        .faq-section {
+            padding: 1.5rem 1rem;
         }
     }
 </style>
