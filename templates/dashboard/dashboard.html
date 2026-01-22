@@ -972,13 +972,205 @@
     flex: 1;
     justify-content: center;
 }
+/* Add these mobile fixes to your dashboard CSS */
+
+/* Mobile Fixes - Add to bottom of your <style> section */
 
 @media (max-width: 768px) {
-    .dashboard-header,
+    .container {
+        padding: 0 1rem;
+    }
+    
+    .dashboard-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+    
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    /* Share Catalog Banner - Stack on mobile */
     .share-catalog-banner {
         flex-direction: column;
         align-items: stretch;
         gap: 1.5rem;
+        padding: 1.5rem;
+    }
+    
+    .share-catalog-banner > div:last-child {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .share-catalog-banner .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Link Copy Wrapper - Stack on mobile */
+    .link-copy-wrapper {
+        flex-direction: column;
+    }
+    
+    .link-copy-wrapper .btn-primary {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Products Section */
+    .products-section {
+        padding: 1rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    /* Filter Tabs - Scroll on mobile */
+    .filter-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    
+    .filter-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .tab-btn {
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    
+    /* Product Row - Stack on mobile */
+    .product-row {
+        flex-wrap: wrap;
+        padding: 1rem;
+        gap: 1rem;
+    }
+    
+    .product-row-image {
+        width: 100%;
+        height: 200px;
+    }
+    
+    .product-row-info {
+        width: 100%;
+    }
+    
+    .product-row-actions {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    
+    .btn-action {
+        flex: 1;
+        min-width: 48px;
+    }
+    
+    /* Product Meta - Wrap nicely */
+    .product-row-meta {
+        font-size: 0.8125rem;
+    }
+    
+    .meta-divider {
+        display: none;
+    }
+    
+    .product-row-meta > span {
+        display: inline-block;
+        margin-right: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Modal on mobile */
+    .status-modal {
+        padding: 1rem;
+    }
+    
+    .modal-content {
+        max-width: 100%;
+    }
+    
+    .modal-form,
+    .modal-actions {
+        padding: 1rem;
+    }
+    
+    .style-options {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    /* Share Card */
+    .share-card {
+        padding: 1.5rem;
+    }
+    
+    .share-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .btn-outline {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    /* Link display - Better touch targets */
+    .link-display {
+        padding: 1rem;
+    }
+    
+    .link-display input {
+        font-size: 0.875rem;
+    }
+}
+
+/* Extra small phones */
+@media (max-width: 480px) {
+    .dashboard-header h1 {
+        font-size: 1.25rem;
+    }
+    
+    .share-icon {
+        font-size: 2rem;
+    }
+    
+    .share-text h3 {
+        font-size: 1rem;
+    }
+    
+    .share-text p {
+        font-size: 0.875rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .product-row-actions {
+        gap: 0.375rem;
+    }
+    
+    .btn-action {
+        width: auto;
+        min-width: 44px;
     }
 }
 </style>
