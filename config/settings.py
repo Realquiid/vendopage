@@ -23,6 +23,12 @@ ALLOWED_HOSTS = [
     config('DOMAIN', default=''),
 ]
 
+# CSRF Trusted Origins (required for Railway)
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://web-production-f5c1a.up.railway.app',
+]
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
