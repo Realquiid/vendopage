@@ -35,26 +35,44 @@ def reset_weekly_analytics_if_needed(seller):
         seller.save()
 
 # Public Views
+# sellers/views.py - Replace your home() function with this
 
 def home(request):
-    """Homepage with seller listings"""
-    # Only show sellers who are NOT staff/superusers
+    """Homepage with seller listings - Only show sellers with 5+ products"""
+    
+    # Only show sellers who:
+    # 1. Are active
+    # 2. Are NOT staff/superusers (regular sellers only)
+    # 3. Have at least 5 active products
     featured_sellers = Seller.objects.filter(
-        is_featured=True, 
+        is_featured=True,
         is_active=True,
         is_staff=False,
         is_superuser=False
     ).annotate(
-        product_count=Count('products', filter=Q(products__is_archived=False))
-    )[:4]
+        product_count=Count('products', filter=Q(
+            products__is_archived=False,
+            products__is_sold_out=False
+        ))
+    ).filter(
+        product_count__gte=5  # Must have at least 5 active products
+    ).order_by('-product_count')[:4]
     
+    # Regular sellers (not featured) with 5+ products
     sellers = Seller.objects.filter(
         is_active=True,
         is_staff=False,
         is_superuser=False
     ).annotate(
-        product_count=Count('products', filter=Q(products__is_archived=False))
-    ).exclude(id__in=featured_sellers.values_list('id', flat=True))
+        product_count=Count('products', filter=Q(
+            products__is_archived=False,
+            products__is_sold_out=False
+        ))
+    ).filter(
+        product_count__gte=5  # Must have at least 5 active products
+    ).exclude(
+        id__in=featured_sellers.values_list('id', flat=True)
+    ).order_by('-product_count')[:20]  # Show top 20 sellers by product count
     
     return render(request, 'home.html', {
         'featured_sellers': featured_sellers,
