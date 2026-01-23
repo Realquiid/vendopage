@@ -55,6 +55,8 @@
             overflow-x: hidden;
         }
     </style>
+    {% load static %}
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
     {% block content %}{% endblock %}
