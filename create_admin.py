@@ -8,7 +8,7 @@ django.setup()
 from sellers.models import Seller
 
 # Change these credentials
-ADMIN_USERNAME = 'Richard'
+ADMIN_USERNAME = 'richard'
 ADMIN_EMAIL = 'richardikenna61@gmail.com'
 ADMIN_PASSWORD = 'Richard1yy1'  # CHANGE THIS!
 
