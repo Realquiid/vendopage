@@ -1,0 +1,233 @@
+/* Auth pages styles */
+.auth-page-simple {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    padding: 2rem 1rem;
+}
+
+.auth-container-simple {
+    width: 100%;
+    max-width: 440px;
+}
+
+.auth-logo {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.logo-icon-large {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: var(--radius);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 1.75rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+}
+
+.auth-header h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.text-muted {
+    color: var(--text-light);
+    font-size: 0.9375rem;
+}
+
+.auth-form {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text);
+    font-size: 0.9375rem;
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-prefix-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.input-suffix-icon {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-light);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    z-index: 1;
+}
+
+.input-suffix-icon:hover {
+    color: var(--primary);
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    transition: var(--transition);
+    background: var(--bg);
+    color: var(--text);
+}
+
+.form-input.with-prefix {
+    padding-left: 3rem;
+}
+
+.form-input.with-suffix {
+    padding-right: 3rem;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Code Input */
+.code-input-group {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.code-input {
+    width: 3.5rem;
+    height: 3.5rem;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    transition: var(--transition);
+}
+
+.code-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Alerts */
+.alert {
+    padding: 1rem;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+.alert-error {
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    color: #DC2626;
+}
+
+.alert-success {
+    background: #F0FDF4;
+    border: 1px solid #86EFAC;
+    color: #16A34A;
+}
+
+[data-theme="dark"] .alert-error {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.3);
+    color: #FCA5A5;
+}
+
+[data-theme="dark"] .alert-success {
+background: rgba(22, 163, 74, 0.1);
+border-color: rgba(22, 163, 74, 0.3);
+color: #86EFAC;
+}
+.auth-footer-simple {
+text-align: center;
+margin-top: 1.5rem;
+}
+.back-link,
+.resend-link {
+color: var(--primary);
+text-decoration: none;
+font-weight: 600;
+font-size: 0.9375rem;
+display: inline-flex;
+align-items: center;
+gap: 0.5rem;
+transition: var(--transition);
+}
+.back-link:hover,
+.resend-link:hover {
+color: var(--primary-dark);
+}
+@media (max-width: 480px) {
+.auth-container-simple {
+max-width: 100%;
+}
+.auth-form {
+    padding: 1.5rem;
+}
+
+.code-input {
+    width: 2.75rem;
+    height: 2.75rem;
+    font-size: 1.25rem;
+}
+
+.code-input-group {
+    gap: 0.5rem;
+}
+}

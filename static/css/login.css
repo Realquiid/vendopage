@@ -250,3 +250,38 @@
             font-size: 1.75rem;
         }
     }
+
+
+/* Add to static/css/login.css at the bottom */
+
+.form-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.forgot-link {
+    color: var(--primary);
+    font-size: 0.875rem;
+    text-decoration: none;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.forgot-link:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.alert-success {
+    background: #F0FDF4;
+    border: 1px solid #86EFAC;
+    color: #16A34A;
+}
+
+[data-theme="dark"] .alert-success {
+    background: rgba(22, 163, 74, 0.1);
+    border-color: rgba(22, 163, 74, 0.3);
+    color: #86EFAC;
+}

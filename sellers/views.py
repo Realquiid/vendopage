@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q, Count, Sum
 from django.utils import timezone
-from datetime import timedelta
+from datetime import timedelta, datetime
 import urllib.parse
 from django.db import IntegrityError
 from sellers.models import Seller
@@ -539,22 +539,210 @@ def change_password(request):
     return redirect('settings')
 
 
+from django.core.mail import send_mail
+# from django.conf import settings
+from django.utils import timezone
+from datetime import timedelta
+import random
+import string
+import uuid
+
+def forgot_password(request):
+    """Request password reset - sends 5-digit code via Hostinger email"""
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        
+        try:
+            seller = Seller.objects.get(email__iexact=email)
+            
+            # Generate 5-digit code
+            reset_code = ''.join(random.choices(string.digits, k=5))
+            
+            # Store code in session (expires in 10 minutes)
+            request.session['reset_code'] = reset_code
+            request.session['reset_email'] = email
+            request.session['reset_code_expires'] = (timezone.now() + timedelta(minutes=10)).isoformat()
+            
+            # Email subject and message
+            subject = 'VendoPage - Password Reset Code'
+            
+            # HTML Email
+            html_message = f'''
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            </head>
+            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f7;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f7; padding: 40px 20px;">
+                    <tr>
+                        <td align="center">
+                            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+                                <!-- Header -->
+                                <tr>
+                                    <td style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 40px 40px 30px; text-align: center;">
+                                        <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 800; letter-spacing: -0.5px;">VendoPage</h1>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Content -->
+                                <tr>
+                                    <td style="padding: 40px;">
+                                        <h2 style="margin: 0 0 16px; color: #1f2937; font-size: 24px; font-weight: 700;">Password Reset Request</h2>
+                                        <p style="margin: 0 0 24px; color: #6b7280; font-size: 16px; line-height: 1.6;">Hi {seller.business_name},</p>
+                                        <p style="margin: 0 0 24px; color: #6b7280; font-size: 16px; line-height: 1.6;">We received a request to reset your password. Use the code below to continue:</p>
+                                        
+                                        <!-- Code Box -->
+                                        <table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
+                                            <tr>
+                                                <td align="center" style="background-color: #f3f4f6; border-radius: 8px; padding: 32px;">
+                                                    <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Your Reset Code</p>
+                                                    <p style="margin: 0; color: #6366f1; font-size: 48px; font-weight: 800; letter-spacing: 8px; font-family: 'Courier New', monospace;">{reset_code}</p>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        
+                                        <p style="margin: 24px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">⏱️ This code expires in <strong>10 minutes</strong></p>
+                                        <p style="margin: 16px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">If you didn't request this password reset, please ignore this email. Your password won't be changed.</p>
+                                    </td>
+                                </tr>
+                                
+                                <!-- Footer -->
+                                <tr>
+                                    <td style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb;">
+                                        <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">© 2026 VendoPage. Making WhatsApp selling easier.</p>
+                                        <p style="margin: 8px 0 0; color: #9ca3af; font-size: 12px; text-align: center;">Need help? Contact us at support@vendopage.com</p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </body>
+            </html>
+            '''
+            
+            # Plain text fallback
+            plain_message = f'''
+VendoPage - Password Reset
+
+Hi {seller.business_name},
+
+Your password reset code is: {reset_code}
+
+This code expires in 10 minutes.
+
+If you didn't request this, please ignore this email.
+
+- VendoPage Team
+            '''
+            
+            try:
+                send_mail(
+                    subject,
+                    plain_message,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                    html_message=html_message,
+                )
+                messages.success(request, f'✓ Reset code sent to {email}. Check your inbox!')
+                return redirect('verify_reset_code')
+            except Exception as e:
+                print(f"Email error: {str(e)}")  # For debugging
+                messages.error(request, 'Could not send email. Please try again or contact support.')
+                return render(request, 'auth/forgot_password.html')
+                
+        except Seller.DoesNotExist:
+            # Don't reveal if email exists (security best practice)
+            messages.success(request, f'If an account with {email} exists, we sent a reset code.')
+            return redirect('verify_reset_code')
+    
+    return render(request, 'auth/forgot_password.html')
 
 
+def verify_reset_code(request):
+    """Verify the 5-digit code"""
+    if request.method == 'POST':
+        code = request.POST.get('code', '').strip()
+        
+        stored_code = request.session.get('reset_code')
+        expires = request.session.get('reset_code_expires')
+        
+        if not stored_code or not expires:
+            messages.error(request, 'No reset code found. Please request a new one.')
+            return redirect('forgot_password')
+        
+        # Check if expired
+        expires_dt = datetime.fromisoformat(expires)
+        if timezone.now() > expires_dt:
+            del request.session['reset_code']
+            del request.session['reset_code_expires']
+            messages.error(request, 'Code expired. Please request a new one.')
+            return redirect('forgot_password')
+        
+        # Check if code matches
+        if code == stored_code:
+            # Generate token for password reset
+            reset_token = uuid.uuid4().hex
+            request.session['reset_token'] = reset_token
+            request.session['reset_token_expires'] = (timezone.now() + timedelta(minutes=30)).isoformat()
+            
+            return redirect('reset_password', token=reset_token)
+        else:
+            messages.error(request, 'Invalid code. Please try again.')
+    
+    return render(request, 'auth/verify_code.html')
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+def reset_password(request, token):
+    """Reset password with new one"""
+    from datetime import datetime
+    
+    stored_token = request.session.get('reset_token')
+    expires = request.session.get('reset_token_expires')
+    email = request.session.get('reset_email')
+    
+    if not stored_token or token != stored_token or not expires or not email:
+        messages.error(request, 'Invalid or expired reset link.')
+        return redirect('forgot_password')
+    
+    expires_dt = datetime.fromisoformat(expires)
+    if timezone.now() > expires_dt:
+        messages.error(request, 'Reset link expired. Please request a new one.')
+        return redirect('forgot_password')
+    
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+        
+        if new_password != confirm_password:
+            messages.error(request, 'Passwords do not match')
+            return render(request, 'auth/reset_password.html')
+        
+        if len(new_password) < 6:
+            messages.error(request, 'Password must be at least 6 characters')
+            return render(request, 'auth/reset_password.html')
+        
+        try:
+            seller = Seller.objects.get(email__iexact=email)
+            seller.set_password(new_password)
+            seller.save()
+            
+            # Clear session
+            for key in ['reset_code', 'reset_email', 'reset_code_expires', 'reset_token', 'reset_token_expires']:
+                if key in request.session:
+                    del request.session[key]
+            
+            messages.success(request, '✓ Password reset successful! Please login with your new password.')
+            return redirect('login')
+            
+        except Seller.DoesNotExist:
+            messages.error(request, 'User not found.')
+            return redirect('forgot_password')
+    
+    return render(request, 'auth/reset_password.html')
 
 
 

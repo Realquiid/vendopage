@@ -33,7 +33,10 @@
             </div>
             
             <div class="form-group">
-                <label class="form-label">Password</label>
+                <div class="form-label-row">
+                    <label class="form-label">Password</label>
+                    <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot password?</a>
+                </div>
                 <div class="input-group">
                     <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
@@ -60,6 +63,17 @@
                 </svg>
                 {{ error }}
             </div>
+            {% endif %}
+            
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    {{ message }}
+                </div>
+                {% endfor %}
             {% endif %}
             
             <button type="submit" class="btn btn-primary btn-full btn-lg">
@@ -92,10 +106,6 @@
         </div>
     </div>
 </div>
-<!-- 
-<style>
-
-</style> -->
 
 <script>
     function togglePassword() {

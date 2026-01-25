@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}  
+{% block title %}Verify Code - VendoPage{% endblock %}
+
+{% block content %}
+<div class="auth-page-simple">
+    <div class="auth-container-simple">
+        <div class="auth-logo">
+            <div class="logo-icon-large">🔒</div>
+        </div>
+        
+        <div class="auth-header">
+            <h1>Enter Verification Code</h1>
+            <p class="text-muted">We sent a 5-digit code to your email. Enter it below to continue.</p>
+        </div>
+        
+        <form method="POST" class="auth-form" id="codeForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label class="form-label">5-Digit Code</label>
+                <div class="code-input-group">
+                    <input type="text" maxlength="1" class="code-input" id="code1" required autofocus>
+                    <input type="text" maxlength="1" class="code-input" id="code2" required>
+                    <input type="text" maxlength="1" class="code-input" id="code3" required>
+                    <input type="text" maxlength="1" class="code-input" id="code4" required>
+                    <input type="text" maxlength="1" class="code-input" id="code5" required>
+                </div>
+                <input type="hidden" name="code" id="fullCode">
+            </div>
+            
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    {{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+            
+            <button type="submit" class="btn btn-primary btn-full btn-lg">
+                Verify Code
+            </button>
+        </form>
+        
+        <div class="auth-footer-simple">
+            <a href="{% url 'forgot_password' %}" class="resend-link">Didn't receive code? Resend</a>
+        </div>
+    </div>
+</div>
+
+<script>
+const inputs = document.querySelectorAll('.code-input');
+const form = document.getElementById('codeForm');
+const fullCodeInput = document.getElementById('fullCode');
+
+inputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+        const value = e.target.value;
+        
+        // Only allow numbers
+        if (!/^\d$/.test(value)) {
+            e.target.value = '';
+            return;
+        }
+        
+        // Move to next input
+        if (value && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+        }
+        
+        // Update hidden input
+        updateFullCode();
+    });
+    
+    input.addEventListener('keydown', (e) => {
+        // Move to previous input on backspace
+        if (e.key === 'Backspace' && !e.target.value && index > 0) {
+            inputs[index - 1].focus();
+        }
+    });
+    
+    input.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const pasteData = e.clipboardData.getData('text').replace(/\D/g, '');
+        
+        if (pasteData.length === 5) {
+            pasteData.split('').forEach((char, i) => {
+                if (inputs[i]) {
+                    inputs[i].value = char;
+                }
+            });
+            inputs[4].focus();
+            updateFullCode();
+        }
+    });
+});
+
+function updateFullCode() {
+    const code = Array.from(inputs).map(input => input.value).join('');
+    fullCodeInput.value = code;
+    
+    // Auto-submit when all 5 digits are entered
+    if (code.length === 5) {
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

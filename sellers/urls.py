@@ -43,6 +43,10 @@ urlpatterns = [
     path('admin-dashboard/products/', views.admin_products, name='admin_products'),
     path('admin-dashboard/analytics/', views.admin_analytics, name='admin_analytics'),
 
+
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('verify-code/', views.verify_reset_code, name='verify_reset_code'),
+    path('reset-password/<str:token>/', views.reset_password, name='reset_password'),
     
 
        
