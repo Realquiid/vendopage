@@ -377,8 +377,7 @@ def track_whatsapp_click(request, product_id):
 
 
 @login_required
-def settings(request):
-    """Settings page"""
+def dashboard_settings(request):
     return render(request, 'dashboard/settings.html')
 
 @login_required
@@ -540,7 +539,7 @@ def change_password(request):
 
 
 from django.core.mail import send_mail
-# from django.conf import settings
+from django.conf import settings
 from django.utils import timezone
 from datetime import timedelta
 import random

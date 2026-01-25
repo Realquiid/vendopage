@@ -17,7 +17,9 @@ urlpatterns = [
     path('payment/verify/', views.verify_payment, name='verify_payment'),
     path('webhook/flutterwave/', views.flutterwave_webhook, name='flutterwave_webhook'),
 
-    path('dashboard/settings/', views.settings, name='settings'),
+   
+    path('dashboard/settings/', views.dashboard_settings, name='settings'),
+
     path('dashboard/settings/profile-picture/', views.update_profile_picture, name='update_profile_picture'),
     path('dashboard/settings/business-info/', views.update_business_info, name='update_business_info'),
     path('dashboard/settings/account/', views.update_account, name='update_account'),
