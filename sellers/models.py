@@ -1,25 +1,22 @@
-
+# sellers/models.py
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.text import slugify
 from django.utils import timezone
+from cloudinary.models import CloudinaryField  # ADD THIS
 import uuid
 
 class Seller(AbstractUser):
     SUBSCRIPTION_CHOICES = [
-        ('free', 'Free'),  # Now unlimited products!
-        ('premium', 'Premium'),  # Removes "Powered by" badge
+        ('free', 'Free'),
+        ('premium', 'Premium'),
     ]
     
     business_name = models.CharField(max_length=200)
-    
-    # IMPORTANT: Make these unique with case-insensitive checks
-    email = models.EmailField(unique=True)  # Built-in unique
+    email = models.EmailField(unique=True)
     whatsapp_number = models.CharField(max_length=20, unique=True)
-    # username is already unique from AbstractUser
-    
     bio = models.TextField(blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    profile_picture = CloudinaryField('image', blank=True, null=True)  # Changed from ImageField
     slug = models.SlugField(unique=True, blank=True)
     category = models.CharField(max_length=100)
     subscription_type = models.CharField(max_length=20, choices=SUBSCRIPTION_CHOICES, default='free')
@@ -34,14 +31,12 @@ class Seller(AbstractUser):
     last_analytics_reset = models.DateTimeField(default=timezone.now)
     
     def save(self, *args, **kwargs):
-        # Normalize email to lowercase
         if self.email:
             self.email = self.email.lower()
         
-        # Generate slug if not exists
         if not self.slug:
             base_slug = slugify(self.business_name)
-            if not base_slug:  # If business name only has special chars
+            if not base_slug:
                 base_slug = f"seller-{uuid.uuid4().hex[:8]}"
             
             slug = base_slug
@@ -54,11 +49,9 @@ class Seller(AbstractUser):
         super().save(*args, **kwargs)
     
     def get_product_limit(self):
-        """Now returns None (unlimited) for all users"""
-        return None  # Everyone gets unlimited!
+        return None
     
     def shows_powered_by_badge(self):
-        """Only free users see the badge"""
         return self.subscription_type == 'free'
     
     def __str__(self):

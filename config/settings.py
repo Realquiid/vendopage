@@ -5,28 +5,33 @@ Django settings for config project.
 from pathlib import Path
 from decouple import config
 import dj_database_url
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 AUTH_USER_MODEL = 'sellers.Seller'
 
 ALLOWED_HOSTS = [
+    'vendopage.com',
+    'www.vendopage.com',
     'localhost',
     '127.0.0.1',
     '.railway.app',
-    config('DOMAIN', default=''),
+   
 ]
 
 # CSRF Trusted Origins (required for Railway)
 CSRF_TRUSTED_ORIGINS = [
+    'https://vendopage.com',
+    'https://www.vendopage.com',
     'https://*.railway.app',
-    'https://web-production-f5c1a.up.railway.app',
+   
 ]
 
 # Application definition
@@ -146,9 +151,13 @@ FLUTTERWAVE_ENCRYPTION_KEY = config('FLUTTERWAVE_ENCRYPTION_KEY', default='')
 
 # Cloudinary Settings for Media Storage
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'dqxlkie1i',
-    'API_KEY': '744231361812346',
-    'API_SECRET': 'xjAQ08pEkufDUXPkFDVGB1YRCFM'
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default='dqxlkie1i'),
+    'API_KEY': config('CLOUDINARY_API_KEY', default='744231361812346'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+    'TRANSFORMATIONS': {
+        'quality': 'auto:good',
+        'fetch_format': 'auto',
+    },
 }
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
