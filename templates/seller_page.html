@@ -6,6 +6,22 @@
 {% block title %}{{ seller.business_name }} - VendoPage{% endblock %}
 
 {% block content %}
+<!-- Owner Preview Banner - MUST BE FIRST, AT THE TOP -->
+{% if is_owner %}
+<div class="owner-preview-banner">
+    <div class="container-narrow">
+        <div class="banner-content">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
+                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
+            </svg>
+            <span>Preview Mode - This is how customers see your page (your views don't count)</span>
+            <a href="{% url 'dashboard' %}" class="banner-link">Go to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <!-- Minimal Sticky Header -->
 <div class="seller-header">
     <div class="container-narrow">
@@ -49,8 +65,8 @@
                 {% endif %}
                 
                 {# Only show verified badge for subscribed/paid users #}
-                {% if seller.is_subscribed or seller.subscription_active %}
-                <div class="verified-badge" title="Verified Seller">
+                {% if seller.is_subscribed %}
+                <div class="verified-badge" title="Verified Premium Seller">
                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
@@ -63,13 +79,9 @@
                 <h1 class="business-name">{{ seller.business_name }}</h1>
                 
                 <div class="profile-badges">
-                    {# Fixed category display - check if category exists and has a display method #}
+                    {# Category display #}
                     {% if seller.category %}
-                        {% if seller.get_category_display %}
-                            <span class="badge badge-category">{{ seller.get_category_display }}</span>
-                        {% else %}
-                            <span class="badge badge-category">{{ seller.category }}</span>
-                        {% endif %}
+                        <span class="badge badge-category">{{ seller.get_category_display }}</span>
                     {% endif %}
                     
                     <span class="badge badge-stat">
@@ -153,7 +165,6 @@
                         <p class="product-desc">{{ product.description }}</p>
                         {% endif %}
                         
-                        {# Single WhatsApp button per product #}
                         <a href="https://wa.me/{{ seller.whatsapp_number }}?text={{ product.get_whatsapp_message|urlencode }}" 
                            class="btn btn-whatsapp-sm"
                            onclick="trackWhatsAppClick({{ product.id }})"
@@ -240,7 +251,9 @@
     });
     
     function trackWhatsAppClick(id) {
+        {% if not is_owner %}
         fetch(`/api/product/${id}/track-whatsapp/`, { method: 'POST' }).catch(() => {});
+        {% endif %}
     }
 </script>
 {% endblock %}

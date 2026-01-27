@@ -94,14 +94,24 @@ def home(request):
         'sellers': sellers
     })
 
+# sellers/views.py (or wherever your seller_page view is)
+
+
+
+
 def seller_page(request, slug):
-    """Individual seller's product page with analytics"""
+    """
+    Individual seller's product page with analytics.
+    Page views are only tracked for non-owners (not counting when seller views their own page).
+    """
     seller = get_object_or_404(Seller, slug=slug, is_active=True)
     
-    # Track page view
-    seller.total_page_views += 1
-    seller.weekly_page_views += 1
-    seller.save(update_fields=['total_page_views', 'weekly_page_views'])
+    # Track page view ONLY if viewer is NOT the seller themselves
+    # This prevents sellers from inflating their own analytics
+    if not request.user.is_authenticated or request.user.id != seller.id:
+        seller.total_page_views += 1
+        seller.weekly_page_views += 1
+        seller.save(update_fields=['total_page_views', 'weekly_page_views'])
     
     # Get active products (not archived, within 30 days)
     thirty_days_ago = timezone.now() - timedelta(days=30)
@@ -111,10 +121,14 @@ def seller_page(request, slug):
         created_at__gte=thirty_days_ago
     ).prefetch_related('images').order_by('-created_at')
     
+    # Optional: Add a flag to show if viewing own page
+    is_owner = request.user.is_authenticated and request.user.id == seller.id
+    
     return render(request, 'seller_page.html', {
-        'seller': seller,
-        'products': products
-    })
+    'seller': seller,
+    'products': products,
+    'is_owner': request.user.is_authenticated and request.user.id == seller.id,
+})
 
 
 def register_view(request):
