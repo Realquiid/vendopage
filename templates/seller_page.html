@@ -251,9 +251,10 @@
     });
     
     function trackWhatsAppClick(id) {
-        {% if not is_owner %}
-        fetch(`/api/product/${id}/track-whatsapp/`, { method: 'POST' }).catch(() => {});
-        {% endif %}
+        const isOwner = {{ is_owner|lower }};
+        if (!isOwner) {
+            fetch(`/api/product/${id}/track-whatsapp/`, { method: 'POST' }).catch(() => {});
+        }
     }
 </script>
 {% endblock %}

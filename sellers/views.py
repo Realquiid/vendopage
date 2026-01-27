@@ -298,47 +298,150 @@ def dashboard(request):
         'catalog_url': catalog_url,
     })
 
+# sellers/views.py
+
+# from django.http import JsonResponse
+# from django.shortcuts import render
+# from django.contrib.auth.decorators import login_required
+# from django.views.decorators.http import require_http_methods
+import traceback
+
 @login_required
+@require_http_methods(["GET", "POST"])
 def upload_product(request):
-    """Upload product - NO LIMIT!"""
-    if request.method == 'POST':
+    """Upload product with robust error handling"""
+    
+    # GET request - show upload form
+    if request.method == 'GET':
+        return render(request, 'dashboard/upload.html')
+    
+    # POST request - handle upload
+    try:
         seller = request.user
         
-        # NO MORE LIMIT CHECK - Everyone gets unlimited!
-        
         # Get form data
-        description = request.POST.get('description', '')
-        price = request.POST.get('price')
+        description = request.POST.get('description', '').strip()
+        price = request.POST.get('price', '').strip()
         images = request.FILES.getlist('images')
         
+        # Validate images
         if not images:
-            return JsonResponse({'error': 'Please upload at least one image'}, status=400)
+            return JsonResponse({
+                'success': False,
+                'error': 'Please upload at least one image'
+            }, status=400)
         
         if len(images) > 10:
-            return JsonResponse({'error': 'Maximum 10 images per product'}, status=400)
+            return JsonResponse({
+                'success': False,
+                'error': 'Maximum 10 images per product. Please remove some images.'
+            }, status=400)
+        
+        # Validate image sizes
+        for idx, image in enumerate(images):
+            if image.size > 10 * 1024 * 1024:  # 10MB
+                return JsonResponse({
+                    'success': False,
+                    'error': f'Image {idx + 1} is too large. Maximum size is 10MB per image.'
+                }, status=400)
+            
+            # Validate image type
+            if not image.content_type.startswith('image/'):
+                return JsonResponse({
+                    'success': False,
+                    'error': f'File {idx + 1} is not a valid image.'
+                }, status=400)
+        
+        # Parse price
+        price_value = None
+        if price:
+            try:
+                price_value = float(price)
+                if price_value < 0:
+                    return JsonResponse({
+                        'success': False,
+                        'error': 'Price cannot be negative'
+                    }, status=400)
+            except ValueError:
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Invalid price format'
+                }, status=400)
         
         # Create product
+        from products.models import Product, ProductImage
+        
         product = Product.objects.create(
             seller=seller,
             description=description,
-            price=price if price else None
+            price=price_value
         )
         
-        # Create images
+        # Upload images to Cloudinary
+        uploaded_count = 0
+        failed_images = []
+        
         for index, image in enumerate(images):
-            ProductImage.objects.create(
-                product=product,
-                image=image,
-                order=index
-            )
+            try:
+                ProductImage.objects.create(
+                    product=product,
+                    image=image,
+                    order=index
+                )
+                uploaded_count += 1
+            except Exception as img_error:
+                # Log the error but continue with other images
+                print(f"Error uploading image {index + 1}: {str(img_error)}")
+                failed_images.append(index + 1)
+                continue
+        
+        # Check if at least one image was uploaded successfully
+        if uploaded_count == 0:
+            # Delete the product if no images were uploaded
+            product.delete()
+            return JsonResponse({
+                'success': False,
+                'error': 'Failed to upload images. Please try again or use smaller images.'
+            }, status=500)
+        
+        # Return success (even if some images failed)
+        response_data = {
+            'success': True,
+            'message': f'Product created successfully with {uploaded_count} image{"s" if uploaded_count > 1 else ""}!',
+            'product_id': product.id,
+            'uploaded_count': uploaded_count
+        }
+        
+        if failed_images:
+            response_data['warning'] = f'{len(failed_images)} image(s) failed to upload'
+        
+        return JsonResponse(response_data)
+    
+    except Exception as e:
+        # Log the full error for debugging
+        print("=" * 50)
+        print("UPLOAD ERROR:")
+        print(traceback.format_exc())
+        print("=" * 50)
+        
+        # Return user-friendly error
+        error_msg = str(e)
+        
+        # Check for specific error types
+        if 'cloudinary' in error_msg.lower():
+            user_msg = 'Image upload service is temporarily unavailable. Please try again in a moment.'
+        elif 'database' in error_msg.lower() or 'constraint' in error_msg.lower():
+            user_msg = 'Database error. Please try again.'
+        elif 'timeout' in error_msg.lower():
+            user_msg = 'Upload is taking too long. Please try with smaller images or fewer images at once.'
+        else:
+            user_msg = 'An unexpected error occurred. Please try again.'
         
         return JsonResponse({
-            'success': True, 
-            'message': f'Product created with {len(images)} images',
-            'product_id': product.id
-        })
-    
-    return render(request, 'dashboard/upload.html')
+            'success': False,
+            'error': user_msg,
+            'debug_info': str(e) if request.user.is_staff else None  # Only show technical details to staff
+        }, status=500)
 
 # API Endpoints
 @login_required

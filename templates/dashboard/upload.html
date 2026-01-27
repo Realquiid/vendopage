@@ -96,10 +96,6 @@
         </form>
     </div>
 </div>
-<!-- 
-<style>
-
-</style> -->
 
 <script>
     const imageInput = document.getElementById('imageInput');
@@ -204,7 +200,7 @@
         updateImageCount();
     }
     
-    // Form submission
+    // Form submission with PROPER ERROR HANDLING
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -235,20 +231,52 @@
         try {
             const response = await fetch('{% url "upload_product" %}', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'  // Tell server this is AJAX
+                }
             });
             
-            if (response.ok) {
+            // CRITICAL FIX: Check content type before parsing
+            const contentType = response.headers.get('content-type');
+            
+            if (!contentType || !contentType.includes('application/json')) {
+                // Server returned HTML instead of JSON - something went wrong
+                console.error('Server returned HTML instead of JSON');
+                throw new Error('Upload failed. Please check your internet connection and try again.');
+            }
+            
+            const data = await response.json();
+            
+            // Check if response was successful
+            if (response.ok && data.success) {
                 btnText.textContent = 'Success!';
+                // Redirect to dashboard
                 setTimeout(() => {
                     window.location.href = '{% url "dashboard" %}';
                 }, 500);
             } else {
-                const data = await response.json();
-                throw new Error(data.error || 'Upload failed');
+                // Server returned an error message
+                throw new Error(data.error || data.message || 'Upload failed. Please try again.');
             }
+            
         } catch (error) {
-            alert(error.message || 'Upload failed. Please try again.');
+            console.error('Upload error:', error);
+            
+            // Show user-friendly error message
+            let errorMsg = 'Unable to upload your product. ';
+            
+            if (error.message.includes('Failed to fetch')) {
+                errorMsg += 'Please check your internet connection and try again.';
+            } else if (error.message.includes('JSON')) {
+                errorMsg += 'There was a problem with the server. Please try again in a moment.';
+            } else {
+                errorMsg += error.message;
+            }
+            
+            alert(errorMsg);
+            
+            // Reset button state
             submitBtn.disabled = false;
             uploadIcon.style.display = 'block';
             loadingIcon.style.display = 'none';
@@ -261,3 +289,4 @@
     imageCount.style.display = 'none';
 </script>
 {% endblock %}
+
