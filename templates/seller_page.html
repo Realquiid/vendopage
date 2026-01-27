@@ -47,11 +47,15 @@
                 {% else %}
                     <div class="avatar-placeholder-large">{{ seller.business_name|first }}</div>
                 {% endif %}
+                
+                {# Only show verified badge for subscribed/paid users #}
+                {% if seller.is_subscribed or seller.subscription_active %}
                 <div class="verified-badge" title="Verified Seller">
                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                     </svg>
                 </div>
+                {% endif %}
             </div>
             
             <!-- Info -->
@@ -59,7 +63,15 @@
                 <h1 class="business-name">{{ seller.business_name }}</h1>
                 
                 <div class="profile-badges">
-                    <!-- <span class="badge badge-category">{{ seller.get_category_display }}</span> -->
+                    {# Fixed category display - check if category exists and has a display method #}
+                    {% if seller.category %}
+                        {% if seller.get_category_display %}
+                            <span class="badge badge-category">{{ seller.get_category_display }}</span>
+                        {% else %}
+                            <span class="badge badge-category">{{ seller.category }}</span>
+                        {% endif %}
+                    {% endif %}
+                    
                     <span class="badge badge-stat">
                         <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
@@ -72,21 +84,12 @@
                 {% if seller.bio %}
                 <p class="business-bio">{{ seller.bio }}</p>
                 {% endif %}
-                
-                <!-- Action Button -->
-                <a href="https://wa.me/{{ seller.whatsapp_number }}?text=Hi {{ seller.business_name }}, I'm browsing your products on VendoPage!" 
-                   class="btn-primary-action">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                    </svg>
-                    Start Conversation
-                </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Products Grid Section (Your Cards - UNCHANGED) -->
+<!-- Products Grid Section -->
 <div class="products-section">
     <div class="container-narrow">
         {% if products %}
@@ -150,6 +153,7 @@
                         <p class="product-desc">{{ product.description }}</p>
                         {% endif %}
                         
+                        {# Single WhatsApp button per product #}
                         <a href="https://wa.me/{{ seller.whatsapp_number }}?text={{ product.get_whatsapp_message|urlencode }}" 
                            class="btn btn-whatsapp-sm"
                            onclick="trackWhatsAppClick({{ product.id }})"
@@ -174,7 +178,7 @@
     </div>
 </div>
 
-<!-- Separate Powered By Section (Only for Free Users) -->
+<!-- Powered By Section (Only for Free Users) -->
 {% if seller.shows_powered_by_badge %}
 <div class="powered-by-section">
     <div class="container-narrow">
