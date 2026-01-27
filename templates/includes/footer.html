@@ -1,0 +1,78 @@
+
+<!-- ============================================ -->
+<!-- FILE 5: templates/includes/footer.html -->
+<!-- CREATE THIS NEW FILE -->
+<!-- ============================================ -->
+
+<!-- Footer Trigger -->
+<div class="footer-trigger-wrapper">
+    <button class="footer-trigger" id="footerTrigger">
+        <span>More Info</span>
+        <svg class="trigger-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M19 9l-7 7-7-7"/>
+        </svg>
+    </button>
+</div>
+
+<!-- Footer (Hidden by default) -->
+<footer class="footer" id="footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <h3 class="footer-logo">VendoPage</h3>
+                <p class="footer-tagline">Your permanent product catalog</p>
+            </div>
+            
+            <div class="footer-links">
+                <div class="footer-column">
+                    <h4 class="footer-heading">Company</h4>
+                    <ul class="footer-list">
+                        <li><a href="{% url 'about' %}">About</a></li>
+                        <li><a href="{% url 'contact' %}">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-heading">Legal</h4>
+                    <ul class="footer-list">
+                        <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
+                        <li><a href="{% url 'terms' %}">Terms of Service</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h4 class="footer-heading">Support</h4>
+                    <ul class="footer-list">
+                        <li><a href="mailto:support@vendopage.com">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2026 VendoPage. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+    // Footer Toggle
+    const footerTrigger = document.getElementById('footerTrigger');
+    const footer = document.getElementById('footer');
+    
+    if (footerTrigger && footer) {
+        footerTrigger.addEventListener('click', () => {
+            const isOpen = footer.classList.contains('active');
+            
+            if (isOpen) {
+                footer.classList.remove('active');
+                footerTrigger.querySelector('.trigger-icon').style.transform = 'rotate(0deg)';
+                footerTrigger.querySelector('span').textContent = 'More Info';
+            } else {
+                footer.classList.add('active');
+                footerTrigger.querySelector('.trigger-icon').style.transform = 'rotate(180deg)';
+                footerTrigger.querySelector('span').textContent = 'Less Info';
+            }
+        });
+    }
+</script>

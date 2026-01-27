@@ -1,0 +1,74 @@
+
+
+<!-- ============================================ -->
+<!-- FILE 3: templates/pages/terms.html -->
+<!-- ============================================ -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container-narrow">
+        <div class="page-header">
+            <h1 class="page-title">Terms of Service</h1>
+            <p class="page-subtitle">Last updated: January 27, 2026</p>
+        </div>
+        
+        <div class="page-content">
+            <h2>Agreement to Terms</h2>
+            <p>By using VendoPage, you agree to these terms. If you don't agree, please don't use our service.</p>
+            
+            <h2>Use of Service</h2>
+            <h3>Eligibility</h3>
+            <p>You must be at least 18 years old to use VendoPage.</p>
+            
+            <h3>Account Responsibilities</h3>
+            <ul>
+                <li>Provide accurate information</li>
+                <li>Keep your account secure</li>
+                <li>Accept responsibility for account activity</li>
+            </ul>
+            
+            <h2>Seller Responsibilities</h2>
+            <p>As a seller, you agree to:</p>
+            <ul>
+                <li>Only list products you have the right to sell</li>
+                <li>Provide accurate descriptions and pricing</li>
+                <li>Honor sales and deliveries</li>
+                <li>Comply with all applicable laws</li>
+            </ul>
+            
+            <h2>Prohibited Content</h2>
+            <p>You may not sell or promote:</p>
+            <ul>
+                <li>Illegal goods or services</li>
+                <li>Counterfeit or stolen items</li>
+                <li>Weapons or hazardous materials</li>
+                <li>Adult content or services</li>
+                <li>Items infringing intellectual property</li>
+            </ul>
+            
+            <h2>Account Termination</h2>
+            <p>We may suspend or terminate accounts that violate these terms or engage in harmful activities.</p>
+            
+            <h2>Payments</h2>
+            <p>VendoPage connects sellers and buyers. All transactions happen directly between you and your customers. We are not responsible for payment disputes.</p>
+            
+            <h2>Limitation of Liability</h2>
+            <p>VendoPage is provided "as is" without warranties. We are not liable for damages arising from your use of the service.</p>
+            
+            <h2>Changes to Terms</h2>
+            <p>We may update these terms. Continued use after changes means you accept the new terms.</p>
+            
+            <h2>Contact</h2>
+            <p>Questions? Email us at <a href="mailto:support@vendopage.com">support@vendopage.com</a></p>
+        </div>
+    </div>
+</section>
+
+{% include 'includes/footer.html' %}
+{% endblock %}

@@ -1,0 +1,38 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container-narrow">
+        <div class="page-header">
+            <h1 class="page-title">About VendoPage</h1>
+            <p class="page-subtitle">Making online selling simple for everyone</p>
+        </div>
+        
+        <div class="page-content">
+            <h2>Our Story</h2>
+            <p>VendoPage was created to solve a simple problem: sellers were losing sales because their WhatsApp stories expired after 24 hours.</p>
+            
+            <p>Small business owners spent hours reposting products daily, only to watch them disappear. Customers couldn't find items they saw yesterday, and sales were lost.</p>
+            
+            <h2>Our Mission</h2>
+            <p>We help small businesses showcase their products permanently, making it easier for customers to discover and buy.</p>
+            
+            <h2>What We Do</h2>
+            <p>VendoPage gives you a permanent catalog. No more daily uploads, no more lost sales. Just one simple link to share everywhere.</p>
+            
+            <div class="cta-box">
+                <h3>Ready to start selling?</h3>
+                <a href="{% url 'register' %}" class="btn btn-primary">Create Your Free Page</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% include 'includes/footer.html' %}
+{% endblock %}

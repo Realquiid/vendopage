@@ -50,6 +50,10 @@ urlpatterns = [
     path('verify-code/', views.verify_reset_code, name='verify_reset_code'),
     path('reset-password/<str:token>/', views.reset_password, name='reset_password'),
     
+        path('about/', views.about, name='about'),
+    path('privacy/', views.privacy, name='privacy'),
+    path('terms/', views.terms, name='terms'),
+    path('contact/', views.contact, name='contact'),
 
        
     # Seller page (must be last - catch-all)

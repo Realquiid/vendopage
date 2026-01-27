@@ -37,6 +37,21 @@ def reset_weekly_analytics_if_needed(seller):
 # Public Views
 # sellers/views.py - Replace your home() function with this
 
+def about(request):
+    """About page"""
+    return render(request, 'about.html')
+
+def privacy(request):
+    """Privacy Policy page"""
+    return render(request, 'privacy.html')
+
+def terms(request):
+    """Terms of Service page"""
+    return render(request, 'terms.html')
+def contact(request):
+    """Contact page"""
+    return render(request, 'contact.html')
+
 def home(request):
     """Homepage with seller listings - Only show sellers with 5+ products"""
     

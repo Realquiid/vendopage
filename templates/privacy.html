@@ -1,0 +1,75 @@
+
+
+<!-- ============================================ -->
+<!-- FILE 2: templates/pages/privacy.html -->
+<!-- ============================================ -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container-narrow">
+        <div class="page-header">
+            <h1 class="page-title">Privacy Policy</h1>
+            <p class="page-subtitle">Last updated: January 27, 2026</p>
+        </div>
+        
+        <div class="page-content">
+            <h2>Introduction</h2>
+            <p>VendoPage is committed to protecting your privacy. This policy explains how we collect, use, and share your information.</p>
+            
+            <h2>Information We Collect</h2>
+            <h3>Information You Provide</h3>
+            <ul>
+                <li>Account information (email, business name, phone number)</li>
+                <li>Profile information (bio, logo, business category)</li>
+                <li>Product information (photos, descriptions, prices)</li>
+            </ul>
+            
+            <h3>Automatically Collected</h3>
+            <ul>
+                <li>Usage data (pages visited, features used)</li>
+                <li>Device information (browser type, IP address)</li>
+                <li>Analytics data to improve our service</li>
+            </ul>
+            
+            <h2>How We Use Your Information</h2>
+            <p>We use your information to:</p>
+            <ul>
+                <li>Provide and improve our services</li>
+                <li>Display your products to customers</li>
+                <li>Communicate about your account</li>
+                <li>Protect against fraud and abuse</li>
+            </ul>
+            
+            <h2>Information Sharing</h2>
+            <p>We do not sell your personal information. We may share information:</p>
+            <ul>
+                <li>Publicly on your seller page (as you choose)</li>
+                <li>With service providers who help operate our platform</li>
+                <li>When required by law</li>
+            </ul>
+            
+            <h2>Your Rights</h2>
+            <ul>
+                <li>Access your personal information</li>
+                <li>Correct inaccurate information</li>
+                <li>Delete your account and data</li>
+                <li>Opt out of marketing communications</li>
+            </ul>
+            
+            <h2>Data Security</h2>
+            <p>We implement security measures to protect your information. However, no internet transmission is 100% secure.</p>
+            
+            <h2>Contact Us</h2>
+            <p>Questions about privacy? Email us at <a href="mailto:support@vendopage.com">support@vendopage.com</a></p>
+        </div>
+    </div>
+</section>
+
+{% include 'includes/footer.html' %}
+{% endblock %}

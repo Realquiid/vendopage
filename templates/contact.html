@@ -1,0 +1,49 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container-narrow">
+        <div class="page-header">
+            <h1 class="page-title">Contact Us</h1>
+            <p class="page-subtitle">We're here to help</p>
+        </div>
+        
+        <div class="page-content">
+            <div class="contact-card">
+                <div class="contact-icon">
+                    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <h2>Email Support</h2>
+                <p>Send us a message and we'll get back to you soon.</p>
+                <a href="mailto:support@vendopage.com" class="btn btn-primary btn-lg">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                    support@vendopage.com
+                </a>
+            </div>
+            
+            <div class="contact-info">
+                <h3>Need Help?</h3>
+                <p>Check out these helpful resources:</p>
+                <ul>
+                    <li><a href="{% url 'about' %}">About VendoPage</a></li>
+                    <li><a href="/#features">Platform Features</a></li>
+                    <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
+                    <li><a href="{% url 'terms' %}">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% include 'includes/footer.html' %}
+{% endblock %}
