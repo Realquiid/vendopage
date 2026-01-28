@@ -399,6 +399,7 @@ def upload_product(request):
         
         redis_url = os.environ.get('REDIS_URL', 'NOT SET')
         print(f"🔍 DEBUG: REDIS_URL = {redis_url[:50]}...") 
+        logger.info(f"🔍 FULL REDIS_URL: {redis_url}")
         # ✅ STEP 3: Queue background upload (INSTANT response!)
         upload_product_images_async.delay(product.id, images_data)
         

@@ -198,10 +198,20 @@ LOGOUT_REDIRECT_URL = 'home'
 # CELERY CONFIGURATION
 # ============================================
 
+from urllib.parse import urlparse
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+
+# Fix Railway Redis URL for Celery compatibility
+if REDIS_URL and 'railway' in REDIS_URL:
+    parsed = urlparse(REDIS_URL)
+    # Reconstruct URL ensuring all parts are present
+    if parsed.hostname:
+        REDIS_URL = f"redis://{parsed.username or 'default'}:{parsed.password}@{parsed.hostname}:{parsed.port or 6379}"
+    
 
 # Celery Settings
-CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
