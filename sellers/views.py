@@ -99,6 +99,36 @@ def home(request):
 
 
 
+def seller_page(request, slug):
+    """
+    Individual seller's product page with analytics.
+    Page views are only tracked for non-owners (not counting when seller views their own page).
+    """
+    seller = get_object_or_404(Seller, slug=slug, is_active=True)
+    
+    # Track page view ONLY if viewer is NOT the seller themselves
+    # This prevents sellers from inflating their own analytics
+    if not request.user.is_authenticated or request.user.id != seller.id:
+        seller.total_page_views += 1
+        seller.weekly_page_views += 1
+        seller.save(update_fields=['total_page_views', 'weekly_page_views'])
+    
+    # Get active products (not archived, within 30 days)
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    products = Product.objects.filter(
+        seller=seller,
+        is_archived=False,
+        created_at__gte=thirty_days_ago
+    ).prefetch_related('images').order_by('-created_at')
+    
+    # Optional: Add a flag to show if viewing own page
+    is_owner = request.user.is_authenticated and request.user.id == seller.id
+    
+    return render(request, 'seller_page.html', {
+    'seller': seller,
+    'products': products,
+    'is_owner': request.user.is_authenticated and request.user.id == seller.id,
+})
 
 
 def register_view(request):
@@ -267,42 +297,7 @@ def dashboard(request):
         'whatsapp_share_url': whatsapp_share_url,
         'catalog_url': catalog_url,
     })
-
-
-def seller_page(request, slug):
-    """
-    Individual seller's product page with analytics.
-    Page views are only tracked for non-owners (not counting when seller views their own page).
-    Shows sold out products with badge, but hides archived products.
-    """
-    seller = get_object_or_404(Seller, slug=slug, is_active=True)
-    
-    # Track page view ONLY if viewer is NOT the seller themselves
-    # This prevents sellers from inflating their own analytics
-    if not request.user.is_authenticated or request.user.id != seller.id:
-        seller.total_page_views += 1
-        seller.weekly_page_views += 1
-        seller.save(update_fields=['total_page_views', 'weekly_page_views'])
-    
-    # Get products (NOT archived, but INCLUDE sold out with badge)
-    # Show products from last 30 days OR sold out products (regardless of age)
-    thirty_days_ago = timezone.now() - timedelta(days=30)
-    products = Product.objects.filter(
-        seller=seller,
-        is_archived=False
-    ).filter(
-        Q(created_at__gte=thirty_days_ago) | Q(is_sold_out=True)
-    ).prefetch_related('images').order_by('-created_at')
-    
-    # Optional: Add a flag to show if viewing own page
-    is_owner = request.user.is_authenticated and request.user.id == seller.id
-    
-    return render(request, 'seller_page.html', {
-        'seller': seller,
-        'products': products,
-        'is_owner': is_owner,
-    })
-
+from django.views.decorators.http import require_http_methods
 import traceback
 
 @login_required
