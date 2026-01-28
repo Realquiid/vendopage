@@ -677,6 +677,7 @@ from datetime import timedelta
 import random
 import string
 import uuid
+from decouple import config
 
 def forgot_password(request):
     """Request password reset - sends 5-digit code via Hostinger email"""
@@ -778,7 +779,7 @@ If you didn't request this, please ignore this email.
 
 - VendoPage Team
             '''
-            
+            email_sent = False
             try:
                 send_mail(
                     subject,
@@ -788,20 +789,54 @@ If you didn't request this, please ignore this email.
                     fail_silently=False,
                     html_message=html_message,
                 )
+                email_sent = True
+                print(f"Email sent successfully via {settings.EMAIL_HOST}")
+            except Exception as e:
+                print(f"Primary email failed ({settings.EMAIL_HOST}): {str(e)}")
+                
+                # Fallback to Gmail if Hostinger fails
+                try:
+                    from django.core.mail import get_connection
+                    
+                    # Create Gmail connection
+                    gmail_connection = get_connection(
+                        backend='django.core.mail.backends.smtp.EmailBackend',
+                        host='smtp.gmail.com',
+                        port=587,
+                        username=config('GMAIL_USER', default=''),
+                        password=config('GMAIL_PASSWORD', default=''),
+                        use_tls=True,
+                        timeout=10,
+                    )
+                    
+                    from django.core.mail import EmailMultiAlternatives
+                    msg = EmailMultiAlternatives(
+                        subject,
+                        plain_message,
+                        config('GMAIL_USER', default='noreply@vendopage.com'),
+                        [email],
+                        connection=gmail_connection
+                    )
+                    msg.attach_alternative(html_message, "text/html")
+                    msg.send()
+                    
+                    email_sent = True
+                    print(f"Email sent successfully via Gmail fallback")
+                except Exception as gmail_error:
+                    print(f"Gmail fallback also failed: {str(gmail_error)}")
+            
+            if email_sent:
                 messages.success(request, f'✓ Reset code sent to {email}. Check your inbox!')
                 return redirect('verify_reset_code')
-            except Exception as e:
-                print(f"Email error: {str(e)}")  # For debugging
+            else:
                 messages.error(request, 'Could not send email. Please try again or contact support.')
                 return render(request, 'auth/forgot_password.html')
                 
         except Seller.DoesNotExist:
-            # Don't reveal if email exists (security best practice)
             messages.success(request, f'If an account with {email} exists, we sent a reset code.')
             return redirect('verify_reset_code')
     
     return render(request, 'auth/forgot_password.html')
-
 
 def verify_reset_code(request):
     """Verify the 5-digit code"""
