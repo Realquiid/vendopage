@@ -679,36 +679,25 @@ import string
 import uuid
 from decouple import config
 
-def forgot_password(request):
-    """Request password reset - sends 5-digit code via Hostinger email"""
+def  forgot_password(request):
+    """Request password reset - sends 5-digit code via email"""
     if request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
-            
-        print("=" * 50)
-        print("EMAIL SETTINGS CHECK:")
-        print(f"EMAIL_HOST: {settings.EMAIL_HOST}")
-        print(f"EMAIL_PORT: {settings.EMAIL_PORT}")
-        print(f"EMAIL_USE_SSL: {settings.EMAIL_USE_SSL}")
-        print(f"EMAIL_USE_TLS: {getattr(settings, 'EMAIL_USE_TLS', 'NOT SET')}")
-        print(f"EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
-        print(f"EMAIL_HOST_PASSWORD exists: {bool(settings.EMAIL_HOST_PASSWORD)}")
-        print(f"EMAIL_TIMEOUT: {getattr(settings, 'EMAIL_TIMEOUT', 'NOT SET')}")
-        print("=" * 50)
+        
         try:
             seller = Seller.objects.get(email__iexact=email)
             
             # Generate 5-digit code
             reset_code = ''.join(random.choices(string.digits, k=5))
             
-            # Store code in session (expires in 10 minutes)
+            # Store code in session
             request.session['reset_code'] = reset_code
             request.session['reset_email'] = email
             request.session['reset_code_expires'] = (timezone.now() + timedelta(minutes=10)).isoformat()
             
-            # Email subject and message
+            # Email content
             subject = 'VendoPage - Password Reset Code'
             
-            # HTML Email
             html_message = f'''
             <!DOCTYPE html>
             <html>
@@ -721,21 +710,16 @@ def forgot_password(request):
                     <tr>
                         <td align="center">
                             <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                                <!-- Header -->
                                 <tr>
                                     <td style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 40px 40px 30px; text-align: center;">
                                         <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 800; letter-spacing: -0.5px;">VendoPage</h1>
                                     </td>
                                 </tr>
-                                
-                                <!-- Content -->
                                 <tr>
                                     <td style="padding: 40px;">
                                         <h2 style="margin: 0 0 16px; color: #1f2937; font-size: 24px; font-weight: 700;">Password Reset Request</h2>
                                         <p style="margin: 0 0 24px; color: #6b7280; font-size: 16px; line-height: 1.6;">Hi {seller.business_name},</p>
                                         <p style="margin: 0 0 24px; color: #6b7280; font-size: 16px; line-height: 1.6;">We received a request to reset your password. Use the code below to continue:</p>
-                                        
-                                        <!-- Code Box -->
                                         <table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
                                             <tr>
                                                 <td align="center" style="background-color: #f3f4f6; border-radius: 8px; padding: 32px;">
@@ -744,13 +728,10 @@ def forgot_password(request):
                                                 </td>
                                             </tr>
                                         </table>
-                                        
                                         <p style="margin: 24px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">⏱️ This code expires in <strong>10 minutes</strong></p>
                                         <p style="margin: 16px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">If you didn't request this password reset, please ignore this email. Your password won't be changed.</p>
                                     </td>
                                 </tr>
-                                
-                                <!-- Footer -->
                                 <tr>
                                     <td style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb;">
                                         <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">© 2026 VendoPage. Making WhatsApp selling easier.</p>
@@ -765,7 +746,6 @@ def forgot_password(request):
             </html>
             '''
             
-            # Plain text fallback
             plain_message = f'''
 VendoPage - Password Reset
 
@@ -779,6 +759,8 @@ If you didn't request this, please ignore this email.
 
 - VendoPage Team
             '''
+            
+            # Try sending with Hostinger first
             email_sent = False
             try:
                 send_mail(
@@ -790,40 +772,46 @@ If you didn't request this, please ignore this email.
                     html_message=html_message,
                 )
                 email_sent = True
-                print(f"Email sent successfully via {settings.EMAIL_HOST}")
-            except Exception as e:
-                print(f"Primary email failed ({settings.EMAIL_HOST}): {str(e)}")
+                print(f"✅ Email sent successfully via Hostinger")
                 
-                # Fallback to Gmail if Hostinger fails
+            except Exception as e:
+                print(f"❌ Hostinger failed: {str(e)}")
+                
+                # 🔧 FIXED: Gmail fallback with proper settings
                 try:
-                    from django.core.mail import get_connection
+                    import smtplib
+                    from email.mime.multipart import MIMEMultipart
+                    from email.mime.text import MIMEText
                     
-                    # Create Gmail connection
-                    gmail_connection = get_connection(
-                        backend='django.core.mail.backends.smtp.EmailBackend',
-                        host='smtp.gmail.com',
-                        port=587,
-                        username=config('GMAIL_USER', default=''),
-                        password=config('GMAIL_PASSWORD', default=''),
-                        use_tls=True,
-                        timeout=10,
-                    )
+                    # Get Gmail credentials
+                    gmail_user = config('GMAIL_USER', default='')
+                    gmail_password = config('GMAIL_PASSWORD', default='')
                     
-                    from django.core.mail import EmailMultiAlternatives
-                    msg = EmailMultiAlternatives(
-                        subject,
-                        plain_message,
-                        config('GMAIL_USER', default='noreply@vendopage.com'),
-                        [email],
-                        connection=gmail_connection
-                    )
-                    msg.attach_alternative(html_message, "text/html")
-                    msg.send()
+                    if not gmail_user or not gmail_password:
+                        raise Exception("Gmail credentials not configured")
+                    
+                    # Create message
+                    msg = MIMEMultipart('alternative')
+                    msg['Subject'] = subject
+                    msg['From'] = f'VendoPage <{gmail_user}>'
+                    msg['To'] = email
+                    
+                    # Attach plain text and HTML
+                    msg.attach(MIMEText(plain_message, 'plain'))
+                    msg.attach(MIMEText(html_message, 'html'))
+                    
+                    # Send via Gmail SMTP (port 587 with TLS)
+                    server = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
+                    server.starttls()  # Use TLS
+                    server.login(gmail_user, gmail_password)
+                    server.send_message(msg)
+                    server.quit()
                     
                     email_sent = True
-                    print(f"Email sent successfully via Gmail fallback")
+                    print(f"✅ Email sent successfully via Gmail fallback")
+                    
                 except Exception as gmail_error:
-                    print(f"Gmail fallback also failed: {str(gmail_error)}")
+                    print(f"❌ Gmail fallback failed: {str(gmail_error)}")
             
             if email_sent:
                 messages.success(request, f'✓ Reset code sent to {email}. Check your inbox!')
@@ -833,6 +821,7 @@ If you didn't request this, please ignore this email.
                 return render(request, 'auth/forgot_password.html')
                 
         except Seller.DoesNotExist:
+            # Don't reveal if email exists
             messages.success(request, f'If an account with {email} exists, we sent a reset code.')
             return redirect('verify_reset_code')
     
