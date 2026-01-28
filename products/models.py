@@ -15,6 +15,18 @@ class Product(models.Model):
     views = models.IntegerField(default=0)
     whatsapp_clicks = models.IntegerField(default=0)
     
+    # NEW: Upload status tracking
+    upload_status = models.CharField(
+        max_length=20,
+        choices=[
+            ('pending', 'Pending'),
+            ('processing', 'Processing'),
+            ('completed', 'Completed'),
+            ('failed', 'Failed'),
+        ],
+        default='pending'
+    )
+    
     class Meta:
         ordering = ['-created_at']
     
@@ -24,6 +36,11 @@ class Product(models.Model):
     
     def get_primary_image(self):
         return self.images.first()
+    
+    def is_ready(self):
+        """Check if product has uploaded images"""
+        return self.images.exists()
+    
     
     def get_whatsapp_message(self):
         msg = f"Hi! I'm interested in this product"

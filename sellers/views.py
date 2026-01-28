@@ -18,7 +18,7 @@ from django.core.exceptions import ValidationError
 from PIL import Image
 import os
 from django.views.decorators.csrf import csrf_exempt
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import uuid
 import json
 
@@ -300,10 +300,19 @@ def dashboard(request):
 from django.views.decorators.http import require_http_methods
 import traceback
 
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import logging
+
+logger = logging.getLogger(__name__)
+# sellers/views.py
+
+from sellers.tasks import upload_product_images_async
+import base64
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def upload_product(request):
-    """Upload product with robust error handling"""
+    """Upload product - INSTANT response, background processing"""
     
     # GET request - show upload form
     if request.method == 'GET':
@@ -328,116 +337,90 @@ def upload_product(request):
         if len(images) > 10:
             return JsonResponse({
                 'success': False,
-                'error': 'Maximum 10 images per product. Please remove some images.'
+                'error': 'Maximum 10 images per product'
             }, status=400)
         
-        # Validate image sizes
+        # Validate image sizes and types
+        max_size = 10 * 1024 * 1024  # 10MB
+        allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+        
         for idx, image in enumerate(images):
-            if image.size > 10 * 1024 * 1024:  # 10MB
+            if image.size > max_size:
                 return JsonResponse({
                     'success': False,
-                    'error': f'Image {idx + 1} is too large. Maximum size is 10MB per image.'
+                    'error': f'Image {idx + 1} is too large (max 10MB)'
                 }, status=400)
             
-            # Validate image type
-            if not image.content_type.startswith('image/'):
+            if image.content_type not in allowed_types:
                 return JsonResponse({
                     'success': False,
-                    'error': f'File {idx + 1} is not a valid image.'
+                    'error': f'Image {idx + 1} has invalid format'
                 }, status=400)
         
         # Parse price
         price_value = None
         if price:
             try:
-                price_value = float(price)
+                price_value = Decimal(price)
                 if price_value < 0:
                     return JsonResponse({
                         'success': False,
                         'error': 'Price cannot be negative'
                     }, status=400)
-            except ValueError:
+            except (ValueError, Exception):
                 return JsonResponse({
                     'success': False,
                     'error': 'Invalid price format'
                 }, status=400)
         
-        # Create product
-        from products.models import Product, ProductImage
-        
+        # ✅ STEP 1: Create product IMMEDIATELY (fast!)
         product = Product.objects.create(
             seller=seller,
             description=description,
             price=price_value
         )
         
-        # Upload images to Cloudinary
-        uploaded_count = 0
-        failed_images = []
+        logger.info(f"✅ Product {product.id} created for seller {seller.username}")
         
+        # ✅ STEP 2: Prepare images for background upload
+        images_data = []
         for index, image in enumerate(images):
-            try:
-                ProductImage.objects.create(
-                    product=product,
-                    image=image,
-                    order=index
-                )
-                uploaded_count += 1
-            except Exception as img_error:
-                # Log the error but continue with other images
-                print(f"Error uploading image {index + 1}: {str(img_error)}")
-                failed_images.append(index + 1)
-                continue
+            # Read image into memory
+            image_content = image.read()
+            
+            # Encode to base64 for Celery (JSON serializable)
+            image_base64 = base64.b64encode(image_content).decode('utf-8')
+            
+            images_data.append({
+                'filename': image.name,
+                'content': image_base64,
+                'order': index
+            })
         
-        # Check if at least one image was uploaded successfully
-        if uploaded_count == 0:
-            # Delete the product if no images were uploaded
-            product.delete()
-            return JsonResponse({
-                'success': False,
-                'error': 'Failed to upload images. Please try again or use smaller images.'
-            }, status=500)
+        # ✅ STEP 3: Queue background upload (INSTANT response!)
+        upload_product_images_async.delay(product.id, images_data)
         
-        # Return success (even if some images failed)
-        response_data = {
+        logger.info(f"🚀 Queued {len(images_data)} images for background upload (product {product.id})")
+        
+        # ✅ STEP 4: Return IMMEDIATELY (user doesn't wait!)
+        return JsonResponse({
             'success': True,
-            'message': f'Product created successfully with {uploaded_count} image{"s" if uploaded_count > 1 else ""}!',
+            'message': f'Product created! {len(images)} image{"s" if len(images) > 1 else ""} uploading in background...',
             'product_id': product.id,
-            'uploaded_count': uploaded_count
-        }
+            'redirect_url': '/dashboard/'
+        })
         
-        if failed_images:
-            response_data['warning'] = f'{len(failed_images)} image(s) failed to upload'
-        
-        return JsonResponse(response_data)
-    
     except Exception as e:
-        # Log the full error for debugging
-        print("=" * 50)
-        print("UPLOAD ERROR:")
-        print(traceback.format_exc())
-        print("=" * 50)
-        
-        # Return user-friendly error
-        error_msg = str(e)
-        
-        # Check for specific error types
-        if 'cloudinary' in error_msg.lower():
-            user_msg = 'Image upload service is temporarily unavailable. Please try again in a moment.'
-        elif 'database' in error_msg.lower() or 'constraint' in error_msg.lower():
-            user_msg = 'Database error. Please try again.'
-        elif 'timeout' in error_msg.lower():
-            user_msg = 'Upload is taking too long. Please try with smaller images or fewer images at once.'
-        else:
-            user_msg = 'An unexpected error occurred. Please try again.'
+        logger.error(f"Upload error: {str(e)}\n{traceback.format_exc()}")
         
         return JsonResponse({
             'success': False,
-            'error': user_msg,
-            'debug_info': str(e) if request.user.is_staff else None  # Only show technical details to staff
+            'error': 'Failed to create product. Please try again.'
         }, status=500)
 
-# API Endpoints
+
+
+        # API Endpoints
 @login_required
 @require_http_methods(["POST"])
 def archive_product(request, product_id):
