@@ -2,6 +2,171 @@
 {% load static %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<style>
+/* Custom Confirmation Modal Styles */
+.confirm-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.confirm-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.confirm-modal .modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.confirm-modal-content {
+    position: relative;
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 420px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    text-align: center;
+}
+
+.confirm-modal.active .confirm-modal-content {
+    transform: scale(1);
+}
+
+.confirm-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+}
+
+.confirm-icon.danger {
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #dc2626;
+}
+
+.confirm-icon.warning {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #f59e0b;
+}
+
+.confirm-icon.info {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #3b82f6;
+}
+
+.confirm-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 8px 0;
+}
+
+.confirm-message {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 0 0 24px 0;
+    line-height: 1.5;
+}
+
+.confirm-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-cancel,
+.btn-confirm {
+    flex: 1;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.btn-cancel {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.btn-cancel:hover {
+    background: #e5e7eb;
+}
+
+.btn-confirm {
+    background: #3b82f6;
+    color: white;
+}
+
+.btn-confirm:hover {
+    background: #2563eb;
+    transform: translateY(-1px);
+}
+
+.btn-confirm.danger {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.btn-confirm.danger:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+}
+
+.btn-confirm.warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.btn-confirm.warning:hover {
+    background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.btn-confirm:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    display: inline-block;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+</style>
 {% endblock %}  
 {% block title %}Dashboard - VendoPage{% endblock %}
 
@@ -110,7 +275,7 @@
             {% endif %}
         </div>
         
-        <!-- FIXED Share Link Card -->
+        <!-- Share Link Card -->
         <div class="share-card">
             <div class="share-header">
                 <div>
@@ -273,7 +438,7 @@
     </div>
 </div>
 
-<!-- UPDATED WhatsApp Status Generator Modal - With Profile Picture -->
+<!-- WhatsApp Status Generator Modal -->
 <div id="statusModal" class="status-modal">
     <div class="modal-overlay" onclick="closeStatusModal()"></div>
     <div class="modal-content">
@@ -392,45 +557,119 @@
         window.open(whatsappUrl, '_blank');
     }
     
-    function archiveProduct(id) {
-        if (confirm('Archive this product?')) {
-            fetch(`/api/product/${id}/archive/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-            }).then(() => location.reload());
+    // Custom Confirmation Modal System
+    function showConfirmModal(config) {
+        const modal = document.createElement('div');
+        modal.className = 'confirm-modal active';
+        modal.innerHTML = `
+            <div class="modal-overlay" onclick="closeConfirmModal(this)"></div>
+            <div class="confirm-modal-content">
+                <div class="confirm-icon ${config.type}">
+                    ${config.icon}
+                </div>
+                <h3 class="confirm-title">${config.title}</h3>
+                <p class="confirm-message">${config.message}</p>
+                <div class="confirm-actions">
+                    <button onclick="closeConfirmModal(this)" class="btn-cancel">Cancel</button>
+                    <button onclick="confirmAction(${config.productId}, '${config.action}', this)" class="btn-confirm ${config.type}">
+                        ${config.confirmText}
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    function closeConfirmModal(element) {
+        const modal = element.closest('.confirm-modal');
+        if (modal) {
+            modal.classList.remove('active');
+            setTimeout(() => modal.remove(), 300);
         }
+    }
+    
+    async function confirmAction(productId, action, buttonElement) {
+        const originalText = buttonElement.innerHTML;
+        buttonElement.innerHTML = '<span class="spinner"></span> Processing...';
+        buttonElement.disabled = true;
+        
+        try {
+            const response = await fetch(`/api/product/${productId}/${action}/`, {
+                method: action === 'delete' ? 'DELETE' : 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+            
+            if (response.ok) {
+                buttonElement.innerHTML = '✓ Done!';
+                setTimeout(() => location.reload(), 500);
+            } else {
+                throw new Error('Action failed');
+            }
+        } catch (error) {
+            buttonElement.innerHTML = originalText;
+            buttonElement.disabled = false;
+            alert('Something went wrong. Please try again.');
+        }
+    }
+    
+    function archiveProduct(id) {
+        showConfirmModal({
+            productId: id,
+            action: 'archive',
+            type: 'info',
+            icon: '📦',
+            title: 'Archive Product?',
+            message: 'This product will be hidden from your catalog. You can reactivate it anytime.',
+            confirmText: 'Archive'
+        });
     }
     
     function reactivateProduct(id) {
-        fetch(`/api/product/${id}/reactivate/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-        }).then(() => location.reload());
+        showConfirmModal({
+            productId: id,
+            action: 'reactivate',
+            type: 'info',
+            icon: '🔄',
+            title: 'Reactivate Product?',
+            message: 'This product will be visible in your catalog again.',
+            confirmText: 'Reactivate'
+        });
     }
     
     function markSoldOut(id) {
-        if (confirm('Mark as SOLD OUT?')) {
-            fetch(`/api/product/${id}/mark-sold-out/`, {
-                method: 'POST',
-                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-            }).then(() => location.reload());
-        }
+        showConfirmModal({
+            productId: id,
+            action: 'mark-sold-out',
+            type: 'warning',
+            icon: '⚠️',
+            title: 'Mark as Sold Out?',
+            message: 'This will add a "SOLD OUT" badge to your product. You can mark it as available later.',
+            confirmText: 'Mark Sold Out'
+        });
     }
     
     function markAvailable(id) {
-        fetch(`/api/product/${id}/mark-available/`, {
-            method: 'POST',
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-        }).then(() => location.reload());
+        showConfirmModal({
+            productId: id,
+            action: 'mark-available',
+            type: 'info',
+            icon: '✅',
+            title: 'Mark as Available?',
+            message: 'This will remove the "SOLD OUT" badge from your product.',
+            confirmText: 'Mark Available'
+        });
     }
     
     function deleteProduct(id) {
-        if (confirm('⚠️ PERMANENTLY DELETE?\n\nThis CANNOT be undone!')) {
-            fetch(`/api/product/${id}/delete/`, {
-                method: 'DELETE',
-                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-            }).then(() => location.reload());
-        }
+        showConfirmModal({
+            productId: id,
+            action: 'delete',
+            type: 'danger',
+            icon: '🗑️',
+            title: 'Delete Permanently?',
+            message: 'This action cannot be undone. Your product and all its images will be permanently deleted.',
+            confirmText: 'Delete Forever'
+        });
     }
     
     // Status Modal functions
@@ -489,15 +728,15 @@
                 
                 setTimeout(() => {
                     btn.innerHTML = '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Download Image';
-                    btn.disabled= false;
-closeStatusModal();
-}, 1500);
-});
-} catch (error) {
-console.error('Download error:', error);
-btn.innerHTML = '❌ Error - Try again';
-btn.disabled = false;
-}
-}
+                    btn.disabled = false;
+                    closeStatusModal();
+                }, 1500);
+            });
+        } catch (error) {
+            console.error('Download error:', error);
+            btn.innerHTML = '❌ Error - Try again';
+            btn.disabled = false;
+        }
+    }
 </script>
 {% endblock %}
