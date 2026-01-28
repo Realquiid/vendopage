@@ -2,6 +2,68 @@
 {% load static %}
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/sellerpage.css' %}">
+<style>
+/* Remove zoom/scale effects from product cards */
+.product-card {
+    transition: box-shadow 0.3s ease;
+}
+
+.product-card:hover {
+    transform: none !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.product-card img {
+    transition: none !important;
+    transform: none !important;
+}
+
+.product-card:hover img {
+    transform: none !important;
+}
+
+/* Sold Out Badge Styles */
+.sold-out-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(239, 68, 68, 0.95);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    z-index: 10;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.product-gallery.sold-out::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    border-radius: 12px;
+}
+
+.product-card.sold-out {
+    opacity: 0.85;
+}
+
+.product-card.sold-out .btn-whatsapp-sm {
+    background: #6b7280;
+    cursor: not-allowed;
+}
+
+.product-card.sold-out .btn-whatsapp-sm:hover {
+    background: #6b7280;
+}
+</style>
 {% endblock %}  
 {% block title %}{{ seller.business_name }} - VendoPage{% endblock %}
 
@@ -112,9 +174,13 @@
             
             <div class="products-grid">
                 {% for product in products %}
-                <div class="product-card">
+                <div class="product-card {% if product.is_sold_out %}sold-out{% endif %}">
                     <!-- Image Gallery -->
-                    <div class="product-gallery" id="gallery-{{ product.id }}">
+                    <div class="product-gallery {% if product.is_sold_out %}sold-out{% endif %}" id="gallery-{{ product.id }}">
+                        {% if product.is_sold_out %}
+                        <div class="sold-out-badge">SOLD OUT</div>
+                        {% endif %}
+                        
                         {% if product.images.count > 1 %}
                             <div class="carousel-container">
                                 <div class="carousel-track" id="track-{{ product.id }}">
@@ -165,6 +231,16 @@
                         <p class="product-desc">{{ product.description }}</p>
                         {% endif %}
                         
+                        {% if product.is_sold_out %}
+                        <button class="btn btn-whatsapp-sm" disabled style="background: #9ca3af; cursor: not-allowed;">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"/>
+                                <line x1="15" y1="9" x2="9" y2="15"/>
+                                <line x1="9" y1="9" x2="15" y2="15"/>
+                            </svg>
+                            Sold Out
+                        </button>
+                        {% else %}
                         <a href="https://wa.me/{{ seller.whatsapp_number }}?text={{ product.get_whatsapp_message|urlencode }}" 
                            class="btn btn-whatsapp-sm"
                            onclick="trackWhatsAppClick({{ product.id }})"
@@ -174,6 +250,7 @@
                             </svg>
                             Inquire
                         </a>
+                        {% endif %}
                     </div>
                 </div>
                 {% endfor %}
