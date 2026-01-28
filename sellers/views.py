@@ -682,7 +682,17 @@ def forgot_password(request):
     """Request password reset - sends 5-digit code via Hostinger email"""
     if request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
-        
+            
+        print("=" * 50)
+        print("EMAIL SETTINGS CHECK:")
+        print(f"EMAIL_HOST: {settings.EMAIL_HOST}")
+        print(f"EMAIL_PORT: {settings.EMAIL_PORT}")
+        print(f"EMAIL_USE_SSL: {settings.EMAIL_USE_SSL}")
+        print(f"EMAIL_USE_TLS: {getattr(settings, 'EMAIL_USE_TLS', 'NOT SET')}")
+        print(f"EMAIL_HOST_USER: {settings.EMAIL_HOST_USER}")
+        print(f"EMAIL_HOST_PASSWORD exists: {bool(settings.EMAIL_HOST_PASSWORD)}")
+        print(f"EMAIL_TIMEOUT: {getattr(settings, 'EMAIL_TIMEOUT', 'NOT SET')}")
+        print("=" * 50)
         try:
             seller = Seller.objects.get(email__iexact=email)
             
