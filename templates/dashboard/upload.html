@@ -254,7 +254,7 @@
                 // Redirect to dashboard
                 setTimeout(() => {
                     window.location.href = '{% url "dashboard" %}';
-                }, 500);
+                }, 100);
             } else {
                 // Server returned an error message
                 throw new Error(data.error || data.message || 'Upload failed. Please try again.');
