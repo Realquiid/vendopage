@@ -378,7 +378,7 @@ def upload_product(request):
             seller=seller,
             description=description,
             price=price_value,
-            upload_status='pending'
+            upload_status='pending'  # Mark as pending
         )
         
         logger.info(f"✅ Product {product.id} created for seller {seller.username}")
@@ -398,28 +398,37 @@ def upload_product(request):
                 'order': index
             })
         
-        # ✅ STEP 3: Try background upload
+        # ✅ STEP 3: Try background upload with FALLBACK
         try:
+            # Try to queue the task
             upload_product_images_async.delay(product.id, images_data)
             logger.info(f"🚀 Queued {len(images_data)} images for background upload (product {product.id})")
-            
-            return JsonResponse({
-                'success': True,
-                'message': f'Product created! {len(images)} image{"s" if len(images) > 1 else ""} uploading in background...',
-                'product_id': product.id,
-                'redirect_url': '/dashboard/'
-            })
+            message = f'Product created! {len(images)} image{"s" if len(images) > 1 else ""} uploading in background...'
             
         except Exception as celery_error:
-            # Celery not available - mark product as failed
-            logger.error(f"❌ Celery unavailable: {celery_error}")
-            product.upload_status = 'failed'
-            product.save()
+            # ❌ Celery/Redis connection failed - FALLBACK to synchronous upload
+            logger.warning(f"⚠️ Celery unavailable, falling back to sync upload: {celery_error}")
             
-            return JsonResponse({
-                'success': False,
-                'error': 'Background upload service is currently unavailable. Please try again in a few minutes.'
-            }, status=503)
+            try:
+                # Upload images synchronously as fallback
+                from .tasks import upload_images_sync  # We'll create this
+                upload_images_sync(product.id, images_data)
+                message = f'Product created with {len(images)} image{"s" if len(images) > 1 else ""}!'
+                
+            except Exception as upload_error:
+                # Even sync upload failed - mark product for retry
+                logger.error(f"❌ Both async and sync upload failed: {upload_error}")
+                product.upload_status = 'failed'
+                product.save()
+                message = 'Product created, but image upload failed. Please try re-uploading.'
+        
+        # ✅ STEP 4: Return IMMEDIATELY (user doesn't wait!)
+        return JsonResponse({
+            'success': True,
+            'message': message,
+            'product_id': product.id,
+            'redirect_url': '/dashboard/'
+        })
         
     except Exception as e:
         logger.error(f"Upload error: {str(e)}\n{traceback.format_exc()}")

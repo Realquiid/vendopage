@@ -117,3 +117,65 @@ def cleanup_failed_products():
         logger.info(f"🧹 Cleaned up {count} failed products with no images")
     
     return {'cleaned': count}
+
+
+
+
+
+def upload_images_sync(product_id, images_data):
+    """
+    Synchronous image upload fallback when Celery is unavailable.
+    This runs in the main Django process (slower but reliable).
+    """
+    import cloudinary.uploader
+    from products.models import Product, ProductImage
+    
+    logger.info(f"🔄 Starting SYNC upload for product {product_id} with {len(images_data)} images")
+    
+    try:
+        product = Product.objects.get(id=product_id)
+        uploaded_count = 0
+        
+        for image_data in images_data:
+            try:
+                # Decode base64 image
+                image_content = base64.b64decode(image_data['content'])
+                
+                # Upload to Cloudinary
+                result = cloudinary.uploader.upload(
+                    image_content,
+                    folder=f"products/{product_id}",
+                    resource_type="image",
+                    timeout=60
+                )
+                
+                # Create ProductImage record
+                ProductImage.objects.create(
+                    product=product,
+                    image_url=result['secure_url'],
+                    public_id=result['public_id'],
+                    order=image_data['order']
+                )
+                
+                uploaded_count += 1
+                logger.info(f"✅ Sync uploaded image {uploaded_count}/{len(images_data)}")
+                
+            except Exception as img_error:
+                logger.error(f"❌ Failed to upload image {image_data['order']}: {img_error}")
+                continue
+        
+        # Update product status
+        if uploaded_count > 0:
+            product.upload_status = 'completed'
+            logger.info(f"✅ Sync upload complete: {uploaded_count}/{len(images_data)} images uploaded")
+        else:
+            product.upload_status = 'failed'
+            logger.error(f"❌ Sync upload failed: 0/{len(images_data)} images uploaded")
+        
+        product.save()
+        
+        return uploaded_count
+        
+    except Exception as e:
+        logger.error(f"❌ Sync upload error for product {product_id}: {e}")
+        raise
