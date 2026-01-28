@@ -20,12 +20,23 @@
                 Your customers can browse and buy anytime, even after 24 hours.
             </p>
             <div class="hero-cta">
-                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
-                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
-                    Start Free - No Credit Card
-                </a>
+                {% if user.is_authenticated %}
+                    <!-- Show Dashboard button for authenticated users -->
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        Go to Dashboard
+                    </a>
+                {% else %}
+                    <!-- Show Sign Up button for guests -->
+                    <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                        Start Free - No Credit Card
+                    </a>
+                {% endif %}
                 <a href="#features" class="btn btn-outline btn-lg">
                     See How It Works
                 </a>
@@ -41,29 +52,6 @@
     </div>
 </section>
 
-<!-- Stats Section -->
-<!-- <section class="stats-section">
-    <div class="container">
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number">10,000+</div>
-                <div class="stat-label">Active Sellers</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">500K+</div>
-                <div class="stat-label">Products Listed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">99.9%</div>
-                <div class="stat-label">Uptime</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">24/7</div>
-                <div class="stat-label">Support</div>
-            </div>
-        </div>
-    </div> -->
-</section>
 
 <!-- Search Section -->
 <section class="search-section">
@@ -158,7 +146,11 @@
                     <div class="empty-icon">🎉</div>
                     <h3>Be the First Seller!</h3>
                     <p class="text-muted">No sellers with 5+ products yet. Start your catalog today!</p>
+                    {% if not user.is_authenticated %}
                     <a href="{% url 'register' %}" class="btn btn-primary mt-2">Create Your Free Page</a>
+                    {% else %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary mt-2">Go to Dashboard</a>
+                    {% endif %}
                 </div>
                 {% endfor %}
             </div>
@@ -255,53 +247,6 @@
     </div>
 </section>
 
-<!-- Testimonials Section -->
-<!-- <section class="testimonials-section">
-    <div class="container">
-        <div class="section-header">
-            <h2 class="section-title">What Sellers Are Saying</h2>
-            <p class="section-subtitle">Join thousands of happy sellers</p>
-        </div>
-        
-        <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                <p class="testimonial-text">"VendoPage changed my business! No more struggling with expired stories. My customers can now browse my full catalog anytime."</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">A</div>
-                    <div>
-                        <div class="author-name">Amaka Johnson</div>
-                        <div class="author-role">Fashion Boutique Owner</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="testimonial-card">
-                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                <p class="testimonial-text">"So easy to use! I set up my entire product catalog in under 10 minutes. My sales have increased by 40% since joining."</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">C</div>
-                    <div>
-                        <div class="author-name">Chinedu Okafor</div>
-                        <div class="author-role">Electronics Seller</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="testimonial-card">
-                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                <p class="testimonial-text">"The WhatsApp integration is genius! Customers find what they want on my page, then message me directly. Perfect workflow!"</p>
-                <div class="testimonial-author">
-                    <div class="author-avatar">F</div>
-                    <div>
-                        <div class="author-name">Folake Adeyemi</div>
-                        <div class="author-role">Beauty Products</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section> -->
 
 <!-- FAQ Section -->
 <section class="faq-section">
@@ -381,18 +326,25 @@
         <div class="cta-content">
             <h2 class="cta-title">Ready to Stop Losing Sales?</h2>
             <p class="cta-subtitle">Join thousands of sellers who switched to permanent catalogs</p>
-            <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-                Create Your Free Catalog Now
-            </a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                    </svg>
+                    Go to Your Dashboard
+                </a>
+            {% else %}
+                <a href="{% url 'register' %}" class="btn btn-primary btn-lg">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    Create Your Free Catalog Now
+                </a>
+            {% endif %}
             <p class="cta-note">No credit card required • Setup in 2 minutes</p>
         </div>
     </div>
 </section>
-
-<!-- REPLACE YOUR ENTIRE FOOTER SECTION WITH THIS -->
 
 <!-- Footer Trigger -->
 <div class="footer-trigger-wrapper">
@@ -452,7 +404,6 @@
     </div>
 </footer>
 
-<!-- REPLACE YOUR SCRIPT SECTION WITH THIS -->
 <script>
     // Search functionality
     const searchInput = document.getElementById('searchInput');
