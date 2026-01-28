@@ -377,7 +377,8 @@ def upload_product(request):
         product = Product.objects.create(
             seller=seller,
             description=description,
-            price=price_value
+            price=price_value,
+            upload_status='pending'
         )
         
         logger.info(f"✅ Product {product.id} created for seller {seller.username}")
@@ -397,21 +398,28 @@ def upload_product(request):
                 'order': index
             })
         
-        redis_url = os.environ.get('REDIS_URL', 'NOT SET')
-        print(f"🔍 DEBUG: REDIS_URL = {redis_url[:50]}...") 
-        logger.info(f"🔍 FULL REDIS_URL: {redis_url}")
-        # ✅ STEP 3: Queue background upload (INSTANT response!)
-        upload_product_images_async.delay(product.id, images_data)
-        
-        logger.info(f"🚀 Queued {len(images_data)} images for background upload (product {product.id})")
-        
-        # ✅ STEP 4: Return IMMEDIATELY (user doesn't wait!)
-        return JsonResponse({
-            'success': True,
-            'message': f'Product created! {len(images)} image{"s" if len(images) > 1 else ""} uploading in background...',
-            'product_id': product.id,
-            'redirect_url': '/dashboard/'
-        })
+        # ✅ STEP 3: Try background upload
+        try:
+            upload_product_images_async.delay(product.id, images_data)
+            logger.info(f"🚀 Queued {len(images_data)} images for background upload (product {product.id})")
+            
+            return JsonResponse({
+                'success': True,
+                'message': f'Product created! {len(images)} image{"s" if len(images) > 1 else ""} uploading in background...',
+                'product_id': product.id,
+                'redirect_url': '/dashboard/'
+            })
+            
+        except Exception as celery_error:
+            # Celery not available - mark product as failed
+            logger.error(f"❌ Celery unavailable: {celery_error}")
+            product.upload_status = 'failed'
+            product.save()
+            
+            return JsonResponse({
+                'success': False,
+                'error': 'Background upload service is currently unavailable. Please try again in a few minutes.'
+            }, status=503)
         
     except Exception as e:
         logger.error(f"Upload error: {str(e)}\n{traceback.format_exc()}")
@@ -420,8 +428,6 @@ def upload_product(request):
             'success': False,
             'error': 'Failed to create product. Please try again.'
         }, status=500)
-
-
 
         # API Endpoints
 @login_required
