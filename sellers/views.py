@@ -310,13 +310,18 @@ import traceback
 
 # sellers/views.py (REPLACE your upload_product function)
 
+# sellers/views.py
+
 @login_required
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def upload_product(request):
-    """
-    Create product and save Cloudinary URLs.
-    Frontend uploads directly to Cloudinary, sends URLs to backend.
-    """
+    """Upload product - instant response"""
+    
+    # GET request - show upload form
+    if request.method == 'GET':
+        return render(request, 'dashboard/upload.html')
+    
+    # POST request - handle upload
     try:
         seller = request.user
         
@@ -396,10 +401,6 @@ def upload_product(request):
             'success': False,
             'error': 'Failed to create product. Please try again.'
         }, status=500)
-
-
-
-
 
         # API Endpoints
 @login_required

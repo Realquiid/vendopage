@@ -74,7 +74,7 @@
             <p class="section-subtitle">Browse catalogs from verified businesses</p>
         </div>
         
-        {% if featured_sellers %}
+        {% if seller.is_featured %}
         <div class="featured-container">
             <div class="featured-header">
                 <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
@@ -121,7 +121,7 @@
                     <div class="seller-avatar">
                         {% if seller.profile_picture %}
                             <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}" loading="lazy">
-                        {% else %}
+                        {% else %}  
                             <div class="avatar-placeholder">{{ seller.business_name|first }}</div>
                         {% endif %}
                     </div>
