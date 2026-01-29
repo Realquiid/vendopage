@@ -6,10 +6,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # Add field as nullable first
         migrations.AddField(
             model_name='productimage',
             name='image_url',
-            field=models.URLField(max_length=500, blank=True, default=''),
+            field=models.URLField(max_length=500, default='https://via.placeholder.com/400'),
+            preserve_default=False,
         ),
     ]
