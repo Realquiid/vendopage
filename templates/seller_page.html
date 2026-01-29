@@ -120,7 +120,7 @@
                                 <div class="carousel-track" id="track-{{ product.id }}">
                                     {% for image in product.images.all %}
                                     <div class="carousel-slide">
-                                        <img src="{{ image.image.url }}" alt="Product" loading="lazy">
+                                        <img src="{{ image.image_url }}" alt="Product" loading="lazy">
                                     </div>
                                     {% endfor %}
                                 </div>
@@ -149,7 +149,7 @@
                         {% else %}
                             {% with product.get_primary_image as primary %}
                             {% if primary %}
-                            <img src="{{ primary.image.url }}" alt="Product" loading="lazy" class="single-image">
+                            <img src="{{ primary.image_url }}" alt="Product" loading="lazy" class="single-image">
                             {% endif %}
                             {% endwith %}
                         {% endif %}

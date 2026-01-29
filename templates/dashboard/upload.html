@@ -20,7 +20,7 @@
             <p class="text-muted">Upload multiple angles of your product in one collection</p>
         </div>
         
-        <form method="POST" enctype="multipart/form-data" id="uploadForm" class="upload-form">
+        <form method="POST" id="uploadForm" class="upload-form">
             {% csrf_token %}
             
             <!-- Image Upload -->
@@ -29,7 +29,7 @@
                 <p class="form-hint mb-2">💡 <strong>Pro tip:</strong> Upload front, back, and side views in ONE post. First image will be the cover photo.</p>
                 
                 <div class="image-upload-area" id="uploadArea">
-                    <input type="file" name="images" id="imageInput" accept="image/*" multiple style="display:none">
+                    <input type="file" id="imageInput" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display:none">
                     <div class="upload-placeholder" onclick="document.getElementById('imageInput').click()">
                         <div class="upload-icon">
                             <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -39,7 +39,7 @@
                             </svg>
                         </div>
                         <h3>Click to upload or drag and drop</h3>
-                        <p class="text-muted">Upload 1-5 images per product • PNG, JPG, JPEG up to 10MB each</p>
+                        <p class="text-muted">Upload 1-10 images per product • JPG, PNG, WebP up to 10MB each</p>
                         <p class="upload-tip">📸 Show different angles for 3x better sales!</p>
                         <button type="button" class="btn btn-secondary mt-2">Choose Files</button>
                     </div>
@@ -57,7 +57,7 @@
             <div class="form-section">
                 <label class="form-label">Description</label>
                 <p class="form-hint mb-2">Describe your product to help customers understand what you're selling</p>
-                <textarea name="description" class="form-input" rows="5" placeholder="e.g., Brand new designer sneakers, size 42, never worn, comes with original box..."></textarea>
+                <textarea name="description" id="description" class="form-input" rows="5" placeholder="e.g., Brand new designer sneakers, size 42, never worn, comes with original box..."></textarea>
                 <p class="helper-text">
                     💬 This appears in the WhatsApp message when customers inquire
                 </p>
@@ -71,7 +71,7 @@
                     <div class="input-prefix">
                         <span class="currency">₦</span>
                     </div>
-                    <input type="number" name="price" class="form-input with-prefix" placeholder="0" step="0.01" min="0">
+                    <input type="number" name="price" id="price" class="form-input with-prefix" placeholder="0" step="0.01" min="0">
                 </div>
             </div>
             
@@ -104,7 +104,14 @@
     const uploadForm = document.getElementById('uploadForm');
     const imageCount = document.getElementById('imageCount');
     const countText = document.getElementById('countText');
+    
     let selectedFiles = [];
+    let uploadedUrls = [];
+    
+    // ✅ Cloudinary Config
+    const CLOUDINARY_CLOUD_NAME = 'dqxlkie1i';
+    const CLOUDINARY_UPLOAD_PRESET = 'vendopage_unsigned'; // You'll create this
+    const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
     
     // Handle file selection
     imageInput.addEventListener('change', handleFiles);
@@ -145,7 +152,6 @@
             return true;
         });
         
-        // Check 10 image limit
         const totalFiles = selectedFiles.length + validFiles.length;
         if (totalFiles > 10) {
             alert(`Maximum 10 images per product. You tried to add ${totalFiles} images.`);
@@ -173,7 +179,6 @@
             reader.readAsDataURL(file);
         });
         
-        // Hide/show placeholder
         const placeholder = document.querySelector('.upload-placeholder');
         if (selectedFiles.length > 0) {
             placeholder.style.display = 'none';
@@ -200,7 +205,28 @@
         updateImageCount();
     }
     
-    // Form submission with PROPER ERROR HANDLING
+    // ✅ Upload to Cloudinary directly
+    async function uploadToCloudinary(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+        formData.append('folder', 'vendopage/products');
+        
+        const response = await fetch(CLOUDINARY_UPLOAD_URL, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error?.message || 'Cloudinary upload failed');
+        }
+        
+        const data = await response.json();
+        return data.secure_url;
+    }
+    
+    // Form submission
     uploadForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -209,15 +235,6 @@
             return;
         }
         
-        const formData = new FormData(uploadForm);
-        
-        // Remove default file input and add selected files
-        formData.delete('images');
-        selectedFiles.forEach(file => {
-            formData.append('images', file);
-        });
-        
-        // Show loading state
         const submitBtn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
         const uploadIcon = document.getElementById('uploadIcon');
@@ -226,57 +243,56 @@
         submitBtn.disabled = true;
         uploadIcon.style.display = 'none';
         loadingIcon.style.display = 'block';
-        btnText.textContent = `Uploading ${selectedFiles.length} image${selectedFiles.length > 1 ? 's' : ''}...`;
         
         try {
+            // ✅ Step 1: Upload all images to Cloudinary in parallel
+            btnText.textContent = `Uploading ${selectedFiles.length} image${selectedFiles.length > 1 ? 's' : ''}...`;
+            
+            uploadedUrls = [];
+            const uploadPromises = selectedFiles.map((file, index) => {
+                return uploadToCloudinary(file).then(url => {
+                    uploadedUrls[index] = url;
+                    const uploaded = uploadedUrls.filter(Boolean).length;
+                    btnText.textContent = `Uploaded ${uploaded}/${selectedFiles.length}...`;
+                });
+            });
+            
+            await Promise.all(uploadPromises);
+            
+            // ✅ Step 2: Send URLs to Django
+            btnText.textContent = 'Saving product...';
+            
+            const formData = new FormData();
+            formData.append('description', document.getElementById('description').value);
+            formData.append('price', document.getElementById('price').value);
+            
+            uploadedUrls.forEach(url => {
+                formData.append('image_urls[]', url);
+            });
+            
             const response = await fetch('{% url "upload_product" %}', {
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'  // Tell server this is AJAX
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
                 }
             });
             
-            // CRITICAL FIX: Check content type before parsing
-            const contentType = response.headers.get('content-type');
-            
-            if (!contentType || !contentType.includes('application/json')) {
-                // Server returned HTML instead of JSON - something went wrong
-                console.error('Server returned HTML instead of JSON');
-                throw new Error('Upload failed. Please check your internet connection and try again.');
-            }
-            
             const data = await response.json();
             
-            // Check if response was successful
             if (response.ok && data.success) {
                 btnText.textContent = 'Success!';
-                // Redirect to dashboard
                 setTimeout(() => {
-                    window.location.href = '{% url "dashboard" %}';
-                }, 100);
+                    window.location.href = data.redirect_url;
+                }, 300);
             } else {
-                // Server returned an error message
-                throw new Error(data.error || data.message || 'Upload failed. Please try again.');
+                throw new Error(data.error || 'Upload failed');
             }
             
         } catch (error) {
             console.error('Upload error:', error);
+            alert(`Upload failed: ${error.message}`);
             
-            // Show user-friendly error message
-            let errorMsg = 'Unable to upload your product. ';
-            
-            if (error.message.includes('Failed to fetch')) {
-                errorMsg += 'Please check your internet connection and try again.';
-            } else if (error.message.includes('JSON')) {
-                errorMsg += 'There was a problem with the server. Please try again in a moment.';
-            } else {
-                errorMsg += error.message;
-            }
-            
-            alert(errorMsg);
-            
-            // Reset button state
             submitBtn.disabled = false;
             uploadIcon.style.display = 'block';
             loadingIcon.style.display = 'none';
@@ -289,4 +305,3 @@
     imageCount.style.display = 'none';
 </script>
 {% endblock %}
-

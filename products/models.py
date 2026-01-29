@@ -3,7 +3,7 @@ from django.db import models
 from django.utils import timezone
 from datetime import timedelta
 from sellers.models import Seller
-from cloudinary.models import CloudinaryField  # ADD THIS
+
 
 class Product(models.Model):
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='products')
@@ -15,18 +15,6 @@ class Product(models.Model):
     views = models.IntegerField(default=0)
     whatsapp_clicks = models.IntegerField(default=0)
     
-    # NEW: Upload status tracking
-    upload_status = models.CharField(
-        max_length=20,
-        choices=[
-            ('pending', 'Pending'),
-            ('processing', 'Processing'),
-            ('completed', 'Completed'),
-            ('failed', 'Failed'),
-        ],
-        default='pending'
-    )
-    
     class Meta:
         ordering = ['-created_at']
     
@@ -36,11 +24,6 @@ class Product(models.Model):
     
     def get_primary_image(self):
         return self.images.first()
-    
-    def is_ready(self):
-        """Check if product has uploaded images"""
-        return self.images.exists()
-    
     
     def get_whatsapp_message(self):
         msg = f"Hi! I'm interested in this product"
@@ -59,9 +42,10 @@ class Product(models.Model):
     def __str__(self):
         return f"{self.seller.business_name} - {self.created_at.strftime('%Y-%m-%d')}"
 
+
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
-    image = CloudinaryField('image')  # Changed from ImageField
+    image_url = models.URLField(max_length=500)  # New primary field
     order = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     
