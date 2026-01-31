@@ -53,7 +53,8 @@ INSTALLED_APPS = [
 # MIDDLEWARE - COMBINED (WhiteNoise + Django required middleware)
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise for static files
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise
+    'config.middleware.WWWRedirectMiddleware', # Custom WWW redirect middleware
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

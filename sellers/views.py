@@ -471,21 +471,23 @@ def track_whatsapp_click(request, product_id):
 def dashboard_settings(request):
     return render(request, 'dashboard/settings.html')
 
+
+# sellers/views.py
+
 @login_required
 def update_profile_picture(request):
-    """Update or remove profile picture"""
+    """Update or remove profile picture - Cloudinary compatible"""
     if request.method == 'POST':
         seller = request.user
         
         # Remove picture
         if request.POST.get('remove_picture'):
             if seller.profile_picture:
-                # Delete old file
-                if os.path.isfile(seller.profile_picture.path):
-                    os.remove(seller.profile_picture.path)
+                # Cloudinary handles deletion automatically
+                seller.profile_picture.delete(save=False)  # Delete from Cloudinary
                 seller.profile_picture = None
                 seller.save()
-                messages.success(request, 'Profile picture removed')
+                messages.success(request, '✓ Profile picture removed')
             return redirect('settings')
         
         # Upload new picture
@@ -498,31 +500,29 @@ def update_profile_picture(request):
                 return redirect('settings')
             
             # Validate file type
-            allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
             if picture.content_type not in allowed_types:
-                messages.error(request, 'Invalid file type. Please upload JPG, PNG, or GIF.')
+                messages.error(request, 'Invalid file type. Use JPG, PNG, or GIF.')
                 return redirect('settings')
             
             try:
-                # Open and verify image
-                img = Image.open(picture)
-                img.verify()
-                
-                # Delete old picture if exists
+                # Delete old picture from Cloudinary if exists
                 if seller.profile_picture:
-                    if os.path.isfile(seller.profile_picture.path):
-                        os.remove(seller.profile_picture.path)
+                    seller.profile_picture.delete(save=False)
                 
-                # Save new picture
+                # Upload new picture to Cloudinary
                 seller.profile_picture = picture
                 seller.save()
-                messages.success(request, 'Profile picture updated!')
+                messages.success(request, '✓ Profile picture updated!')
                 
             except Exception as e:
-                messages.error(request, 'Invalid image file. Please try another.')
+                logger.error(f"Profile picture upload error: {str(e)}")
+                messages.error(request, 'Failed to update profile picture. Please try again.')
                 return redirect('settings')
     
     return redirect('settings')
+
+
 
 @login_required
 def update_business_info(request):
