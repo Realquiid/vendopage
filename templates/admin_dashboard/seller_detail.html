@@ -186,7 +186,7 @@
                 {% for product in products %}
                 <div class="product-card-admin">
                     {% if product.images.first %}
-                    <img src="{{ product.images.first.image.url }}" alt="Product">
+                    <img src="{{ product.images.first.image_url }}" alt="Product" loading="lazy">
                     {% else %}
                     <div class="product-placeholder">No Image</div>
                     {% endif %}
