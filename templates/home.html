@@ -8,693 +8,1112 @@
 
 {% block extra_css %}
 <style>
-/* =============================================
-   ADDITIONAL META TAGS (keywords, twitter image)
-   ============================================= */
+  /* =============================================
+     DOCUMENT 3 DESIGN SYSTEM — UNCHANGED
+     ============================================= */
+  :root {
+    --green: #00C853;
+    --green-dk: #00a844;
+    --dark: #0A0A0A;
+    --gray: #6B6B6B;
+    --gray-lt: #9B9B9B;
+    --light: #F7F7F5;
+    --border: #E8E8E4;
+    --white: #ffffff;
+    --red: #FF4444;
+    --wa: #25D366;
+    --font-d: 'Syne', sans-serif;
+    --font-b: 'DM Sans', sans-serif;
+    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px; --r-pill: 100px;
+    --sh-sm: 0 2px 8px rgba(0,0,0,.06);
+    --sh-md: 0 8px 24px rgba(0,0,0,.08);
+    --sh-lg: 0 20px 60px rgba(0,0,0,.10);
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: var(--font-b);
+    background: var(--white);
+    color: var(--dark);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
 
-/* =============================================
-   DARK MODE — home-page-specific overrides
-   All base elements already covered in base.html.
-   These target home-specific components.
-   ============================================= */
+  /* =============================================
+     NAVBAR — FROM DOCUMENT 4 (base.html) — EXACT
+     ============================================= */
+  .header {
+    position: sticky; top: 0; z-index: 200;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+  .header-content {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; gap: 16px;
+  }
 
-/* =============================================
-   HERO
-   ============================================= */
-.hero {
-    min-height: calc(100vh - 64px);
-    display: flex; flex-direction: column; justify-content: center;
-    padding: 100px 40px 80px;
-    max-width: 900px; margin: 0 auto;
-}
-.hero-tag {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: var(--bg-subtle); border: 1px solid var(--border-color);
-    padding: 6px 14px; border-radius: 100px;
-    font-size: 12px; font-weight: 500; color: var(--text-secondary);
-    margin-bottom: 32px; width: fit-content;
-}
-.hero-tag .dot {
-    width: 6px; height: 6px; background: var(--green);
-    border-radius: 50%; animation: pulse 2s infinite;
-}
-@keyframes pulse {
+  /* Logo */
+  .logo {
+    font-family: var(--font-d); font-weight: 800; font-size: 20px;
+    letter-spacing: -.5px; color: var(--dark); text-decoration: none;
+    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+  }
+  .logo-icon {
+    width: 32px; height: 32px; background: var(--green); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-d); font-weight: 800; font-size: 15px; color: var(--white);
+  }
+  .logo-word { color: var(--dark); }
+  .logo-word span { color: var(--green); }
+
+  /* Nav links */
+  .nav-links { display: flex; align-items: center; gap: 4px; }
+  .nav-link {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border-radius: var(--r-pill);
+    font-size: 14px; font-weight: 500; color: var(--gray);
+    text-decoration: none; transition: all .18s ease; white-space: nowrap;
+  }
+  .nav-link:hover { color: var(--dark); background: var(--light); }
+  .nav-link svg { flex-shrink: 0; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 22px; border-radius: var(--r-pill);
+    font-family: var(--font-b); font-size: 14px; font-weight: 600;
+    border: none; cursor: pointer; text-decoration: none;
+    transition: all .18s ease; white-space: nowrap; line-height: 1;
+  }
+  .btn-primary { background: var(--green); color: var(--white); }
+  .btn-primary:hover { background: var(--green-dk); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,200,83,.3); }
+
+  /* Theme toggle */
+  .theme-toggle {
+    width: 36px; height: 36px;
+    background: var(--light); border: 1px solid var(--border); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .18s; flex-shrink: 0;
+  }
+  .theme-toggle:hover { border-color: var(--dark); }
+
+  /* Profile dropdown */
+  .nav-dropdown { position: relative; }
+  .nav-profile-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--light); border: 1px solid var(--border);
+    border-radius: var(--r-pill); padding: 4px 10px 4px 4px;
+    cursor: pointer; transition: all .18s;
+  }
+  .nav-profile-btn:hover { border-color: var(--dark); }
+  .nav-profile-btn img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+  .profile-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--green); color: var(--white);
+    font-family: var(--font-d); font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dropdown-menu {
+    position: absolute; top: calc(100% + 8px); right: 0;
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--r-lg); min-width: 220px;
+    box-shadow: var(--sh-lg); opacity: 0; pointer-events: none;
+    transform: translateY(-8px); transition: all .18s ease;
+    z-index: 300; overflow: hidden;
+  }
+  .dropdown-menu.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
+  .dropdown-header { padding: 16px 16px 12px; }
+  .dropdown-name { font-family: var(--font-d); font-weight: 700; font-size: 14px; }
+  .dropdown-email { font-size: 12px; color: var(--gray); margin-top: 2px; }
+  .dropdown-divider { height: 1px; background: var(--border); }
+  .dropdown-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 16px; font-size: 14px; font-weight: 500;
+    color: var(--dark); text-decoration: none; transition: background .15s;
+  }
+  .dropdown-item:hover { background: var(--light); }
+  .dropdown-item.text-danger { color: var(--red); }
+  .dropdown-item.text-danger:hover { background: #fff5f5; }
+
+  /* Mobile hamburger */
+  .mobile-menu-btn {
+    display: none; flex-direction: column; gap: 5px;
+    background: none; border: none; cursor: pointer; padding: 4px;
+  }
+  .mobile-menu-btn span { display: block; width: 22px; height: 2px; background: var(--dark); border-radius: 2px; transition: all .2s; }
+
+  /* Dark mode */
+  [data-theme="dark"] body { background: #0f0f0f; color: #f0f0f0; }
+  [data-theme="dark"] .header { background: rgba(15,15,15,.97); border-color: #222; }
+  [data-theme="dark"] .nav-link { color: #888; }
+  [data-theme="dark"] .nav-link:hover { color: #f0f0f0; background: #1a1a1a; }
+  [data-theme="dark"] .logo, [data-theme="dark"] .logo-word { color: #f0f0f0; }
+  [data-theme="dark"] .dropdown-menu { background: #1a1a1a; border-color: #2a2a2a; }
+  [data-theme="dark"] .dropdown-item { color: #f0f0f0; }
+  [data-theme="dark"] .dropdown-item:hover { background: #222; }
+  [data-theme="dark"] .theme-toggle { background: #1a1a1a; border-color: #333; }
+  [data-theme="dark"] .nav-profile-btn { background: #1a1a1a; border-color: #333; }
+
+  /* =============================================
+     HERO — DOCUMENT 3 EXACT
+     ============================================= */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 120px 40px 80px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--light);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray);
+    margin-bottom: 32px;
+    width: fit-content;
+  }
+  .hero-tag .dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
-    50%       { opacity: 0.5; transform: scale(1.3); }
-}
-.hero h1 {
-    font-family: var(--font-d); font-weight: 800;
-    font-size: clamp(42px, 7vw, 80px); line-height: 1.0;
-    letter-spacing: -2px; margin-bottom: 24px;
-    color: var(--text-primary);
-}
-.hero h1 .accent { color: var(--green); }
-.hero-sub {
-    font-size: clamp(16px, 2.5vw, 20px); color: var(--text-secondary);
-    font-weight: 300; max-width: 500px; line-height: 1.6; margin-bottom: 48px;
-}
-.hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-.btn-hero {
-    background: var(--green); color: #fff; border: none;
-    padding: 16px 36px; border-radius: 100px;
-    font-family: var(--font-b); font-size: 16px; font-weight: 500;
-    cursor: pointer; text-decoration: none;
-    display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
-}
-.btn-hero:hover { background: var(--green-dk); transform: translateY(-1px); }
-.btn-hero svg { transition: transform 0.2s; }
-.btn-hero:hover svg { transform: translateX(3px); }
-.btn-ghost {
-    color: var(--text-secondary); font-size: 14px; font-weight: 500;
-    text-decoration: none; display: flex; align-items: center; gap: 6px; transition: color .18s;
-}
-.btn-ghost:hover { color: var(--text-primary); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+  h1 {
+    font-family: var(--font-d);
+    font-weight: 800;
+    font-size: clamp(42px, 7vw, 80px);
+    line-height: 1.0;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+  }
+  h1 .accent { color: var(--green); }
+  .hero-sub {
+    font-size: clamp(16px, 2.5vw, 20px);
+    color: var(--gray);
+    font-weight: 300;
+    max-width: 500px;
+    line-height: 1.6;
+    margin-bottom: 48px;
+  }
+  .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+  .btn-hero {
+    background: var(--green);
+    color: var(--white);
+    border: none;
+    padding: 16px 36px;
+    border-radius: 100px;
+    font-family: var(--font-b);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-hero:hover { background: var(--green-dk); transform: translateY(-1px); }
+  .btn-hero svg { transition: transform 0.2s; }
+  .btn-hero:hover svg { transform: translateX(3px); }
+  .btn-ghost {
+    color: var(--gray);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color .18s;
+  }
+  .btn-ghost:hover { color: var(--dark); }
 
-/* =============================================
-   PROOF BAR
-   ============================================= */
+  /* =============================================
+     PROOF BAR — DOCUMENT 3 EXACT
+     ============================================= */
+
 .proof-bar {
-    border-top: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-    background: var(--bg-page);
-    padding: 24px 40px; display: flex; align-items: center;
-    gap: 48px; overflow-x: auto; scrollbar-width: none;
-}
-.proof-bar::-webkit-scrollbar { display: none; }
-.proof-item { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
-.proof-num {
-    font-family: var(--font-d); font-weight: 800;
-    font-size: 28px; letter-spacing: -1px; color: var(--text-primary);
-}
-.proof-label { font-size: 13px; color: var(--text-secondary); }
-
-/* =============================================
-   SECTIONS — SHARED
-   ============================================= */
-.section { padding: 100px 40px; background: var(--bg-page); }
-.section-label {
-    font-size: 11px; font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--green); margin-bottom: 16px;
-}
-.section-title {
-    font-family: var(--font-d); font-weight: 700;
-    font-size: clamp(28px, 4vw, 48px); letter-spacing: -1.5px;
-    margin-bottom: 64px; color: var(--text-primary);
+  display: flex;
+  overflow: hidden; /* Hide the scrollbar */
+  white-space: nowrap;
+  gap: 48px;
+  /* border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border); */
+  padding: 24px 40px;
 }
 
-/* =============================================
-   HOW IT WORKS — STEPS
-   ============================================= */
-.steps {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 2px; background: var(--border-color);
-    border: 1px solid var(--border-color);
+/* The animation movement */
+@keyframes scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); } /* Moves halfway through the doubled content */
 }
-.step {
-    background: var(--bg-surface); padding: 40px 32px;
-    position: relative; transition: background .2s;
-}
-.step:hover { background: var(--bg-subtle); }
-.step-num {
-    font-family: var(--font-d); font-weight: 800; font-size: 48px;
-    color: var(--border-color); line-height: 1; margin-bottom: 16px;
-}
-.step-icon {
-    width: 44px; height: 44px; background: var(--text-primary);
-    border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px; transition: background .2s;
-}
-.step:hover .step-icon { background: var(--green); }
-.step h3 { font-family: var(--font-d); font-weight: 700; font-size: 18px; margin-bottom: 8px; color: var(--text-primary); }
-.step p  { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
 
-/* =============================================
-   BENEFITS GRID
-   ============================================= */
-.benefits-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px; margin-top: 48px;
+.scrolling-inner {
+  display: flex;
+  gap: 48px;
+  animation: scroll 20s linear infinite; /* Adjust '20s' to change speed */
 }
-.benefit-card {
-    border: 1px solid var(--border-color); padding: 32px;
-    border-radius: 16px; background: var(--bg-surface);
+
+/* Pause on hover so users can read */
+.proof-bar:hover .scrolling-inner {
+  animation-play-state: paused;
+}
+  .proof-bar::-webkit-scrollbar { display: none; }
+  .proof-item { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+  .proof-num {
+    font-family: var(--font-d);
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -1px;
+  }
+  .proof-label { font-size: 13px; color: var(--gray); }
+
+  /* =============================================
+     HOW IT WORKS — DOCUMENT 3 EXACT
+     ============================================= */
+  .section { padding: 100px 40px; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: var(--font-d);
+    font-weight: 700;
+    font-size: clamp(28px, 4vw, 48px);
+    letter-spacing: -1.5px;
+    margin-bottom: 64px;
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2px;
+    background: var(--border);
+    border: 1px solid var(--border);
+  }
+  .step {
+    background: var(--white);
+    padding: 40px 32px;
+    position: relative;
+    transition: background .2s;
+  }
+  .step:hover { background: var(--light); }
+  .step-num {
+    font-family: var(--font-d);
+    font-weight: 800;
+    font-size: 48px;
+    color: var(--light);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  .step:hover .step-num { color: #ddd; }
+  .step-icon {
+    width: 44px; height: 44px;
+    background: var(--dark);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    transition: background .2s;
+  }
+  .step:hover .step-icon { background: var(--green); }
+  .step h3 {
+    font-family: var(--font-d);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .step p { font-size: 14px; color: var(--gray); line-height: 1.6; }
+
+  /* =============================================
+     BENEFITS — DOCUMENT 3 EXACT
+     ============================================= */
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 48px;
+  }
+  .benefit-card {
+    border: 1px solid var(--border);
+    padding: 32px;
+    border-radius: 16px;
     transition: border-color 0.2s, transform 0.2s;
-}
-.benefit-card:hover { border-color: var(--green); transform: translateY(-2px); }
-.benefit-icon { font-size: 28px; margin-bottom: 16px; display: block; }
-.benefit-card h3 { font-family: var(--font-d); font-weight: 700; font-size: 18px; margin-bottom: 8px; color: var(--text-primary); }
-.benefit-card p  { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+  }
+  .benefit-card:hover { border-color: var(--green); transform: translateY(-2px); }
+  .benefit-icon { font-size: 28px; margin-bottom: 16px; display: block; }
+  .benefit-card h3 {
+    font-family: var(--font-d);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 8px;
+  }
+  .benefit-card p { font-size: 14px; color: var(--gray); line-height: 1.6; }
 
-/* =============================================
-   LIVE SELLERS
-   ============================================= */
-.sellers-section { background: var(--bg-subtle); padding: 100px 40px; }
-.sellers-inner { max-width: 1000px; margin: 0 auto; }
-.sellers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
-.seller-card {
-    background: var(--bg-surface); border: 1px solid var(--border-color);
+  /* =============================================
+     LIVE SELLERS GRID — new, matches Doc 3 style
+     ============================================= */
+  .sellers-section { background: var(--light); padding: 100px 40px; }
+  .sellers-inner { max-width: 1000px; margin: 0 auto; }
+  .sellers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  .seller-card {
+    background: var(--white); border: 1px solid var(--border);
     border-radius: 14px; overflow: hidden;
     transition: transform .2s, box-shadow .2s, border-color .2s;
     text-decoration: none; color: inherit; display: block;
-}
-.seller-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); border-color: var(--text-secondary); }
-.seller-card-img { height: 90px; position: relative; overflow: hidden; }
-.seller-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.seller-fallback {
-    width: 100%; height: 100%; background: var(--text-primary);
+  }
+  .seller-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); border-color: #ccc; }
+  .seller-card-img { height: 90px; position: relative; overflow: hidden; }
+  .seller-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .seller-fallback {
+    width: 100%; height: 100%; background: var(--dark);
     display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-d); font-weight: 800; font-size: 36px; color: var(--bg-page);
-}
-.seller-featured-badge {
-    position: absolute; top: 8px; left: 8px; background: var(--green); color: #fff;
+    font-family: var(--font-d); font-weight: 800; font-size: 36px; color: var(--white);
+  }
+  .seller-featured-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: var(--green); color: var(--white);
     font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
-}
-.seller-card-body { padding: 12px 14px 14px; }
-.seller-card-name {
+  }
+  .seller-card-body { padding: 12px 14px 14px; }
+  .seller-card-name {
     font-family: var(--font-d); font-weight: 700; font-size: 14px;
     margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    color: var(--text-primary);
-}
-.seller-card-cat { font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
-.seller-card-count {
+  }
+  .seller-card-cat { font-size: 11px; color: var(--gray-lt); margin-bottom: 8px; }
+  .seller-card-count {
     display: inline-flex; align-items: center; gap: 4px;
-    background: var(--bg-subtle); border-radius: 100px;
-    padding: 3px 9px; font-size: 11px; font-weight: 600; color: var(--text-secondary);
-}
-.sellers-sub-label {
+    background: var(--light); border-radius: 100px;
+    padding: 3px 9px; font-size: 11px; font-weight: 600; color: var(--gray);
+  }
+  .sellers-sub-label {
     font-size: 11px; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
-}
+    text-transform: uppercase; color: var(--gray-lt); margin-bottom: 14px;
+  }
 
-/* =============================================
-   DEMO / PHONE MOCKUP
-   ============================================= */
-.demo-section { background: var(--bg-subtle); padding: 100px 40px; }
-.demo-container { max-width: 1000px; margin: 0 auto; }
-.demo-phone {
-    width: 280px; background: var(--bg-surface);
-    border-radius: 32px; box-shadow: 0 40px 80px rgba(0,0,0,0.15);
-    overflow: hidden; border: 2px solid var(--border-color);
-    margin: 48px auto 0; animation: float 4s ease-in-out infinite;
-}
-@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-.phone-header { background: var(--green); padding: 20px 20px 16px; color: #fff; }
-.phone-header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-.phone-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.3); border-radius: 50%; }
-.phone-name   { font-weight: 600; font-size: 15px; }
-.phone-status { font-size: 12px; opacity: 0.8; }
-.phone-products { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.phone-product { background: var(--bg-subtle); border-radius: 10px; overflow: hidden; }
-.phone-img { height: 90px; background: var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 28px; }
-.phone-info { padding: 8px; }
-.phone-info-name  { font-size: 11px; font-weight: 600; color: var(--text-primary); }
-.phone-info-price { font-size: 11px; color: var(--green); font-weight: 700; margin-top: 2px; }
-.phone-order-btn {
-    margin: 0 16px 16px; background: var(--green); color: #fff;
+  /* =============================================
+     DEMO MOCKUP — DOCUMENT 3 EXACT
+     ============================================= */
+  .demo-section { background: var(--light); padding: 100px 40px; }
+  .demo-container { max-width: 1000px; margin: 0 auto; }
+  .demo-phone {
+    width: 280px;
+    background: var(--white);
+    border-radius: 32px;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.12);
+    overflow: hidden;
+    border: 2px solid var(--border);
+    margin: 48px auto 0;
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  .phone-header { background: var(--green); padding: 20px 20px 16px; color: var(--white); }
+  .phone-header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+  .phone-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.3); border-radius: 50%; }
+  .phone-name { font-weight: 600; font-size: 15px; }
+  .phone-status { font-size: 12px; opacity: 0.8; }
+  .phone-products { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .phone-product { background: var(--light); border-radius: 10px; overflow: hidden; }
+  .phone-img { height: 90px; background: linear-gradient(135deg, #e0e0e0, #c8c8c8); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .phone-info { padding: 8px; }
+  .phone-info-name { font-size: 11px; font-weight: 600; color: var(--dark); }
+  .phone-info-price { font-size: 11px; color: var(--green); font-weight: 700; margin-top: 2px; }
+  .phone-order-btn {
+    margin: 0 16px 16px; background: var(--green); color: var(--white);
     padding: 10px; border-radius: 8px; text-align: center;
     font-size: 13px; font-weight: 600;
     display: flex; align-items: center; justify-content: center; gap: 6px;
-}
+  }
 
-/* =============================================
-   CTA SECTION
-   ============================================= */
-.cta-section {
-    padding: 120px 40px; text-align: center;
-    background: var(--text-primary); color: var(--bg-page);
+  /* =============================================
+     CTA — DOCUMENT 3 EXACT
+     ============================================= */
+  .cta-section {
+    padding: 120px 40px;
+    text-align: center;
+    background: var(--dark);
+    color: var(--white);
     position: relative; overflow: hidden;
-}
-/* Subtle grid overlay */
-.cta-section::before {
+  }
+  /* subtle grid overlay */
+  .cta-section::before {
     content: ''; position: absolute; inset: 0;
     background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
                       linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
     background-size: 48px 48px;
-}
-.cta-section > * { position: relative; z-index: 1; }
-.cta-section .section-label { color: var(--green); }
-.cta-section h2 {
-    font-family: var(--font-d); font-weight: 800;
-    font-size: clamp(32px, 6vw, 64px); letter-spacing: -2px; margin-bottom: 20px;
-    color: var(--bg-page);
-}
-.cta-section p { color: rgba(255,255,255,0.5); font-size: 18px; margin-bottom: 48px; }
-/* In dark mode, CTA stays inverted (light text on dark bg) */
-[data-theme="dark"] .cta-section { background: #0A0A0A; }
-[data-theme="dark"] .cta-section h2  { color: #f0f0f0; }
-[data-theme="dark"] .cta-section::before {
-    background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-}
+  }
+  .cta-section > * { position: relative; z-index: 1; }
+  .cta-section .section-label { color: var(--green); }
+  .cta-section h2 {
+    font-family: var(--font-d);
+    font-weight: 800;
+    font-size: clamp(32px, 6vw, 64px);
+    letter-spacing: -2px;
+    margin-bottom: 20px;
+  }
+  .cta-section p { color: rgba(255,255,255,0.5); font-size: 18px; margin-bottom: 48px; }
 
-/* =============================================
-   FAQ
-   ============================================= */
-.faq-section { padding: 100px 40px; background: var(--bg-page); }
-.faq-inner { max-width: 760px; margin: 0 auto; }
-.faq-subtitle { font-size: 16px; color: var(--text-secondary); font-weight: 300; margin-bottom: 52px; }
+  /* =============================================
+     FAQ — styled to match Document 3 system
+     ============================================= */
+  .faq-section { padding: 100px 40px; background: var(--white); }
+  .faq-inner { max-width: 760px; margin: 0 auto; }
+  .faq-section .section-title { margin-bottom: 8px; }
+  .faq-subtitle { font-size: 16px; color: var(--gray); font-weight: 300; margin-bottom: 52px; }
 
-.faq-list { border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; }
-.faq-item { border-bottom: 1px solid var(--border-color); }
-.faq-item:last-child { border-bottom: none; }
+  .faq-list {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .faq-item { border-bottom: 1px solid var(--border); }
+  .faq-item:last-child { border-bottom: none; }
 
-.faq-question {
+  .faq-question {
     width: 100%; background: none; border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; padding: 24px 28px; text-align: left; transition: background .18s;
-}
-.faq-question:hover { background: var(--bg-subtle); }
-.faq-question span { font-family: var(--font-d); font-weight: 600; font-size: 16px; color: var(--text-primary); line-height: 1.4; }
-.faq-icon { flex-shrink: 0; color: var(--text-secondary); transition: transform .3s ease, color .18s; }
-.faq-item.open .faq-icon { transform: rotate(180deg); color: var(--green); }
-.faq-item.open .faq-question { background: var(--bg-subtle); }
-.faq-item.open .faq-question span { color: var(--green); }
+    gap: 16px; padding: 24px 28px; text-align: left;
+    transition: background .18s;
+  }
+  .faq-question:hover { background: var(--light); }
+  .faq-question span {
+    font-family: var(--font-d); font-weight: 600; font-size: 16px;
+    color: var(--dark); line-height: 1.4;
+  }
+  .faq-icon {
+    flex-shrink: 0; color: var(--gray);
+    transition: transform .3s ease, color .18s;
+  }
+  .faq-item.open .faq-icon { transform: rotate(180deg); color: var(--green); }
+  .faq-item.open .faq-question { background: var(--light); }
+  .faq-item.open .faq-question span { color: var(--green); }
 
-.faq-answer { max-height: 0; overflow: hidden; transition: max-height .35s ease; background: var(--bg-subtle); }
-.faq-item.open .faq-answer { max-height: 300px; }
-.faq-answer p { padding: 0 28px 24px; font-size: 15px; color: var(--text-secondary); line-height: 1.7; font-weight: 400; }
+  .faq-answer {
+    max-height: 0; overflow: hidden;
+    transition: max-height .35s ease;
+    background: var(--light);
+  }
+  .faq-item.open .faq-answer { max-height: 300px; }
+  .faq-answer p {
+    padding: 0 28px 24px;
+    font-size: 15px; color: var(--gray); line-height: 1.7; font-weight: 400;
+  }
 
-/* =============================================
-   FOOTER
-   ============================================= */
-footer {
-    background: #0A0A0A;
-    color: #ffffff;
+  /* =============================================
+     FOOTER — professional dark, matches Doc 3
+     ============================================= */
+  footer {
+    background: var(--dark);
+    color: var(--white);
     padding: 64px 40px 32px;
-}
-/* Dark mode footer stays the same dark — already dark */
-.footer-inner { max-width: 1200px; margin: 0 auto; }
-.footer-top {
-    display: grid; grid-template-columns: 1.6fr repeat(3, 1fr);
-    gap: 48px; padding-bottom: 48px;
+  }
+  .footer-inner { max-width: 1200px; margin: 0 auto; }
+
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1.6fr repeat(3, 1fr);
+    gap: 48px;
+    padding-bottom: 48px;
     border-bottom: 1px solid rgba(255,255,255,.08);
-}
-.footer-logo {
+  }
+
+  .footer-logo {
     font-family: var(--font-d); font-weight: 800; font-size: 20px;
-    color: #ffffff; letter-spacing: -.5px;
+    color: var(--white); letter-spacing: -.5px;
     display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
     text-decoration: none;
-}
-.footer-logo-icon {
+  }
+  .footer-logo-icon {
     width: 30px; height: 30px; background: var(--green); border-radius: 7px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 800; color: #fff; font-family: var(--font-d);
-}
-.footer-logo-text span { color: var(--green); }
-.footer-tagline { font-size: 13px; color: rgba(255,255,255,.4); line-height: 1.7; max-width: 240px; margin-bottom: 24px; }
-.footer-socials { display: flex; gap: 10px; }
-.social-icon {
+    font-size: 14px; font-weight: 800; color: var(--white); font-family: var(--font-d);
+  }
+  .footer-logo-text span { color: var(--green); }
+  .footer-tagline {
+    font-size: 13px; color: rgba(255,255,255,.4);
+    line-height: 1.7; max-width: 240px; margin-bottom: 24px;
+  }
+
+  /* Social icons */
+  .footer-socials { display: flex; gap: 10px; }
+  .social-icon {
     width: 36px; height: 36px;
-    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
-    border-radius: 8px; display: flex; align-items: center; justify-content: center;
-    text-decoration: none; color: rgba(255,255,255,.5); transition: all .18s;
-}
-.social-icon:hover { background: var(--green); border-color: var(--green); color: #fff; transform: translateY(-2px); }
-.footer-col h4 {
+    background: rgba(255,255,255,.07);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; color: rgba(255,255,255,.5);
+    transition: all .18s;
+  }
+  .social-icon:hover { background: var(--green); border-color: var(--green); color: var(--white); transform: translateY(-2px); }
+
+  /* Footer link columns */
+  .footer-col h4 {
     font-family: var(--font-d); font-weight: 700; font-size: 12px;
-    color: #fff; letter-spacing: 1.5px; margin-bottom: 18px;
+    color: var(--white); letter-spacing: 1.5px; margin-bottom: 18px;
     text-transform: uppercase; opacity: .7;
-}
-.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.footer-col ul li a { font-size: 14px; color: rgba(255,255,255,.4); text-decoration: none; transition: color .18s; }
-.footer-col ul li a:hover { color: #fff; }
-.footer-bottom {
+  }
+  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col ul li a {
+    font-size: 14px; color: rgba(255,255,255,.4);
+    text-decoration: none; transition: color .18s;
+  }
+  .footer-col ul li a:hover { color: var(--white); }
+
+  /* Footer bottom */
+  .footer-bottom {
     display: flex; align-items: center; justify-content: space-between;
     flex-wrap: wrap; gap: 12px; padding-top: 28px;
-}
-.footer-bottom p { font-size: 13px; color: rgba(255,255,255,.3); }
+  }
+  .footer-bottom p { font-size: 13px; color: rgba(255,255,255,.3); }
 
-/* =============================================
-   FADE-IN ANIMATION
-   ============================================= */
-.fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
-.fade-in.visible { opacity: 1; transform: translateY(0); }
+  /* =============================================
+     FADE IN — DOCUMENT 3 EXACT
+     ============================================= */
+  .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
 
-/* =============================================
-   RESPONSIVE
-   ============================================= */
-@media (max-width: 768px) {
-    .hero        { padding: 80px 20px 60px; }
-    .proof-bar   { padding: 20px; gap: 24px; }
-    .section     { padding: 60px 20px; }
+  /* =============================================
+     RESPONSIVE
+     ============================================= */
+  @media (max-width: 768px) {
+    /* Nav mobile — Document 4 exact */
+    .container { padding: 0 20px; }
+    .mobile-menu-btn { display: flex; }
+    .nav-links {
+      display: none; position: fixed; top: 64px; left: 0; right: 0;
+      background: var(--white); border-bottom: 1px solid var(--border);
+      padding: 16px 20px 24px; flex-direction: column; align-items: stretch;
+      gap: 4px; box-shadow: var(--sh-md); z-index: 199;
+    }
+    .nav-links.active { display: flex; }
+    .nav-link { padding: 12px 16px; border-radius: var(--r-md); }
+    .btn { width: 100%; justify-content: center; margin-top: 8px; border-radius: var(--r-md); }
+    .nav-dropdown { width: 100%; }
+    .nav-profile-btn { width: 100%; justify-content: flex-start; border-radius: var(--r-md); padding: 10px 14px; }
+    .dropdown-menu { position: static; box-shadow: none; border: 1px solid var(--border); margin-top: 4px; opacity: 1; pointer-events: auto; transform: none; border-radius: var(--r-md); display: none; }
+    .dropdown-menu.active { display: block; }
+    .theme-toggle { display: none; }
+    [data-theme="dark"] .nav-links { background: #0f0f0f; border-color: #222; }
+
+    /* Page sections */
+    .hero { padding: 100px 20px 60px; min-height: 20vh; }
+    .proof-bar { padding: 20px; gap: 24px; }
+    .section { padding: 60px 20px; }
     .sellers-section { padding: 60px 20px; }
-    .demo-section    { padding: 60px 20px; }
-    .cta-section     { padding: 80px 20px; }
-    .faq-section     { padding: 60px 20px; }
-    .faq-question    { padding: 18px 20px; }
-    .faq-answer p    { padding: 0 20px 20px; }
+    .demo-section { padding: 60px 20px; }
+    .cta-section { padding: 80px 20px; }
+    .faq-section { padding: 60px 20px; }
+    .faq-question { padding: 18px 20px; }
+    .faq-answer p { padding: 0 20px 20px; }
     .faq-question span { font-size: 15px; }
+
+    /* Footer */
     footer { padding: 48px 20px 24px; }
     .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
     .footer-brand { grid-column: 1 / -1; }
     .sellers-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 480px) {
+  }
+  @media (max-width: 480px) {
     .footer-top { grid-template-columns: 1fr; }
     .footer-brand { grid-column: auto; }
     .sellers-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-}
+    .footer-socials { flex-wrap: wrap; }
+  }
 </style>
+
+
 {% endblock %}
 
 {% block content %}
 
+
 <!-- =============================================
-     HERO
+     HERO — DOCUMENT 3 EXACT
      ============================================= -->
 <section class="hero">
-    <div class="hero-tag"><span class="dot"></span> No payment. No coding. Just sell.</div>
-    <h1>Upload 50 Products<br><span class="accent">in 1 Click.</span></h1>
-    <p class="hero-sub">Turn your WhatsApp products into a permanent shop link. Share it. Sell it. Done.</p>
-    <div class="hero-actions">
-        {% if user.is_authenticated %}
-            <a href="{% url 'upload_product' %}" class="btn-hero">
-                Add Products
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-            <a href="/{{ user.slug }}" target="_blank" class="btn-ghost">View my store ↗</a>
-        {% else %}
-            <a href="{% url 'guest_upload' %}" class="btn-hero">
-                Start Uploading
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </a>
-            <a href="#how" class="btn-ghost">See how it works ↓</a>
-        {% endif %}
-    </div>
+  <div class="hero-tag"><span class="dot"></span> No payment. No coding. Just sell.</div>
+  <h1>Upload 50 Products<br><span class="accent">in 1 Click.</span></h1>
+  <p class="hero-sub">Turn your WhatsApp products into a permanent shop link. Share it. Sell it. Done.</p>
+  <div class="hero-actions">
+    {% if user.is_authenticated %}
+      <a href="{% url 'upload_product' %}" class="btn-hero">
+        Add Products
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="/{{ user.slug }}" target="_blank" class="btn-ghost">View my store ↗</a>
+      {% else %}
+        <a href="{% url 'guest_upload' %}" class="btn-hero">   {# was register #}
+          Start Uploading
+        </a>
+        <a href="#how" class="btn-ghost">See how it works ↓</a>
+      {% endif %}
+  </div>
 </section>
 
 
 <!-- =============================================
-     PROOF BAR
+     PROOF BAR — DOCUMENT 3 EXACT
      ============================================= -->
 <div class="proof-bar">
-    <div class="proof-item"><span class="proof-num">50+</span><span class="proof-label">Products<br>per upload</span></div>
-    <div class="proof-item"><span class="proof-num">0</span><span class="proof-label">Coding<br>required</span></div>
-    <div class="proof-item"><span class="proof-num">30s</span><span class="proof-label">To publish<br>your store</span></div>
-    <div class="proof-item"><span class="proof-num">100%</span><span class="proof-label">WhatsApp<br>friendly</span></div>
-    <div class="proof-item"><span class="proof-num">Free</span><span class="proof-label">Always<br>forever</span></div>
+  <div class="proof-item">
+    <span class="proof-num">50+</span>
+    <span class="proof-label">Products<br>per upload</span>
+  </div>
+  <div class="proof-item">
+    <span class="proof-num">0</span>
+    <span class="proof-label">Coding<br>required</span>
+  </div>
+  <div class="proof-item">
+    <span class="proof-num">30s</span>
+    <span class="proof-label">To publish<br>your store</span>
+  </div>
+  <div class="proof-item">
+    <span class="proof-num">100%</span>
+    <span class="proof-label">WhatsApp<br>friendly</span>
+  </div>
+  <div class="proof-item">
+    <span class="proof-num">Free</span>
+    <span class="proof-label">Always<br>forever</span>
+  </div>
 </div>
 
 
 <!-- =============================================
-     HOW IT WORKS
+     HOW IT WORKS — DOCUMENT 3 EXACT
      ============================================= -->
 <section class="section" id="how">
-    <div style="max-width:1000px;margin:0 auto;">
-        <p class="section-label">The Flow</p>
-        <h2 class="section-title">3 steps to your store</h2>
-        <div class="steps">
-            <div class="step fade-in">
-                <div class="step-num">01</div>
-                <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
-                <h3>Drag &amp; Drop</h3>
-                <p>Drop all your product photos at once. As many as you want. WhatsApp screenshots? Fine. Camera shots? Perfect.</p>
-            </div>
-            <div class="step fade-in">
-                <div class="step-num">02</div>
-                <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
-                <h3>Type Like WhatsApp</h3>
-                <p>Add descriptions naturally. "🔥 Black Ankara Gown – ₦18,000. DM to order." That's all. No forms.</p>
-            </div>
-            <div class="step fade-in">
-                <div class="step-num">03</div>
-                <div class="step-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
-                <h3>Get Your Store Link</h3>
-                <p>Hit Publish. Get <strong>vendopage.com/yourname</strong>. Share it on WhatsApp status, Instagram bio, everywhere.</p>
-            </div>
+  <div style="max-width: 1000px; margin: 0 auto;">
+    <p class="section-label">The Flow</p>
+    <h2 class="section-title">3 steps to your store</h2>
+    <div class="steps">
+      <div class="step fade-in">
+        <div class="step-num">01</div>
+        <div class="step-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
         </div>
+        <h3>Drag & Drop</h3>
+        <p>Drop all your product photos at once. As many as you want. WhatsApp screenshots? Fine. Camera shots? Perfect.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">02</div>
+        <div class="step-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </div>
+        <h3>Type Like WhatsApp</h3>
+        <p>Add descriptions naturally. "🔥 Black Ankara Gown – ₦18,000. DM to order." That's all. No forms.</p>
+      </div>
+      <div class="step fade-in">
+        <div class="step-num">03</div>
+        <div class="step-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </div>
+        <h3>Get Your Store Link</h3>
+        <p>Hit Publish. Get <strong>vendopage.com/yourname</strong>. Share it on WhatsApp status, Instagram bio, everywhere.</p>
+      </div>
     </div>
+  </div>
 </section>
 
 
 <!-- =============================================
-     BENEFITS
+     BENEFITS — DOCUMENT 3 EXACT
      ============================================= -->
-<section class="section" id="benefits" style="padding-top:0;">
-    <div style="max-width:1000px;margin:0 auto;">
-        <p class="section-label">Why Vendopage</p>
-        <h2 class="section-title">Built for how<br>vendors actually work</h2>
-        <div class="benefits-grid">
-            <div class="benefit-card fade-in"><span class="benefit-icon">📦</span><h3>Bulk Upload</h3><p>Stop posting one product at a time. Upload your whole catalogue in one go — 50 products in under a minute.</p></div>
-            <div class="benefit-card fade-in"><span class="benefit-icon">🔗</span><h3>Permanent Shop Link</h3><p>Your store lives forever at your personal link. No expiry. No disappearing statuses. Always on.</p></div>
-            <div class="benefit-card fade-in"><span class="benefit-icon">💬</span><h3>WhatsApp Orders</h3><p>Buyers click "Order on WhatsApp" and a message is pre-typed for them. Zero friction. More sales.</p></div>
-            <div class="benefit-card fade-in"><span class="benefit-icon">📱</span><h3>Mobile-First</h3><p>Built for phone vendors. Upload from your phone, manage from your phone. No laptop needed.</p></div>
-            <div class="benefit-card fade-in"><span class="benefit-icon">⚡</span><h3>Instant Setup</h3><p>No complicated forms. No payment integration. No technical skills. If you can send WhatsApp, you can use Vendopage.</p></div>
-            <div class="benefit-card fade-in"><span class="benefit-icon">✅</span><h3>Mark Sold Out</h3><p>Update your inventory with one tap. Mark items sold out, delete products, re-arrange — all from your dashboard.</p></div>
-        </div>
+<section class="section" id="benefits" style="padding-top: 0;">
+  <div style="max-width: 1000px; margin: 0 auto;">
+    <p class="section-label">Why Vendopage</p>
+    <h2 class="section-title">Built for how<br>vendors actually work</h2>
+    <div class="benefits-grid">
+      <div class="benefit-card fade-in">
+        <span class="benefit-icon">📦</span>
+        <h3>Bulk Upload</h3>
+        <p>Stop posting one product at a time. Upload your whole catalogue in one go — 50 products in under a minute.</p>
+      </div>
+      <div class="benefit-card fade-in">
+        <span class="benefit-icon">🔗</span>
+        <h3>Permanent Shop Link</h3>
+        <p>Your store lives forever at your personal link. No expiry. No disappearing statuses. Always on.</p>
+      </div>
+      <div class="benefit-card fade-in">
+        <span class="benefit-icon">💬</span>
+        <h3>WhatsApp Orders</h3>
+        <p>Buyers click "Order on WhatsApp" and a message is pre-typed for them. Zero friction. More sales.</p>
+      </div>
+      <div class="benefit-card fade-in">
+        <span class="benefit-icon">📱</span>
+        <h3>Mobile-First</h3>
+        <p>Built for phone vendors. Upload from your phone, manage from your phone. No laptop needed.</p>
+      </div>
+      <div class="benefit-card fade-in">
+        <span class="benefit-icon">⚡</span>
+        <h3>Instant Setup</h3>
+        <p>No complicated forms. No payment integration. No technical skills. If you can send WhatsApp, you can use Vendopage.</p>
+      </div>
+      <div class="benefit-card fade-in">
+        <span class="benefit-icon">✅</span>
+        <h3>Mark Sold Out</h3>
+        <p>Update your inventory with one tap. Mark items sold out, delete products, re-arrange — all from your dashboard.</p>
+      </div>
     </div>
+  </div>
 </section>
 
 
 <!-- =============================================
-     LIVE SELLERS
+     LIVE SELLERS — pulled from views.py home()
+     Only renders if sellers exist (5+ products)
      ============================================= -->
 {% if featured_sellers or sellers %}
 <section class="sellers-section" id="stores">
-    <div class="sellers-inner">
-        <p class="section-label fade-in">Live Stores</p>
-        <h2 class="section-title fade-in" style="margin-bottom:32px;">Vendors already<br>selling on Vendopage</h2>
+  <div class="sellers-inner">
+    <p class="section-label fade-in">Live Stores</p>
+    <h2 class="section-title fade-in" style="margin-bottom: 32px;">Vendors already<br>selling on Vendopage</h2>
 
-        {% if featured_sellers %}
-            <p class="sellers-sub-label">⭐ Featured</p>
-            <div class="sellers-grid" style="margin-bottom:40px;">
-                {% for seller in featured_sellers %}
-                <a href="{% url 'seller_page' seller.slug %}" class="seller-card">
-                    <div class="seller-card-img">
-                        {% if seller.profile_picture %}<img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
-                        {% else %}<div class="seller-fallback">{{ seller.business_name|first }}</div>{% endif %}
-                        <span class="seller-featured-badge">⭐ Featured</span>
-                    </div>
-                    <div class="seller-card-body">
-                        <div class="seller-card-name">{{ seller.business_name }}</div>
-                        <div class="seller-card-cat">{{ seller.get_category_display }}</div>
-                        <span class="seller-card-count">{{ seller.product_count }} products</span>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-        {% endif %}
+    {% if featured_sellers %}
+      <p class="sellers-sub-label">⭐ Featured</p>
+      <div class="sellers-grid" style="margin-bottom: 40px;">
+        {% for seller in featured_sellers %}
+        <a href="{% url 'seller_page' seller.slug %}" class="seller-card">
+          <div class="seller-card-img">
+            {% if seller.profile_picture %}
+              <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
+            {% else %}
+              <div class="seller-fallback">{{ seller.business_name|first }}</div>
+            {% endif %}
+            <span class="seller-featured-badge">⭐ Featured</span>
+          </div>
+          <div class="seller-card-body">
+            <div class="seller-card-name">{{ seller.business_name }}</div>
+            <div class="seller-card-cat">{{ seller.get_category_display }}</div>
+            <span class="seller-card-count">{{ seller.product_count }} products</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    {% endif %}
 
-        {% if sellers %}
-            {% if featured_sellers %}<p class="sellers-sub-label" style="margin-top:8px;">All Vendors</p>{% endif %}
-            <div class="sellers-grid">
-                {% for seller in sellers %}
-                <a href="{% url 'seller_page' seller.slug %}" class="seller-card">
-                    <div class="seller-card-img">
-                        {% if seller.profile_picture %}<img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
-                        {% else %}<div class="seller-fallback">{{ seller.business_name|first }}</div>{% endif %}
-                    </div>
-                    <div class="seller-card-body">
-                        <div class="seller-card-name">{{ seller.business_name }}</div>
-                        <div class="seller-card-cat">{{ seller.get_category_display }}</div>
-                        <span class="seller-card-count">{{ seller.product_count }} products</span>
-                    </div>
-                </a>
-                {% endfor %}
-            </div>
-        {% endif %}
-    </div>
+    {% if sellers %}
+      {% if featured_sellers %}<p class="sellers-sub-label" style="margin-top: 8px;">All Vendors</p>{% endif %}
+      <div class="sellers-grid">
+        {% for seller in sellers %}
+        <a href="{% url 'seller_page' seller.slug %}" class="seller-card">
+          <div class="seller-card-img">
+            {% if seller.profile_picture %}
+              <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
+            {% else %}
+              <div class="seller-fallback">{{ seller.business_name|first }}</div>
+            {% endif %}
+          </div>
+          <div class="seller-card-body">
+            <div class="seller-card-name">{{ seller.business_name }}</div>
+            <div class="seller-card-cat">{{ seller.get_category_display }}</div>
+            <span class="seller-card-count">{{ seller.product_count }} products</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
 </section>
 {% endif %}
 
 
 <!-- =============================================
-     DEMO MOCKUP
+     DEMO MOCKUP — DOCUMENT 3 EXACT
      ============================================= -->
 <div class="demo-section">
-    <div class="demo-container">
-        <div style="text-align:center;">
-            <p class="section-label">Live Preview</p>
-            <h2 class="section-title" style="margin-bottom:0;">What your buyers see</h2>
-            <p style="color:var(--text-secondary);margin-top:8px;">A clean store they can scroll and order from instantly</p>
-        </div>
-        <div class="demo-phone">
-            <div class="phone-header">
-                <div class="phone-header-top">
-                    <div class="phone-avatar"></div>
-                    <div>
-                        <div class="phone-name">Chioma Fashion 💃</div>
-                        <div class="phone-status">vendopage.com/chioma-fashion</div>
-                    </div>
-                </div>
-            </div>
-            <div class="phone-products">
-                <div class="phone-product"><div class="phone-img">👗</div><div class="phone-info"><div class="phone-info-name">Ankara Gown</div><div class="phone-info-price">₦18,000</div></div></div>
-                <div class="phone-product"><div class="phone-img">👜</div><div class="phone-info"><div class="phone-info-name">Leather Bag</div><div class="phone-info-price">₦12,500</div></div></div>
-                <div class="phone-product"><div class="phone-img">👠</div><div class="phone-info"><div class="phone-info-name">Block Heels</div><div class="phone-info-price">₦9,000</div></div></div>
-                <div class="phone-product"><div class="phone-img">💍</div><div class="phone-info"><div class="phone-info-name">Gold Set</div><div class="phone-info-price">₦7,000</div></div></div>
-            </div>
-            <div class="phone-order-btn">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.5 2C6.262 2 2 6.262 2 11.5c0 1.888.549 3.647 1.49 5.135L2 22l5.545-1.46A9.453 9.453 0 0011.5 21c5.238 0 9.5-4.262 9.5-9.5S16.738 2 11.5 2z"/></svg>
-                Order on WhatsApp
-            </div>
-        </div>
+  <div class="demo-container">
+    <div style="text-align: center;">
+      <p class="section-label">Live Preview</p>
+      <h2 class="section-title" style="margin-bottom: 0;">What your buyers see</h2>
+      <p style="color: var(--gray); margin-top: 8px;">A clean store they can scroll and order from instantly</p>
     </div>
+    <div class="demo-phone">
+      <div class="phone-header">
+        <div class="phone-header-top">
+          <div class="phone-avatar"></div>
+          <div>
+            <div class="phone-name">Chioma Fashion 💃</div>
+            <div class="phone-status">vendopage.com/chioma-fashion</div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-products">
+        <div class="phone-product"><div class="phone-img">👗</div><div class="phone-info"><div class="phone-info-name">Ankara Gown</div><div class="phone-info-price">₦18,000</div></div></div>
+        <div class="phone-product"><div class="phone-img">👜</div><div class="phone-info"><div class="phone-info-name">Leather Bag</div><div class="phone-info-price">₦12,500</div></div></div>
+        <div class="phone-product"><div class="phone-img">👠</div><div class="phone-info"><div class="phone-info-name">Block Heels</div><div class="phone-info-price">₦9,000</div></div></div>
+        <div class="phone-product"><div class="phone-img">💍</div><div class="phone-info"><div class="phone-info-name">Gold Set</div><div class="phone-info-price">₦7,000</div></div></div>
+      </div>
+      <div class="phone-order-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.5 2C6.262 2 2 6.262 2 11.5c0 1.888.549 3.647 1.49 5.135L2 22l5.545-1.46A9.453 9.453 0 0011.5 21c5.238 0 9.5-4.262 9.5-9.5S16.738 2 11.5 2z"/></svg>
+        Order on WhatsApp
+      </div>
+    </div>
+  </div>
 </div>
 
 
 <!-- =============================================
-     CTA
+     CTA — DOCUMENT 3 EXACT
      ============================================= -->
 <section class="cta-section">
-    <p class="section-label">Get Started Free</p>
-    <h2>Your store.<br>Live in 30 seconds.</h2>
-    <p>No payment. No setup. No stress.</p>
-    {% if user.is_authenticated %}
-        <a href="{% url 'upload_product' %}" class="btn-hero" style="margin:0 auto;display:inline-flex;">
-            Add More Products
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-    {% else %}
-        <a href="{% url 'register' %}" class="btn-hero" style="margin:0 auto;display:inline-flex;">
-            Create My Store Free
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </a>
-    {% endif %}
+  <p class="section-label">Get Started Free</p>
+  <h2>Your store.<br>Live in 30 seconds.</h2>
+  <p>No payment. No setup. No stress.</p>
+  {% if user.is_authenticated %}
+    <a href="{% url 'upload_product' %}" class="btn-hero" style="margin: 0 auto; display: inline-flex;">
+      Add More Products
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  {% else %}
+    <a href="{% url 'register' %}" class="btn-hero" style="margin: 0 auto; display: inline-flex;">
+      Create My Store Free
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+  {% endif %}
 </section>
 
 
 <!-- =============================================
-     FAQ
+     FAQ — your exact structure, Doc 3 styles
      ============================================= -->
 <section class="faq-section" id="faq">
-    <div class="faq-inner">
-        <p class="section-label">Got Questions</p>
-        <h2 class="section-title">Frequently Asked<br>Questions</h2>
-        <p class="faq-subtitle">Everything you need to know before you start selling</p>
-        <div class="faq-list">
-            <div class="faq-item">
-                <button class="faq-question"><span>Is VendoPage really free?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-                <div class="faq-answer"><p>Yes! We offer a free forever plan with all essential features. You can create your catalog, add unlimited products, and start selling immediately without paying a cent.</p></div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question"><span>Do I need technical skills to use VendoPage?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-                <div class="faq-answer"><p>Not at all! VendoPage is designed for everyone. If you can use WhatsApp, you can use VendoPage. Just upload photos, add descriptions, and you're ready to sell.</p></div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question"><span>How do customers purchase products?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-                <div class="faq-answer"><p>Customers browse your catalog on VendoPage, then click the WhatsApp button to message you directly. You handle the sale through WhatsApp as usual.</p></div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question"><span>Can I customize my catalog page?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-                <div class="faq-answer"><p>Absolutely! Add your profile photo, write your bio, and organize your products however you like. Your store link stays the same — <strong>vendopage.com/yourname</strong> — forever.</p></div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question"><span>What types of businesses can use VendoPage?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-                <div class="faq-answer"><p>VendoPage works for any business! Fashion, electronics, beauty, food, handmade items, services — if you're selling online, VendoPage is for you.</p></div>
-            </div>
-            <div class="faq-item">
-                <button class="faq-question"><span>Will my store link ever expire?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-                <div class="faq-answer"><p>Never. Unlike WhatsApp Status that disappears in 24 hours, your Vendopage store link is permanent. Share it once and your customers can always find your products.</p></div>
-            </div>
+  <div class="faq-inner">
+    <p class="section-label">Got Questions</p>
+    <h2 class="section-title">Frequently Asked<br>Questions</h2>
+    <p class="faq-subtitle">Everything you need to know before you start selling</p>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>Is VendoPage really free?</span>
+          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>Yes! We offer a free forever plan with all essential features. You can create your catalog, add unlimited products, and start selling immediately without paying a cent.</p>
         </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>Do I need technical skills to use VendoPage?</span>
+          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>Not at all! VendoPage is designed for everyone. If you can use WhatsApp, you can use VendoPage. Just upload photos, add descriptions, and you're ready to sell.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>How do customers purchase products?</span>
+          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>Customers browse your catalog on VendoPage, then click the WhatsApp button to message you directly about products they're interested in. You handle the sale through WhatsApp as usual.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>Can I customize my catalog page?</span>
+          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>Absolutely! Add your profile photo, write your bio, and organize your products however you like. Your store link stays the same — <strong>vendopage.com/yourname</strong> — forever.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>What types of businesses can use VendoPage?</span>
+          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>VendoPage works for any business! Fashion, electronics, beauty products, food, handmade items, services — if you're selling online, VendoPage is for you.</p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>Will my store link ever expire?</span>
+          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="faq-answer">
+          <p>Never. Unlike WhatsApp Status that disappears in 24 hours, your Vendopage store link is permanent. Share it once and your customers can always find your products.</p>
+        </div>
+      </div>
     </div>
+  </div>
 </section>
 
 
-<!-- =============================================
-     FOOTER
-     ============================================= -->
 <footer>
-    <div class="footer-inner">
-        <div class="footer-top">
-            <div class="footer-brand">
-                <a href="{% url 'home' %}" class="footer-logo">
-                    <div class="footer-logo-icon">V</div>
-                    <span class="footer-logo-text">Vendo<span>page</span></span>
-                </a>
-                <p class="footer-tagline">The permanent product catalog built for WhatsApp vendors across Nigeria and Africa.</p>
-                <div class="footer-socials">
-                    <a href="https://wa.me/2348000000000" target="_blank" rel="noopener" class="social-icon" aria-label="WhatsApp"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></a>
-                    <a href="https://instagram.com/vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
-                    <a href="https://twitter.com/vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="Twitter"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-                    <a href="https://tiktok.com/@vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="TikTok"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg></a>
-                    <a href="https://facebook.com/vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook"><svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-                </div>
-            </div>
-            <div class="footer-col">
-                <h4>Product</h4>
-                <ul>
-                    <li><a href="#how">How it works</a></li>
-                    <li><a href="#benefits">Benefits</a></li>
-                    <li><a href="#faq">FAQ</a></li>
-                    <li><a href="{% url 'register' %}">Get Started Free</a></li>
-                    {% if user.is_authenticated %}
-                        <li><a href="{% url 'upload_product' %}">Upload Products</a></li>
-                        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                    {% endif %}
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>Company</h4>
-                <ul>
-                    <li><a href="{% url 'about' %}">About Us</a></li>
-                    <li><a href="{% url 'contact' %}">Contact</a></li>
-                    <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
-                    <li><a href="{% url 'terms' %}">Terms of Service</a></li>
-                </ul>
-            </div>
-            <div class="footer-col">
-                <h4>Account</h4>
-                <ul>
-                    {% if user.is_authenticated %}
-                        <li><a href="/{{ user.slug }}" target="_blank">My Store ↗</a></li>
-                        <li><a href="{% url 'settings' %}">Settings</a></li>
-                        <li><a href="{% url 'subscription' %}">Subscription</a></li>
-                        <li><a href="{% url 'logout' %}">Logout</a></li>
-                    {% else %}
-                        <li><a href="{% url 'login' %}">Sign In</a></li>
-                        <li><a href="{% url 'register' %}">Create Account</a></li>
-                        <li><a href="{% url 'forgot_password' %}">Forgot Password</a></li>
-                    {% endif %}
-                </ul>
-            </div>
+  <div class="footer-inner">
+    <div class="footer-top">
+
+      <!-- Brand column -->
+      <div class="footer-brand">
+        <a href="{% url 'home' %}" class="footer-logo">
+          <div class="footer-logo-icon">V</div>
+          <span class="footer-logo-text">Vendo<span>page</span></span>
+        </a>
+        <p class="footer-tagline">The permanent product catalog built for WhatsApp vendors across Nigeria and Africa.</p>
+        <div class="footer-socials">
+          <!-- WhatsApp -->
+          <a href="https://wa.me/2348000000000" target="_blank" rel="noopener" class="social-icon" aria-label="WhatsApp">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          </a>
+          <!-- Instagram -->
+          <a href="https://instagram.com/vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+          <!-- Twitter / X -->
+          <a href="https://twitter.com/vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="Twitter / X">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <!-- TikTok -->
+          <a href="https://tiktok.com/@vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="TikTok">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
+          </a>
+          <!-- Facebook -->
+          <a href="https://facebook.com/vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
         </div>
-        <div class="footer-bottom">
-            <p>© {% now "Y" %} Vendopage. Built for Nigerian vendors. Powered by hustle. 🇳🇬</p>
-            <p>Made with ❤️ in Nigeria</p>
-        </div>
+      </div>
+
+      <!-- Product links -->
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="#benefits">Benefits</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="{% url 'register' %}">Get Started Free</a></li>
+          {% if user.is_authenticated %}
+            <li><a href="{% url 'upload_product' %}">Upload Products</a></li>
+            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- Company links -->
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="{% url 'about' %}">About Us</a></li>
+          <li><a href="{% url 'contact' %}">Contact</a></li>
+          <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
+          <li><a href="{% url 'terms' %}">Terms of Service</a></li>
+        </ul>
+      </div>
+
+      <!-- Account links -->
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          {% if user.is_authenticated %}
+            <li><a href="/{{ user.slug }}" target="_blank">My Store ↗</a></li>
+            <li><a href="{% url 'settings' %}">Settings</a></li>
+            <li><a href="{% url 'subscription' %}">Subscription</a></li>
+            <li><a href="{% url 'logout' %}">Logout</a></li>
+          {% else %}
+            <li><a href="{% url 'login' %}">Sign In</a></li>
+            <li><a href="{% url 'register' %}">Create Account</a></li>
+            <li><a href="{% url 'forgot_password' %}">Forgot Password</a></li>
+          {% endif %}
+        </ul>
+      </div>
+
     </div>
+
+    <div class="footer-bottom">
+      <p>© {% now "Y" %} Vendopage. Built for Nigerian vendors. Powered by hustle. 🇳🇬</p>
+     
+    </div>
+  </div>
 </footer>
+
 
 {% endblock %}
 
 {% block extra_js %}
+
+
 <script>
-    /* FAQ accordion */
-    document.querySelectorAll('.faq-question').forEach(function(btn) {
-        btn.addEventListener('click', function() {
-            var item   = btn.closest('.faq-item');
-            var isOpen = item.classList.contains('open');
-            document.querySelectorAll('.faq-item').forEach(function(i) { i.classList.remove('open'); });
-            if (!isOpen) item.classList.add('open');
-        });
-    });
 
-    /* Fade-in on scroll */
-    var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(e) {
-            if (e.isIntersecting) {
-                e.target.classList.add('visible');
-                e.target.querySelectorAll('.fade-in').forEach(function(child, i) {
-                    setTimeout(function() { child.classList.add('visible'); }, i * 100);
-                });
-            }
-        });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.fade-in').forEach(function(el) { observer.observe(el); });
+  const proofBar = document.querySelector('.proof-bar');
 
-    /* Smooth scroll with sticky header offset */
-    document.querySelectorAll('a[href^="#"]').forEach(function(a) {
-        a.addEventListener('click', function(e) {
-            var id = a.getAttribute('href').slice(1);
-            var el = document.getElementById(id);
-            if (el) {
-                e.preventDefault();
-                var top = el.getBoundingClientRect().top + window.scrollY - 72;
-                window.scrollTo({ top: top, behavior: 'smooth' });
-            }
-        });
+  // 1. Wrap the existing items in a moving div
+  const inner = document.createElement('div');
+  inner.classList.add('scrolling-inner');
+  inner.innerHTML = proofBar.innerHTML;
+
+  // 2. Clone the content to create a seamless loop
+  inner.innerHTML += inner.innerHTML;
+
+  // 3. Clear the original bar and inject the new moving inner div
+  proofBar.innerHTML = '';
+  proofBar.appendChild(inner);
+
+
+  /* ---------- FAQ accordion ---------- */
+  document.querySelectorAll('.faq-question').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+      // close all first
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      // open clicked if it was closed
+      if (!isOpen) item.classList.add('open');
     });
+  });
+
+  /* ---------- Fade-in observer (Document 3 exact) ---------- */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        const children = e.target.querySelectorAll('.fade-in');
+        children.forEach((child, i) => {
+          setTimeout(() => child.classList.add('visible'), i * 100);
+        });
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  /* ---------- Smooth scroll with sticky header offset ---------- */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const id = a.getAttribute('href').slice(1);
+      const el = document.getElementById(id);
+      if (el) {
+        e.preventDefault();
+        const top = el.getBoundingClientRect().top + window.scrollY - 72;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  });
 </script>
 {% endblock %}
