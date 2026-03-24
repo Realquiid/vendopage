@@ -30,7 +30,10 @@ class Seller(AbstractUser):
     bio = models.TextField(blank=True, null=True)
     profile_picture = CloudinaryField('image', blank=True, null=True)
     slug = models.SlugField(unique=True, blank=True)
-    
+    watermark_enabled = models.BooleanField(default=True)
+    country_code  = models.CharField(max_length=10, default='+234')
+    currency_code = models.CharField(max_length=10, default='NGN')
+    currency_symbol = models.CharField(max_length=10, default='₦')
     # UPDATED: Changed from plain CharField to choices field
     category = models.CharField(
         max_length=100,

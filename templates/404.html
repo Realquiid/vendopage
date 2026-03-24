@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page Not Found — Vendopage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #00C853; --green-dk: #00a844;
+  --dark: #0A0A0A; --gray: #6B6B6B;
+  --light: #F7F7F5; --border: #E8E8E4; --white: #ffffff;
+  --font-d: 'Syne', sans-serif; --font-b: 'DM Sans', sans-serif;
+  --r-pill: 100px; --r-lg: 16px;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--font-b); background: var(--light); color: var(--dark);
+  min-height: 100vh; display: flex; flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* NAV */
+nav {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0 32px; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo { font-family: var(--font-d); font-weight: 800; font-size: 18px; text-decoration: none; color: var(--dark); }
+.logo span { color: var(--green); }
+
+/* MAIN */
+main {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+}
+.error-box { text-align: center; max-width: 520px; }
+
+/* Giant 404 */
+.big-num {
+  font-family: var(--font-d); font-weight: 800;
+  font-size: clamp(100px, 20vw, 160px);
+  letter-spacing: -8px; line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 3px var(--border);
+  margin-bottom: 8px;
+  position: relative;
+  user-select: none;
+}
+.big-num::after {
+  content: '404';
+  position: absolute; inset: 0;
+  -webkit-text-stroke: 0;
+  color: transparent;
+  background: linear-gradient(135deg, var(--green) 0%, var(--dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  opacity: .12;
+}
+
+.error-emoji { font-size: 56px; margin-bottom: 20px; display: block; animation: float 3s ease-in-out infinite; }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+.error-title {
+  font-family: var(--font-d); font-weight: 800; font-size: 28px;
+  letter-spacing: -1px; margin-bottom: 12px;
+}
+.error-sub { font-size: 15px; color: var(--gray); line-height: 1.7; margin-bottom: 36px; }
+
+.error-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-home {
+  padding: 14px 28px; border-radius: var(--r-pill);
+  background: var(--dark); color: var(--white); border: none;
+  font-family: var(--font-b); font-size: 15px; font-weight: 700;
+  text-decoration: none; transition: background .18s; display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-home:hover { background: var(--green); }
+.btn-upload {
+  padding: 14px 28px; border-radius: var(--r-pill);
+  background: var(--white); color: var(--dark);
+  border: 1.5px solid var(--border);
+  font-family: var(--font-b); font-size: 15px; font-weight: 600;
+  text-decoration: none; transition: all .18s; display: inline-flex; align-items: center; gap: 7px;
+}
+.btn-upload:hover { border-color: var(--dark); }
+
+/* Suggestions */
+.suggestions { margin-top: 48px; text-align: left; }
+.suggestions-title { font-size: 13px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; text-align: center; }
+.suggestion-links { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.suggestion-link {
+  padding: 8px 16px; border-radius: var(--r-pill);
+  background: var(--white); border: 1px solid var(--border);
+  font-size: 13px; font-weight: 500; color: var(--gray);
+  text-decoration: none; transition: all .18s;
+  display: flex; align-items: center; gap: 6px;
+}
+.suggestion-link:hover { border-color: var(--green); color: var(--dark); }
+
+/* FOOTER */
+footer {
+  text-align: center; padding: 20px;
+  font-size: 12px; color: var(--gray);
+  border-top: 1px solid var(--border); background: var(--white);
+}
+footer a { color: var(--green); font-weight: 600; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">Vendo<span>page</span></a>
+</nav>
+
+<main>
+  <div class="error-box">
+    <div class="big-num">404</div>
+    <span class="error-emoji">🔍</span>
+    <h1 class="error-title">This page doesn't exist</h1>
+    <p class="error-sub">
+      The page you're looking for may have been moved, deleted, or you might have typed the wrong URL.<br>
+      If you're looking for a seller's store, double-check the store link.
+    </p>
+
+    <div class="error-actions">
+      <a href="/" class="btn-home">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        Go Home
+      </a>
+      <a href="/upload/" class="btn-upload">
+        Start Uploading
+      </a>
+    </div>
+
+    <div class="suggestions">
+      <p class="suggestions-title">Or try one of these</p>
+      <div class="suggestion-links">
+        <a href="/register/" class="suggestion-link">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          Create Account
+        </a>
+        <a href="/login/" class="suggestion-link">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          Sign In
+        </a>
+        <a href="/dashboard/" class="suggestion-link">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  &copy; {% now "Y" %} <a href="/">Vendopage</a> · Made with ❤️ in Nigeria
+</footer>
+
+</body>
+</html>

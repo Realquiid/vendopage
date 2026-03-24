@@ -1,260 +1,564 @@
-{% extends 'base_public.html' %}
 {% load static %}
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/sellerpage.css' %}">
-{% endblock %}  
-{% block title %}{{ seller.business_name }} - VendoPage{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>{{ seller.business_name }} — Vendopage</title>
+<meta name="description" content="{{ seller.bio|default:seller.business_name }}">
+<meta property="og:title" content="{{ seller.business_name }} on Vendopage">
+<meta property="og:description" content="{{ seller.bio|default:'Browse products and order on WhatsApp.' }}">
+{% if seller.profile_picture %}<meta property="og:image" content="{{ seller.profile_picture.url }}">{% endif %}
+<meta name="theme-color" content="#00C853">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#00C853; --green-dk:#00a844;
+  --dark:#0A0A0A; --gray:#6B6B6B; --gray-lt:#9B9B9B;
+  --light:#F7F7F5; --border:#E8E8E4; --white:#ffffff;
+  --wa:#25D366; --wa-dk:#22c55e;
+  --font-d:'Syne',sans-serif; --font-b:'DM Sans',sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
 
-{% block content %}
-<!-- Owner Preview Banner - MUST BE FIRST, AT THE TOP -->
+
+.owner-banner a{
+  background:var(--green);color:var(--white);
+  padding:4px 12px;border-radius:100px;
+  font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;
+}
+
+.owner-banner {
+  position: sticky;
+  top: 0;
+  z-index: 101;  /* above top-bar */
+  background: var(--dark); color: var(--white);
+  padding: 10px 20px; font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  flex-wrap: wrap; text-align: center;
+}
+
+.top-bar {
+  position: sticky;
+  top: 0;        /* default — no banner */
+  z-index: 100;
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 13px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* Remove body.has-banner rule entirely — no longer needed */
+
+.top-back{
+  display:flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:500;color:var(--gray);
+  text-decoration:none;transition:color .18s;
+}
+.top-back:hover{color:var(--dark);}
+.top-logo{
+  font-family:var(--font-d);font-weight:800;font-size:16px;
+  color:var(--dark);text-decoration:none;
+}
+.top-logo span{color:var(--green);}
+
+/* ---- Page wrapper — FULL WIDTH, no max-width cap ---- */
+.page-wrap{width:100%;padding:0;}
+
+/* ---- Profile section ---- */
+.profile-section{
+  padding:24px 24px 20px;
+  border-bottom:1px solid var(--border);
+  max-width:900px; /* profile info itself stays readable */
+}
+.profile-inner{display:flex;align-items:flex-start;gap:16px;}
+.profile-avatar{
+  width:60px;height:60px;border-radius:50%;
+  background:var(--green);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-d);font-weight:800;font-size:22px;color:var(--white);
+  overflow:hidden;position:relative;
+}
+.profile-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+.verified-dot{
+  position:absolute;bottom:1px;right:1px;
+  width:17px;height:17px;background:var(--green);
+  border-radius:50%;border:2px solid var(--white);
+  display:flex;align-items:center;justify-content:center;
+}
+.profile-info{flex:1;min-width:0;}
+.profile-name{font-family:var(--font-d);font-weight:800;font-size:19px;letter-spacing:-.4px;margin-bottom:3px;}
+.profile-bio{font-size:13px;color:var(--gray);line-height:1.5;margin-bottom:8px;}
+.profile-meta{display:flex;gap:14px;}
+.profile-meta span{font-size:12px;color:var(--gray-lt);font-weight:500;}
+.profile-meta strong{color:var(--dark);font-weight:700;}
+
+/* ---- Search ---- */
+.search-wrap{padding:14px 24px;}
+.search-inner{position:relative;max-width:500px;}
+.search-inner svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gray-lt);pointer-events:none;}
+.search-inner input{
+  width:100%;padding:10px 12px 10px 38px;
+  border:1px solid var(--border);border-radius:9px;
+  font-family:var(--font-b);font-size:14px;outline:none;
+  background:var(--light);color:var(--dark);transition:border-color .18s;
+}
+.search-inner input:focus{border-color:var(--green);background:var(--white);}
+.search-inner input::placeholder{color:var(--gray-lt);}
+
+.products-meta{padding:0 24px 12px;font-size:13px;color:var(--gray-lt);}
+
+/* ---- Products grid — FULL WIDTH, auto columns ---- */
+.products-wrap{padding:0 24px 120px;}
+.products-grid{
+  display:grid;
+  /* Auto-fill: as many columns as fit, min 160px each */
+  grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+  gap:12px;
+}
+/* On small screens fall back to 2 columns */
+@media(max-width:480px){
+  .products-wrap{padding:0 12px 140px;}
+  .search-wrap{padding:12px 12px;}
+  .products-meta{padding:0 12px 10px;}
+  .profile-section{padding:20px 12px 16px;}
+  .products-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .top-bar{padding:12px 16px;}
+}
+
+/* ---- Product card ---- */
+.product-card{
+  background:var(--white);cursor:pointer;position:relative;
+  border:1px solid var(--border);border-radius:12px;overflow:hidden;
+  transition:transform .15s,box-shadow .15s;
+}
+.product-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
+
+.card-gallery{
+  width:100%;aspect-ratio:1;
+  position:relative;overflow:hidden;background:var(--light);
+}
+.car-wrap{width:100%;height:100%;position:relative;overflow:hidden;}
+.car-track{display:flex;height:100%;transition:transform .3s ease;}
+.car-slide{flex-shrink:0;width:100%;height:100%;position:relative;}
+.car-slide img{width:100%;height:100%;object-fit:cover;display:block;}
+.car-slide canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;}
+.car-btn{
+  position:absolute;top:50%;transform:translateY(-50%);
+  width:24px;height:24px;background:rgba(255,255,255,.9);
+  border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;z-index:5;transition:background .15s;
+}
+.car-btn:hover{background:var(--white);}
+.car-btn.prev{left:4px;}
+.car-btn.next{right:4px;}
+.car-dots{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:3px;z-index:5;}
+.car-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.5);border:none;padding:0;cursor:pointer;}
+.car-dot.active{background:var(--white);}
+.price-badge{
+  position:absolute;bottom:7px;left:7px;
+  background:rgba(0,0,0,.6);color:var(--white);
+  font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;z-index:4;
+}
+.img-count{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.5);color:var(--white);font-size:10px;font-weight:600;padding:2px 5px;border-radius:4px;z-index:4;}
+
+.card-body{padding:9px 11px 11px;}
+.card-desc{
+  font-size:12px;color:var(--gray);line-height:1.4;margin-bottom:8px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.card-wa{
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  width:100%;padding:7px;
+  background:var(--wa);color:var(--white);
+  border:none;border-radius:6px;
+  font-family:var(--font-b);font-size:11px;font-weight:600;
+  text-decoration:none;cursor:pointer;transition:background .18s;
+}
+.card-wa:hover{background:var(--wa-dk);}
+
+/* ---- Empty ---- */
+.empty{padding:60px 20px;text-align:center;color:var(--gray-lt);}
+.empty p{font-size:14px;margin-top:12px;}
+
+/* ---- Powered by ---- */
+.powered-wrap{padding:0 24px 24px;}
+.powered-card{
+  background:var(--dark);color:var(--white);border-radius:12px;
+  padding:16px 18px;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;flex-wrap:wrap;max-width:600px;
+}
+.powered-card h4{font-family:var(--font-d);font-weight:700;font-size:13px;margin-bottom:2px;}
+.powered-card p{font-size:12px;color:rgba(255,255,255,.5);}
+.powered-cta{background:var(--green);color:var(--white);padding:8px 14px;border-radius:100px;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background .18s;}
+.powered-cta:hover{background:var(--green-dk);}
+.powered-note{text-align:left;font-size:11px;color:var(--gray-lt);padding:8px 0 0;}
+.powered-note a{color:var(--green);font-weight:600;text-decoration:none;}
+
+/* ---- Bottom bar ---- */
+.wa-bar-outer{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--white);border-top:1px solid var(--border);
+  z-index:100;padding:12px 20px;
+  display:flex;justify-content:center;
+}
+.wa-bar-inner{width:100%;max-width:440px;display:flex;gap:10px;}
+.wa-main{
+  flex:1;background:var(--wa);color:var(--white);
+  border:none;border-radius:9px;
+  font-family:var(--font-b);font-size:14px;font-weight:600;
+  padding:12px;display:flex;align-items:center;justify-content:center;gap:7px;
+  text-decoration:none;transition:background .18s;cursor:pointer;
+}
+.wa-main:hover{background:var(--wa-dk);}
+.wa-share{
+  width:46px;height:46px;flex-shrink:0;
+  background:var(--light);border:1px solid var(--border);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:border-color .18s;
+}
+.wa-share:hover{border-color:var(--dark);}
+
+/* ---- Modal ---- */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);
+  z-index:400;display:none;align-items:flex-end;justify-content:center;
+}
+.modal-bg.open{display:flex;}
+.modal-sheet{
+  background:var(--white);width:100%;max-width:480px;
+  border-radius:20px 20px 0 0;overflow:hidden;max-height:90vh;overflow-y:auto;
+  animation:slideUp .3s ease;position:relative;
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:12px auto 0;}
+.modal-close-btn{
+  position:absolute;top:12px;right:12px;z-index:10;
+  width:30px;height:30px;border-radius:50%;
+  background:rgba(0,0,0,.4);color:var(--white);border:none;cursor:pointer;
+  font-size:15px;display:flex;align-items:center;justify-content:center;
+}
+.modal-img-area{width:100%;aspect-ratio:1;background:var(--light);position:relative;overflow:hidden;}
+.modal-img-area canvas{width:100%;height:100%;display:block;}
+.modal-body{padding:16px 18px 22px;}
+.modal-price{font-size:20px;font-weight:700;color:var(--dark);margin-bottom:7px;}
+.modal-desc{font-size:14px;color:var(--gray);line-height:1.6;margin-bottom:18px;}
+.modal-wa{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  width:100%;padding:13px;
+  background:var(--wa);color:var(--white);border:none;border-radius:9px;
+  font-family:var(--font-b);font-size:14px;font-weight:700;
+  text-decoration:none;cursor:pointer;transition:background .18s;
+}
+.modal-wa:hover{background:var(--wa-dk);}
+
+.toast-el{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
+  background:var(--dark);color:var(--white);padding:9px 20px;
+  border-radius:100px;font-size:13px;font-weight:500;z-index:999;
+  opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;
+}
+.toast-el.show{opacity:1;}
+</style>
+</head>
+
+<body{% if is_owner %} class="has-banner"{% endif %}>
+
 {% if is_owner %}
-<div class="owner-preview-banner">
-    <div class="container-narrow">
-        <div class="banner-content">
-            <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/>
-                <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/>
-            </svg>
-            <span>Preview Mode - This is how customers see your page (your views don't count)</span>
-            <a href="{% url 'dashboard' %}" class="banner-link">Go to Dashboard</a>
-        </div>
-    </div>
+<div class="owner-banner">
+  <span>Preview Mode — customers see this page. Your views don't count.</span>
+  <a href="{% url 'dashboard' %}">Dashboard</a>
 </div>
 {% endif %}
 
-<!-- Minimal Sticky Header -->
-<div class="seller-header">
-    <div class="container-narrow">
-        <div class="header-content">
-            <a href="{% url 'home' %}" class="back-link">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M19 12H5M12 19l-7-7 7-7"/>
-                </svg>
-            </a>
-            
-            <div class="header-seller-info">
-                {% if seller.profile_picture %}
-                    <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}" class="header-avatar">
-                {% else %}
-                    <div class="header-avatar-placeholder">{{ seller.business_name|first }}</div>
-                {% endif %}
-                <span class="header-business-name">{{ seller.business_name }}</span>
-            </div>
-            
-            <a href="https://wa.me/{{ seller.whatsapp_number }}?text=Hi, I'm browsing your products!" 
-               class="header-contact-btn">
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                </svg>
-                Contact
-            </a>
-        </div>
-    </div>
+<div class="top-bar">
+  <a href="{% url 'home' %}" class="top-back">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Vendopage
+  </a>
+  <a href="{% url 'home' %}" class="top-logo">Vendo<span>page</span></a>
 </div>
 
-<!-- Premium Profile Section -->
-<div class="seller-profile-hero">
-    <div class="container-narrow">
-        <div class="profile-content">
-            <!-- Avatar -->
-            <div class="profile-avatar-large">
-                {% if seller.profile_picture %}
-                    <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
-                {% else %}
-                    <div class="avatar-placeholder-large">{{ seller.business_name|first }}</div>
-                {% endif %}
-                
-                {# Only show verified badge for subscribed/paid users #}
-                {% if seller.is_subscribed %}
-                <div class="verified-badge" title="Verified Premium Seller">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                    </svg>
-                </div>
-                {% endif %}
-            </div>
-            
-            <!-- Info -->
-            <div class="profile-info">
-                <h1 class="business-name">{{ seller.business_name }}</h1>
-                
-                <div class="profile-badges">
-                    {# Category display #}
-                    {% if seller.category %}
-                        <span class="badge badge-category">{{ seller.get_category_display }}</span>
-                    {% endif %}
-                    
-                    <span class="badge badge-stat">
-                        <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
-                            <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
-                        </svg>
-                        {{ products|length }} Products
-                    </span>
-                </div>
-                
-                {% if seller.bio %}
-                <p class="business-bio">{{ seller.bio }}</p>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+<div class="page-wrap">
 
-<!-- Products Grid Section -->
-<div class="products-section">
-    <div class="container-narrow">
-        {% if products %}
-            <div class="section-header">
-                <h2 class="section-title">Products</h2>
-                <span class="product-count">{{ products|length }} item{{ products|length|pluralize }}</span>
-            </div>
-            
-            <div class="products-grid">
-                {% for product in products %}
-                <div class="product-card">
-                    <!-- Image Gallery -->
-                    <div class="product-gallery" id="gallery-{{ product.id }}">
-                        {% if product.images.count > 1 %}
-                            <div class="carousel-container">
-                                <div class="carousel-track" id="track-{{ product.id }}">
-                                    {% for image in product.images.all %}
-                                    <div class="carousel-slide">
-                                        <img src="{{ image.image_url }}" alt="Product" loading="lazy">
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                
-                                <button class="carousel-btn prev" onclick="moveSlide({{ product.id }}, -1)" aria-label="Previous image">
-                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <polyline points="15 18 9 12 15 6"/>
-                                    </svg>
-                                </button>
-                                <button class="carousel-btn next" onclick="moveSlide({{ product.id }}, 1)" aria-label="Next image">
-                                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <polyline points="9 18 15 12 9 6"/>
-                                    </svg>
-                                </button>
-                                
-                                <div class="carousel-dots">
-                                    {% for image in product.images.all %}
-                                    <button class="dot {% if forloop.first %}active{% endif %}" 
-                                            onclick="goToSlide({{ product.id }}, {{ forloop.counter0 }})"
-                                            aria-label="Go to image {{ forloop.counter }}"></button>
-                                    {% endfor %}
-                                </div>
-                                
-                                <div class="image-count">{{ product.images.count }} photos</div>
-                            </div>
-                        {% else %}
-                            {% with product.get_primary_image as primary %}
-                            {% if primary %}
-                            <img src="{{ primary.image_url }}" alt="Product" loading="lazy" class="single-image">
-                            {% endif %}
-                            {% endwith %}
-                        {% endif %}
-                        
-                        {% if product.price %}
-                        <div class="price-tag">₦{{ product.price|floatformat:0 }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- Product Info -->
-                    <div class="product-info">
-                        {% if product.description %}
-                        <p class="product-desc">{{ product.description }}</p>
-                        {% endif %}
-                        
-                        <a href="https://wa.me/{{ seller.whatsapp_number }}?text={{ product.get_whatsapp_message|urlencode }}" 
-                           class="btn btn-whatsapp-sm"
-                           onclick="trackWhatsAppClick({{ product.id }})"
-                           target="_blank">
-                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                            </svg>
-                            Inquire
-                        </a>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="empty-state">
-                <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <rect x="1" y="3" width="15" height="13"/>
-                </svg>
-                <p>No products available yet</p>
-            </div>
+  <div class="profile-section">
+    <div class="profile-inner">
+      <div class="profile-avatar">
+        {% if seller.profile_picture %}
+          <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
+        {% else %}{{ seller.business_name|first }}{% endif %}
+        {% if seller.is_subscribed %}
+        <div class="verified-dot">
+          <svg width="8" height="8" fill="white" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+        </div>
         {% endif %}
+      </div>
+      <div class="profile-info">
+        <div class="profile-name">{{ seller.business_name }}</div>
+        {% if seller.bio %}<div class="profile-bio">{{ seller.bio }}</div>{% endif %}
+        <div class="profile-meta">
+          <span><strong>{{ products|length }}</strong> products</span>
+          {% if seller.category %}<span>{{ seller.get_category_display }}</span>{% endif %}
+        </div>
+      </div>
     </div>
+  </div>
+
+  <div class="search-wrap">
+    <div class="search-inner">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="Search products…" oninput="filterProducts()">
+    </div>
+  </div>
+  <div class="products-meta"><span id="productsCount">{{ products|length }} product{{ products|length|pluralize }}</span></div>
+
+  <div class="products-wrap">
+    {% if products %}
+    <div class="products-grid" id="productsGrid">
+      {% for product in products %}
+      <div class="product-card"
+           data-id="{{ product.id }}"
+           data-description="{{ product.description|default:'' }}"
+           data-price="{{ product.price|default:'' }}"
+           data-wa-msg="{{ product.get_whatsapp_message|urlencode }}"
+           onclick="openModal({{ product.id }})">
+
+        <div class="card-gallery" id="gal-{{ product.id }}">
+          {% if product.images.count > 1 %}
+          <div class="car-wrap">
+            <div class="car-track" id="ct-{{ product.id }}">
+              {% for image in product.images.all %}
+              <div class="car-slide">
+                <img src="{{ image.image_url }}" alt="" loading="lazy" crossorigin="anonymous">
+              </div>
+              {% endfor %}
+            </div>
+            <button class="car-btn prev" onclick="event.stopPropagation();carMove({{ product.id }},-1)">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <button class="car-btn next" onclick="event.stopPropagation();carMove({{ product.id }},1)">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <div class="car-dots">
+              {% for image in product.images.all %}
+              <button class="car-dot {% if forloop.first %}active{% endif %}" onclick="event.stopPropagation();carGo({{ product.id }},{{ forloop.counter0 }})"></button>
+              {% endfor %}
+            </div>
+            <span class="img-count">{{ product.images.count }}</span>
+          </div>
+          {% else %}
+            {% with product.images.first as img %}
+              {% if img %}
+              <div class="car-slide" style="width:100%;height:100%;position:relative;">
+                <img src="{{ img.image_url }}" alt="" loading="lazy" crossorigin="anonymous" style="width:100%;height:100%;object-fit:cover;display:block;">
+              </div>
+              {% endif %}
+            {% endwith %}
+          {% endif %}
+          {% if product.price %}
+            <span class="price-badge">{{ seller.currency_symbol|default:"₦" }}{{ product.price|floatformat:0 }}</span>
+          {% endif %}
+        </div>
+
+        <div class="card-body">
+          {% if product.description %}<p class="card-desc">{{ product.description }}</p>{% endif %}
+          <a href="https://wa.me/{{ seller.whatsapp_number }}?text={{ product.get_whatsapp_message|urlencode }}"
+             class="card-wa"
+             onclick="event.stopPropagation();trackWa({{ product.id }})"
+             target="_blank">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            Order on WhatsApp
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">
+      <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <p>No products available yet.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if seller.shows_powered_by_badge %}
+  <div class="powered-wrap">
+    <div class="powered-card">
+      <div><h4>Want a store like this?</h4><p>Create your free product catalog in minutes.</p></div>
+      <a href="{% url 'register' %}" class="powered-cta">Get Started Free</a>
+    </div>
+    <p class="powered-note">Powered by <a href="{% url 'home' %}">Vendopage</a></p>
+  </div>
+  {% endif %}
+
 </div>
 
-<!-- Powered By Section (Only for Free Users) -->
-{% if seller.shows_powered_by_badge %}
-<div class="powered-by-section">
-    <div class="container-narrow">
-        <div class="powered-card">
-            <div class="powered-content">
-                <div class="powered-icon">✨</div>
-                <div class="powered-text">
-                    <h3>Want a page like this?</h3>
-                    <p>Create your own product catalog in minutes — completely free</p>
-                </div>
-            </div>
-            <a href="{% url 'register' %}" class="powered-cta-btn">
-                Get Started Free
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-            </a>
-        </div>
-        <p class="powered-badge-text">Powered by <strong>VendoPage</strong></p>
-    </div>
+<!-- Bottom bar -->
+<div class="wa-bar-outer">
+  <div class="wa-bar-inner">
+    <a href="https://wa.me/{{ seller.whatsapp_number }}?text=Hi%2C%20I%27m%20browsing%20your%20Vendopage%20store%20and%20I%27m%20interested%20in%20your%20products%21"
+       class="wa-main" target="_blank">
+      <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      Chat on WhatsApp
+    </a>
+    <button class="wa-share" onclick="shareStore()" title="Share">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+    </button>
+  </div>
 </div>
-{% endif %}
+
+<!-- Modal -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal-sheet">
+    <button class="modal-close-btn" onclick="closeModal()">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="modal-handle"></div>
+    <div class="modal-img-area" id="modalImgArea"></div>
+    <div class="modal-body">
+      <div class="modal-price" id="modalPrice"></div>
+      <div class="modal-desc" id="modalDesc"></div>
+      <a class="modal-wa" id="modalWaBtn" target="_blank">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Order on WhatsApp
+      </a>
+    </div>
+  </div>
+</div>
+
+<div class="toast-el" id="toast"></div>
 
 <script>
-    const carousels = {};
-    
-    function initCarousel(id) {
-        const track = document.getElementById(`track-${id}`);
-        const dots = document.querySelectorAll(`#gallery-${id} .dot`);
-        if (!track) return;
-        
-        carousels[id] = { current: 0, total: dots.length, track, dots };
-    }
-    
-    function moveSlide(id, dir) {
-        if (!carousels[id]) initCarousel(id);
-        const c = carousels[id];
-        c.current = (c.current + dir + c.total) % c.total;
-        updateCarousel(id);
-    }
-    
-    function goToSlide(id, index) {
-        if (!carousels[id]) initCarousel(id);
-        carousels[id].current = index;
-        updateCarousel(id);
-    }
-    
-    function updateCarousel(id) {
-        const c = carousels[id];
-        c.track.style.transform = `translateX(-${c.current * 100}%)`;
-        c.dots.forEach((dot, i) => dot.classList.toggle('active', i === c.current));
-    }
-    
-    document.addEventListener('DOMContentLoaded', () => {
-        document.querySelectorAll('.carousel-track').forEach(t => {
-            const id = t.id.split('-')[1];
-            initCarousel(id);
-        });
-    });
-    
-    function trackWhatsAppClick(id) {
-        const isOwner = {{ is_owner|lower }};
-        if (!isOwner) {
-            fetch(`/api/product/${id}/track-whatsapp/`, { method: 'POST' }).catch(() => {});
-        }
-    }
+const SELLER_WA   = '{{ seller.whatsapp_number }}';
+const SELLER_NAME = '{{ seller.business_name|escapejs }}';
+const CURRENCY    = '{{ seller.currency_symbol|default:"₦"|escapejs }}';
+const IS_OWNER    = {{ is_owner|lower }};
+const WM_ACTIVE   = {{ seller.watermark_enabled|default:"True"|lower }};
+
+/* ---- Watermark ---- */
+function applyWatermark(img, canvas) {
+  const w = img.naturalWidth || img.width || 400;
+  const h = img.naturalHeight || img.height || 400;
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+  if (!WM_ACTIVE) return;
+  ctx.save();
+  ctx.globalAlpha = 0.2;
+  ctx.fillStyle = '#ffffff';
+  const fs = Math.max(12, Math.round(w * 0.05));
+  ctx.font = `600 ${fs}px 'DM Sans',sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.translate(w/2, h/2);
+  ctx.rotate(-30 * Math.PI / 180);
+  const gap = fs * 4.5;
+  const cols = Math.ceil(w/gap)+4, rows = Math.ceil(h/gap)+4;
+  for(let r=0;r<rows;r++) for(let c=0;c<cols;c++)
+    ctx.fillText(SELLER_NAME, -cols/2*gap+c*gap, -rows/2*gap+r*gap);
+  ctx.restore();
+}
+
+function initWatermarks() {
+  document.querySelectorAll('.car-slide').forEach(slide => {
+    const img = slide.querySelector('img');
+    if (!img) return;
+    const cv = document.createElement('canvas');
+    cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;';
+    slide.appendChild(cv);
+    const draw = () => applyWatermark(img, cv);
+    if (img.complete && img.naturalWidth) draw(); else img.addEventListener('load', draw);
+  });
+}
+
+/* ---- Carousel ---- */
+const cars = {};
+function carInit(id) {
+  const t = document.getElementById(`ct-${id}`);
+  const dots = document.querySelectorAll(`#gal-${id} .car-dot`);
+  if (!t) return;
+  cars[id] = {cur:0, total:dots.length, t, dots};
+}
+function carMove(id, d) {
+  if (!cars[id]) carInit(id);
+  const c = cars[id];
+  c.cur = (c.cur+d+c.total)%c.total;
+  c.t.style.transform = `translateX(-${c.cur*100}%)`;
+  c.dots.forEach((dot,i) => dot.classList.toggle('active', i===c.cur));
+}
+function carGo(id, i) {
+  if (!cars[id]) carInit(id);
+  cars[id].cur = i;
+  cars[id].t.style.transform = `translateX(-${i*100}%)`;
+  cars[id].dots.forEach((d,j) => d.classList.toggle('active', j===i));
+}
+
+/* ---- Product data ---- */
+const pData = {};
+document.querySelectorAll('.product-card').forEach(card => {
+  const id = card.dataset.id;
+  const imgs = [];
+  card.querySelectorAll('.car-slide img').forEach(i => imgs.push(i.src));
+  pData[id] = {desc:card.dataset.description, price:card.dataset.price, waMsg:card.dataset.waMsg, imgs};
+});
+
+/* ---- Modal ---- */
+function openModal(id) {
+  const p = pData[id]; if(!p) return;
+  const area = document.getElementById('modalImgArea');
+  area.innerHTML = '';
+  const cv = document.createElement('canvas');
+  cv.style.cssText = 'width:100%;height:100%;display:block;';
+  area.appendChild(cv);
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => applyWatermark(img, cv);
+  img.src = p.imgs[0] || '';
+  document.getElementById('modalPrice').textContent = p.price ? `${CURRENCY}${Number(p.price).toLocaleString()}` : '';
+  document.getElementById('modalDesc').textContent = p.desc || '';
+  const btn = document.getElementById('modalWaBtn');
+  btn.href = `https://wa.me/${SELLER_WA}?text=${p.waMsg}`;
+  btn.onclick = () => trackWa(id);
+  document.getElementById('modalBg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('modalBg').addEventListener('click', e => {
+  if(e.target === document.getElementById('modalBg')) closeModal();
+});
+
+function trackWa(id) {
+  if(!IS_OWNER) fetch(`/api/product/${id}/track-whatsapp/`, {method:'POST'}).catch(()=>{});
+}
+function shareStore() {
+  if(navigator.share) navigator.share({title:SELLER_NAME, url:location.href});
+  else navigator.clipboard.writeText(location.href).then(()=>showToast('Link copied'));
+}
+function filterProducts() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let v = 0;
+  document.querySelectorAll('.product-card').forEach(c => {
+    const match = !q || c.dataset.description.toLowerCase().includes(q);
+    c.style.display = match ? '' : 'none';
+    if(match) v++;
+  });
+  document.getElementById('productsCount').textContent = v+' product'+(v!==1?'s':'');
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.car-track').forEach(t => carInit(t.id.split('-')[1]));
+  initWatermarks();
+});
 </script>
-{% endblock %}
+</body>
+</html>

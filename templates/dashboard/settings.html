@@ -1,282 +1,551 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% block title %}Settings — Vendopage{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/setting.css' %}">
-{% endblock %}  
-{% block title %}Settings - VendoPage{% endblock %}
+<style>
+.settings-page {
+  background: var(--light);
+  min-height: calc(100vh - 64px);
+  padding: 40px 20px 80px;
+}
+.settings-wrap { max-width: 700px; margin: 0 auto; }
+
+.settings-head { margin-bottom: 32px; }
+.settings-head h1 { font-family: var(--font-d); font-weight: 800; font-size: 28px; letter-spacing: -1px; margin-bottom: 4px; }
+.settings-head p { font-size: 14px; color: var(--gray); }
+
+/* Messages */
+.msg-list { list-style: none; margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
+.msg-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; }
+.msg-item.success { background: #f0fff5; border: 1px solid #bbf7d0; color: #166534; }
+.msg-item.error   { background: #fff5f5; border: 1px solid #fecaca; color: #991b1b; }
+
+/* Card */
+.s-card { background: var(--white); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 14px; overflow: hidden; }
+.s-card-head { padding: 22px 26px 0; }
+.s-card-head h2 { font-family: var(--font-d); font-weight: 700; font-size: 16px; margin-bottom: 3px; }
+.s-card-head p { font-size: 13px; color: var(--gray); }
+.s-card-body { padding: 18px 26px 26px; }
+.s-divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+
+/* Fields */
+.f-group { margin-bottom: 16px; }
+.f-label { font-size: 13px; font-weight: 600; color: var(--gray); margin-bottom: 5px; display: block; }
+.f-input, .f-textarea, .f-select {
+  width: 100%; background: var(--light); border: 1px solid var(--border);
+  border-radius: 11px; padding: 11px 14px;
+  font-family: var(--font-b); font-size: 14px; color: var(--dark);
+  outline: none; transition: border-color .18s;
+}
+.f-input:focus, .f-textarea:focus, .f-select:focus { border-color: var(--green); background: var(--white); }
+.f-input:disabled { opacity: .45; cursor: not-allowed; }
+.f-hint { font-size: 12px; color: var(--gray-lt); margin-top: 4px; }
+.f-textarea { resize: vertical; min-height: 85px; }
+.f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 560px) { .f-row { grid-template-columns: 1fr; } }
+
+/* Avatar — upload via Cloudinary directly */
+.avatar-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.avatar-circle {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: var(--green); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-d); font-weight: 800; font-size: 30px; color: #fff;
+  overflow: hidden; position: relative;
+}
+.avatar-circle img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar-uploading {
+  position: absolute; inset: 0; background: rgba(0,0,0,.45);
+  border-radius: 50%; display: none; align-items: center; justify-content: center;
+}
+.avatar-uploading svg { animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.avatar-ctrl { display: flex; flex-direction: column; gap: 7px; }
+.avatar-hint { font-size: 12px; color: var(--gray-lt); }
+
+/* Link box */
+.link-box { display: flex; align-items: center; background: var(--light); border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
+.link-box input { flex: 1; background: none; border: none; outline: none; padding: 11px 13px; font-family: var(--font-b); font-size: 14px; color: var(--dark); cursor: pointer; }
+.link-copy-btn { padding: 11px 14px; background: none; border: none; border-left: 1px solid var(--border); cursor: pointer; color: var(--gray); transition: all .18s; display: flex; align-items: center; }
+.link-copy-btn:hover { background: var(--green); color: #fff; }
+
+/* Plan */
+.plan-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 100px; font-size: 13px; font-weight: 700; }
+.plan-free { background: var(--light); border: 1px solid var(--border); color: var(--gray); }
+.plan-premium { background: #fefce8; border: 1px solid #fde68a; color: #92400e; }
+.features-list { margin: 14px 0; display: flex; flex-direction: column; gap: 7px; }
+.feature-item { display: flex; align-items: center; gap: 9px; font-size: 14px; }
+.feature-item svg { color: var(--green); flex-shrink: 0; }
+
+/* =============================================
+   WATERMARK TOGGLE — clean toggle switch
+   ============================================= */
+.toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; padding: 4px 0;
+}
+.toggle-info h3 { font-family: var(--font-d); font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+.toggle-info p { font-size: 13px; color: var(--gray); line-height: 1.4; }
+.toggle-info .plan-note { font-size: 12px; color: var(--gray-lt); margin-top: 4px; }
+.toggle-info .plan-note a { color: var(--green); font-weight: 600; text-decoration: none; }
+
+/* iOS-style toggle switch */
+.switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-track {
+  position: absolute; inset: 0; background: var(--border);
+  border-radius: 100px; cursor: pointer; transition: background .2s;
+}
+.switch input:checked + .switch-track { background: var(--green); }
+.switch-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  transition: transform .2s;
+}
+.switch input:checked ~ .switch-thumb { transform: translateX(20px); }
+
+/* =============================================
+   DARK / LIGHT MODE
+   ============================================= */
+.mode-pills { display: flex; gap: 6px; }
+.mode-pill {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 14px; border-radius: var(--r-pill);
+  border: 1.5px solid var(--border); background: var(--white);
+  font-family: var(--font-b); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .2s; color: var(--gray);
+}
+.mode-pill:hover { border-color: var(--dark); color: var(--dark); }
+.mode-pill.active { border-color: var(--dark); background: var(--dark); color: #fff; }
+.mode-pill.active.light-pill { border-color: var(--border); background: var(--white); color: var(--dark); box-shadow: 0 0 0 2px var(--dark); }
+
+/* Buttons */
+.btn-primary {
+  background: var(--green); color: #fff; border: none; border-radius: var(--r-pill);
+  padding: 11px 22px; font-family: var(--font-b); font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background .18s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary:hover { background: var(--green-dk); }
+.btn-secondary {
+  background: var(--white); color: var(--dark); border: 1.5px solid var(--border);
+  border-radius: var(--r-pill); padding: 11px 22px;
+  font-family: var(--font-b); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .18s; display: inline-flex; align-items: center; gap: 6px;
+  text-decoration: none;
+}
+.btn-secondary:hover { border-color: var(--dark); }
+.btn-danger {
+  background: #fff5f5; color: #991b1b; border: 1.5px solid #fecaca;
+  border-radius: var(--r-pill); padding: 11px 22px;
+  font-family: var(--font-b); font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all .18s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-danger:hover { background: #fef2f2; border-color: #f87171; }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+
+@media (max-width: 480px) {
+  .settings-page { padding: 24px 16px 60px; }
+  .s-card-head { padding: 18px 18px 0; }
+  .s-card-body { padding: 14px 18px 22px; }
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="settings-page">
-    <div class="container-settings">
-        <div class="settings-header">
-            <h1>Settings</h1>
-            <p class="text-muted">Manage your account and business information</p>
+<div class="settings-wrap">
+
+  <div class="settings-head">
+    <h1>Settings</h1>
+    <p>Manage your account, business info, and preferences.</p>
+  </div>
+
+  {% if messages %}
+  <ul class="msg-list">
+    {% for message in messages %}
+    <li class="msg-item {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+      {% if message.tags == 'error' %}
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      {% else %}
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      {% endif %}
+      {{ message }}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  <!-- =============================================
+       APPEARANCE
+       ============================================= -->
+  <div class="s-card">
+    <div class="s-card-head"><h2>Appearance</h2><p>Choose how Vendopage looks for you.</p></div>
+    <div class="s-card-body">
+      <div class="toggle-row">
+        <div class="toggle-info">
+          <h3>Color Mode</h3>
+          <p>Saved and applied everywhere.</p>
         </div>
-        
-        <div class="settings-grid">
-            <!-- Profile Settings -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <h2>Profile Picture</h2>
-                    <p class="text-muted">This appears on your public storefront</p>
-                </div>
-                
-                <form method="POST" enctype="multipart/form-data" action="{% url 'update_profile_picture' %}">
-                    {% csrf_token %}
-                    <div class="profile-upload">
-                        <div class="current-avatar">
-                            {% if user.profile_picture %}
-                                <img src="{{ user.profile_picture.url }}" alt="Profile" id="avatarPreview">
-                            {% else %}
-                                <div class="avatar-placeholder" id="avatarPlaceholder">
-                                    {{ user.business_name|first }}
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="upload-controls">
-                            <input type="file" 
-                                   name="profile_picture" 
-                                   id="profilePicture" 
-                                   accept="image/*" 
-                                   style="display: none;"
-                                   onchange="previewImage(event)">
-                            <button type="button" onclick="document.getElementById('profilePicture').click()" class="btn btn-secondary">
-                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                                    <polyline points="21 15 16 10 5 21"/>
-                                </svg>
-                                Choose Photo
-                            </button>
-                            {% if user.profile_picture %}
-                            <button type="submit" name="remove_picture" value="true" class="btn btn-outline">Remove</button>
-                            {% endif %}
-                            <button type="submit" class="btn btn-primary" id="uploadBtn" style="display: none;">
-                                Save Photo
-                            </button>
-                        </div>
-                        <p class="upload-hint">JPG, PNG or GIF. Max 5MB. Square images work best.</p>
-                    </div>
-                </form>
-            </div>
-            
-            <!-- Business Info -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <h2>Business Information</h2>
-                    <p class="text-muted">Update your business details</p>
-                </div>
-                
-                <form method="POST" action="{% url 'update_business_info' %}" class="settings-form">
-                    {% csrf_token %}
-                    
-                    <div class="form-group">
-                        <label>Business Name</label>
-                        <input type="text" name="business_name" value="{{ user.business_name }}" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Bio (Optional)</label>
-                        <textarea name="bio" rows="3" placeholder="Tell customers about your business...">{{ user.bio }}</textarea>
-                        <small>This appears on your public page</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select name="category" required>
-                            <option value="fashion" {% if user.category == 'fashion' %}selected{% endif %}>👗 Fashion & Clothing</option>
-                            <option value="beauty" {% if user.category == 'beauty' %}selected{% endif %}>💄 Beauty & Cosmetics</option>
-                            <option value="electronics" {% if user.category == 'electronics' %}selected{% endif %}>📱 Electronics</option>
-                            <option value="food" {% if user.category == 'food' %}selected{% endif %}>🍕 Food & Beverages</option>
-                            <option value="home" {% if user.category == 'home' %}selected{% endif %}>🏠 Home & Living</option>
-                            <option value="sports" {% if user.category == 'sports' %}selected{% endif %}>⚽ Sports & Fitness</option>
-                            <option value="health" {% if user.category == 'health' %}selected{% endif %}>💪 Health & Wellness</option>
-                            <option value="other" {% if user.category == 'other' %}selected{% endif %}>🎯 Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>WhatsApp Number</label>
-                        <input type="tel" name="whatsapp_number" value="{{ user.whatsapp_number }}" required>
-                        <small>Include country code (e.g., 234XXXXXXXXXX)</small>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </form>
-            </div>
-            
-            <!-- Account Settings -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <h2>Account Settings</h2>
-                    <p class="text-muted">Manage your login credentials</p>
-                </div>
-                
-                <form method="POST" action="{% url 'update_account' %}" class="settings-form">
-                    {% csrf_token %}
-                    
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" name="email" value="{{ user.email }}" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" value="{{ user.username }}" disabled>
-                        <small>Username cannot be changed</small>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-primary">Update Email</button>
-                </form>
-                
-                <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--border);">
-                
-                <form method="POST" action="{% url 'change_password' %}" class="settings-form">
-                    {% csrf_token %}
-                    
-                    <div class="form-group">
-                        <label>Current Password</label>
-                        <input type="password" name="current_password" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>New Password</label>
-                        <input type="password" name="new_password" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Confirm New Password</label>
-                        <input type="password" name="confirm_password" required>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-secondary">Change Password</button>
-                </form>
-            </div>
-            
-            <!-- Public Page -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <h2>Your Public Page</h2>
-                    <p class="text-muted">Share your storefront link</p>
-                </div>
-                
-                <div class="public-link-section">
-                    <div class="link-preview">
-                        <label>Your Page URL</label>
-                        <div class="link-display-box">
-                            <input type="text" value="vendopage.com/{{ user.slug }}" readonly id="publicPageLink">
-                            <button onclick="copyPublicLink()" class="copy-btn">
-                                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="quick-actions">
-                        <a href="/{{ user.slug }}" target="_blank" class="btn btn-outline">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
-                                <polyline points="15 3 21 3 21 9"/>
-                                <line x1="10" y1="14" x2="21" y2="3"/>
-                            </svg>
-                            View Public Page
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Subscription Info -->
-            <div class="settings-card subscription-card">
-                <div class="card-header">
-                    <h2>Subscription</h2>
-                    <p class="text-muted">Your current plan</p>
-                </div>
-                
-                <div class="subscription-info">
-                    <div class="plan-badge">
-                        {% if user.subscription_type == 'premium' %}
-                        <div class="badge badge-premium">⭐ Premium</div>
-                        {% else %}
-                        <div class="badge badge-free">Free</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="plan-features">
-                        <div class="feature">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                            <span>Unlimited Products</span>
-                        </div>
-                        <div class="feature">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                            <span>Custom Page URL</span>
-                        </div>
-                        <div class="feature">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                            <span>WhatsApp Integration</span>
-                        </div>
-                        {% if user.subscription_type == 'premium' %}
-                        <div class="feature">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                            <span>No "Powered by" Badge</span>
-                        </div>
-                        {% endif %}
-                    </div>
-                    
-                    {% if user.subscription_type == 'free' %}
-                    <a href="{% url 'subscription' %}" class="btn btn-primary">
-                        ⭐ Upgrade to Premium
-                    </a>
-                    {% endif %}
-                </div>
-            </div>
+        <div class="mode-pills">
+          <button class="mode-pill light-pill" id="pillLight" onclick="setMode('light')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            Light
+          </button>
+          <button class="mode-pill" id="pillDark" onclick="setMode('dark')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            Dark
+          </button>
         </div>
+      </div>
     </div>
+  </div>
+
+  <!-- =============================================
+       PROFILE PICTURE — Cloudinary direct upload
+       fixes the failing upload issue
+       ============================================= -->
+  <div class="s-card">
+    <div class="s-card-head"><h2>Profile Picture</h2><p>Shown on your public storefront.</p></div>
+    <div class="s-card-body">
+      <div class="avatar-row">
+        <div class="avatar-circle" id="avatarCircle">
+          {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" alt="" id="avatarImg">
+          {% else %}
+            <span id="avatarLetter">{{ user.business_name|first }}</span>
+          {% endif %}
+          <div class="avatar-uploading" id="avatarSpinner">
+            <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+          </div>
+        </div>
+        <div>
+          <div class="avatar-ctrl">
+            <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+            <button type="button" onclick="document.getElementById('avatarFile').click()" class="btn-secondary btn-sm">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Choose Photo
+            </button>
+            {% if user.profile_picture %}
+            <form method="POST" action="{% url 'update_profile_picture' %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" name="remove_picture" value="true" class="btn-danger btn-sm">Remove</button>
+            </form>
+            {% endif %}
+          </div>
+          <p class="avatar-hint" style="margin-top:7px;">JPG, PNG or GIF · Max 5MB · Square works best</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================================
+       WATERMARK
+       ============================================= -->
+  <div class="s-card">
+    <div class="s-card-head">
+      <h2>Product Watermark</h2>
+      <p>Protect your product images by adding your store name as a watermark.</p>
+    </div>
+    <div class="s-card-body">
+      <form method="POST" action="{% url 'update_watermark' %}">
+        {% csrf_token %}
+        <div class="toggle-row" style="margin-bottom:16px;">
+          <div class="toggle-info">
+            <h3>Show watermark on images</h3>
+            <p>Your business name appears diagonally across each product photo when customers view or download it.</p>
+            {% if user.subscription_type == 'free' %}
+            <p class="plan-note">Premium sellers can disable watermarks. <a href="{% url 'subscription' %}">Upgrade</a></p>
+            {% endif %}
+          </div>
+          <label class="switch">
+            <input type="checkbox" name="watermark_enabled" id="wmToggle"
+              {% if user.watermark_enabled %}checked{% endif %}
+              {% if user.subscription_type == 'free' %}disabled{% endif %}
+              onchange="this.form.submit()">
+            <span class="switch-track"></span>
+            <span class="switch-thumb"></span>
+          </label>
+        </div>
+        {% if user.subscription_type == 'premium' %}
+          <p style="font-size:13px;color:var(--gray);">
+            As a Premium seller, you can turn watermarks on or off. The toggle saves instantly.
+          </p>
+        {% else %}
+          <p style="font-size:13px;color:var(--gray-lt);">
+            Watermarks are <strong style="color:var(--dark);">on by default</strong> for free accounts and cannot be disabled.
+            <a href="{% url 'subscription' %}" style="color:var(--green);font-weight:600;text-decoration:none;">Upgrade to Premium</a> to remove them.
+          </p>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  <!-- =============================================
+       BUSINESS INFO
+       ============================================= -->
+  <div class="s-card">
+    <div class="s-card-head"><h2>Business Information</h2><p>Shown to customers on your store page.</p></div>
+    <div class="s-card-body">
+      <form method="POST" action="{% url 'update_business_info' %}">
+        {% csrf_token %}
+        <div class="f-group">
+          <label class="f-label">Business Name</label>
+          <input type="text" name="business_name" class="f-input" value="{{ user.business_name }}" required>
+        </div>
+        <div class="f-group">
+          <label class="f-label">Bio <span style="font-weight:400;color:var(--gray-lt);font-size:11px;">(optional)</span></label>
+          <textarea name="bio" class="f-textarea" placeholder="Tell customers about your business…">{{ user.bio }}</textarea>
+          <div class="f-hint">Appears as the tagline on your storefront.</div>
+        </div>
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Category</label>
+            <select name="category" class="f-select">
+              <option value="fashion"     {% if user.category == 'fashion' %}selected{% endif %}>Fashion &amp; Clothing</option>
+              <option value="beauty"      {% if user.category == 'beauty' %}selected{% endif %}>Beauty &amp; Cosmetics</option>
+              <option value="electronics" {% if user.category == 'electronics' %}selected{% endif %}>Electronics</option>
+              <option value="food"        {% if user.category == 'food' %}selected{% endif %}>Food &amp; Beverages</option>
+              <option value="home"        {% if user.category == 'home' %}selected{% endif %}>Home &amp; Living</option>
+              <option value="sports"      {% if user.category == 'sports' %}selected{% endif %}>Sports &amp; Fitness</option>
+              <option value="health"      {% if user.category == 'health' %}selected{% endif %}>Health &amp; Wellness</option>
+              <option value="other"       {% if user.category == 'other' %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+          <div class="f-group">
+            <label class="f-label">WhatsApp Number</label>
+            <input type="tel" name="whatsapp_number" class="f-input" value="{{ user.whatsapp_number }}" required>
+            <div class="f-hint">Include country code — e.g. 2348012345678</div>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =============================================
+       ACCOUNT
+       ============================================= -->
+  <div class="s-card">
+    <div class="s-card-head"><h2>Account Settings</h2><p>Manage your login credentials.</p></div>
+    <div class="s-card-body">
+      <form method="POST" action="{% url 'update_account' %}">
+        {% csrf_token %}
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">Email Address</label>
+            <input type="email" name="email" class="f-input" value="{{ user.email }}" required>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Username</label>
+            <input type="text" class="f-input" value="{{ user.username }}" disabled>
+            <div class="f-hint">Username cannot be changed.</div>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Update Email</button>
+      </form>
+      <hr class="s-divider">
+      <h3 style="font-family:var(--font-d);font-weight:700;font-size:14px;margin-bottom:14px;">Change Password</h3>
+      <form method="POST" action="{% url 'change_password' %}">
+        {% csrf_token %}
+        <div class="f-group">
+          <label class="f-label">Current Password</label>
+          <input type="password" name="current_password" class="f-input" required>
+        </div>
+        <div class="f-row">
+          <div class="f-group">
+            <label class="f-label">New Password</label>
+            <input type="password" name="new_password" class="f-input" required>
+          </div>
+          <div class="f-group">
+            <label class="f-label">Confirm New Password</label>
+            <input type="password" name="confirm_password" class="f-input" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-secondary">Change Password</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =============================================
+       PUBLIC PAGE
+       ============================================= -->
+  <div class="s-card">
+    <div class="s-card-head"><h2>Your Public Page</h2><p>Share this link on WhatsApp, Instagram bio, or anywhere.</p></div>
+    <div class="s-card-body">
+      <div class="f-group">
+        <label class="f-label">Your Store URL</label>
+        <div class="link-box">
+          <input type="text" value="{{ request.scheme }}://{{ request.get_host }}/{{ user.slug }}" readonly id="publicLink" onclick="this.select()">
+          <button class="link-copy-btn" onclick="copyLink()" title="Copy">
+            <svg id="copyIcon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            <svg id="checkIcon" style="display:none;" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <a href="/{{ user.slug }}" target="_blank" class="btn-secondary btn-sm">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        View Public Page
+      </a>
+    </div>
+  </div>
+
+  <!-- =============================================
+       SUBSCRIPTION
+       ============================================= -->
+  <div class="s-card">
+    <div class="s-card-head"><h2>Subscription</h2><p>Your current plan and features.</p></div>
+    <div class="s-card-body">
+      <div style="margin-bottom:14px;">
+        {% if user.subscription_type == 'premium' %}
+          <span class="plan-badge plan-premium">Premium</span>
+        {% else %}
+          <span class="plan-badge plan-free">Free Plan</span>
+        {% endif %}
+      </div>
+      <div class="features-list">
+        <div class="feature-item">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Unlimited Products
+        </div>
+        <div class="feature-item">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Custom Store URL
+        </div>
+        <div class="feature-item">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          WhatsApp Integration
+        </div>
+        {% if user.subscription_type == 'premium' %}
+        <div class="feature-item">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Disable Product Watermarks
+        </div>
+        <div class="feature-item">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          No "Powered by" Badge
+        </div>
+        {% endif %}
+      </div>
+      {% if user.subscription_type == 'free' %}
+      <a href="{% url 'subscription' %}" class="btn-primary" style="margin-top:4px;">
+        Upgrade to Premium
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
 </div>
 
 <script>
-    function previewImage(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('avatarPreview');
-                const placeholder = document.getElementById('avatarPlaceholder');
-                
-                if (preview) {
-                    preview.src = e.target.result;
-                } else if (placeholder) {
-                    placeholder.outerHTML = `<img src="${e.target.result}" alt="Preview" id="avatarPreview">`;
-                }
-                
-                document.getElementById('uploadBtn').style.display = 'inline-flex';
-            }
-            reader.readAsDataURL(file);
-        }
+/* =============================================
+   PROFILE PICTURE — direct Cloudinary upload
+   Bypasses Django file handling which was causing failures.
+   Uploads to Cloudinary, then sends the URL to Django to save.
+   ============================================= */
+const CLOUD  = 'dqxlkie1i';
+const PRESET = 'vendopage_unsigned';
+const CDN    = `https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`;
+const CSRF   = '{{ csrf_token }}';
+
+async function uploadAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { showMsg('Image too large. Max 5MB.', 'error'); return; }
+
+  /* Show spinner */
+  document.getElementById('avatarSpinner').style.display = 'flex';
+
+  try {
+    /* 1. Upload to Cloudinary */
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', PRESET);
+    fd.append('folder', 'vendopage/profiles');
+    const r    = await fetch(CDN, { method: 'POST', body: fd });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error?.message || 'Upload failed');
+
+    const url = data.secure_url;
+
+    /* 2. Send URL to Django to save on seller profile */
+    const dfd = new FormData();
+    dfd.append('profile_picture_url', url);
+    const dr = await fetch('{% url "update_profile_picture" %}', {
+      method: 'POST', body: dfd,
+      headers: { 'X-CSRFToken': CSRF }
+    });
+    if (!dr.ok) throw new Error('Save failed');
+
+    /* 3. Update avatar preview */
+    const circle = document.getElementById('avatarCircle');
+    let img = document.getElementById('avatarImg');
+    if (!img) {
+      circle.innerHTML = '';
+      img = document.createElement('img');
+      img.id = 'avatarImg';
+      circle.appendChild(img);
     }
-    
-    function copyPublicLink() {
-        const input = document.getElementById('publicPageLink');
-        input.select();
-        document.execCommand('copy');
-        
-        const btn = event.target.closest('button');
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '✓';
-        
-        setTimeout(() => {
-            btn.innerHTML = originalHTML;
-        }, 2000);
-    }
+    img.src = url;
+    showMsg('Profile picture updated!', 'success');
+
+  } catch(e) {
+    showMsg('Upload failed: ' + e.message, 'error');
+  } finally {
+    document.getElementById('avatarSpinner').style.display = 'none';
+  }
+}
+
+function showMsg(msg, type) {
+  const el = document.createElement('li');
+  el.className = `msg-item ${type}`;
+  el.innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ${msg}`;
+  const list = document.querySelector('.msg-list') || (() => {
+    const ul = document.createElement('ul');
+    ul.className = 'msg-list';
+    document.querySelector('.settings-wrap').prepend(ul);
+    return ul;
+  })();
+  list.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+/* =============================================
+   DARK / LIGHT MODE
+   ============================================= */
+function setMode(mode) {
+  localStorage.setItem('vp-theme', mode);
+  applyMode(mode);
+  document.getElementById('pillLight').classList.toggle('active', mode === 'light');
+  document.getElementById('pillDark').classList.toggle('active', mode === 'dark');
+}
+function applyMode(mode) {
+  if (mode === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  else document.documentElement.removeAttribute('data-theme');
+}
+(function() {
+  const saved = localStorage.getItem('vp-theme') || 'light';
+  applyMode(saved);
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('pillLight').classList.toggle('active', saved === 'light');
+    document.getElementById('pillDark').classList.toggle('active', saved === 'dark');
+  });
+})();
+
+/* =============================================
+   COPY LINK
+   ============================================= */
+function copyLink() {
+  navigator.clipboard.writeText(document.getElementById('publicLink').value).catch(()=>{});
+  document.getElementById('copyIcon').style.display = 'none';
+  document.getElementById('checkIcon').style.display = 'block';
+  setTimeout(() => {
+    document.getElementById('copyIcon').style.display = 'block';
+    document.getElementById('checkIcon').style.display = 'none';
+  }, 2000);
+}
 </script>
 {% endblock %}

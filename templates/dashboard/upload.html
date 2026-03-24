@@ -1,307 +1,773 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% block title %}Upload Products — Vendopage{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/upload.css' %}">
-{% endblock %}  
-{% block title %}Add Product - VendoPage{% endblock %}
+<style>
+.upload-page {
+  background: var(--light);
+  min-height: calc(100vh - 64px);
+  padding: 28px 16px 120px;
+}
+.upload-wrap { max-width: 900px; margin: 0 auto; }
+
+.upload-head { margin-bottom: 20px; }
+.upload-head h1 {
+  font-family: var(--font-d); font-weight: 800; font-size: 26px;
+  letter-spacing: -1px; margin-bottom: 4px;
+}
+.upload-head p { font-size: 13px; color: var(--gray); line-height: 1.5; }
+
+.back-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500; color: var(--gray);
+  text-decoration: none; margin-bottom: 12px; transition: color .18s;
+}
+.back-link:hover { color: var(--dark); }
+
+.guest-banner {
+  background: #f0fff5; border: 1px solid #bbf7d0;
+  border-radius: 12px; padding: 11px 14px;
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px; font-size: 13px; color: #166534; line-height: 1.5;
+}
+.guest-banner svg { flex-shrink: 0; color: var(--green); }
+.guest-banner a { color: var(--green); font-weight: 600; text-decoration: none; }
+
+.stats-bar { font-size: 13px; color: var(--gray); margin-bottom: 14px; }
+.stats-bar strong { color: var(--dark); font-weight: 700; }
+
+/* ---- Grid ---- */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-bottom: 16px;
+}
+@media (min-width: 520px) { .product-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 720px) { .product-grid { grid-template-columns: repeat(5, 1fr); } }
+
+.slot {
+  aspect-ratio: 3/4; border-radius: 14px;
+  border: 2px dashed var(--border); background: var(--white);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: border-color .2s, background .2s, transform .15s;
+}
+.slot:hover { border-color: var(--green); background: #f0fff5; transform: translateY(-2px); }
+.slot-num { position: absolute; top: 7px; left: 9px; font-size: 11px; font-weight: 600; color: var(--gray-lt); }
+.slot-plus {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 2px dashed var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: var(--gray-lt);
+  transition: border-color .2s, color .2s;
+}
+.slot:hover .slot-plus { border-color: var(--green); color: var(--green); }
+.slot-hint { font-size: 11px; color: var(--gray-lt); font-weight: 500; }
+
+.slot.filled { border-style: solid; border-color: var(--border); padding: 0; }
+.slot.filled:hover { border-color: var(--green); }
+.slot-cover { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 12px; }
+.slot-overlay {
+  position: absolute; inset: 0; border-radius: 12px;
+  background: linear-gradient(to top, rgba(0,0,0,.68) 0%, transparent 55%);
+  display: flex; flex-direction: column; justify-content: flex-end; padding: 8px;
+}
+.slot-desc {
+  font-size: 10px; font-weight: 600; color: #fff; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.slot-price { font-size: 11px; font-weight: 800; color: var(--green); margin-top: 2px; }
+.slot-badge-edit {
+  position: absolute; top: 6px; right: 6px;
+  background: rgba(0,0,0,.55); color: #fff;
+  border-radius: 6px; padding: 3px 7px; font-size: 10px; font-weight: 600;
+}
+.slot-badge-imgs {
+  position: absolute; top: 6px; left: 6px;
+  background: rgba(0,0,0,.55); color: #fff;
+  border-radius: 6px; padding: 3px 7px; font-size: 10px; font-weight: 600;
+}
+/* uploading animation */
+.slot.uploading { border-color: var(--green); border-style: solid; }
+.slot-up-overlay {
+  position: absolute; inset: 0; border-radius: 12px;
+  background: rgba(0,200,83,.12);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+}
+.ring {
+  width: 26px; height: 26px;
+  border: 3px solid rgba(0,200,83,.25);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+.slot-up-overlay span { font-size: 10px; font-weight: 700; color: var(--green-dk); }
+.slot.done { border-color: var(--green); }
+
+.slot.add-more { border-color: var(--green); border-style: dashed; }
+.slot.add-more .slot-plus { border-color: var(--green); color: var(--green); }
+.slot.add-more .slot-hint { color: var(--green); font-weight: 600; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---- Publish bar ---- */
+.pub-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--white); border-top: 1px solid var(--border);
+  padding: 13px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; z-index: 100;
+}
+.pub-bar-info strong { font-family: var(--font-d); font-size: 16px; color: var(--dark); display: block; }
+.pub-bar-info span { font-size: 12px; color: var(--gray); }
+.pub-btn {
+  padding: 13px 28px; background: var(--green); color: #fff;
+  border: none; border-radius: var(--r-pill);
+  font-family: var(--font-b); font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: background .18s; white-space: nowrap;
+  display: flex; align-items: center; gap: 8px; min-width: 170px; justify-content: center;
+}
+.pub-btn:hover { background: var(--green-dk); }
+.pub-btn:disabled { background: var(--gray-lt); cursor: not-allowed; }
+.spin-sm {
+  width: 16px; height: 16px; flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
+  border-radius: 50%; animation: spin .7s linear infinite; display: none;
+}
+
+/* ---- Drawer ---- */
+.drw-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.4);
+  backdrop-filter: blur(3px); z-index: 400; display: none;
+}
+.drw-overlay.open { display: block; }
+.drw {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--white); border-radius: 24px 24px 0 0;
+  z-index: 500; max-height: 92vh; overflow-y: auto;
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(.32,0,.67,0);
+  max-width: 540px; margin: 0 auto;
+}
+.drw.open { transform: translateY(0); }
+.drw-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 12px auto 0; }
+.drw-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 10px; }
+.drw-head h2 { font-family: var(--font-d); font-weight: 800; font-size: 18px; }
+.drw-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--light);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; transition: all .18s;
+}
+.drw-close:hover { background: var(--dark); color: #fff; border-color: var(--dark); }
+.drw-body { padding: 0 20px 32px; }
+
+.img-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 8px; }
+.img-slot {
+  aspect-ratio: 1; border-radius: 12px;
+  border: 2px dashed var(--border); background: var(--light);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 5px;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: border-color .2s, background .2s;
+}
+.img-slot:hover { border-color: var(--green); background: #f0fff5; }
+.img-slot.has { border-style: solid; border-color: var(--green); }
+.img-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 10px; display: none; }
+.img-slot.has img { display: block; }
+.img-slot input { display: none; }
+.img-slot-ico { font-size: 22px; }
+.img-slot-lbl { font-size: 10px; color: var(--gray-lt); font-weight: 600; }
+.img-slot.has .img-slot-ico, .img-slot.has .img-slot-lbl { display: none; }
+.img-rm {
+  position: absolute; top: 4px; right: 4px; z-index: 3;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: rgba(0,0,0,.6); color: #fff; border: none;
+  font-size: 10px; cursor: pointer; display: none; align-items: center; justify-content: center;
+}
+.img-slot.has:hover .img-rm { display: flex; }
+.slots-labels { display: flex; gap: 10px; margin-bottom: 18px; }
+.slots-labels span { flex: 1; text-align: center; font-size: 11px; color: var(--gray-lt); font-weight: 500; }
+
+.f-group { margin-bottom: 16px; }
+.f-lbl { font-size: 13px; font-weight: 600; color: var(--gray); margin-bottom: 5px; display: block; }
+.f-lbl small { font-weight: 400; color: var(--gray-lt); font-size: 11px; }
+.f-inp {
+  width: 100%; background: var(--light); border: 1px solid var(--border);
+  border-radius: 12px; padding: 12px 14px;
+  font-family: var(--font-b); font-size: 14px; color: var(--dark);
+  outline: none; transition: border-color .18s; resize: none;
+}
+.f-inp:focus { border-color: var(--green); background: var(--white); }
+.f-inp::placeholder { color: var(--gray-lt); }
+.price-wrap { position: relative; }
+.price-sym { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-weight: 700; color: var(--gray); pointer-events: none; }
+.price-wrap .f-inp { padding-left: 30px; }
+.drw-actions { display: flex; gap: 10px; margin-top: 4px; }
+.drw-cancel {
+  padding: 13px 20px; border: 1px solid var(--border); border-radius: var(--r-pill);
+  background: var(--white); font-family: var(--font-b); font-size: 14px; font-weight: 600;
+  color: var(--gray); cursor: pointer; transition: all .18s;
+}
+.drw-cancel:hover { border-color: var(--dark); color: var(--dark); }
+.drw-save {
+  flex: 1; padding: 13px; background: var(--dark); color: #fff;
+  border: none; border-radius: var(--r-pill);
+  font-family: var(--font-b); font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background .18s;
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+}
+.drw-save:hover { background: var(--green); }
+
+/* ---- Gate modal ---- */
+.gate-bg {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  backdrop-filter: blur(4px); z-index: 600;
+  display: none; align-items: flex-end; justify-content: center;
+}
+.gate-bg.open { display: flex; }
+.gate-sheet {
+  background: var(--white); width: 100%; max-width: 480px;
+  border-radius: 24px 24px 0 0; padding: 28px 24px 44px;
+  animation: slideUp .3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.gate-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 22px; }
+.gate-emoji { text-align: center; font-size: 42px; margin-bottom: 12px; }
+.gate-sheet h2 { font-family: var(--font-d); font-weight: 800; font-size: 22px; text-align: center; margin-bottom: 8px; }
+.gate-sheet p { font-size: 14px; color: var(--gray); text-align: center; line-height: 1.6; margin-bottom: 20px; }
+.gate-thumbs { display: flex; gap: 8px; justify-content: center; margin-bottom: 22px; flex-wrap: wrap; }
+.gate-thumb { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; border: 2px solid var(--green); }
+.gate-more { width: 52px; height: 52px; border-radius: 10px; background: var(--light); border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: var(--gray); }
+.gate-register { display: block; width: 100%; padding: 15px; text-align: center; background: var(--green); color: #fff; border: none; border-radius: var(--r-pill); font-family: var(--font-b); font-size: 15px; font-weight: 700; text-decoration: none; margin-bottom: 10px; transition: background .18s; }
+.gate-register:hover { background: var(--green-dk); }
+.gate-login { display: block; width: 100%; padding: 14px; text-align: center; background: var(--white); color: var(--dark); border: 1.5px solid var(--border); border-radius: var(--r-pill); font-family: var(--font-b); font-size: 15px; font-weight: 600; text-decoration: none; transition: all .18s; }
+.gate-login:hover { border-color: var(--dark); }
+.gate-fine { font-size: 12px; color: var(--gray-lt); text-align: center; margin-top: 12px; }
+
+.toast-up {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: var(--dark); color: #fff; padding: 10px 22px;
+  border-radius: 100px; font-size: 14px; font-weight: 500;
+  z-index: 999; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap;
+}
+.toast-up.show { opacity: 1; }
+@media (max-width: 360px) { .product-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="upload-page">
-    <div class="container-narrow">
-        <div class="upload-header">
-            <a href="{% url 'dashboard' %}" class="back-btn">
-                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <line x1="19" y1="12" x2="5" y2="12"/>
-                    <polyline points="12 19 5 12 12 5"/>
-                </svg>
-                Back to Dashboard
-            </a>
-            <h1>Add New Product</h1>
-            <p class="text-muted">Upload multiple angles of your product in one collection</p>
-        </div>
-        
-        <form method="POST" id="uploadForm" class="upload-form">
-            {% csrf_token %}
-            
-            <!-- Image Upload -->
-            <div class="form-section">
-                <label class="form-label required">Product Images (Collection)</label>
-                <p class="form-hint mb-2">💡 <strong>Pro tip:</strong> Upload front, back, and side views in ONE post. First image will be the cover photo.</p>
-                
-                <div class="image-upload-area" id="uploadArea">
-                    <input type="file" id="imageInput" accept="image/jpeg,image/jpg,image/png,image/webp" multiple style="display:none">
-                    <div class="upload-placeholder" onclick="document.getElementById('imageInput').click()">
-                        <div class="upload-icon">
-                            <svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                <circle cx="8.5" cy="8.5" r="1.5"/>
-                                <polyline points="21 15 16 10 5 21"/>
-                            </svg>
-                        </div>
-                        <h3>Click to upload or drag and drop</h3>
-                        <p class="text-muted">Upload 1-5 images per product • JPG, PNG, WebP up to 10MB each</p>
-                        <p class="upload-tip">📸 Show different angles for 3x better sales!</p>
-                        <button type="button" class="btn btn-secondary mt-2">Choose Files</button>
-                    </div>
-                    <div id="imagePreview" class="image-preview-grid"></div>
-                </div>
-                <p class="helper-text" id="imageCount" style="display:none;">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                    <span id="countText">0 images selected</span> • Customers will see a carousel
-                </p>
-            </div>
-            
-            <!-- Description -->
-            <div class="form-section">
-                <label class="form-label">Description</label>
-                <p class="form-hint mb-2">Describe your product to help customers understand what you're selling</p>
-                <textarea name="description" id="description" class="form-input" rows="5" placeholder="e.g., Brand new designer sneakers, size 42, never worn, comes with original box..."></textarea>
-                <p class="helper-text">
-                    💬 This appears in the WhatsApp message when customers inquire
-                </p>
-            </div>
-            
-            <!-- Price -->
-            <div class="form-section">
-                <label class="form-label">Price</label>
-                <p class="form-hint mb-2">Set your selling price (optional - leave blank if price varies)</p>
-                <div class="input-group">
-                    <div class="input-prefix">
-                        <span class="currency">₦</span>
-                    </div>
-                    <input type="number" name="price" id="price" class="form-input with-prefix" placeholder="0" step="0.01" min="0">
-                </div>
-            </div>
-            
-            <!-- Submit -->
-            <div class="form-actions">
-                <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-lg">Cancel</a>
-                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                    <svg id="uploadIcon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                        <polyline points="17 8 12 3 7 8"/>
-                        <line x1="12" y1="3" x2="12" y2="15"/>
-                    </svg>
-                    <svg id="loadingIcon" style="display:none;" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" opacity="0.25"/>
-                        <path d="M12 2a10 10 0 0110 10" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-                            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s" repeatCount="indefinite"/>
-                        </path>
-                    </svg>
-                    <span id="btnText">Upload Product</span>
-                </button>
-            </div>
-        </form>
+<div class="upload-wrap">
+
+  {% if user.is_authenticated %}
+    <a href="{% url 'dashboard' %}" class="back-link">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
+      </svg>
+      Dashboard
+    </a>
+  {% else %}
+    <div class="guest-banner">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span>No account needed yet — add your products freely, then publish. <a href="{% url 'login' %}">Already have an account? Sign in</a></span>
     </div>
+  {% endif %}
+
+  <div class="upload-head">
+    <h1>Upload Your Products</h1>
+    <p>Tap any box · Up to 3 photos per product (front, back, detail) · Add description &amp; price.</p>
+  </div>
+
+  <div class="stats-bar">
+    <strong id="sFilled">0</strong> products added<span id="sDesc"></span>
+  </div>
+
+  <div class="product-grid" id="grid"></div>
+
+</div>
 </div>
 
+<!-- Publish bar -->
+<div class="pub-bar">
+  <div class="pub-bar-info">
+    <strong id="barCount">0 products</strong>
+    <span id="barSub">Tap a box to add your first product</span>
+  </div>
+  <button class="pub-btn" id="pubBtn" onclick="handlePublish()">
+    <span class="spin-sm" id="pubSpin"></span>
+    <span id="pubTxt">{% if user.is_authenticated %}Save All Products{% else %}Publish My Store{% endif %}</span>
+  </button>
+</div>
+
+<!-- Drawer -->
+<div class="drw-overlay" id="drwOverlay" onclick="closeDrawer()"></div>
+<div class="drw" id="drw">
+  <div class="drw-handle"></div>
+  <div class="drw-head">
+    <h2 id="drwTitle">Product 1</h2>
+    <button class="drw-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drw-body">
+    <div class="img-slots">
+      <div class="img-slot" id="s0" onclick="trigImg(0)">
+        <input type="file" id="i0" accept="image/*" onchange="onImg(0,this)">
+        <img id="p0" alt=""><button type="button" class="img-rm" onclick="rmImg(event,0)">✕</button>
+        <span class="img-slot-ico">📸</span><span class="img-slot-lbl">Front</span>
+      </div>
+      <div class="img-slot" id="s1" onclick="trigImg(1)">
+        <input type="file" id="i1" accept="image/*" onchange="onImg(1,this)">
+        <img id="p1" alt=""><button type="button" class="img-rm" onclick="rmImg(event,1)">✕</button>
+        <span class="img-slot-ico">🔄</span><span class="img-slot-lbl">Back</span>
+      </div>
+      <div class="img-slot" id="s2" onclick="trigImg(2)">
+        <input type="file" id="i2" accept="image/*" onchange="onImg(2,this)">
+        <img id="p2" alt=""><button type="button" class="img-rm" onclick="rmImg(event,2)">✕</button>
+        <span class="img-slot-ico">✨</span><span class="img-slot-lbl">Detail</span>
+      </div>
+    </div>
+    <div class="slots-labels"><span>Front view</span><span>Back view</span><span>Close-up</span></div>
+    <div class="f-group">
+      <label class="f-lbl">Description <small>(optional)</small></label>
+      <textarea id="dDesc" class="f-inp" rows="3" placeholder="e.g. Black Ankara gown, sizes S-XL. DM to order 🔥"></textarea>
+    </div>
+    <div class="f-group">
+      <label class="f-lbl">Price <small>(optional)</small></label>
+      <div class="price-wrap">
+        <span class="price-sym">{{ user.currency_symbol }}</span> 
+        <input type="number" id="dPrice" class="f-inp" placeholder="18000" min="0" step="1">
+      </div>
+    </div>
+    <div class="drw-actions">
+      <button type="button" class="drw-cancel" onclick="closeDrawer()">Cancel</button>
+      <button type="button" class="drw-save" onclick="saveSlot()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Save Product
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Gate modal -->
+<div class="gate-bg" id="gateBg">
+  <div class="gate-sheet">
+    <div class="gate-handle"></div>
+    <div class="gate-emoji">🎉</div>
+    <h2>Your products are ready!</h2>
+    <p>Create a free account to publish your store and start getting WhatsApp orders.</p>
+    <div class="gate-thumbs" id="gateThumbs"></div>
+    <a href="{% url 'register' %}?guest=1" class="gate-register">Create Free Account &amp; Publish</a>
+    <a href="{% url 'login' %}?next={% url 'upload_product' %}" class="gate-login">Already have an account — Sign In</a>
+    <p class="gate-fine">No credit card · Free forever · 30 seconds to set up</p>
+  </div>
+</div>
+
+<div class="toast-up" id="toast"></div>
+
 <script>
-    const imageInput = document.getElementById('imageInput');
-    const imagePreview = document.getElementById('imagePreview');
-    const uploadArea = document.getElementById('uploadArea');
-    const uploadForm = document.getElementById('uploadForm');
-    const imageCount = document.getElementById('imageCount');
-    const countText = document.getElementById('countText');
-    
-    let selectedFiles = [];
-    let uploadedUrls = [];
-    
-    // ✅ Cloudinary Config
-    const CLOUDINARY_CLOUD_NAME = 'dqxlkie1i';
-    const CLOUDINARY_UPLOAD_PRESET = 'vendopage_unsigned'; // You'll create this
-    const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-    
-    // Handle file selection
-    imageInput.addEventListener('change', handleFiles);
-    
-    // Drag and drop
-    uploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = 'var(--primary)';
-        uploadArea.style.background = 'var(--bg)';
-    });
-    
-    uploadArea.addEventListener('dragleave', () => {
-        uploadArea.style.borderColor = 'var(--border)';
-        uploadArea.style.background = 'var(--bg-secondary)';
-    });
-    
-    uploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        uploadArea.style.borderColor = 'var(--border)';
-        uploadArea.style.background = 'var(--bg-secondary)';
-        const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
-        if (files.length > 0) {
-            handleFiles({target: {files}});
-        }
-    });
-    
-    function handleFiles(e) {
-        const files = Array.from(e.target.files);
-        const validFiles = files.filter(f => {
-            if (!f.type.startsWith('image/')) {
-                alert(`${f.name} is not an image file`);
-                return false;
-            }
-            if (f.size > 10 * 1024 * 1024) {
-                alert(`${f.name} is larger than 10MB`);
-                return false;
-            }
-            return true;
-        });
-        
-        const totalFiles = selectedFiles.length + validFiles.length;
-        if (totalFiles > 10) {
-            alert(`Maximum 10 images per product. You tried to add ${totalFiles} images.`);
-            return;
-        }
-        
-        selectedFiles = [...selectedFiles, ...validFiles];
-        renderPreviews();
-        updateImageCount();
-    }
-    
-    function renderPreviews() {
-        imagePreview.innerHTML = '';
-        selectedFiles.forEach((file, index) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const div = document.createElement('div');
-                div.className = 'preview-item';
-                div.innerHTML = `
-                    <img src="${e.target.result}" alt="Preview">
-                    <button type="button" class="preview-remove" onclick="removeImage(${index})" title="Remove image">&times;</button>
-                `;
-                imagePreview.appendChild(div);
-            };
-            reader.readAsDataURL(file);
-        });
-        
-        const placeholder = document.querySelector('.upload-placeholder');
-        if (selectedFiles.length > 0) {
-            placeholder.style.display = 'none';
-            imagePreview.style.display = 'grid';
+/* =====================================================
+   FAST UPLOAD — optimised for Nigerian mobile
+
+   SPEED STRATEGY:
+   ─────────────────────────────────────────────────
+   1. SKIP compression if file < 500 KB — it's
+      already small, canvas only adds CPU time.
+
+   2. Compress large files to max 1000px / 75%
+      quality. Most phone photos are 3-5 MB,
+      this brings them to ~150-250 KB.
+
+   3. Upload in CONTROLLED BATCHES of 4 concurrent
+      uploads. Too many at once on mobile data
+      causes congestion and all slow down together.
+      4 at a time is the sweet spot.
+
+   4. ONE batch POST to Django — not N requests.
+   ===================================================== */
+
+const IS_AUTH   = {{ user.is_authenticated|lower }};
+const CSRF      = '{{ csrf_token }}';
+const CDN_URL   = 'https://api.cloudinary.com/v1_1/dqxlkie1i/image/upload';
+const BATCH_URL = '{% url "upload_products_batch" %}';
+const CURRENCY_SYM = '{{ user.currency_symbol|default:"₦"|escapejs }}';
+
+/* Concurrency limit — 4 uploads at a time */
+const CONCURRENCY = 4;
+
+const prods = {};
+let slots   = 15;
+let active  = null;
+let dFiles  = [null, null, null];
+let dSrcs   = ['', '', ''];
+
+/* =============================================
+   SMART COMPRESSION
+   Only compress if file is over 500 KB.
+   Saves CPU time on already-small images.
+   ============================================= */
+const SIZE_THRESHOLD = 500 * 1024;   /* 500 KB */
+const MAX_DIM        = 1000;          /* px */
+const QUALITY        = 0.75;          /* 75% JPEG */
+
+function maybeCompress(file) {
+  /* If file is already small, skip compression entirely */
+  if (file.size <= SIZE_THRESHOLD) return Promise.resolve(file);
+
+  return new Promise(resolve => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      let { width, height } = img;
+
+      /* Only resize if actually bigger than MAX_DIM */
+      if (width > MAX_DIM || height > MAX_DIM) {
+        if (width >= height) {
+          height = Math.round(height * MAX_DIM / width);
+          width  = MAX_DIM;
         } else {
-            placeholder.style.display = 'block';
-            imagePreview.style.display = 'none';
+          width  = Math.round(width * MAX_DIM / height);
+          height = MAX_DIM;
         }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width  = width;
+      canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        blob => resolve(blob && blob.size < file.size ? blob : file),
+        'image/jpeg',
+        QUALITY
+      );
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+    img.src = url;
+  });
+}
+
+/* =============================================
+   CLOUDINARY UPLOAD — single file
+   ============================================= */
+async function uploadOne(file) {
+  const blob = await maybeCompress(file);
+  const fd   = new FormData();
+  fd.append('file', blob);
+  fd.append('upload_preset', 'vendopage_unsigned');
+  fd.append('folder', 'vendopage/products');
+  const res = await fetch(CDN_URL, { method: 'POST', body: fd });
+  if (!res.ok) throw new Error('Upload failed');
+  return (await res.json()).secure_url;
+}
+
+/* =============================================
+   CONCURRENCY-LIMITED BATCH RUNNER
+   Runs at most `limit` tasks simultaneously.
+   Much faster than sequential, but avoids
+   overwhelming mobile bandwidth like full
+   Promise.all would.
+   ============================================= */
+async function runWithConcurrency(tasks, limit, onProgress) {
+  const results = new Array(tasks.length);
+  let index     = 0;
+  let completed = 0;
+
+  async function worker() {
+    while (index < tasks.length) {
+      const i   = index++;
+      results[i] = await tasks[i]();
+      completed++;
+      if (onProgress) onProgress(completed, tasks.length);
     }
-    
-    function updateImageCount() {
-        const count = selectedFiles.length;
-        if (count > 0) {
-            imageCount.style.display = 'flex';
-            countText.textContent = `${count} image${count > 1 ? 's' : ''} selected`;
-        } else {
-            imageCount.style.display = 'none';
-        }
-    }
-    
-    function removeImage(index) {
-        selectedFiles.splice(index, 1);
-        renderPreviews();
-        updateImageCount();
-    }
-    
-    // ✅ Upload to Cloudinary directly
-    async function uploadToCloudinary(file) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-        formData.append('folder', 'vendopage/products');
-        
-        const response = await fetch(CLOUDINARY_UPLOAD_URL, {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error?.message || 'Cloudinary upload failed');
-        }
-        
-        const data = await response.json();
-        return data.secure_url;
-    }
-    
-    // Form submission
-    uploadForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        if (selectedFiles.length === 0) {
-            alert('Please select at least one product image');
-            return;
-        }
-        
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = document.getElementById('btnText');
-        const uploadIcon = document.getElementById('uploadIcon');
-        const loadingIcon = document.getElementById('loadingIcon');
-        
-        submitBtn.disabled = true;
-        uploadIcon.style.display = 'none';
-        loadingIcon.style.display = 'block';
-        
-        try {
-            // ✅ Step 1: Upload all images to Cloudinary in parallel
-            btnText.textContent = `Uploading ${selectedFiles.length} image${selectedFiles.length > 1 ? 's' : ''}...`;
-            
-            uploadedUrls = [];
-            const uploadPromises = selectedFiles.map((file, index) => {
-                return uploadToCloudinary(file).then(url => {
-                    uploadedUrls[index] = url;
-                    const uploaded = uploadedUrls.filter(Boolean).length;
-                    btnText.textContent = `Uploaded ${uploaded}/${selectedFiles.length}...`;
-                });
-            });
-            
-            await Promise.all(uploadPromises);
-            
-            // ✅ Step 2: Send URLs to Django
-            btnText.textContent = 'Saving product...';
-            
-            const formData = new FormData();
-            formData.append('description', document.getElementById('description').value);
-            formData.append('price', document.getElementById('price').value);
-            
-            uploadedUrls.forEach(url => {
-                formData.append('image_urls[]', url);
-            });
-            
-            const response = await fetch('{% url "upload_product" %}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (response.ok && data.success) {
-                btnText.textContent = 'Success!';
-                setTimeout(() => {
-                    window.location.href = data.redirect_url;
-                }, 300);
-            } else {
-                throw new Error(data.error || 'Upload failed');
-            }
-            
-        } catch (error) {
-            console.error('Upload error:', error);
-            alert(`Upload failed: ${error.message}`);
-            
-            submitBtn.disabled = false;
-            uploadIcon.style.display = 'block';
-            loadingIcon.style.display = 'none';
-            btnText.textContent = 'Upload Product';
-        }
+  }
+
+  /* Start `limit` workers simultaneously */
+  await Promise.all(Array.from({ length: Math.min(limit, tasks.length) }, worker));
+  return results;
+}
+
+/* =============================================
+   GRID
+   ============================================= */
+function buildGrid() {
+  const g = document.getElementById('grid');
+  g.innerHTML = '';
+  for (let i = 0; i < slots; i++) g.appendChild(makeSlot(i));
+  const m = document.createElement('div');
+  m.className = 'slot add-more';
+  m.innerHTML = '<div class="slot-plus">+</div><span class="slot-hint">Add more</span>';
+  m.onclick = () => { slots += 5; buildGrid(); toast('5 more slots added'); };
+  g.appendChild(m);
+  syncUI();
+}
+
+function makeSlot(i) {
+  const p  = prods[i];
+  const el = document.createElement('div');
+  if (p) {
+    const cover = p.srcs.find(s => s) || '';
+    el.className = 'slot filled' + (p.saved ? ' done' : '');
+    el.innerHTML = `
+      <span class="slot-badge-imgs">📷 ${p.srcs.filter(s=>s).length}</span>
+      <img class="slot-cover" src="${cover}" alt="">
+      <div class="slot-overlay">
+        <div class="slot-desc">${p.desc || 'No description'}</div>
+        ${p.price ? `<div class="slot-price">${CURRENCY_SYM}${Number(p.price).toLocaleString()}</div>` : ''}
+      </div>
+      <span class="slot-badge-edit">✏️ Edit</span>`;
+  } else {
+    el.className = 'slot';
+    el.innerHTML = `<span class="slot-num">${i+1}</span><div class="slot-plus">+</div><span class="slot-hint">Add product</span>`;
+  }
+  el.onclick = () => openDrawer(i);
+  return el;
+}
+
+function setSlotUploading(i) {
+  const el = document.getElementById('grid').children[i];
+  if (!el) return;
+  el.className = 'slot uploading';
+  el.innerHTML = `<div class="slot-up-overlay"><div class="ring"></div><span>Uploading…</span></div>`;
+}
+
+function setSlotDone(i) {
+  const el = document.getElementById('grid').children[i];
+  if (!el || !prods[i]) return;
+  const p = prods[i];
+  el.className = 'slot filled done';
+  el.innerHTML = `
+    <span class="slot-badge-imgs">✓</span>
+    <img class="slot-cover" src="${p.srcs.find(s=>s)}" alt="">
+    <div class="slot-overlay">
+      <div class="slot-desc">${p.desc || ''}</div>
+      ${p.price ? `<div class="slot-price">${CURRENCY_SYM}${Number(p.price).toLocaleString()}</div>` : ''}
+    </div>`;
+}
+
+function syncUI() {
+  const n = Object.keys(prods).length;
+  const d = Object.values(prods).filter(p => p.desc).length;
+  document.getElementById('sFilled').textContent = n;
+  document.getElementById('sDesc').textContent   = n > 0 ? ` · ${d} described` : '';
+  document.getElementById('barCount').textContent = n === 0 ? '0 products' : `${n} product${n>1?'s':''} added`;
+  document.getElementById('barSub').textContent   = n === 0
+    ? 'Tap a box to add your first product'
+    : IS_AUTH ? 'Tap Save when ready' : 'Tap Publish when ready';
+}
+
+/* =============================================
+   DRAWER
+   ============================================= */
+function openDrawer(i) {
+  active = i;
+  const p = prods[i];
+  document.getElementById('drwTitle').textContent = `Product ${i+1}`;
+  dFiles = p ? [...p.files] : [null, null, null];
+  dSrcs  = p ? [...p.srcs]  : ['', '', ''];
+  while (dFiles.length < 3) dFiles.push(null);
+  while (dSrcs.length  < 3) dSrcs.push('');
+  [0,1,2].forEach(x => {
+    document.getElementById(`i${x}`).value = '';
+    const sl = document.getElementById(`s${x}`);
+    const pr = document.getElementById(`p${x}`);
+    if (dSrcs[x]) { pr.src = dSrcs[x]; sl.classList.add('has'); }
+    else          { pr.src = '';       sl.classList.remove('has'); }
+  });
+  document.getElementById('dDesc').value  = p?.desc  || '';
+  document.getElementById('dPrice').value = p?.price || '';
+  document.getElementById('drwOverlay').classList.add('open');
+  document.getElementById('drw').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+  document.getElementById('drwOverlay').classList.remove('open');
+  document.getElementById('drw').classList.remove('open');
+  document.body.style.overflow = '';
+  active = null;
+}
+
+function trigImg(x) { document.getElementById(`i${x}`).click(); }
+
+function onImg(x, inp) {
+  const f = inp.files[0]; if (!f) return;
+  if (!f.type.startsWith('image/')) { toast('Not an image file'); return; }
+  if (f.size > 30 * 1024 * 1024)   { toast('Max 30MB per image'); return; }
+  const r = new FileReader();
+  r.onload = ev => {
+    dFiles[x] = f; dSrcs[x] = ev.target.result;
+    document.getElementById(`p${x}`).src = ev.target.result;
+    document.getElementById(`s${x}`).classList.add('has');
+  };
+  r.readAsDataURL(f);
+}
+
+function rmImg(e, x) {
+  e.stopPropagation();
+  dFiles[x] = null; dSrcs[x] = '';
+  document.getElementById(`p${x}`).src = '';
+  document.getElementById(`s${x}`).classList.remove('has');
+  document.getElementById(`i${x}`).value = '';
+}
+
+function saveSlot() {
+  if (!dSrcs.some(s => s)) { toast('Add at least one photo'); return; }
+  prods[active] = {
+    files: [...dFiles], srcs: [...dSrcs],
+    desc:  document.getElementById('dDesc').value.trim(),
+    price: document.getElementById('dPrice').value.trim(),
+    saved: false
+  };
+  saveMeta();
+  buildGrid();
+  closeDrawer();
+  toast('Product saved ✓');
+  if (Object.keys(prods).length >= slots - 2) { slots += 5; buildGrid(); }
+}
+
+/* =============================================
+   PUBLISH
+   ============================================= */
+function handlePublish() {
+  if (!Object.keys(prods).length) { toast('Add at least one product first!'); return; }
+  IS_AUTH ? saveToServer() : openGate();
+}
+
+async function saveToServer() {
+  const btn  = document.getElementById('pubBtn');
+  const spin = document.getElementById('pubSpin');
+  const txt  = document.getElementById('pubTxt');
+  const keys = Object.keys(prods);
+
+  /* Count total images to upload */
+  const totalImages = keys.reduce((sum, k) => sum + prods[k].files.filter(Boolean).length, 0);
+
+  btn.disabled       = true;
+  spin.style.display = 'block';
+  txt.textContent    = `Uploading 0 / ${totalImages} images…`;
+
+  let uploadedCount = 0;
+
+  /* ---- Build flat list of upload tasks ---- */
+  /* Each task knows which product + image slot it belongs to */
+  const tasks  = [];
+  const urlMap = {};   /* productKey → [url, url, ...] */
+
+  keys.forEach(k => {
+    urlMap[k] = [];
+    prods[k].files.forEach((file, slotIdx) => {
+      if (!file) return;
+      tasks.push(async () => {
+        const url = await uploadOne(file);
+        urlMap[k].push(url);
+        uploadedCount++;
+        txt.textContent = `Uploading ${uploadedCount} / ${totalImages} images…`;
+        /* Show live state on the grid */
+        setSlotUploading(Number(k));
+        return url;
+      });
     });
-    
-    // Initialize
-    imagePreview.style.display = 'none';
-    imageCount.style.display = 'none';
+  });
+
+  try {
+    /* ---- Run all uploads, 4 at a time ---- */
+    await runWithConcurrency(tasks, CONCURRENCY, null);
+
+    /* ---- Filter out products with no successful uploads ---- */
+    const validProducts = keys
+      .filter(k => urlMap[k].length > 0)
+      .map(k => ({
+        image_urls:  urlMap[k],
+        description: prods[k].desc,
+        price:       prods[k].price
+      }));
+
+    if (!validProducts.length) {
+      throw new Error('No images uploaded successfully');
+    }
+
+    /* ---- ONE batch POST to Django ---- */
+    txt.textContent = 'Saving to your store…';
+
+    const fd = new FormData();
+    fd.append('products', JSON.stringify(validProducts));
+
+    const res  = await fetch(BATCH_URL, {
+      method:  'POST',
+      body:    fd,
+      headers: { 'X-CSRFToken': CSRF }
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      keys.forEach(k => setSlotDone(Number(k)));
+      spin.style.display = 'none';
+      txt.textContent    = `${data.created} saved! ✓`;
+      toast(`${data.created} product${data.created>1?'s':''} saved ✓`);
+      setTimeout(() => { window.location.href = '{% url "dashboard" %}'; }, 700);
+    } else {
+      throw new Error(data.error || 'Save failed');
+    }
+
+  } catch (e) {
+    spin.style.display = 'none';
+    btn.disabled       = false;
+    txt.textContent    = 'Save All Products';
+    toast('Upload failed: ' + e.message + '. Check your connection and try again.');
+    /* Re-render grid so slots go back to normal */
+    buildGrid();
+  }
+}
+
+/* ---- Guest gate modal ---- */
+function openGate() {
+  const keys  = Object.keys(prods);
+  const show  = keys.slice(0, 4);
+  const extra = keys.length - show.length;
+  document.getElementById('gateThumbs').innerHTML =
+    show.map(k => `<img class="gate-thumb" src="${prods[k].srcs.find(s=>s)}">`).join('') +
+    (extra > 0 ? `<div class="gate-more">+${extra}</div>` : '');
+  document.getElementById('gateBg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+document.getElementById('gateBg').addEventListener('click', e => {
+  if (e.target === document.getElementById('gateBg')) {
+    document.getElementById('gateBg').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+/* ---- SessionStorage for register page ---- */
+function saveMeta() {
+  try {
+    sessionStorage.setItem('vp_guest_meta', JSON.stringify(
+      Object.values(prods).map(p => ({ desc: p.desc, price: p.price, imgs: p.srcs.filter(s=>s).length }))
+    ));
+    sessionStorage.setItem('vp_guest_count', Object.keys(prods).length);
+  } catch(e) {}
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  closeDrawer();
+  document.getElementById('gateBg').classList.remove('open');
+  document.body.style.overflow = '';
+});
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+buildGrid();
 </script>
 {% endblock %}

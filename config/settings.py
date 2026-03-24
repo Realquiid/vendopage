@@ -6,6 +6,7 @@ from pathlib import Path
 from decouple import config
 import dj_database_url
 import os
+import cloudinary
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here')
 
 
-DEBUG = config('DEBUG', default=False, cast=bool)
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 AUTH_USER_MODEL = 'sellers.Seller'
 
@@ -85,16 +86,16 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
-if config('DATABASE_URL', default=None):
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=config('DATABASE_URL'),
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-else:
- DATABASES = {
+# if config('DATABASE_URL', default=None):
+#     DATABASES = {
+#         'default': dj_database_url.config(
+#             default=config('DATABASE_URL'),
+#             conn_max_age=600,
+#             conn_health_checks=True,
+#         )
+#     }
+# else:
+DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'db.sqlite3',
@@ -140,31 +141,34 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Security settings for production
 # Security settings for production
-if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # ADD THIS FIRST
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
-    X_FRAME_OPTIONS = 'DENY'
+# if not DEBUG:
+#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # ADD THIS FIRST
+#     SECURE_SSL_REDIRECT = True
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
+#     SECURE_BROWSER_XSS_FILTER = True
+#     SECURE_CONTENT_TYPE_NOSNIFF = True
+#     X_FRAME_OPTIONS = 'DENY'
 
 # Flutterwave Payment Settings
 FLUTTERWAVE_PUBLIC_KEY = config('FLUTTERWAVE_PUBLIC_KEY', default='')
 FLUTTERWAVE_SECRET_KEY = config('FLUTTERWAVE_SECRET_KEY', default='')
 FLUTTERWAVE_ENCRYPTION_KEY = config('FLUTTERWAVE_ENCRYPTION_KEY', default='')
 
-# Cloudinary Settings for Media Storage
+
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default='dqxlkie1i'),
-    'API_KEY': config('CLOUDINARY_API_KEY', default='744231361812346'),
-    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
-    'TRANSFORMATIONS': {
-        'quality': 'auto:good',
-        'fetch_format': 'auto',
-    },
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY':    config('CLOUDINARY_API_KEY'),
+    'API_SECRET': config('CLOUDINARY_API_SECRET'),
 }
 
+
+cloudinary.config(
+    cloud_name = config('CLOUDINARY_CLOUD_NAME'),
+    api_key    = config('CLOUDINARY_API_KEY'),
+    api_secret = config('CLOUDINARY_API_SECRET'),
+    secure     = True
+)
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # config/settings.py

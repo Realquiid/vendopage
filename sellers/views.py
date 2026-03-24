@@ -131,108 +131,138 @@ def seller_page(request, slug):
 })
 
 
+
+def login_view(request):
+    if request.method == 'POST':
+        identifier = request.POST.get('username', '').strip()
+        password   = request.POST.get('password', '')
+
+        # Try username first, then email
+        user = authenticate(request, username=identifier, password=password)
+
+        if not user:
+            # Maybe they typed their email — look up the username
+            try:
+                seller = Seller.objects.get(email__iexact=identifier)
+                user = authenticate(request, username=seller.username, password=password)
+            except Seller.DoesNotExist:
+                pass
+
+        if user and user.is_active:
+            login(request, user)
+            next_url = request.GET.get('next', '')
+            return redirect(next_url or 'dashboard')
+
+        return render(request, 'register.html', {
+            'error': 'Wrong username/email or password. Try again.',
+            'active_tab': 'login',
+            'login_username': identifier,   # repopulate the field
+        })
+
+    return render(request, 'register.html', {'active_tab': 'login'})
+
+
 def register_view(request):
     if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        email = request.POST.get('email', '').strip().lower()  # Normalize to lowercase
-        password = request.POST.get('password', '')
-        business_name = request.POST.get('business_name', '').strip()
+        username        = request.POST.get('username', '').strip()
+        email           = request.POST.get('email', '').strip().lower()
+        password        = request.POST.get('password', '')
+        business_name   = request.POST.get('business_name', '').strip()
         whatsapp_number = request.POST.get('whatsapp_number', '').strip()
-        category = request.POST.get('category', '')
-        
+        country_code    = request.POST.get('country_code', '+234').strip()
+        currency_code   = request.POST.get('currency_code', 'NGN').strip()
+        currency_symbol = request.POST.get('currency_symbol', '₦').strip()
+        category        = request.POST.get('category', 'other')
+
+        # Combine country code + local number → full WhatsApp number
+        # e.g. +234 + 8012345678 → +2348012345678
+        if country_code and not whatsapp_number.startswith('+'):
+            full_whatsapp = country_code + whatsapp_number
+        else:
+            full_whatsapp = whatsapp_number
+
         errors = []
-        
-        # Validate required fields
-        if not all([username, email, password, business_name, whatsapp_number, category]):
+
+        if not all([username, email, password, business_name, whatsapp_number]):
             errors.append('All fields are required')
-        
-        # Check username uniqueness (case-insensitive)
+
         if username and Seller.objects.filter(username__iexact=username).exists():
-            errors.append(f'Username "{username}" is already taken. Please choose another.')
-        
-        # Check email uniqueness (case-insensitive)
+            errors.append(f'Username "{username}" is already taken.')
+
         if email and Seller.objects.filter(email__iexact=email).exists():
-            errors.append(f'Email "{email}" is already registered. Please use another email or login.')
-        
-        # Check phone number uniqueness
-        if whatsapp_number and Seller.objects.filter(whatsapp_number=whatsapp_number).exists():
-            errors.append(f'WhatsApp number "{whatsapp_number}" is already registered. Please use another number.')
-        
-        # Validate email format
+            errors.append(f'Email "{email}" is already registered.')
+
+        if full_whatsapp and Seller.objects.filter(whatsapp_number=full_whatsapp).exists():
+            errors.append(f'WhatsApp number is already registered.')
+
         if email and ('@' not in email or '.' not in email.split('@')[1]):
             errors.append('Please enter a valid email address')
-        
-        # Validate password length
+
         if password and len(password) < 6:
             errors.append('Password must be at least 6 characters long')
-        
-        # Validate username format (alphanumeric and underscores only)
+
         if username and not username.replace('_', '').isalnum():
             errors.append('Username can only contain letters, numbers, and underscores')
-        
+
         if errors:
             return render(request, 'register.html', {
-                'errors': errors,
-                'username': username,
-                'email': email,
+                'errors': errors, 'active_tab': 'register',
+                'username': username, 'email': email,
                 'business_name': business_name,
                 'whatsapp_number': whatsapp_number,
                 'category': category,
             })
-        
+
         try:
-            # Create the seller with unlimited products
             seller = Seller.objects.create_user(
                 username=username,
                 email=email,
                 password=password,
                 business_name=business_name,
-                whatsapp_number=whatsapp_number,
+                whatsapp_number=full_whatsapp,
                 category=category,
-                subscription_type='free'  # Everyone gets free (which is unlimited!)
+                country_code=country_code,
+                currency_code=currency_code,
+                currency_symbol=currency_symbol,
+                subscription_type='free',
             )
-            
-            # Log them in
             login(request, seller)
-            messages.success(request, f'🎉 Welcome {business_name}! You now have UNLIMITED products to list!')
-            return redirect('dashboard')
-            
+            if request.GET.get('guest') == '1':
+                return redirect('upload_product')
+            return redirect(request.GET.get('next', '') or 'dashboard')
+
         except IntegrityError as e:
-            error_message = str(e)
-            if 'username' in error_message:
+            err = str(e)
+            if 'username' in err:
                 errors.append('Username is already taken')
-            elif 'email' in error_message:
+            elif 'email' in err:
                 errors.append('Email is already registered')
-            elif 'whatsapp_number' in error_message:
+            elif 'whatsapp' in err:
                 errors.append('WhatsApp number is already registered')
             else:
-                errors.append('Registration failed. Please check your details and try again.')
-            
+                errors.append('Registration failed. Please try again.')
+
             return render(request, 'register.html', {
-                'errors': errors,
-                'username': username,
-                'email': email,
+                'errors': errors, 'active_tab': 'register',
+                'username': username, 'email': email,
                 'business_name': business_name,
                 'whatsapp_number': whatsapp_number,
                 'category': category,
             })
-    
-    return render(request, 'register.html')
 
+    return render(request, 'register.html', {'active_tab': 'register'})
 
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        
-        if user:
-            login(request, user)
-            return redirect('dashboard')
-        else:
-            return render(request, 'login.html', {'error': 'Invalid credentials'})
-    
-    return render(request, 'login.html')
+@login_required
+@require_http_methods(["POST"])
+def update_watermark(request):
+    if request.user.subscription_type == 'premium':
+        request.user.watermark_enabled = 'watermark_enabled' in request.POST
+        request.user.save(update_fields=['watermark_enabled'])
+    return redirect('settings')
+
+def guest_upload_view(request):
+    """Homepage 'Start Uploading' — same page for everyone"""
+    return render(request, 'dashboard/upload.html') 
 
 def logout_view(request):
     logout(request)
@@ -308,11 +338,7 @@ from django.views.decorators.http import require_http_methods
 import traceback
 
 
-# sellers/views.py (REPLACE your upload_product function)
-
-# sellers/views.py
-
-@login_required
+# @login_required
 @require_http_methods(["GET", "POST"])
 def upload_product(request):
     """Upload product - instant response"""
@@ -471,58 +497,53 @@ def track_whatsapp_click(request, product_id):
 def dashboard_settings(request):
     return render(request, 'dashboard/settings.html')
 
-
-# sellers/views.py
-
 @login_required
 def update_profile_picture(request):
-    """Update or remove profile picture - Cloudinary compatible"""
-    if request.method == 'POST':
-        seller = request.user
-        
-        # Remove picture
-        if request.POST.get('remove_picture'):
-            if seller.profile_picture:
-                # Cloudinary handles deletion automatically
-                seller.profile_picture.delete(save=False)  # Delete from Cloudinary
-                seller.profile_picture = None
-                seller.save()
-                messages.success(request, '✓ Profile picture removed')
-            return redirect('settings')
-        
-        # Upload new picture
-        if 'profile_picture' in request.FILES:
-            picture = request.FILES['profile_picture']
-            
-            # Validate file size (max 5MB)
-            if picture.size > 5 * 1024 * 1024:
-                messages.error(request, 'Image too large. Maximum size is 5MB.')
-                return redirect('settings')
-            
-            # Validate file type
-            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
-            if picture.content_type not in allowed_types:
-                messages.error(request, 'Invalid file type. Use JPG, PNG, or GIF.')
-                return redirect('settings')
-            
+    if request.method != 'POST':
+        return redirect('settings')
+
+    seller = request.user
+
+    # Remove picture
+    if request.POST.get('remove_picture'):
+        if seller.profile_picture:
             try:
-                # Delete old picture from Cloudinary if exists
-                if seller.profile_picture:
-                    seller.profile_picture.delete(save=False)
-                
-                # Upload new picture to Cloudinary
-                seller.profile_picture = picture
-                seller.save()
-                messages.success(request, '✓ Profile picture updated!')
-                
+                import cloudinary.uploader
+                # Get the public_id from the CloudinaryResource
+                public_id = seller.profile_picture.public_id
+                if public_id:
+                    cloudinary.uploader.destroy(public_id)
             except Exception as e:
-                logger.error(f"Profile picture upload error: {str(e)}")
-                messages.error(request, 'Failed to update profile picture. Please try again.')
-                return redirect('settings')
-    
+                logger.error(f"Cloudinary delete error: {str(e)}")
+            seller.profile_picture = None
+            seller.save(update_fields=['profile_picture'])
+        return redirect('settings')
+
+    # URL-based upload (from frontend Cloudinary direct upload)
+    if request.POST.get('profile_picture_url'):
+        try:
+            url = request.POST.get('profile_picture_url')
+            # Extract public_id: https://res.cloudinary.com/xxx/image/upload/v123/vendopage/profiles/abc.jpg
+            # → vendopage/profiles/abc
+            parts = url.split('/upload/')
+            if len(parts) > 1:
+                path = parts[1]
+                # Remove version segment (v1234567/)
+                path_parts = path.split('/')
+                if path_parts[0].startswith('v') and path_parts[0][1:].isdigit():
+                    path_parts = path_parts[1:]
+                public_id = '/'.join(path_parts).rsplit('.', 1)[0]
+            else:
+                public_id = url
+
+            seller.profile_picture = public_id
+            seller.save(update_fields=['profile_picture'])
+            return JsonResponse({'success': True})
+        except Exception as e:
+            logger.error(f"Profile picture URL save error: {str(e)}")
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
     return redirect('settings')
-
-
 
 @login_required
 def update_business_info(request):
@@ -556,7 +577,7 @@ def update_business_info(request):
         seller.whatsapp_number = whatsapp_number
         seller.save()
         
-        messages.success(request, 'Business information updated!')
+        # messages.success(request, 'Business information updated!')
     
     return redirect('settings')
 
@@ -583,7 +604,7 @@ def update_account(request):
         
         seller.email = email
         seller.save()
-        messages.success(request, 'Email updated successfully!')
+        # messages.success(request, 'Email updated successfully!')
     
     return redirect('settings')
 
@@ -624,7 +645,7 @@ def change_password(request):
         # Keep user logged in after password change
         update_session_auth_hash(request, seller)
         
-        messages.success(request, 'Password changed successfully!')
+        # messages.success(request, 'Password changed successfully!')
     
     return redirect('settings')
 
@@ -773,7 +794,7 @@ If you didn't request this, please ignore this email.
                     print(f"❌ Gmail fallback failed: {str(gmail_error)}")
             
             if email_sent:
-                messages.success(request, f'✓ Reset code sent to {email}. Check your inbox!')
+                # messages.success(request, f'✓ Reset code sent to {email}. Check your inbox!')
                 return redirect('verify_reset_code')
             else:
                 messages.error(request, 'Could not send email. Please try again or contact support.')
@@ -1209,3 +1230,76 @@ def flutterwave_webhook(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
+
+
+@login_required
+@require_http_methods(["POST"])
+def upload_products_batch(request):
+    """Save multiple products in one request — batch endpoint for fast upload"""
+    try:
+        seller = request.user
+        products_data = json.loads(request.POST.get('products', '[]'))
+
+        if not products_data:
+            return JsonResponse({'success': False, 'error': 'No products provided'}, status=400)
+
+        if len(products_data) > 50:
+            return JsonResponse({'success': False, 'error': 'Maximum 50 products per batch'}, status=400)
+
+        created = []
+
+        for item in products_data:
+            # Filter to only valid Cloudinary URLs
+            valid_urls = [
+                url for url in item.get('image_urls', [])
+                if isinstance(url, str) and url.startswith('https://res.cloudinary.com/')
+            ]
+
+            # Skip product if no valid images
+            if not valid_urls:
+                continue
+
+            # Parse price safely
+            price_value = None
+            raw_price = str(item.get('price', '')).strip()
+            if raw_price:
+                try:
+                    price_value = Decimal(raw_price)
+                    if price_value < 0:
+                        price_value = None
+                except Exception:
+                    price_value = None
+
+            # Create product instantly
+            product = Product.objects.create(
+                seller=seller,
+                description=str(item.get('description', '')).strip(),
+                price=price_value
+            )
+
+            # Save only valid image URLs (max 10)
+            for index, url in enumerate(valid_urls[:10]):
+                ProductImage.objects.create(
+                    product=product,
+                    image_url=url,
+                    order=index
+                )
+
+            created.append(product.id)
+
+        if not created:
+            return JsonResponse({'success': False, 'error': 'No valid products to save'}, status=400)
+
+        logger.info(f"✅ Batch: {len(created)} products saved for seller {seller.id}")
+
+        return JsonResponse({
+            'success': True,
+            'created': len(created),
+            'redirect_url': '/dashboard/'
+        })
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid data format'}, status=400)
+    except Exception as e:
+        logger.error(f"Batch upload error: {str(e)}\n{traceback.format_exc()}")
+        return JsonResponse({'success': False, 'error': 'Failed to save. Please try again.'}, status=500)

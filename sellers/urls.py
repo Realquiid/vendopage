@@ -12,6 +12,7 @@ urlpatterns = [
     # Dashboard
     path('dashboard/', views.dashboard, name='dashboard'),
     path('dashboard/upload/', views.upload_product, name='upload_product'),
+        path('upload/', views.guest_upload_view, name='guest_upload'),  # ADD THIS
     path('dashboard/subscription/', views.subscription, name='subscription'),
     path('payment/upgrade/', views.upgrade_to_premium, name='upgrade_to_premium'),
     path('payment/verify/', views.verify_payment, name='verify_payment'),
@@ -24,11 +25,13 @@ urlpatterns = [
     path('dashboard/settings/business-info/', views.update_business_info, name='update_business_info'),
     path('dashboard/settings/account/', views.update_account, name='update_account'),
     path('dashboard/settings/password/', views.change_password, name='change_password'),
+    path('dashboard/settings/update-watermark/', views.update_watermark, name='update_watermark'),
     
     # API endpoints - Product actions
     path('api/product/<int:product_id>/archive/', views.archive_product, name='archive_product'),
     path('api/product/<int:product_id>/reactivate/', views.reactivate_product, name='reactivate_product'),
     path('api/product/<int:product_id>/delete/', views.delete_product, name='delete_product'),
+    path('api/products/batch/', views.upload_products_batch, name='upload_products_batch'),
     
     # NEW: Sold out feature
     path('api/product/<int:product_id>/mark-sold-out/', views.mark_sold_out, name='mark_sold_out'),

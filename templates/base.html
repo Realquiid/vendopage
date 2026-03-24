@@ -4,736 +4,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- Primary Meta Tags -->
-    <title>{% block title %}VendoPage - Your Permanent Product Catalog for WhatsApp Business{% endblock %}</title>
-    <meta name="title" content="{% block meta_title %}VendoPage - Transform Your WhatsApp Business into a Professional Online Store{% endblock %}">
-    <meta name="description" content="{% block meta_description %}Create a permanent product catalog for your WhatsApp business. Never lose sales to expired stories again. Free forever, unlimited products, instant setup.{% endblock %}">
-    <meta name="keywords" content="whatsapp catalog, whatsapp business, online store nigeria, product catalog, sell on whatsapp, whatsapp store, digital storefront, e-commerce nigeria, online selling, whatsapp marketing">
+    <title>{% block title %}VendoPage — Upload Once. Sell Forever.{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Upload 50 products in one click. Get your own store link instantly. Built for WhatsApp vendors.{% endblock %}">
     <meta name="author" content="VendoPage">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
-    
-    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
-    <meta property="og:title" content="{% block og_title %}VendoPage - Your Permanent Product Catalog for WhatsApp Business{% endblock %}">
-    <meta property="og:description" content="{% block og_description %}Transform your WhatsApp business into a professional online catalog. Free forever, unlimited products, instant setup.{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}VendoPage — Your Permanent WhatsApp Store{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Upload once. Sell forever. Your products, your link, your store.{% endblock %}">
     <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-image.jpg' %}">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
     <meta property="og:site_name" content="VendoPage">
-    <meta property="og:locale" content="en_US">
-    
-    <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
     <meta property="twitter:title" content="{% block twitter_title %}VendoPage{% endblock %}">
-    <meta property="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/twitter-card.jpg' %}">
-    <meta property="twitter:description" content="{% block twitter_description %}Create a permanent product catalog for your WhatsApp business. Free forever, unlimited products.{% endblock %}">
-    <meta name="twitter:creator" content="@vendopage">
-    
-    <!-- WhatsApp / Telegram -->
-    <meta property="og:image:alt" content="VendoPage - WhatsApp Business Catalog Platform">
-    
-    <!-- Mobile App Meta -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="VendoPage">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#7C3AED">
-    <meta name="msapplication-TileColor" content="#7C3AED">
-    
-    <!-- Favicon -->
+    <meta property="twitter:description" content="{% block twitter_description %}Create a permanent product catalog for your WhatsApp business. Free forever.{% endblock %}">
+    <meta name="theme-color" content="#00C853">
     <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/apple-touch-icon.png' %}">
     <link rel="manifest" href="{% static 'manifest.json' %}">
-    
-    <!-- Structured Data / JSON-LD for Google -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "VendoPage",
-      "url": "https://www.vendopage.com",
-      "description": "Create a permanent product catalog for your WhatsApp business",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Any",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "NGN"
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "127"
-      }
-    }
-    </script>
-    
-    <!-- Preconnect for Performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://res.cloudinary.com">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Styles -->
-      <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
         :root {
-            --primary: #7C3AED;
-            --primary-dark: #6D28D9;
-            --primary-light: #A78BFA;
-            --secondary: #EC4899;
-            --accent: #14B8A6;
-            --text: #0F172A;
-            --text-light: #64748B;
-            --bg: #FFFFFF;
-            --bg-secondary: #F8FAFC;
-            --bg-tertiary: #F1F5F9;
-            --border: #E2E8F0;
-            --success: #10B981;
-            --error: #EF4444;
-            --warning: #F59E0B;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-            --radius: 12px;
-            --radius-lg: 16px;
-            --radius-sm: 8px;
-            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --green: #00C853; --green-dk: #00a844;
+            --dark: #0A0A0A; --gray: #6B6B6B; --gray-lt: #9B9B9B;
+            --light: #F7F7F5; --border: #E8E8E4; --white: #ffffff;
+            --red: #FF4444; --wa: #25D366;
+            --font-d: 'Syne', sans-serif; --font-b: 'DM Sans', sans-serif;
+            --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px; --r-pill:100px;
+            --sh-sm:0 2px 8px rgba(0,0,0,.06); --sh-md:0 8px 24px rgba(0,0,0,.08); --sh-lg:0 20px 60px rgba(0,0,0,.10);
+            --nav-h: 64px;
         }
-        
-        [data-theme="dark"] {
-            --text: #F1F5F9;
-            --text-light: #94A3B8;
-            --bg: #0F172A;
-            --bg-secondary: #1E293B;
-            --bg-tertiary: #334155;
-            --border: #334155;
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+        body{font-family:var(--font-b);background:var(--white);color:var(--dark);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+
+        /* ---- HEADER ---- */
+        .header{
+            position:sticky;top:0;z-index:200;height:var(--nav-h);
+            background:rgba(255,255,255,.96);
+            backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+            border-bottom:1px solid var(--border);
         }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: var(--text);
-            background: var(--bg);
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            transition: background-color 0.3s ease, color 0.3s ease;
+        .header-inner{
+            max-width:1280px;margin:0 auto;padding:0 32px;height:100%;
+            display:flex;align-items:center;justify-content:space-between;gap:20px;
         }
-        
-        /* Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
+
+        /* Logo */
+        .logo{font-family:var(--font-d);font-weight:800;font-size:19px;letter-spacing:-.5px;color:var(--dark);text-decoration:none;flex-shrink:0;}
+        .logo span{color:var(--green);}
+
+        /* Desktop nav */
+        .nav-desktop{display:flex;align-items:center;gap:2px;}
+        .nav-link{
+            display:flex;align-items:center;gap:7px;
+            padding:8px 14px;border-radius:var(--r-pill);
+            font-size:14px;font-weight:500;color:var(--gray);
+            text-decoration:none;transition:color .18s,background .18s;white-space:nowrap;
         }
-        
-        .container-narrow {
-            max-width: 720px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
+        .nav-link:hover{color:var(--dark);background:var(--light);}
+
+        /* Shared buttons */
+        .btn{
+            display:inline-flex;align-items:center;justify-content:center;gap:8px;
+            padding:9px 20px;border-radius:var(--r-pill);
+            font-family:var(--font-b);font-size:14px;font-weight:600;
+            border:none;cursor:pointer;text-decoration:none;
+            transition:all .18s;white-space:nowrap;line-height:1;
         }
-        
-        /* Header */
-        .header {
-            background: var(--bg);
-            border-bottom: 1px solid var(--border);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.8);
+        .btn-primary{background:var(--green);color:var(--white);}
+        .btn-primary:hover{background:var(--green-dk);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,200,83,.28);}
+        .btn-secondary{background:var(--light);color:var(--dark);border:1px solid var(--border);}
+        .btn-secondary:hover{border-color:var(--dark);}
+        .btn-dark{background:var(--dark);color:var(--white);}
+        .btn-dark:hover{background:#222;}
+        .btn-full{width:100%;justify-content:center;}
+        .btn-lg{padding:14px 28px;font-size:15px;}
+
+        /* Nav right */
+        .nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+
+        /* Profile pill */
+        .profile-pill{
+            display:flex;align-items:center;gap:8px;
+            background:var(--light);border:1px solid var(--border);
+            border-radius:var(--r-pill);padding:4px 12px 4px 4px;
+            cursor:pointer;transition:border-color .18s;position:relative;
         }
-        
-        [data-theme="dark"] .header {
-            background: rgba(15, 23, 42, 0.8);
+        .profile-pill:hover{border-color:#bbb;}
+        .profile-pill-avatar{
+            width:30px;height:30px;border-radius:50%;
+            background:var(--green);color:var(--white);
+            font-family:var(--font-d);font-weight:700;font-size:13px;
+            display:flex;align-items:center;justify-content:center;
+            overflow:hidden;flex-shrink:0;
         }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .profile-pill-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+        .profile-pill-name{font-size:13px;font-weight:600;color:var(--dark);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        .profile-pill-caret{color:var(--gray-lt);transition:transform .2s;flex-shrink:0;}
+        .profile-pill.open .profile-pill-caret{transform:rotate(180deg);}
+
+        /* Dropdown */
+        .nav-dropdown{position:relative;}
+        .dropdown-panel{
+            position:absolute;top:calc(100% + 10px);right:0;
+            background:var(--white);border:1px solid var(--border);
+            border-radius:16px;min-width:230px;
+            box-shadow:0 16px 48px rgba(0,0,0,.12);
+            opacity:0;pointer-events:none;
+            transform:translateY(-6px) scale(.98);
+            transition:opacity .2s,transform .2s;
+            z-index:300;overflow:hidden;
         }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-decoration: none;
-            transition: var(--transition);
+        .dropdown-panel.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1);}
+        .dp-head{padding:16px 18px 12px;border-bottom:1px solid var(--border);}
+        .dp-name{font-family:var(--font-d);font-weight:700;font-size:14px;color:var(--dark);}
+        .dp-handle{font-size:12px;color:var(--gray-lt);margin-top:2px;}
+        .dp-item{
+            display:flex;align-items:center;gap:10px;
+            padding:11px 18px;font-size:14px;font-weight:500;
+            color:var(--dark);text-decoration:none;transition:background .15s;
         }
-        
-        .logo:hover {
-            transform: scale(1.02);
+        .dp-item:hover{background:var(--light);}
+        .dp-item svg{color:var(--gray);flex-shrink:0;}
+        .dp-item.danger{color:var(--red);}
+        .dp-item.danger svg{color:var(--red);}
+        .dp-item.danger:hover{background:#fff5f5;}
+        .dp-divider{height:1px;background:var(--border);}
+
+        /* Hamburger */
+        .hamburger{
+            display:none;flex-direction:column;justify-content:center;gap:5px;
+            width:40px;height:40px;background:none;border:none;cursor:pointer;
+            padding:8px;border-radius:10px;transition:background .18s;
         }
-        
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 800;
-            font-size: 1.25rem;
+        .hamburger:hover{background:var(--light);}
+        .hamburger span{
+            display:block;width:100%;height:2px;background:var(--dark);
+            border-radius:2px;transition:transform .3s cubic-bezier(.4,0,.2,1),opacity .3s,width .3s;
+            transform-origin:center;
         }
-        
-        .nav-links {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
+        .hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+        .hamburger.active span:nth-child(2){opacity:0;width:0;}
+        .hamburger.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+        /* ---- MOBILE DRAWER ---- */
+        .mobile-drawer{position:fixed;inset:0;z-index:190;display:flex;pointer-events:none;}
+        .mobile-drawer-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:opacity .35s;}
+        .mobile-drawer-panel{
+            position:relative;z-index:1;width:min(320px,85vw);height:100%;
+            background:var(--white);display:flex;flex-direction:column;
+            transform:translateX(-100%);transition:transform .35s cubic-bezier(.4,0,.2,1);
+            overflow-y:auto;
         }
-        
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-light);
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition);
-            font-size: 0.9375rem;
+        .mobile-drawer.open{pointer-events:auto;}
+        .mobile-drawer.open .mobile-drawer-overlay{opacity:1;}
+        .mobile-drawer.open .mobile-drawer-panel{transform:translateX(0);}
+
+        .drawer-head{
+            display:flex;align-items:center;justify-content:space-between;
+            padding:20px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0;
         }
-        
-        .nav-link:hover {
-            color: var(--primary);
+        .drawer-logo{font-family:var(--font-d);font-weight:800;font-size:18px;color:var(--dark);text-decoration:none;}
+        .drawer-logo span{color:var(--green);}
+        .drawer-close{
+            width:36px;height:36px;border-radius:50%;
+            border:1px solid var(--border);background:var(--light);
+            display:flex;align-items:center;justify-content:center;
+            cursor:pointer;transition:all .18s;
         }
-        
-        /* Profile Dropdown */
-        .nav-dropdown {
-            position: relative;
+        .drawer-close:hover{background:var(--dark);border-color:var(--dark);}
+        .drawer-close:hover svg{color:var(--white);}
+        .drawer-close svg{color:var(--dark);transition:color .18s;}
+
+        .drawer-user{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+        .drawer-avatar{
+            width:44px;height:44px;border-radius:50%;
+            background:var(--green);color:var(--white);
+            font-family:var(--font-d);font-weight:800;font-size:18px;
+            display:flex;align-items:center;justify-content:center;
+            flex-shrink:0;overflow:hidden;
         }
-        
-        .nav-profile-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: transparent;
-            border: 1px solid var(--border);
-            border-radius: 50px;
-            padding: 0.25rem 0.75rem 0.25rem 0.25rem;
-            cursor: pointer;
-            transition: var(--transition);
+        .drawer-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+        .drawer-user-name{font-family:var(--font-d);font-weight:700;font-size:15px;color:var(--dark);}
+        .drawer-user-handle{font-size:12px;color:var(--gray-lt);margin-top:1px;}
+
+        .drawer-nav{padding:12px 0;flex:1;}
+        .drawer-link{
+            display:flex;align-items:center;gap:12px;
+            padding:13px 24px;font-size:15px;font-weight:500;
+            color:var(--dark);text-decoration:none;
+            transition:background .15s;border-left:3px solid transparent;
         }
-        
-        .nav-profile-btn:hover {
-            border-color: var(--primary-light);
-            background: var(--bg-secondary);
-        }
-        
-        .nav-profile-btn img,
-        .profile-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .profile-avatar {
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 0.875rem;
-        }
-        
-        .dropdown-menu {
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            right: 0;
-            min-width: 220px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-lg);
-            padding: 0.5rem;
-            display: none;
-        }
-        
-        .dropdown-menu.active {
-            display: block;
-        }
-        
-        .dropdown-header {
-            padding: 0.75rem 1rem;
-        }
-        
-        .dropdown-name {
-            font-weight: 700;
-            font-size: 0.9375rem;
-            margin-bottom: 0.25rem;
-        }
-        
-        .dropdown-email {
-            font-size: 0.8125rem;
-            color: var(--text-light);
-        }
-        
-        .dropdown-divider {
-            height: 1px;
-            background: var(--border);
-            margin: 0.5rem 0;
-        }
-        
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            border-radius: var(--radius-sm);
-            text-decoration: none;
-            color: var(--text);
-            font-weight: 500;
-            font-size: 0.9375rem;
-            transition: var(--transition);
-        }
-        
-        .dropdown-item:hover {
-            background: var(--bg-secondary);
-        }
-        
-        .dropdown-item.text-danger {
-            color: #EF4444;
-        }
-        
-        .dropdown-item.text-danger:hover {
-            background: #FEE2E2;
-        }
-        
-        .theme-toggle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 1px solid var(--border);
-            background: var(--bg-secondary);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-        
-        .theme-toggle:hover {
-            background: var(--bg-tertiary);
-            transform: rotate(15deg);
-        }
-        
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius-sm);
-            font-weight: 600;
-            text-decoration: none;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            text-align: center;
-            font-size: 0.9375rem;
-            white-space: nowrap;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            box-shadow: var(--shadow);
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-        
-        .btn-secondary {
-            background: var(--bg-secondary);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--primary-light);
-        }
-        
-        .btn-outline {
-            background: transparent;
-            color: var(--primary);
-            border: 2px solid var(--primary);
-        }
-        
-        .btn-outline:hover {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .btn-lg {
-            padding: 1rem 2rem;
-            font-size: 1.0625rem;
-            border-radius: var(--radius);
-        }
-        
-        .btn-full {
-            width: 100%;
-        }
-        
-        /* Form Elements */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--text);
-            font-size: 0.875rem;
-        }
-        
-        .form-input, select.form-input {
-            width: 100%;
-            padding: 0.875rem 1rem;
-            border: 1.5px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 0.9375rem;
-            transition: var(--transition);
-            background: var(--bg);
-            color: var(--text);
-            font-family: inherit;
-        }
-        
-        .form-input:focus, select.form-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-        }
-        
-        .form-input::placeholder {
-            color: var(--text-light);
-        }
-        
-        textarea.form-input {
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        .input-group {
-            position: relative;
-        }
-        
-        .input-icon {
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .input-icon:hover {
-            color: var(--primary);
-        }
-        
-        /* Grid */
-        .grid {
-            display: grid;
-            gap: 1.5rem;
-        }
-        
-        .grid-2 {
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        }
-        
-        .grid-3 {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        }
-        
-        /* Cards */
-        .card {
-            background: var(--bg);
-            border-radius: var(--radius);
-            padding: 1.5rem;
-            border: 1px solid var(--border);
-            transition: var(--transition);
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-        
-        /* Utility Classes */
-        .text-center { text-align: center; }
-        .text-muted { color: var(--text-light); }
-        .mb-1 { margin-bottom: 0.5rem; }
-        .mb-2 { margin-bottom: 1rem; }
-        .mb-3 { margin-bottom: 1.5rem; }
-        .mb-4 { margin-bottom: 2rem; }
-        .mt-2 { margin-top: 1rem; }
-        .mt-4 { margin-top: 2rem; }
-        
-        /* Loading */
-        img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-        }
-        
-        img[loading="lazy"] {
-            background: var(--bg-secondary);
-        }
-        
-        /* Mobile Menu */
-        .mobile-menu-btn {
-            display: none;
-            width: 40px;
-            height: 40px;
-            border: none;
-            background: none;
-            cursor: pointer;
-            flex-direction: column;
-            justify-content: center;
-            gap: 6px;
-        }
-        
-        .mobile-menu-btn span {
-            width: 24px;
-            height: 2px;
-            background: var(--text);
-            border-radius: 2px;
-            transition: var(--transition);
-        }
-        
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                right: 0;
-                background: var(--bg);
-                border-bottom: 1px solid var(--border);
-                flex-direction: column;
-                padding: 1rem;
-                gap: 1rem;
-                box-shadow: var(--shadow-lg);
-            }
-            
-            .nav-links.active {
-                display: flex;
-            }
-            
-            .mobile-menu-btn {
-                display: flex;
-            }
-            
-            .grid-2, .grid-3 {
-                grid-template-columns: 1fr;
-            }
-            
-            .nav-link {
-                width: 100%;
-                justify-content: center;
-            }
+        .drawer-link:hover{background:var(--light);border-left-color:var(--green);}
+        .drawer-link svg{color:var(--gray);flex-shrink:0;}
+        .drawer-link.active-link{background:#f0fff5;border-left-color:var(--green);color:var(--green-dk);}
+        .drawer-link.active-link svg{color:var(--green);}
+        .drawer-link.danger{color:var(--red);}
+        .drawer-link.danger svg{color:var(--red);}
+        .drawer-link.danger:hover{background:#fff5f5;border-left-color:var(--red);}
+        .drawer-divider{height:1px;background:var(--border);margin:8px 0;}
+        .drawer-foot{padding:20px 24px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:10px;}
+
+        /* Alert */
+        .alert{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--r-md);font-size:14px;font-weight:500;margin-bottom:16px;}
+        .alert-error{background:#fff5f5;color:#c0392b;border:1px solid #fecaca;}
+        .alert-success{background:#f0fff5;color:#166534;border:1px solid #bbf7d0;}
+
+        /* Responsive */
+        @media(max-width:900px){.header-inner{padding:0 20px;}}
+        @media(max-width:768px){
+            .nav-desktop{display:none;}
+            .nav-right .btn{display:none;}
+            .nav-dropdown{display:none;}
+            .hamburger{display:flex;}
         }
     </style>
-    
-    {% load static %}
     {% block extra_css %}{% endblock %}
+    <script>(function(){const t=localStorage.getItem('vp-theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');})()</script>
 </head>
-
 <body>
-    <header class="header">
-        <div class="container">
-            <div class="header-content">
-                <a href="/" class="logo">
-                    <div class="logo-icon">V</div>
-                    <!-- <span>VendoPage</span> -->
+
+<header class="header">
+    <div class="header-inner">
+        <a href="/" class="logo">Vendo<span>page</span></a>
+
+        <nav class="nav-desktop">
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="nav-link">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                    Dashboard
                 </a>
-                <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <nav class="nav-links" id="navLinks">
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'dashboard' %}" class="nav-link">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <rect x="3" y="3" width="7" height="7"/>
-                                <rect x="14" y="3" width="7" height="7"/>
-                                <rect x="14" y="14" width="7" height="7"/>
-                                <rect x="3" y="14" width="7" height="7"/>
-                            </svg>
+                <a href="{% url 'upload_product' %}" class="nav-link">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Add Product
+                </a>
+                <a href="/{{ user.slug }}" target="_blank" class="nav-link">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    My Page
+                </a>
+            {% else %}
+                <a href="{% url 'home' %}" class="nav-link">Home</a>
+            {% endif %}
+        </nav>
+
+        <div class="nav-right">
+            {% if user.is_authenticated %}
+                <div class="nav-dropdown" id="navDropdown">
+                    <button class="profile-pill" id="profilePillBtn" onclick="toggleDropdown()">
+                        <div class="profile-pill-avatar">
+                            {% if user.profile_picture %}<img src="{{ user.profile_picture.url }}" alt="{{ user.business_name }}">
+                            {% else %}{{ user.business_name|first }}{% endif %}
+                        </div>
+                        <span class="profile-pill-name">{{ user.business_name|truncatechars:18 }}</span>
+                        <svg class="profile-pill-caret" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="dropdown-panel" id="dropdownPanel">
+                        <div class="dp-head">
+                            <div class="dp-name">{{ user.business_name }}</div>
+                            <div class="dp-handle">@{{ user.username }}</div>
+                        </div>
+                        <a href="{% url 'dashboard' %}" class="dp-item">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
                             Dashboard
                         </a>
-                        <a href="{% url 'upload_product' %}" class="nav-link">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <line x1="12" y1="5" x2="12" y2="19"/>
-                                <line x1="5" y1="12" x2="19" y2="12"/>
-                            </svg>
-                            Add Product
+                        <a href="{% url 'settings' %}" class="dp-item">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                            Settings
                         </a>
-                        <a href="/{{ user.slug }}" target="_blank" class="nav-link">
-                            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
-                                <polyline points="15 3 21 3 21 9"/>
-                                <line x1="10" y1="14" x2="21" y2="3"/>
-                            </svg>
-                            My Page
+                        <a href="{% url 'subscription' %}" class="dp-item">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            Subscription
                         </a>
-                        
-                        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path id="sunIcon" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                                <path id="moonIcon" style="display:none;" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                            </svg>
-                        </button>
-                        
-                        <!-- Profile Dropdown -->
-                        <div class="nav-dropdown">
-                            <button class="nav-profile-btn" onclick="toggleDropdown()">
-                                {% if user.profile_picture %}
-                                    <img src="{{ user.profile_picture.url }}" alt="{{ user.business_name }}">
-                                {% else %}
-                                    <div class="profile-avatar">{{ user.business_name|first }}</div>
-                                {% endif %}
-                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <polyline points="6 9 12 15 18 9"/>
-                                </svg>
-                            </button>
-                            
-                            <div class="dropdown-menu" id="profileDropdown">
-                                <div class="dropdown-header">
-                                    <div class="dropdown-name">{{ user.business_name }}</div>
-                                    <div class="dropdown-email">@{{ user.username }}</div>
-                                </div>
-                                <div class="dropdown-divider"></div>
-                                <a href="{% url 'settings' %}" class="dropdown-item">
-                                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <circle cx="12" cy="12" r="3"/>
-                                        <path d="M12 1v6m0 6v6m8.66-9l-5.2 3M8.54 14l-5.2 3m13.32 0l-5.2-3M8.54 10l-5.2-3"/>
-                                    </svg>
-                                    Settings
-                                </a>
-                                <a href="{% url 'subscription' %}" class="dropdown-item">
-                                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                    </svg>
-                                    Subscription
-                                </a>
-                                <div class="dropdown-divider"></div>
-                                <a href="{% url 'logout' %}" class="dropdown-item text-danger">
-                                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-                                        <polyline points="16 17 21 12 16 7"/>
-                                        <line x1="21" y1="12" x2="9" y2="12"/>
-                                    </svg>
-                                    Logout
-                                </a>
-                            </div>
-                        </div>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="nav-link">Sign In</a>
-                        <a href="{% url 'register' %}" class="btn btn-primary">Get Started Free</a>
-                        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-                            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path id="sunIcon" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                                <path id="moonIcon" style="display:none;" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                            </svg>
-                        </button>
-                    {% endif %}
-                </nav>
+                        <a href="/{{ user.slug }}" target="_blank" class="dp-item">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                            View Store
+                        </a>
+                        <div class="dp-divider"></div>
+                        <a href="{% url 'logout' %}" class="dp-item danger">
+                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Log out
+                        </a>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-secondary">Sign In</a>
+                <a href="{% url 'register' %}" class="btn btn-primary">Get Started</a>
+            {% endif %}
+            <button class="hamburger" id="hamburgerBtn" onclick="toggleDrawer()" aria-label="Open menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Mobile drawer -->
+<div class="mobile-drawer" id="mobileDrawer">
+    <div class="mobile-drawer-overlay" onclick="closeDrawer()"></div>
+    <div class="mobile-drawer-panel">
+        <div class="drawer-head">
+            <a href="/" class="drawer-logo">Vendo<span>page</span></a>
+            <button class="drawer-close" onclick="closeDrawer()">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        {% if user.is_authenticated %}
+        <div class="drawer-user">
+            <div class="drawer-avatar">
+                {% if user.profile_picture %}<img src="{{ user.profile_picture.url }}" alt="{{ user.business_name }}">
+                {% else %}{{ user.business_name|first }}{% endif %}
+            </div>
+            <div>
+                <div class="drawer-user-name">{{ user.business_name }}</div>
+                <div class="drawer-user-handle">@{{ user.username }}</div>
             </div>
         </div>
-    </header>
-    
-    <main>
-        {% block content %}{% endblock %}
-    </main>
-    
-    <script>
-        // Theme Toggle
-        const themeToggle = () => {
-            const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            const sunIcons = document.querySelectorAll('#sunIcon');
-            const moonIcons = document.querySelectorAll('#moonIcon');
-            if (newTheme === 'dark') {
-                sunIcons.forEach(icon => icon.style.display = 'none');
-                moonIcons.forEach(icon => icon.style.display = 'block');
-            } else {
-                sunIcons.forEach(icon => icon.style.display = 'block');
-                moonIcons.forEach(icon => icon.style.display = 'none');
-            }
-        };
-        
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        if (savedTheme === 'dark') {
-            document.querySelectorAll('#sunIcon').forEach(icon => icon.style.display = 'none');
-            document.querySelectorAll('#moonIcon').forEach(icon => icon.style.display = 'block');
-        }
-        
-        function toggleTheme() {
-            themeToggle();
-        }
-        
-        // Mobile Menu
-        function toggleMobileMenu() {
-            document.getElementById('navLinks').classList.toggle('active');
-        }
-        
-        // Profile Dropdown
-        function toggleDropdown() {
-            const dropdown = document.getElementById('profileDropdown');
-            dropdown.classList.toggle('active');
-        }
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('profileDropdown');
-            const button = document.querySelector('.nav-profile-btn');
-            
-            if (dropdown && button && !button.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.classList.remove('active');
-            }
-        });
-    </script>
-    
-    {% block extra_js %}{% endblock %}
+        <nav class="drawer-nav">
+            <a href="{% url 'dashboard' %}" class="drawer-link">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                Dashboard
+            </a>
+            <a href="{% url 'upload_product' %}" class="drawer-link">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Add Product
+            </a>
+            <a href="/{{ user.slug }}" target="_blank" class="drawer-link">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                View My Store
+            </a>
+            <div class="drawer-divider"></div>
+            <a href="{% url 'settings' %}" class="drawer-link">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                Settings
+            </a>
+            <a href="{% url 'subscription' %}" class="drawer-link">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                Subscription
+            </a>
+            <div class="drawer-divider"></div>
+            <a href="{% url 'logout' %}" class="drawer-link danger">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Log out
+            </a>
+        </nav>
+        {% else %}
+        <nav class="drawer-nav">
+            <a href="{% url 'home' %}" class="drawer-link">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                Home
+            </a>
+        </nav>
+        <div class="drawer-foot">
+            <a href="{% url 'login' %}" class="btn btn-secondary btn-full">Sign In</a>
+            <a href="{% url 'register' %}" class="btn btn-primary btn-full">Get Started Free</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<main>{% block content %}{% endblock %}</main>
+
+<script>
+function toggleDropdown(){
+    const btn=document.getElementById('profilePillBtn');
+    const panel=document.getElementById('dropdownPanel');
+    const open=panel.classList.contains('open');
+    panel.classList.toggle('open',!open);
+    btn.classList.toggle('open',!open);
+}
+document.addEventListener('click',function(e){
+    const dd=document.getElementById('navDropdown');
+    if(dd&&!dd.contains(e.target)){
+        document.getElementById('dropdownPanel')?.classList.remove('open');
+        document.getElementById('profilePillBtn')?.classList.remove('open');
+    }
+});
+function toggleDrawer(){
+    const d=document.getElementById('mobileDrawer');
+    if(d.classList.contains('open'))closeDrawer();else openDrawerMenu();
+}
+function openDrawerMenu(){
+    document.getElementById('mobileDrawer').classList.add('open');
+    document.getElementById('hamburgerBtn').classList.add('active');
+    document.body.style.overflow='hidden';
+}
+function closeDrawer(){
+    document.getElementById('mobileDrawer').classList.remove('open');
+    document.getElementById('hamburgerBtn').classList.remove('active');
+    document.body.style.overflow='';
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrawer();});
+document.addEventListener('DOMContentLoaded',function(){
+    const path=window.location.pathname;
+    document.querySelectorAll('.drawer-link').forEach(link=>{
+        const href=link.getAttribute('href');
+        if(href&&href!=='/'&&path.startsWith(href))link.classList.add('active-link');
+    });
+});
+</script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>
+
+
+
+
+

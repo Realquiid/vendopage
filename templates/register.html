@@ -1,253 +1,518 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/register.css' %}">
-{% endblock %}  
 
-{% block title %}Create Your Free Page - VendoPage{% endblock %}
+{% block title %}Sign In or Create Account — Vendopage{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-page {
+  min-height: calc(100vh - 64px);
+  background: var(--light);
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+}
+.auth-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 20px; width: 100%; max-width: 460px;
+  overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,.06);
+  animation: fadeUp .35s cubic-bezier(.22,1,.36,1);
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+.auth-head { padding: 26px 30px 0; }
+.auth-logo { font-family:var(--font-d); font-weight:800; font-size:17px; text-decoration:none; color:var(--dark); display:inline-block; margin-bottom:18px; }
+.auth-logo span { color:var(--green); }
+.auth-title { font-family:var(--font-d); font-weight:800; font-size:22px; letter-spacing:-.5px; margin-bottom:3px; }
+.auth-sub { font-size:13px; color:var(--gray); }
+
+.auth-tabs { display:flex; margin-top:22px; border-bottom:1px solid var(--border); }
+.auth-tab { flex:1; padding:12px; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-1px; font-family:var(--font-b); font-size:14px; font-weight:500; color:var(--gray); cursor:pointer; transition:all .2s; }
+.auth-tab:hover { color:var(--dark); }
+.auth-tab.active { color:var(--dark); font-weight:600; border-bottom-color:var(--green); }
+
+.auth-body { padding: 24px 30px 28px; }
+.tab-panel { display:none; }
+.tab-panel.active { display:block; }
+
+.auth-error { background:#fff5f5; border:1px solid #fecaca; color:#b91c1c; border-radius:10px; padding:11px 13px; font-size:13px; line-height:1.5; margin-bottom:18px; }
+.auth-error ul { margin:0; padding-left:16px; }
+.auth-success { background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; border-radius:10px; padding:11px 13px; font-size:13px; margin-bottom:18px; }
+
+.f-group { margin-bottom:14px; }
+.f-label { display:block; font-size:12px; font-weight:600; color:var(--gray); margin-bottom:5px; text-transform:uppercase; letter-spacing:.3px; }
+.label-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
+.label-row .f-label { margin-bottom:0; }
+.forgot-link { font-size:12px; color:var(--gray); text-decoration:none; font-weight:500; }
+.forgot-link:hover { color:var(--dark); }
+
+.f-wrap { display:flex; align-items:center; border:1.5px solid var(--border); border-radius:10px; background:var(--white); overflow:hidden; transition:border-color .2s, box-shadow .2s; }
+.f-wrap:focus-within { border-color:var(--green); box-shadow:0 0 0 3px rgba(0,200,83,.08); }
+.f-icon { padding:0 9px 0 12px; color:var(--gray-lt); display:flex; align-items:center; flex-shrink:0; }
+.f-input { flex:1; min-width:0; padding:12px 12px 12px 0; border:none; outline:none; background:transparent; font-family:var(--font-b); font-size:14px; color:var(--dark); }
+.f-input::placeholder { color:var(--gray-lt); }
+.f-pass-toggle { padding:0 12px; background:none; border:none; cursor:pointer; color:var(--gray-lt); display:flex; align-items:center; }
+.f-hint { font-size:12px; color:var(--gray-lt); margin-top:4px; }
+.slug-preview { font-size:12px; color:var(--gray-lt); margin-top:4px; }
+.slug-preview strong { color:var(--dark); }
+
+/* =========================================
+   PHONE FIELD — country code + number
+   Dropdown is OUTSIDE the input wrapper
+   so overflow:hidden doesn't clip it
+   ========================================= */
+.phone-field-wrap { position: relative; }
+
+.phone-field {
+  display: flex; border: 1.5px solid var(--border); border-radius: 10px;
+  background: var(--white); overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+}
+.phone-field:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,200,83,.08); }
+
+.cc-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 12px 10px 12px 12px;
+  border: none; border-right: 1px solid var(--border);
+  background: var(--light); cursor: pointer;
+  font-family: var(--font-b); font-size: 13px; font-weight: 600; color: var(--dark);
+  white-space: nowrap; flex-shrink: 0; min-width: 88px;
+  transition: background .15s;
+}
+.cc-btn:hover { background: #e8e8e4; }
+.cc-flag { font-size: 18px; line-height: 1; }
+.cc-dial { font-size: 13px; font-weight: 700; }
+.cc-caret { color: var(--gray-lt); }
+
+/* Spinner while detecting */
+.cc-spin {
+  width: 14px; height: 14px; flex-shrink: 0;
+  border: 2px solid var(--border); border-top-color: var(--green);
+  border-radius: 50%; animation: ccspin .7s linear infinite;
+}
+@keyframes ccspin { to { transform: rotate(360deg); } }
+
+.cc-number {
+  flex: 1; padding: 12px; border: none; outline: none;
+  background: transparent; font-family: var(--font-b); font-size: 14px; color: var(--dark);
+  min-width: 0;
+}
+.cc-number::placeholder { color: var(--gray-lt); }
+
+/* Dropdown — positioned relative to phone-field-wrap, NOT inside overflow:hidden */
+.cc-dropdown {
+  display: none;
+  position: absolute; top: calc(100% + 6px); left: 0;
+  width: 100%; min-width: 260px;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.12);
+  z-index: 9999; overflow: hidden;
+  flex-direction: column; max-height: 240px;
+}
+.cc-dropdown.open { display: flex; }
+.cc-search { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.cc-search input { width:100%; border:none; outline:none; font-family:var(--font-b); font-size:13px; background:transparent; color:var(--dark); }
+.cc-search input::placeholder { color: var(--gray-lt); }
+.cc-list { overflow-y: auto; flex: 1; }
+.cc-item { display:flex; align-items:center; gap:10px; padding:9px 12px; cursor:pointer; font-size:13px; transition:background .13s; }
+.cc-item:hover { background: var(--light); }
+.cc-item.active { background: #f0fff5; }
+.cc-item .ci-flag { font-size:17px; flex-shrink:0; }
+.cc-item .ci-name { flex:1; font-weight:500; color:var(--dark); }
+.cc-item .ci-dial { color:var(--gray-lt); font-size:12px; }
+
+.auth-submit { width:100%; padding:13px; background:var(--green); color:var(--white); border:none; border-radius:10px; font-family:var(--font-b); font-size:15px; font-weight:700; cursor:pointer; transition:background .18s; margin-top:4px; }
+.auth-submit:hover { background:var(--green-dk); }
+.auth-terms { font-size:12px; color:var(--gray-lt); text-align:center; margin-top:12px; line-height:1.6; }
+.auth-terms a { color:var(--gray); font-weight:500; text-decoration:underline; }
+
+.auth-perks { display:flex; border-top:1px solid var(--border); background:var(--light); }
+.auth-perk { flex:1; padding:14px 8px; text-align:center; border-right:1px solid var(--border); }
+.auth-perk:last-child { border-right:none; }
+.auth-perk-val { font-size:13px; font-weight:700; color:var(--dark); margin-bottom:1px; }
+.auth-perk-label { font-size:11px; font-weight:500; color:var(--gray); }
+
+@media (max-width:480px) {
+  .auth-head { padding:20px 20px 0; }
+  .auth-body { padding:20px 20px 24px; }
+  .auth-perks { display:none; }
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="auth-page">
-    <div class="auth-container">
-        <div class="auth-logo">
-            <div class="logo-icon-large">V</div>
+<div class="auth-card">
+
+  <div class="auth-head">
+    <a href="{% url 'home' %}" class="auth-logo">Vendo<span>page</span></a>
+    <h1 class="auth-title" id="authTitle">
+      {% if active_tab == 'login' %}Welcome back{% else %}Create your store{% endif %}
+    </h1>
+    <p class="auth-sub" id="authSub">
+      {% if active_tab == 'login' %}Sign in to manage your store{% else %}Free forever. No payment needed.{% endif %}
+    </p>
+  </div>
+
+  <div class="auth-tabs">
+    <button class="auth-tab {% if active_tab == 'login' %}active{% endif %}" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+    <button class="auth-tab {% if active_tab != 'login' %}active{% endif %}" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <div class="auth-body">
+
+    <!-- ===== LOGIN ===== -->
+    <div class="tab-panel {% if active_tab == 'login' %}active{% endif %}" id="panelLogin">
+      {% if error and active_tab == 'login' %}<div class="auth-error">{{ error }}</div>{% endif %}
+      {% if messages %}{% for m in messages %}<div class="auth-success">{{ m }}</div>{% endfor %}{% endif %}
+      <form method="POST" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="f-group">
+          <label class="f-label">Email or Username</label>
+          <div class="f-wrap">
+            <span class="f-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <input type="text" name="username" class="f-input" placeholder="your@email.com or username" value="{{ login_username|default:'' }}" required autofocus>
+          </div>
         </div>
-        
-        <div class="auth-header">
-            <h1>Start selling in 2 minutes</h1>
-            <p class="text-muted">Create your free product catalog. No credit card required.</p>
-        </div>
-        
-        <form method="POST" class="auth-form">
-            {% csrf_token %}
-            
-            <!-- Show all errors -->
-            {% if errors %}
-            <div class="alert alert-error">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                </svg>
-                <div>
-                    {% for error in errors %}
-                        <div>{{ error }}</div>
-                    {% endfor %}
-                </div>
-            </div>
-            {% elif error %}
-            <div class="alert alert-error">
-                <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                </svg>
-                {{ error }}
-            </div>
-            {% endif %}
-            
-            <div class="form-group">
-                <label class="form-label">Business Name *</label>
-                <div class="input-group">
-                    <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                        <polyline points="9 22 9 12 15 12 15 22"/>
-                    </svg>
-                    <input type="text" name="business_name" class="form-input with-prefix" placeholder="e.g. Bella's Fashion Store" value="{{ business_name }}" required>
-                </div>
-                <small class="form-hint">This will be visible to your customers</small>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">What do you sell? *</label>
-                <div class="category-grid">
-                    <label class="category-option">
-                        <input type="radio" name="category" value="fashion" {% if category == 'fashion' %}checked{% endif %} required>
-                        <div class="category-card">
-                            <span class="category-emoji">👗</span>
-                            <span class="category-name">Fashion</span>
-                        </div>
-                    </label>
-                    <label class="category-option">
-                        <input type="radio" name="category" value="beauty" {% if category == 'beauty' %}checked{% endif %}>
-                        <div class="category-card">
-                            <span class="category-emoji">💄</span>
-                            <span class="category-name">Beauty</span>
-                        </div>
-                    </label>
-                    <label class="category-option">
-                        <input type="radio" name="category" value="electronics" {% if category == 'electronics' %}checked{% endif %}>
-                        <div class="category-card">
-                            <span class="category-emoji">📱</span>
-                            <span class="category-name">Electronics</span>
-                        </div>
-                    </label>
-                    <label class="category-option">
-                        <input type="radio" name="category" value="food" {% if category == 'food' %}checked{% endif %}>
-                        <div class="category-card">
-                            <span class="category-emoji">🍕</span>
-                            <span class="category-name">Food</span>
-                        </div>
-                    </label>
-                    <label class="category-option">
-                        <input type="radio" name="category" value="home" {% if category == 'home' %}checked{% endif %}>
-                        <div class="category-card">
-                            <span class="category-emoji">🏠</span>
-                            <span class="category-name">Home</span>
-                        </div>
-                    </label>
-                    <label class="category-option">
-                        <input type="radio" name="category" value="sports" {% if category == 'sports' %}checked{% endif %}>
-                        <div class="category-card">
-                            <span class="category-emoji">⚽</span>
-                            <span class="category-name">Sports</span>
-                        </div>
-                    </label>
-                    <label class="category-option">
-                        <input type="radio" name="category" value="health" {% if category == 'health' %}checked{% endif %}>
-                        <div class="category-card">
-                            <span class="category-emoji">💪</span>
-                            <span class="category-name">Health</span>
-                        </div>
-                    </label>
-                    <label class="category-option">
-                        <input type="radio" name="category" value="other" {% if category == 'other' %}checked{% endif %}>
-                        <div class="category-card">
-                            <span class="category-emoji">🎯</span>
-                            <span class="category-name">Other</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">WhatsApp Number *</label>
-                <div class="input-group">
-                    <svg class="input-prefix-icon" width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                    </svg>
-                    <input type="tel" name="whatsapp_number" class="form-input with-prefix" placeholder="234XXXXXXXXXX" value="{{ whatsapp_number }}" required>
-                </div>
-                <small class="form-hint">Include country code (e.g., 234 for Nigeria). No + or spaces.</small>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Email Address *</label>
-                <div class="input-group">
-                    <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                        <polyline points="22,6 12,13 2,6"/>
-                    </svg>
-                    <input type="email" name="email" class="form-input with-prefix" placeholder="you@example.com" value="{{ email }}" required>
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Username *</label>
-                <div class="input-group">
-                    <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                        <circle cx="12" cy="7" r="4"/>
-                    </svg>
-                    <input type="text" name="username" class="form-input with-prefix" placeholder="Choose a username" value="{{ username }}" required>
-                </div>
-                <small class="form-hint">Your page will be: vendopage.com/<strong>username</strong></small>
-            </div>
-            
-            <div class="form-group">
-                <label class="form-label">Password *</label>
-                <div class="input-group">
-                    <svg class="input-prefix-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                        <path d="M7 11V7a5 5 0 0110 0v4"/>
-                    </svg>
-                    <input type="password" name="password" id="password" class="form-input with-prefix with-suffix" placeholder="Create a strong password" required>
-                    <button type="button" class="input-suffix-icon" onclick="togglePassword()" aria-label="Toggle password visibility">
-                        <svg id="showIcon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                            <circle cx="12" cy="12" r="3"/>
-                        </svg>
-                        <svg id="hideIcon" style="display:none;" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
-                            <line x1="1" y1="1" x2="23" y2="23"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-            
-            <button type="submit" class="btn btn-primary btn-full btn-lg">
-                Create My Free Page (Unlimited Products!)
+        <div class="f-group">
+          <div class="label-row">
+            <label class="f-label">Password</label>
+            <a href="{% url 'forgot_password' %}" class="forgot-link">Forgot password?</a>
+          </div>
+          <div class="f-wrap">
+            <span class="f-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+            <input type="password" name="password" id="loginPass" class="f-input" placeholder="Your password" required>
+            <button type="button" class="f-pass-toggle" onclick="togglePass('loginPass',this)">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path class="eye-show" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle class="eye-show" cx="12" cy="12" r="3"/>
+                <path class="eye-hide" style="display:none" d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                <line class="eye-hide" style="display:none" x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
             </button>
-            
-            <div class="form-footer">
-                <small class="text-muted">
-                    By signing up, you agree to our Terms of Service and Privacy Policy
-                </small>
-            </div>
-        </form>
-        
-        <div class="auth-divider">
-            <span>or</span>
+          </div>
         </div>
-        
-        <div class="auth-footer">
-            <p>Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
-        </div>
+        <button type="submit" class="auth-submit">Sign In</button>
+      </form>
     </div>
-    
-    <div class="auth-side">
-        <div class="features-showcase">
-            <h2>Why choose VendoPage?</h2>
-            <div class="feature-list">
-                <div class="feature-item">
-                    <div class="feature-check">✓</div>
-                    <div>
-                        <h4>Unlimited Products - FREE!</h4>
-                        <p>List as many products as you want. No limits, no fees.</p>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-check">✓</div>
-                    <div>
-                        <h4>Always Visible Products</h4>
-                        <p>No more 24-hour story limits. Your catalog is permanent.</p>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-check">✓</div>
-                    <div>
-                        <h4>Professional Storefront</h4>
-                        <p>Beautiful, mobile-friendly page that works on any device.</p>
-                    </div>
-                </div>
-                <div class="feature-item">
-                    <div class="feature-check">✓</div>
-                    <div>
-                        <h4>Direct WhatsApp Orders</h4>
-                        <p>Customers contact you instantly through WhatsApp.</p>
-                    </div>
-                </div>
-            </div>
+
+    <!-- ===== REGISTER ===== -->
+    <div class="tab-panel {% if active_tab != 'login' %}active{% endif %}" id="panelRegister">
+      {% if errors and active_tab == 'register' %}
+      <div class="auth-error">
+        {% if errors|length == 1 %}{{ errors.0 }}{% else %}<ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+      </div>
+      {% endif %}
+
+      <form method="POST" action="{% url 'register' %}{% if request.GET.guest %}?guest=1{% endif %}">
+        {% csrf_token %}
+        <!-- Hidden fields — filled by JS from detected/selected country -->
+        <input type="hidden" name="country_code"    id="hCountryCode"   value="+234">
+        <input type="hidden" name="currency_code"   id="hCurrencyCode"  value="NGN">
+        <input type="hidden" name="currency_symbol" id="hCurrencySymbol" value="₦">
+        <input type="hidden" name="category" value="other">
+
+        <div class="f-group">
+          <label class="f-label">Business Name</label>
+          <div class="f-wrap">
+            <span class="f-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+            <input type="text" name="business_name" class="f-input" placeholder="Your store name" value="{{ business_name|default:'' }}" required>
+          </div>
         </div>
+
+        <!-- WhatsApp with country picker -->
+        <div class="f-group">
+          <label class="f-label">WhatsApp Number</label>
+          <!-- IMPORTANT: phone-field-wrap is the positioning parent for the dropdown -->
+          <div class="phone-field-wrap">
+            <div class="phone-field" id="phoneField">
+              <!-- Country button -->
+              <button type="button" class="cc-btn" id="ccBtn">
+                <span class="cc-flag" id="ccFlag">🌍</span>
+                <span class="cc-dial" id="ccDial"><span class="cc-spin" id="ccSpin"></span></span>
+                <svg class="cc-caret" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <!-- Number input -->
+              <input type="tel" name="whatsapp_number" id="ccNumber" class="cc-number"
+                     placeholder="8012345678" value="{{ whatsapp_number|default:'' }}" required>
+            </div>
+            <!-- Dropdown OUTSIDE the overflow:hidden phone-field but INSIDE phone-field-wrap -->
+            <div class="cc-dropdown" id="ccDropdown">
+              <div class="cc-search">
+                <input type="text" id="ccSearch" placeholder="Search country or dial code…" autocomplete="off">
+              </div>
+              <div class="cc-list" id="ccList"></div>
+            </div>
+          </div>
+          <div class="f-hint">Enter number without country code — we prepend it automatically.</div>
+        </div>
+
+        <div class="f-group">
+          <label class="f-label">Email Address</label>
+          <div class="f-wrap">
+            <span class="f-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
+            <input type="email" name="email" class="f-input" placeholder="you@example.com" value="{{ email|default:'' }}" required>
+          </div>
+        </div>
+
+        <div class="f-group">
+          <label class="f-label">Username</label>
+          <div class="f-wrap">
+            <span class="f-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <input type="text" name="username" id="usernameInp" class="f-input" placeholder="Choose a username"
+                   value="{{ username|default:'' }}" oninput="updateSlug(this.value)" required>
+          </div>
+          <div class="slug-preview">Your store: vendopage.com/<strong id="slugVal">username</strong></div>
+        </div>
+
+        <div class="f-group">
+          <label class="f-label">Password</label>
+          <div class="f-wrap">
+            <span class="f-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></span>
+            <input type="password" name="password" id="regPass" class="f-input" placeholder="At least 6 characters" required>
+            <button type="button" class="f-pass-toggle" onclick="togglePass('regPass',this)">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path class="eye-show" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle class="eye-show" cx="12" cy="12" r="3"/>
+                <path class="eye-hide" style="display:none" d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                <line class="eye-hide" style="display:none" x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+          <div class="f-hint">Min. 6 characters</div>
+        </div>
+
+        <button type="submit" class="auth-submit">Create Free Store</button>
+        <p class="auth-terms">
+          By signing up you agree to our <a href="{% url 'terms' %}">Terms</a> and <a href="{% url 'privacy' %}">Privacy Policy</a>.
+        </p>
+      </form>
     </div>
+
+  </div><!-- /auth-body -->
+
+  <div class="auth-perks">
+    <div class="auth-perk"><div class="auth-perk-val">Free</div><div class="auth-perk-label">Always free</div></div>
+    <div class="auth-perk"><div class="auth-perk-val">30s</div><div class="auth-perk-label">Store live fast</div></div>
+    <div class="auth-perk"><div class="auth-perk-val">WhatsApp</div><div class="auth-perk-label">Orders direct</div></div>
+  </div>
+
 </div>
-<!-- 
-<style>
+</div>
+{% endblock %}
 
-
-</style> -->
-
+{% block extra_js %}
 <script>
-    function togglePassword() {
-        const passwordInput = document.getElementById('password');
-        const showIcon = document.getElementById('showIcon');
-        const hideIcon = document.getElementById('hideIcon');
-        
-        if (passwordInput.type === 'password') {
-            passwordInput.type = 'text';
-            showIcon.style.display = 'none';
-            hideIcon.style.display = 'block';
-        } else {
-            passwordInput.type = 'password';
-            showIcon.style.display = 'block';
-            hideIcon.style.display = 'none';
-        }
-    }
+/* =======================================================
+   COUNTRY DATA
+   ======================================================= */
+const COUNTRIES = [
+  {n:'Nigeria',        f:'🇳🇬', d:'+234', c:'NGN', s:'₦'},
+  {n:'Ghana',          f:'🇬🇭', d:'+233', c:'GHS', s:'₵'},
+  {n:'Kenya',          f:'🇰🇪', d:'+254', c:'KES', s:'KSh'},
+  {n:'South Africa',   f:'🇿🇦', d:'+27',  c:'ZAR', s:'R'},
+  {n:'United States',  f:'🇺🇸', d:'+1',   c:'USD', s:'$'},
+  {n:'United Kingdom', f:'🇬🇧', d:'+44',  c:'GBP', s:'£'},
+  {n:'Canada',         f:'🇨🇦', d:'+1',   c:'CAD', s:'CA$'},
+  {n:'Australia',      f:'🇦🇺', d:'+61',  c:'AUD', s:'A$'},
+  {n:'India',          f:'🇮🇳', d:'+91',  c:'INR', s:'₹'},
+  {n:'Pakistan',       f:'🇵🇰', d:'+92',  c:'PKR', s:'₨'},
+  {n:'Bangladesh',     f:'🇧🇩', d:'+880', c:'BDT', s:'৳'},
+  {n:'Uganda',         f:'🇺🇬', d:'+256', c:'UGX', s:'USh'},
+  {n:'Tanzania',       f:'🇹🇿', d:'+255', c:'TZS', s:'TSh'},
+  {n:'Ethiopia',       f:'🇪🇹', d:'+251', c:'ETB', s:'Br'},
+  {n:'Egypt',          f:'🇪🇬', d:'+20',  c:'EGP', s:'E£'},
+  {n:'Morocco',        f:'🇲🇦', d:'+212', c:'MAD', s:'MAD'},
+  {n:'Cameroon',       f:'🇨🇲', d:'+237', c:'XAF', s:'CFA'},
+  {n:'Senegal',        f:'🇸🇳', d:'+221', c:'XOF', s:'CFA'},
+  {n:'Rwanda',         f:'🇷🇼', d:'+250', c:'RWF', s:'FRw'},
+  {n:'Zambia',         f:'🇿🇲', d:'+260', c:'ZMW', s:'ZK'},
+  {n:'Zimbabwe',       f:'🇿🇼', d:'+263', c:'ZWL', s:'Z$'},
+  {n:'Germany',        f:'🇩🇪', d:'+49',  c:'EUR', s:'€'},
+  {n:'France',         f:'🇫🇷', d:'+33',  c:'EUR', s:'€'},
+  {n:'Italy',          f:'🇮🇹', d:'+39',  c:'EUR', s:'€'},
+  {n:'Spain',          f:'🇪🇸', d:'+34',  c:'EUR', s:'€'},
+  {n:'Netherlands',    f:'🇳🇱', d:'+31',  c:'EUR', s:'€'},
+  {n:'Brazil',         f:'🇧🇷', d:'+55',  c:'BRL', s:'R$'},
+  {n:'Mexico',         f:'🇲🇽', d:'+52',  c:'MXN', s:'MX$'},
+  {n:'UAE',            f:'🇦🇪', d:'+971', c:'AED', s:'د.إ'},
+  {n:'Saudi Arabia',   f:'🇸🇦', d:'+966', c:'SAR', s:'SR'},
+  {n:'China',          f:'🇨🇳', d:'+86',  c:'CNY', s:'¥'},
+  {n:'Japan',          f:'🇯🇵', d:'+81',  c:'JPY', s:'¥'},
+  {n:'Indonesia',      f:'🇮🇩', d:'+62',  c:'IDR', s:'Rp'},
+  {n:'Malaysia',       f:'🇲🇾', d:'+60',  c:'MYR', s:'RM'},
+  {n:'Philippines',    f:'🇵🇭', d:'+63',  c:'PHP', s:'₱'},
+];
+
+/* Fallback map: ISO country code → dial */
+const ISO_DIAL = {
+  NG:'+234',GH:'+233',KE:'+254',ZA:'+27',US:'+1',GB:'+44',CA:'+1',
+  AU:'+61',IN:'+91',PK:'+92',BD:'+880',UG:'+256',TZ:'+255',ET:'+251',
+  EG:'+20',MA:'+212',CM:'+237',SN:'+221',RW:'+250',ZM:'+260',ZW:'+263',
+  DE:'+49',FR:'+33',IT:'+39',ES:'+34',NL:'+31',BR:'+55',MX:'+52',
+  AE:'+971',SA:'+966',CN:'+86',JP:'+81',ID:'+62',MY:'+60',PH:'+63',
+};
+
+let chosen = null; /* null = not yet detected */
+
+/* =======================================================
+   RENDER DROPDOWN ITEMS
+   ======================================================= */
+function renderList(list) {
+  document.getElementById('ccList').innerHTML = list.map(c => `
+    <div class="cc-item${chosen && chosen.d===c.d?' active':''}"
+         onclick="selectCountry('${c.d}')">
+      <span class="ci-flag">${c.f}</span>
+      <span class="ci-name">${c.n}</span>
+      <span class="ci-dial">${c.d}</span>
+    </div>`).join('');
+}
+
+/* =======================================================
+   SELECT A COUNTRY — updates button + hidden fields
+   ======================================================= */
+function selectCountry(dial) {
+  const c = COUNTRIES.find(x => x.d === dial);
+  if (!c) return;
+  chosen = c;
+
+  /* Update button */
+  document.getElementById('ccFlag').textContent = c.f;
+  document.getElementById('ccDial').textContent = c.d;
+
+  /* Remove spinner if still there */
+  const spin = document.getElementById('ccSpin');
+  if (spin) spin.remove();
+
+  /* Update hidden fields */
+  document.getElementById('hCountryCode').value    = c.d;
+  document.getElementById('hCurrencyCode').value   = c.c;
+  document.getElementById('hCurrencySymbol').value = c.s;
+
+  /* Close dropdown */
+  closeDropdown();
+
+  /* Re-render to highlight selected */
+  renderList(COUNTRIES);
+}
+
+/* =======================================================
+   OPEN / CLOSE DROPDOWN
+   ======================================================= */
+function openDropdown() {
+  renderList(COUNTRIES);
+  document.getElementById('ccDropdown').classList.add('open');
+  /* Focus search after short delay so it's visible */
+  setTimeout(() => {
+    const s = document.getElementById('ccSearch');
+    if (s) { s.value = ''; s.focus(); }
+  }, 60);
+}
+
+function closeDropdown() {
+  document.getElementById('ccDropdown').classList.remove('open');
+}
+
+/* =======================================================
+   DETECT COUNTRY FROM IP — no default shown while loading
+   ======================================================= */
+async function detectCountry() {
+  /* Try ipapi.co */
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 4000);
+    const r = await fetch('https://ipapi.co/json/', { signal: ctrl.signal });
+    clearTimeout(t);
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    if (d.error) throw new Error();
+    const dial = '+' + String(d.country_calling_code || '').replace(/\+/g, '');
+    const match = COUNTRIES.find(c => c.d === dial);
+    if (match) { selectCountry(match.d); return; }
+    throw new Error('not in list');
+  } catch(e1) {}
+
+  /* Fallback: ip-api.com */
+  try {
+    const r2 = await fetch('https://ip-api.com/json/?fields=countryCode');
+    const d2 = await r2.json();
+    const dial2 = ISO_DIAL[d2.countryCode];
+    if (dial2) { selectCountry(dial2); return; }
+  } catch(e2) {}
+
+  /* Both failed — show picker prompt */
+  const spin = document.getElementById('ccSpin');
+  if (spin) spin.remove();
+  document.getElementById('ccDial').textContent = 'Pick';
+  document.getElementById('ccFlag').textContent = '🌍';
+}
+
+/* =======================================================
+   WIRE UP EVENTS — all in DOMContentLoaded
+   ======================================================= */
+document.addEventListener('DOMContentLoaded', function () {
+
+  /* Country button click */
+  document.getElementById('ccBtn').addEventListener('click', function () {
+    const drop = document.getElementById('ccDropdown');
+    if (drop.classList.contains('open')) closeDropdown();
+    else openDropdown();
+  });
+
+  /* Search filter */
+  document.getElementById('ccSearch').addEventListener('input', function () {
+    const q = this.value.toLowerCase();
+    const filtered = q
+      ? COUNTRIES.filter(c =>
+          c.n.toLowerCase().includes(q) ||
+          c.d.includes(q) ||
+          c.c.toLowerCase().includes(q))
+      : COUNTRIES;
+    renderList(filtered);
+  });
+
+  /* Close on outside click */
+  document.addEventListener('click', function (e) {
+    const wrap = document.getElementById('phoneField').closest('.phone-field-wrap');
+    if (!wrap.contains(e.target)) closeDropdown();
+  });
+
+  /* Slug init for validation error repopulation */
+  const uInp = document.getElementById('usernameInp');
+  if (uInp && uInp.value) updateSlug(uInp.value);
+
+  /* Start IP detection */
+  detectCountry();
+});
+
+/* =======================================================
+   HELPERS
+   ======================================================= */
+const TABS = {
+  login:    {title:'Welcome back',       sub:'Sign in to manage your store'},
+  register: {title:'Create your store',  sub:'Free forever. No payment needed.'},
+};
+let currentTab = '{{ active_tab|default:"register" }}';
+
+function switchTab(tab) {
+  if (tab === currentTab) return;
+  currentTab = tab;
+  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('panelLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('panelRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('authTitle').textContent = TABS[tab].title;
+  document.getElementById('authSub').textContent   = TABS[tab].sub;
+}
+
+function togglePass(id, btn) {
+  const inp  = document.getElementById(id);
+  const show = inp.type === 'password';
+  inp.type   = show ? 'text' : 'password';
+  btn.querySelectorAll('.eye-show').forEach(e => e.style.display = show ? 'none' : '');
+  btn.querySelectorAll('.eye-hide').forEach(e => e.style.display = show ? '' : 'none');
+}
+
+function updateSlug(val) {
+  const slug = val.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'username';
+  document.getElementById('slugVal').textContent = slug;
+}
 </script>
 {% endblock %}
