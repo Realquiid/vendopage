@@ -1,0 +1,85 @@
+{% extends "admin/login.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  body {
+    background: #0A0A0A !important;
+    font-family: 'DM Sans', sans-serif !important;
+  }
+  #container {
+    background: transparent !important;
+  }
+  #header {
+    display: none !important;
+  }
+  .login {
+    background: #1a1a1a !important;
+    border-radius: 20px !important;
+    border: 1px solid #2e2e2e !important;
+    padding: 40px !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4) !important;
+  }
+  .login h1 a {
+    background: none !important;
+    color: #fff !important;
+    font-size: 28px !important;
+    font-weight: 800 !important;
+    letter-spacing: -1px !important;
+    text-indent: 0 !important;
+    width: auto !important;
+    height: auto !important;
+  }
+  .login h1 a span { color: #00C853; }
+  .form-row input {
+    background: #2a2a2a !important;
+    border: 1.5px solid #3a3a3a !important;
+    border-radius: 10px !important;
+    color: #f0f0f0 !important;
+    padding: 12px 14px !important;
+    font-size: 14px !important;
+    width: 100% !important;
+  }
+  .form-row input:focus {
+    border-color: #00C853 !important;
+    outline: none !important;
+  }
+  .form-row label {
+    color: #888 !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: .5px !important;
+  }
+  .submit-row input {
+    background: #00C853 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    padding: 13px !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    transition: background .18s !important;
+  }
+  .submit-row input:hover {
+    background: #00a844 !important;
+  }
+  .errornote {
+    background: #2a1515 !important;
+    border: 1px solid #4a2020 !important;
+    border-radius: 10px !important;
+    color: #ff6b6b !important;
+  }
+  a:link, a:visited { color: #00C853 !important; }
+  #login-form { margin-top: 20px; }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+  <a href="{% url 'admin:index' %}">Vendo<span>page</span> Admin</a>
+</h1>
+{% endblock %}
