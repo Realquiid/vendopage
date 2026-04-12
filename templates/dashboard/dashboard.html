@@ -6,6 +6,17 @@
 {% block extra_css %}
 <style>
 
+  [data-theme="dark"] .store-banner {
+  background: #111111;
+  border: 1px solid #2e2e2e;
+}
+[data-theme="dark"] .store-banner-left h3 { color: #f0f0f0; }
+[data-theme="dark"] .link-display {
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.15);
+}
+[data-theme="dark"] .link-display input { color: #f0f0f0; }
+
 /* Layout */
 .dashboard { background: var(--light); min-height: calc(100vh - 64px); }
 .dash-inner { max-width: 1200px; margin: 0 auto; padding: 40px 32px 80px; }

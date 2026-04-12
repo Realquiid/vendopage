@@ -1,86 +1,79 @@
-# convert_logo_to_favicons.py
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import os
 
-# Ensure directories exist
 os.makedirs('static/images', exist_ok=True)
 
-# Load your logo
-try:
-    logo = Image.open('static/images/logo.jpg')
-    print("✅ Logo loaded successfully!")
-except FileNotFoundError:
-    print("❌ Please save your logo as 'static/images/logo.jpg' first")
-    exit()
+def make_favicon(size, bg_color='#00C853', text='V', text_color='white'):
+    img = Image.new('RGBA', (size, size), bg_color)
+    draw = ImageDraw.Draw(img)
+    
+    # Draw circle background
+    draw.ellipse([0, 0, size, size], fill=bg_color)
+    
+    # Draw the letter V centered
+    font_size = int(size * 0.65)
+    try:
+        font = ImageFont.truetype("arial.ttf", font_size)
+    except:
+        font = ImageFont.load_default()
+    
+    bbox = draw.textbbox((0, 0), text, font=font)
+    text_w = bbox[2] - bbox[0]
+    text_h = bbox[3] - bbox[1]
+    x = (size - text_w) // 2
+    y = (size - text_h) // 2 - int(size * 0.05)
+    
+    draw.text((x, y), text, fill=text_color, font=font)
+    return img
 
-# Convert to RGBA if needed
-if logo.mode != 'RGBA':
-    logo = logo.convert('RGBA')
-
-# Sizes needed for favicons
 sizes = {
-    'favicon-16x16.png': (16, 16),
-    'favicon-32x32.png': (32, 32),
-    'apple-touch-icon.png': (180, 180),
-    'android-chrome-192x192.png': (192, 192),
-    'android-chrome-512x512.png': (512, 512),
+    'favicon-16x16.png': 16,
+    'favicon-32x32.png': 32,
+    'apple-touch-icon.png': 180,
+    'android-chrome-192x192.png': 192,
+    'android-chrome-512x512.png': 512,
 }
 
-# Generate all favicon sizes
 for filename, size in sizes.items():
-    # Resize logo maintaining quality
-    resized = logo.resize(size, Image.Resampling.LANCZOS)
-    
-    # Save
-    output_path = f'static/images/{filename}'
-    resized.save(output_path, quality=95)
-    print(f'✅ Created {filename} ({size[0]}x{size[1]})')
+    img = make_favicon(size)
+    img.save(f'static/images/{filename}')
+    print(f'✅ Created {filename}')
 
-# Create OG image (1200x630) for social media
-og_width, og_height = 1200, 630
+# OG image — green background with VendoPage text
+from PIL import ImageFont
 
-# Create background with your logo's gradient colors
-og_img = Image.new('RGB', (og_width, og_height))
+og = Image.new('RGB', (1200, 630), '#00C853')
+draw = ImageDraw.Draw(og)
 
-# Paste logo in center
-logo_size = 400
-logo_resized = logo.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
+# Darker green gradient effect
+for i in range(630):
+    shade = int(0 + (20) * (i / 630))
+    r = max(0, 0 - shade)
+    g = max(0, 200 - shade * 2)
+    b = max(0, 83 - shade)
+    draw.line([(0, i), (1200, i)], fill=(r, g + shade, b))
 
-# Calculate center position
-x = (og_width - logo_size) // 2
-y = (og_height - logo_size) // 2
+try:
+    big_font = ImageFont.truetype("arialbd.ttf", 120)
+    sub_font = ImageFont.truetype("arial.ttf", 48)
+except:
+    big_font = ImageFont.load_default()
+    sub_font = big_font
 
-# Create a gradient background (purple to pink like your logo)
-from PIL import ImageDraw
+# Main title
+title = "VendoPage"
+bbox = draw.textbbox((0, 0), title, font=big_font)
+tw = bbox[2] - bbox[0]
+draw.text(((1200 - tw) // 2, 220), title, fill='white', font=big_font)
 
-og_img = Image.new('RGB', (og_width, og_height), '#7C3AED')
-draw = ImageDraw.Draw(og_img)
+# Subtitle
+sub = "Upload Once. Sell Forever."
+bbox2 = draw.textbbox((0, 0), sub, font=sub_font)
+sw = bbox2[2] - bbox2[0]
+draw.text(((1200 - sw) // 2, 380), sub, fill='rgba(255,255,255,180)', font=sub_font)
 
-# Add gradient effect
-for i in range(og_height):
-    # Interpolate between purple and pink
-    r = int(124 + (236 - 124) * (i / og_height))
-    g = int(58 + (72 - 58) * (i / og_height))
-    b = int(237 + (153 - 237) * (i / og_height))
-    draw.line([(0, i), (og_width, i)], fill=(r, g, b))
-
-# Paste logo on gradient background
-og_img.paste(logo_resized, (x, y), logo_resized)
-
-# Save social media images
-og_img.save('static/images/og-image.jpg', quality=95)
-og_img.save('static/images/twitter-card.jpg', quality=95)
-
-print('✅ Created og-image.jpg (1200x630)')
-print('✅ Created twitter-card.jpg (1200x630)')
-
-print("\n🎉 All favicons created successfully!")
-print("📁 Files created in: static/images/")
-print("\nGenerated files:")
-print("  - favicon-16x16.png")
-print("  - favicon-32x32.png")
-print("  - apple-touch-icon.png")
-print("  - android-chrome-192x192.png")
-print("  - android-chrome-512x512.png")
-print("  - og-image.jpg")
-print("  - twitter-card.jpg")
+og.save('static/images/og-image.jpg', quality=95)
+og.save('static/images/twitter-card.jpg', quality=95)
+print('✅ Created og-image.jpg')
+print('✅ Created twitter-card.jpg')
+print('\n🎉 Done! Check static/images/')

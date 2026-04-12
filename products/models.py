@@ -6,7 +6,7 @@ from sellers.models import Seller
 
 
 class Product(models.Model):
-    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, related_name='products')
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True, related_name='products')
     description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     is_archived = models.BooleanField(default=False)
@@ -14,6 +14,7 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     views = models.IntegerField(default=0)
     whatsapp_clicks = models.IntegerField(default=0)
+    guest_key   = models.CharField(max_length=64, blank=True, null=True, db_index=True)
     
     class Meta:
         ordering = ['-created_at']

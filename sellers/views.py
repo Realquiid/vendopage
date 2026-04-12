@@ -162,96 +162,6 @@ def login_view(request):
     return render(request, 'register.html', {'active_tab': 'login'})
 
 
-def register_view(request):
-    if request.method == 'POST':
-        username        = request.POST.get('username', '').strip()
-        email           = request.POST.get('email', '').strip().lower()
-        password        = request.POST.get('password', '')
-        business_name   = request.POST.get('business_name', '').strip()
-        whatsapp_number = request.POST.get('whatsapp_number', '').strip()
-        country_code    = request.POST.get('country_code', '+234').strip()
-        currency_code   = request.POST.get('currency_code', 'NGN').strip()
-        currency_symbol = request.POST.get('currency_symbol', '₦').strip()
-        category        = request.POST.get('category', 'other')
-
-        # Combine country code + local number → full WhatsApp number
-        # e.g. +234 + 8012345678 → +2348012345678
-        if country_code and not whatsapp_number.startswith('+'):
-            full_whatsapp = country_code + whatsapp_number
-        else:
-            full_whatsapp = whatsapp_number
-
-        errors = []
-
-        if not all([username, email, password, business_name, whatsapp_number]):
-            errors.append('All fields are required')
-
-        if username and Seller.objects.filter(username__iexact=username).exists():
-            errors.append(f'Username "{username}" is already taken.')
-
-        if email and Seller.objects.filter(email__iexact=email).exists():
-            errors.append(f'Email "{email}" is already registered.')
-
-        if full_whatsapp and Seller.objects.filter(whatsapp_number=full_whatsapp).exists():
-            errors.append(f'WhatsApp number is already registered.')
-
-        if email and ('@' not in email or '.' not in email.split('@')[1]):
-            errors.append('Please enter a valid email address')
-
-        if password and len(password) < 6:
-            errors.append('Password must be at least 6 characters long')
-
-        if username and not username.replace('_', '').isalnum():
-            errors.append('Username can only contain letters, numbers, and underscores')
-
-        if errors:
-            return render(request, 'register.html', {
-                'errors': errors, 'active_tab': 'register',
-                'username': username, 'email': email,
-                'business_name': business_name,
-                'whatsapp_number': whatsapp_number,
-                'category': category,
-            })
-
-        try:
-            seller = Seller.objects.create_user(
-                username=username,
-                email=email,
-                password=password,
-                business_name=business_name,
-                whatsapp_number=full_whatsapp,
-                category=category,
-                country_code=country_code,
-                currency_code=currency_code,
-                currency_symbol=currency_symbol,
-                subscription_type='free',
-            )
-            login(request, seller)
-            if request.GET.get('guest') == '1':
-                return redirect('upload_product')
-            return redirect(request.GET.get('next', '') or 'dashboard')
-
-        except IntegrityError as e:
-            err = str(e)
-            if 'username' in err:
-                errors.append('Username is already taken')
-            elif 'email' in err:
-                errors.append('Email is already registered')
-            elif 'whatsapp' in err:
-                errors.append('WhatsApp number is already registered')
-            else:
-                errors.append('Registration failed. Please try again.')
-
-            return render(request, 'register.html', {
-                'errors': errors, 'active_tab': 'register',
-                'username': username, 'email': email,
-                'business_name': business_name,
-                'whatsapp_number': whatsapp_number,
-                'category': category,
-            })
-
-    return render(request, 'register.html', {'active_tab': 'register'})
-
 @login_required
 @require_http_methods(["POST"])
 def update_watermark(request):
@@ -1232,34 +1142,99 @@ def flutterwave_webhook(request):
 
 
 
-@login_required
+
+# ── 1. CHECK USERNAME AVAILABILITY ──────────────────────────
+def check_username(request):
+    """
+    GET /api/check-username/?u=chioma
+    Returns JSON {available: true/false}
+    Used by the homepage entry modal for live feedback.
+    """
+    u = request.GET.get('u', '').strip().lower()
+    if not u or len(u) < 2:
+        return JsonResponse({'available': False, 'error': 'Too short'})
+    # Only allow letters, numbers, underscores
+    import re
+    if not re.match(r'^[a-z0-9_]+$', u):
+        return JsonResponse({'available': False, 'error': 'Invalid characters'})
+    taken = Seller.objects.filter(username__iexact=u).exists()
+    return JsonResponse({'available': not taken})
+ 
+ 
+# ── 2. GUEST INIT ────────────────────────────────────────────
+@require_http_methods(["POST"])
+def guest_init(request):
+    """
+    POST /api/guest-init/
+    Body: {business_name, username}
+ 
+    Saves the guest's intended business name and username to the
+    session so the upload page can show them, and the register
+    page can pre-fill them.
+ 
+    Returns {success: true} or {success: false, error: "..."}
+    """
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+ 
+    business_name = data.get('business_name', '').strip()
+    username      = data.get('username', '').strip().lower()
+ 
+    if not business_name or not username:
+        return JsonResponse({'success': False, 'error': 'Both fields required'}, status=400)
+ 
+    import re
+    if not re.match(r'^[a-z0-9_]+$', username):
+        return JsonResponse({'success': False, 'error': 'Username can only use letters, numbers, underscores'}, status=400)
+ 
+    # Check username isn't already taken
+    if Seller.objects.filter(username__iexact=username).exists():
+        return JsonResponse({'success': False, 'error': f'"{username}" is already taken. Try another.'})
+ 
+    # Store in session — these travel with the user through upload → preview → register
+    request.session['guest_business_name'] = business_name
+    request.session['guest_username']      = username
+    # guest_key is created later when they actually upload products
+    request.session.modified = True
+ 
+    return JsonResponse({'success': True})
+ 
+ 
+# ── 3. UPLOAD PRODUCTS BATCH (guest + auth) ──────────────────
 @require_http_methods(["POST"])
 def upload_products_batch(request):
-    """Save multiple products in one request — batch endpoint for fast upload"""
+    """
+    Handles batch product creation for BOTH authenticated sellers
+    and guests who have gone through the entry modal.
+    """
     try:
-        seller = request.user
         products_data = json.loads(request.POST.get('products', '[]'))
-
+ 
         if not products_data:
             return JsonResponse({'success': False, 'error': 'No products provided'}, status=400)
-
         if len(products_data) > 50:
             return JsonResponse({'success': False, 'error': 'Maximum 50 products per batch'}, status=400)
-
+ 
+        # ── GUEST FLOW ───────────────────────────────────────
+        if not request.user.is_authenticated:
+            guest_key = request.session.get('guest_key')
+            if not guest_key:
+                guest_key = uuid.uuid4().hex
+                request.session['guest_key'] = guest_key
+                request.session.modified = True
+ 
         created = []
-
+ 
         for item in products_data:
-            # Filter to only valid Cloudinary URLs
             valid_urls = [
                 url for url in item.get('image_urls', [])
                 if isinstance(url, str) and url.startswith('https://res.cloudinary.com/')
             ]
-
-            # Skip product if no valid images
             if not valid_urls:
                 continue
-
-            # Parse price safely
+ 
             price_value = None
             raw_price = str(item.get('price', '')).strip()
             if raw_price:
@@ -1269,37 +1244,184 @@ def upload_products_batch(request):
                         price_value = None
                 except Exception:
                     price_value = None
-
-            # Create product instantly
+ 
             product = Product.objects.create(
-                seller=seller,
-                description=str(item.get('description', '')).strip(),
-                price=price_value
+                seller      = request.user if request.user.is_authenticated else None,
+                guest_key   = guest_key if not request.user.is_authenticated else None,
+                description = str(item.get('description', '')).strip(),
+                price       = price_value,
             )
-
-            # Save only valid image URLs (max 10)
+ 
             for index, url in enumerate(valid_urls[:10]):
                 ProductImage.objects.create(
-                    product=product,
-                    image_url=url,
-                    order=index
+                    product   = product,
+                    image_url = url,
+                    order     = index,
                 )
-
+ 
             created.append(product.id)
-
+ 
         if not created:
             return JsonResponse({'success': False, 'error': 'No valid products to save'}, status=400)
-
-        logger.info(f"✅ Batch: {len(created)} products saved for seller {seller.id}")
-
-        return JsonResponse({
-            'success': True,
-            'created': len(created),
-            'redirect_url': '/dashboard/'
-        })
-
+ 
+        if request.user.is_authenticated:
+            return JsonResponse({
+                'success': True,
+                'created': len(created),
+                'redirect_url': '/dashboard/',
+            })
+        else:
+            return JsonResponse({
+                'success': True,
+                'created': len(created),
+                'redirect_url': f'/preview/{guest_key}/',
+            })
+ 
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Invalid data format'}, status=400)
     except Exception as e:
         logger.error(f"Batch upload error: {str(e)}\n{traceback.format_exc()}")
         return JsonResponse({'success': False, 'error': 'Failed to save. Please try again.'}, status=500)
+ 
+ 
+# ── 4. GUEST STORE PREVIEW ───────────────────────────────────
+def guest_store_preview(request, guest_key):
+    """
+    /preview/<guest_key>/
+    Shows real DB products for the guest, renders seller_page.html
+    look-alike with a registration modal.
+    Authenticated users are bounced to dashboard.
+    """
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+ 
+    products = Product.objects.filter(
+        guest_key = guest_key,
+        seller    = None,
+        is_archived = False,
+    ).prefetch_related('images').order_by('created_at')
+ 
+    if not products.exists():
+        return redirect('upload_product')
+ 
+    business_name = request.session.get('guest_business_name', 'Your Store')
+    username      = request.session.get('guest_username', '')
+ 
+    return render(request, 'guest_seller_page.html', {
+        'products':      products,
+        'guest_key':     guest_key,
+        'business_name': business_name,
+        'username':      username,
+    })
+ 
+
+
+
+
+ 
+# ── 5. REGISTER VIEW (updated — no username field in form) ───
+def register_view(request):
+    if request.method == 'POST':
+        # Pull pre-chosen username from session (set in guest_init)
+        # Fall back to a POST field for direct registration without guest flow
+        username = (
+            request.session.get('guest_username') or
+            request.POST.get('username', '')
+        ).strip().lower()
+ 
+        business_name   = (
+            request.session.get('guest_business_name') or
+            request.POST.get('business_name', '')
+        ).strip()
+ 
+        email           = request.POST.get('email', '').strip().lower()
+        password        = request.POST.get('password', '')
+        whatsapp_number = request.POST.get('whatsapp_number', '').strip()
+        country_code    = request.POST.get('country_code', '+234').strip()
+        currency_code   = request.POST.get('currency_code', 'NGN').strip()
+        currency_symbol = request.POST.get('currency_symbol', '₦').strip()
+        category        = request.POST.get('category', 'other')
+ 
+        if country_code and not whatsapp_number.startswith('+'):
+            full_whatsapp = country_code + whatsapp_number
+        else:
+            full_whatsapp = whatsapp_number
+ 
+        errors = []
+ 
+        if not all([username, email, password, business_name, whatsapp_number]):
+            errors.append('All fields are required')
+        if username and Seller.objects.filter(username__iexact=username).exists():
+            # Username was reserved in guest_init but someone else grabbed it in the meantime
+            errors.append(f'Username "{username}" was just taken. Please go back and choose another.')
+        if email and Seller.objects.filter(email__iexact=email).exists():
+            errors.append(f'Email "{email}" is already registered.')
+        if full_whatsapp and Seller.objects.filter(whatsapp_number=full_whatsapp).exists():
+            errors.append('WhatsApp number is already registered.')
+        if email and ('@' not in email or '.' not in email.split('@')[1]):
+            errors.append('Please enter a valid email address')
+        if password and len(password) < 6:
+            errors.append('Password must be at least 6 characters long')
+ 
+        if errors:
+            return render(request, 'register.html', {
+                'errors': errors, 'active_tab': 'register',
+                'email': email,
+                'business_name': business_name,
+                'username': username,
+                'whatsapp_number': whatsapp_number,
+                'category': category,
+            })
+ 
+        try:
+            seller = Seller.objects.create_user(
+                username        = username,
+                email           = email,
+                password        = password,
+                business_name   = business_name,
+                whatsapp_number = full_whatsapp,
+                category        = category,
+                country_code    = country_code,
+                currency_code   = currency_code,
+                currency_symbol = currency_symbol,
+                subscription_type = 'free',
+            )
+ 
+            # ── TRANSFER GUEST PRODUCTS ──────────────────────
+            guest_key = request.session.get('guest_key')
+            if guest_key:
+                transferred = Product.objects.filter(
+                    guest_key = guest_key,
+                    seller    = None,
+                ).update(seller=seller, guest_key=None)
+                logger.info(f"Transferred {transferred} guest products → seller {seller.id}")
+ 
+            # Clear guest session data
+            for key in ['guest_key', 'guest_username', 'guest_business_name']:
+                request.session.pop(key, None)
+ 
+            login(request, seller)
+            # Send straight to dashboard — their products are already there
+            return redirect('dashboard')
+ 
+        except IntegrityError as e:
+            err = str(e)
+            if 'username' in err:
+                errors.append('Username is already taken')
+            elif 'email' in err:
+                errors.append('Email is already registered')
+            elif 'whatsapp' in err:
+                errors.append('WhatsApp number is already registered')
+            else:
+                errors.append('Registration failed. Please try again.')
+ 
+            return render(request, 'register.html', {
+                'errors': errors, 'active_tab': 'register',
+                'email': email,
+                'business_name': business_name,
+                'username': username,
+                'whatsapp_number': whatsapp_number,
+                'category': category,
+            })
+ 
+    return render(request, 'register.html', {'active_tab': 'register'})

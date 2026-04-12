@@ -8,826 +8,433 @@
 
 {% block extra_css %}
 <style>
-  /* =============================================
-     DOCUMENT 3 DESIGN SYSTEM — UNCHANGED
-     ============================================= */
-  :root {
-    --green: #00C853;
-    --green-dk: #00a844;
-    --dark: #0A0A0A;
-    --gray: #6B6B6B;
-    --gray-lt: #9B9B9B;
-    --light: #F7F7F5;
-    --border: #E8E8E4;
-    --white: #ffffff;
-    --red: #FF4444;
-    --wa: #25D366;
-    --font-d: 'Syne', sans-serif;
-    --font-b: 'DM Sans', sans-serif;
-    --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-xl: 24px; --r-pill: 100px;
-    --sh-sm: 0 2px 8px rgba(0,0,0,.06);
-    --sh-md: 0 8px 24px rgba(0,0,0,.08);
-    --sh-lg: 0 20px 60px rgba(0,0,0,.10);
-  }
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-  body {
-    font-family: var(--font-b);
-    background: var(--white);
-    color: var(--dark);
-    overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* =============================================
-     NAVBAR — FROM DOCUMENT 4 (base.html) — EXACT
-     ============================================= */
-  .header {
-    position: sticky; top: 0; z-index: 200;
-    background: rgba(255,255,255,0.97);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-  }
-  .container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
-  .header-content {
-    display: flex; align-items: center; justify-content: space-between;
-    height: 64px; gap: 16px;
-  }
-
-  /* Logo */
-  .logo {
-    font-family: var(--font-d); font-weight: 800; font-size: 20px;
-    letter-spacing: -.5px; color: var(--dark); text-decoration: none;
-    display: flex; align-items: center; gap: 8px; flex-shrink: 0;
-  }
-  .logo-icon {
-    width: 32px; height: 32px; background: var(--green); border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-d); font-weight: 800; font-size: 15px; color: var(--white);
-  }
-  .logo-word { color: var(--dark); }
-  .logo-word span { color: var(--green); }
-
-  /* Nav links */
-  .nav-links { display: flex; align-items: center; gap: 4px; }
-  .nav-link {
-    display: flex; align-items: center; gap: 6px;
-    padding: 8px 12px; border-radius: var(--r-pill);
-    font-size: 14px; font-weight: 500; color: var(--gray);
-    text-decoration: none; transition: all .18s ease; white-space: nowrap;
-  }
-  .nav-link:hover { color: var(--dark); background: var(--light); }
-  .nav-link svg { flex-shrink: 0; }
-
-  /* Buttons */
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 10px 22px; border-radius: var(--r-pill);
-    font-family: var(--font-b); font-size: 14px; font-weight: 600;
-    border: none; cursor: pointer; text-decoration: none;
-    transition: all .18s ease; white-space: nowrap; line-height: 1;
-  }
-  .btn-primary { background: var(--green); color: var(--white); }
-  .btn-primary:hover { background: var(--green-dk); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(0,200,83,.3); }
-
-  /* Theme toggle */
-  .theme-toggle {
-    width: 36px; height: 36px;
-    background: var(--light); border: 1px solid var(--border); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: all .18s; flex-shrink: 0;
-  }
-  .theme-toggle:hover { border-color: var(--dark); }
-
-  /* Profile dropdown */
-  .nav-dropdown { position: relative; }
-  .nav-profile-btn {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--light); border: 1px solid var(--border);
-    border-radius: var(--r-pill); padding: 4px 10px 4px 4px;
-    cursor: pointer; transition: all .18s;
-  }
-  .nav-profile-btn:hover { border-color: var(--dark); }
-  .nav-profile-btn img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
-  .profile-avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: var(--green); color: var(--white);
-    font-family: var(--font-d); font-weight: 700; font-size: 13px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .dropdown-menu {
-    position: absolute; top: calc(100% + 8px); right: 0;
-    background: var(--white); border: 1px solid var(--border);
-    border-radius: var(--r-lg); min-width: 220px;
-    box-shadow: var(--sh-lg); opacity: 0; pointer-events: none;
-    transform: translateY(-8px); transition: all .18s ease;
-    z-index: 300; overflow: hidden;
-  }
-  .dropdown-menu.active { opacity: 1; pointer-events: auto; transform: translateY(0); }
-  .dropdown-header { padding: 16px 16px 12px; }
-  .dropdown-name { font-family: var(--font-d); font-weight: 700; font-size: 14px; }
-  .dropdown-email { font-size: 12px; color: var(--gray); margin-top: 2px; }
-  .dropdown-divider { height: 1px; background: var(--border); }
-  .dropdown-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 11px 16px; font-size: 14px; font-weight: 500;
-    color: var(--dark); text-decoration: none; transition: background .15s;
-  }
-  .dropdown-item:hover { background: var(--light); }
-  .dropdown-item.text-danger { color: var(--red); }
-  .dropdown-item.text-danger:hover { background: #fff5f5; }
-
-  /* Mobile hamburger */
-  .mobile-menu-btn {
-    display: none; flex-direction: column; gap: 5px;
-    background: none; border: none; cursor: pointer; padding: 4px;
-  }
-  .mobile-menu-btn span { display: block; width: 22px; height: 2px; background: var(--dark); border-radius: 2px; transition: all .2s; }
-
-  /* Dark mode */
-  [data-theme="dark"] body { background: #0f0f0f; color: #f0f0f0; }
-  [data-theme="dark"] .header { background: rgba(15,15,15,.97); border-color: #222; }
-  [data-theme="dark"] .nav-link { color: #888; }
-  [data-theme="dark"] .nav-link:hover { color: #f0f0f0; background: #1a1a1a; }
-  [data-theme="dark"] .logo, [data-theme="dark"] .logo-word { color: #f0f0f0; }
-  [data-theme="dark"] .dropdown-menu { background: #1a1a1a; border-color: #2a2a2a; }
-  [data-theme="dark"] .dropdown-item { color: #f0f0f0; }
-  [data-theme="dark"] .dropdown-item:hover { background: #222; }
-  [data-theme="dark"] .theme-toggle { background: #1a1a1a; border-color: #333; }
-  [data-theme="dark"] .nav-profile-btn { background: #1a1a1a; border-color: #333; }
-
-  /* =============================================
-     HERO — DOCUMENT 3 EXACT
-     ============================================= */
-  .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    padding: 120px 40px 80px;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-  .hero-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--light);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 100px;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--gray);
-    margin-bottom: 32px;
-    width: fit-content;
-  }
-  .hero-tag .dot {
-    width: 6px; height: 6px;
-    background: var(--green);
-    border-radius: 50%;
-    animation: pulse 2s infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.3); }
-  }
-  h1 {
-    font-family: var(--font-d);
-    font-weight: 800;
-    font-size: clamp(42px, 7vw, 80px);
-    line-height: 1.0;
-    letter-spacing: -2px;
-    margin-bottom: 24px;
-  }
-  h1 .accent { color: var(--green); }
-  .hero-sub {
-    font-size: clamp(16px, 2.5vw, 20px);
-    color: var(--gray);
-    font-weight: 300;
-    max-width: 500px;
-    line-height: 1.6;
-    margin-bottom: 48px;
-  }
-  .hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-  .btn-hero {
-    background: var(--green);
-    color: var(--white);
-    border: none;
-    padding: 16px 36px;
-    border-radius: 100px;
-    font-family: var(--font-b);
-    font-size: 16px;
-    font-weight: 500;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
-  }
-  .btn-hero:hover { background: var(--green-dk); transform: translateY(-1px); }
-  .btn-hero svg { transition: transform 0.2s; }
-  .btn-hero:hover svg { transform: translateX(3px); }
-  .btn-ghost {
-    color: var(--gray);
-    font-size: 14px;
-    font-weight: 500;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: color .18s;
-  }
-  .btn-ghost:hover { color: var(--dark); }
-
-  /* =============================================
-     PROOF BAR — DOCUMENT 3 EXACT
-     ============================================= */
-
-.proof-bar {
-  display: flex;
-  overflow: hidden; /* Hide the scrollbar */
-  white-space: nowrap;
-  gap: 48px;
-  /* border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border); */
-  padding: 24px 40px;
+:root {
+  --primary:#00C853; --primary-dark:#00a844; --primary-lt:#e8fff0;
+  --bg:#ffffff; --bg-alt:#F7F7F5; --text:#0A0A0A; --text-muted:#6B6B6B;
+  --border-c:#E8E8E4; --radius:12px; --radius-lg:20px;
 }
 
-/* The animation movement */
-@keyframes scroll {
-  from { transform: translateX(0); }
-  to { transform: translateX(-50%); } /* Moves halfway through the doubled content */
+/* =============================================
+   UPLOAD ENTRY MODAL
+   ============================================= */
+.entry-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity .25s;
 }
+.entry-overlay.open { opacity: 1; pointer-events: auto; }
 
-.scrolling-inner {
-  display: flex;
-  gap: 48px;
-  animation: scroll 20s linear infinite; /* Adjust '20s' to change speed */
+.entry-modal {
+  background: var(--white); border-radius: 20px;
+  width: 100%; max-width: 420px;
+  padding: 32px 28px 28px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.18);
+  transform: translateY(12px) scale(.97);
+  transition: transform .3s cubic-bezier(.22,1,.36,1);
 }
+.entry-overlay.open .entry-modal { transform: translateY(0) scale(1); }
 
-/* Pause on hover so users can read */
-.proof-bar:hover .scrolling-inner {
-  animation-play-state: paused;
+.entry-logo {
+  font-family: var(--font-d); font-weight: 800; font-size: 16px;
+  color: var(--dark); text-decoration: none; display: inline-block; margin-bottom: 20px;
 }
-  .proof-bar::-webkit-scrollbar { display: none; }
-  .proof-item { display: flex; align-items: center; gap: 12px; white-space: nowrap; }
-  .proof-num {
-    font-family: var(--font-d);
-    font-weight: 800;
-    font-size: 28px;
-    letter-spacing: -1px;
-  }
-  .proof-label { font-size: 13px; color: var(--gray); }
+.entry-logo span { color: var(--green); }
 
-  /* =============================================
-     HOW IT WORKS — DOCUMENT 3 EXACT
-     ============================================= */
-  .section { padding: 100px 40px; }
-  .section-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--green);
-    margin-bottom: 16px;
-  }
-  .section-title {
-    font-family: var(--font-d);
-    font-weight: 700;
-    font-size: clamp(28px, 4vw, 48px);
-    letter-spacing: -1.5px;
-    margin-bottom: 64px;
-  }
-  .steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 2px;
-    background: var(--border);
-    border: 1px solid var(--border);
-  }
-  .step {
-    background: var(--white);
-    padding: 40px 32px;
-    position: relative;
-    transition: background .2s;
-  }
-  .step:hover { background: var(--light); }
-  .step-num {
-    font-family: var(--font-d);
-    font-weight: 800;
-    font-size: 48px;
-    color: var(--light);
-    line-height: 1;
-    margin-bottom: 16px;
-  }
-  .step:hover .step-num { color: #ddd; }
-  .step-icon {
-    width: 44px; height: 44px;
-    background: var(--dark);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px;
-    transition: background .2s;
-  }
-  .step:hover .step-icon { background: var(--green); }
-  .step h3 {
-    font-family: var(--font-d);
-    font-weight: 700;
-    font-size: 18px;
-    margin-bottom: 8px;
-  }
-  .step p { font-size: 14px; color: var(--gray); line-height: 1.6; }
+.entry-modal h2 {
+  font-family: var(--font-d); font-weight: 800; font-size: 22px;
+  letter-spacing: -.5px; color: var(--dark); margin-bottom: 6px;
+}
+.entry-modal p { font-size: 14px; color: var(--gray); margin-bottom: 24px; line-height: 1.5; }
 
-  /* =============================================
-     BENEFITS — DOCUMENT 3 EXACT
-     ============================================= */
-  .benefits-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 24px;
-    margin-top: 48px;
-  }
-  .benefit-card {
-    border: 1px solid var(--border);
-    padding: 32px;
-    border-radius: 16px;
-    transition: border-color 0.2s, transform 0.2s;
-  }
-  .benefit-card:hover { border-color: var(--green); transform: translateY(-2px); }
-  .benefit-icon { font-size: 28px; margin-bottom: 16px; display: block; }
-  .benefit-card h3 {
-    font-family: var(--font-d);
-    font-weight: 700;
-    font-size: 18px;
-    margin-bottom: 8px;
-  }
-  .benefit-card p { font-size: 14px; color: var(--gray); line-height: 1.6; }
+.em-group { margin-bottom: 16px; }
+.em-label {
+  display: block; font-size: 11px; font-weight: 700;
+  color: var(--gray); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px;
+}
+.em-input {
+  width: 100%; padding: 12px 14px;
+  border: 1.5px solid var(--border); border-radius: 11px;
+  font-family: var(--font-b); font-size: 15px; color: var(--dark);
+  outline: none; transition: border-color .2s, box-shadow .2s;
+  background: var(--white);
+}
+.em-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,200,83,.09); }
+.em-input::placeholder { color: var(--gray-lt); }
+.em-input.error { border-color: #f87171; }
 
-  /* =============================================
-     LIVE SELLERS GRID — new, matches Doc 3 style
-     ============================================= */
-  .sellers-section { background: var(--light); padding: 100px 40px; }
-  .sellers-inner { max-width: 1000px; margin: 0 auto; }
-  .sellers-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 14px;
-  }
-  .seller-card {
-    background: var(--white); border: 1px solid var(--border);
-    border-radius: 14px; overflow: hidden;
-    transition: transform .2s, box-shadow .2s, border-color .2s;
-    text-decoration: none; color: inherit; display: block;
-  }
-  .seller-card:hover { transform: translateY(-3px); box-shadow: var(--sh-md); border-color: #ccc; }
-  .seller-card-img { height: 90px; position: relative; overflow: hidden; }
-  .seller-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .seller-fallback {
-    width: 100%; height: 100%; background: var(--dark);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font-d); font-weight: 800; font-size: 36px; color: var(--white);
-  }
-  .seller-featured-badge {
-    position: absolute; top: 8px; left: 8px;
-    background: var(--green); color: var(--white);
-    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
-  }
-  .seller-card-body { padding: 12px 14px 14px; }
-  .seller-card-name {
-    font-family: var(--font-d); font-weight: 700; font-size: 14px;
-    margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .seller-card-cat { font-size: 11px; color: var(--gray-lt); margin-bottom: 8px; }
-  .seller-card-count {
-    display: inline-flex; align-items: center; gap: 4px;
-    background: var(--light); border-radius: 100px;
-    padding: 3px 9px; font-size: 11px; font-weight: 600; color: var(--gray);
-  }
-  .sellers-sub-label {
-    font-size: 11px; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--gray-lt); margin-bottom: 14px;
-  }
+.slug-row {
+  display: flex; align-items: center; gap: 0;
+  border: 1.5px solid var(--border); border-radius: 11px;
+  overflow: hidden; transition: border-color .2s, box-shadow .2s;
+}
+.slug-row:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,200,83,.09); }
+.slug-prefix {
+  padding: 12px 10px 12px 14px;
+  font-size: 13px; color: var(--gray-lt); font-weight: 500;
+  background: var(--light); white-space: nowrap; flex-shrink: 0;
+  border-right: 1px solid var(--border);
+}
+.slug-input {
+  flex: 1; padding: 12px 14px 12px 10px;
+  border: none; outline: none;
+  font-family: var(--font-b); font-size: 15px; color: var(--dark);
+  background: transparent; min-width: 0;
+}
+.slug-input::placeholder { color: var(--gray-lt); }
 
-  /* =============================================
-     DEMO MOCKUP — DOCUMENT 3 EXACT
-     ============================================= */
-  .demo-section { background: var(--light); padding: 100px 40px; }
-  .demo-container { max-width: 1000px; margin: 0 auto; }
-  .demo-phone {
-    width: 280px;
-    background: var(--white);
-    border-radius: 32px;
-    box-shadow: 0 40px 80px rgba(0,0,0,0.12);
-    overflow: hidden;
-    border: 2px solid var(--border);
-    margin: 48px auto 0;
-    animation: float 4s ease-in-out infinite;
-  }
-  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-  .phone-header { background: var(--green); padding: 20px 20px 16px; color: var(--white); }
-  .phone-header-top { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-  .phone-avatar { width: 36px; height: 36px; background: rgba(255,255,255,0.3); border-radius: 50%; }
-  .phone-name { font-weight: 600; font-size: 15px; }
-  .phone-status { font-size: 12px; opacity: 0.8; }
-  .phone-products { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .phone-product { background: var(--light); border-radius: 10px; overflow: hidden; }
-  .phone-img { height: 90px; background: linear-gradient(135deg, #e0e0e0, #c8c8c8); display: flex; align-items: center; justify-content: center; font-size: 28px; }
-  .phone-info { padding: 8px; }
-  .phone-info-name { font-size: 11px; font-weight: 600; color: var(--dark); }
-  .phone-info-price { font-size: 11px; color: var(--green); font-weight: 700; margin-top: 2px; }
-  .phone-order-btn {
-    margin: 0 16px 16px; background: var(--green); color: var(--white);
-    padding: 10px; border-radius: 8px; text-align: center;
-    font-size: 13px; font-weight: 600;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
+.em-hint { font-size: 12px; color: var(--gray-lt); margin-top: 5px; }
+.em-hint.taken { color: #ef4444; }
+.em-hint.available { color: var(--green); }
 
-  /* =============================================
-     CTA — DOCUMENT 3 EXACT
-     ============================================= */
-  .cta-section {
-    padding: 120px 40px;
-    text-align: center;
-    background: var(--dark);
-    color: var(--white);
-    position: relative; overflow: hidden;
-  }
-  /* subtle grid overlay */
-  .cta-section::before {
-    content: ''; position: absolute; inset: 0;
-    background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
-                      linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
-    background-size: 48px 48px;
-  }
-  .cta-section > * { position: relative; z-index: 1; }
-  .cta-section .section-label { color: var(--green); }
-  .cta-section h2 {
-    font-family: var(--font-d);
-    font-weight: 800;
-    font-size: clamp(32px, 6vw, 64px);
-    letter-spacing: -2px;
-    margin-bottom: 20px;
-  }
-  .cta-section p { color: rgba(255,255,255,0.5); font-size: 18px; margin-bottom: 48px; }
+.em-submit {
+  width: 100%; padding: 14px; margin-top: 4px;
+  background: var(--green); color: #fff; border: none; border-radius: 11px;
+  font-family: var(--font-b); font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: background .18s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.em-submit:hover { background: var(--green-dk); }
+.em-submit:disabled { background: var(--gray-lt); cursor: not-allowed; }
+.em-spin {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
+  animation: spin .7s linear infinite; display: none;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  /* =============================================
-     FAQ — styled to match Document 3 system
-     ============================================= */
-  .faq-section { padding: 100px 40px; background: var(--white); }
-  .faq-inner { max-width: 760px; margin: 0 auto; }
-  .faq-section .section-title { margin-bottom: 8px; }
-  .faq-subtitle { font-size: 16px; color: var(--gray); font-weight: 300; margin-bottom: 52px; }
+.em-signin { text-align: center; font-size: 13px; color: var(--gray-lt); margin-top: 14px; }
+.em-signin a { color: var(--green); font-weight: 600; text-decoration: none; }
 
-  .faq-list {
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-  .faq-item { border-bottom: 1px solid var(--border); }
-  .faq-item:last-child { border-bottom: none; }
+/* =============================================
+   HERO
+   ============================================= */
+.hp-hero {
+  padding: 100px 40px 80px; background: var(--bg);
+  position: relative; overflow: hidden;
+}
+.hp-hero::before {
+  content:''; position:absolute; top:-200px; right:-200px;
+  width:600px; height:600px;
+  background:radial-gradient(circle,rgba(0,200,83,.07) 0%,transparent 65%);
+  border-radius:50%; pointer-events:none;
+}
+.hp-hero-inner { max-width:860px; margin:0 auto; text-align:center; position:relative; z-index:1; }
+.hp-hero-tag {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 16px; background:var(--bg-alt);
+  border:1.5px solid var(--border-c); border-radius:100px;
+  font-size:13px; font-weight:500; color:var(--text-muted); margin-bottom:32px;
+}
+.hp-hero-dot {
+  width:7px; height:7px; background:var(--primary);
+  border-radius:50%; animation:dotPulse 2s ease-in-out infinite; flex-shrink:0;
+}
+@keyframes dotPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.hp-hero h1 {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:clamp(40px,6.5vw,78px); line-height:1.0;
+  letter-spacing:-2px; color:var(--text); margin-bottom:24px;
+}
+.hp-accent { color:var(--primary); }
+.hp-hero-sub {
+  font-size:clamp(16px,2.2vw,20px); color:var(--text-muted);
+  max-width:520px; margin:0 auto 48px; line-height:1.7;
+}
+.hp-hero-actions { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+.hp-btn-primary {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:15px 32px; background:var(--primary); color:#fff;
+  border:none; border-radius:100px;
+  font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600;
+  text-decoration:none; cursor:pointer; transition:all .22s;
+}
+.hp-btn-primary:hover { background:var(--primary-dark); transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,200,83,.32); }
+.hp-ghost-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:15px 28px; color:var(--text-muted); font-size:15px; font-weight:500;
+  text-decoration:none; border:1.5px solid var(--border-c); border-radius:100px; transition:all .22s;
+}
+.hp-ghost-btn:hover { color:var(--text); border-color:var(--text); background:var(--bg-alt); }
 
-  .faq-question {
-    width: 100%; background: none; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 16px; padding: 24px 28px; text-align: left;
-    transition: background .18s;
-  }
-  .faq-question:hover { background: var(--light); }
-  .faq-question span {
-    font-family: var(--font-d); font-weight: 600; font-size: 16px;
-    color: var(--dark); line-height: 1.4;
-  }
-  .faq-icon {
-    flex-shrink: 0; color: var(--gray);
-    transition: transform .3s ease, color .18s;
-  }
-  .faq-item.open .faq-icon { transform: rotate(180deg); color: var(--green); }
-  .faq-item.open .faq-question { background: var(--light); }
-  .faq-item.open .faq-question span { color: var(--green); }
+/* PROOF BAR */
+.hp-proof { border-top:1px solid var(--border-c); border-bottom:1px solid var(--border-c); padding:28px 40px; background:var(--bg-alt); overflow:hidden; }
+.hp-proof-track { display:flex; gap:64px; animation:proofScroll 22s linear infinite; width:max-content; }
+.hp-proof:hover .hp-proof-track { animation-play-state:paused; }
+@keyframes proofScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.hp-proof-item { display:flex; align-items:center; gap:14px; flex-shrink:0; }
+.hp-proof-num { font-family:'Syne',sans-serif; font-weight:800; font-size:30px; letter-spacing:-1px; color:var(--text); }
+.hp-proof-label { font-size:12px; color:var(--text-muted); line-height:1.4; font-weight:500; }
+.hp-proof-divider { width:1px; height:32px; background:var(--border-c); flex-shrink:0; }
 
-  .faq-answer {
-    max-height: 0; overflow: hidden;
-    transition: max-height .35s ease;
-    background: var(--light);
-  }
-  .faq-item.open .faq-answer { max-height: 300px; }
-  .faq-answer p {
-    padding: 0 28px 24px;
-    font-size: 15px; color: var(--gray); line-height: 1.7; font-weight: 400;
-  }
+/* SHARED SECTIONS */
+.hp-section { padding:90px 40px; background:var(--bg); }
+.hp-section-alt { padding:90px 40px; background:var(--bg-alt); }
+.hp-container { max-width:1080px; margin:0 auto; }
+.hp-container-sm { max-width:780px; margin:0 auto; }
+.hp-section-label { display:block; font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--primary); margin-bottom:14px; }
+.hp-section-title { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(26px,4vw,46px); letter-spacing:-1.5px; color:var(--text); margin-bottom:16px; line-height:1.1; }
+.hp-section-sub { font-size:17px; color:var(--text-muted); line-height:1.6; max-width:560px; }
+.hp-section-head { margin-bottom:60px; }
+.hp-section-head.center { text-align:center; }
+.hp-section-head.center .hp-section-sub { margin:0 auto; }
 
-  /* =============================================
-     FOOTER — professional dark, matches Doc 3
-     ============================================= */
-  footer {
-    background: var(--dark);
-    color: var(--white);
-    padding: 64px 40px 32px;
-  }
-  .footer-inner { max-width: 1200px; margin: 0 auto; }
+/* HOW IT WORKS */
+.hp-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:var(--border-c); border:1px solid var(--border-c); border-radius:var(--radius); overflow:hidden; }
+.hp-step { background:var(--bg); padding:44px 36px; transition:background .22s; }
+.hp-step:hover { background:var(--bg-alt); }
+.hp-step-num { font-family:'Syne',sans-serif; font-weight:800; font-size:52px; color:var(--border-c); line-height:1; margin-bottom:20px; }
+.hp-step-icon { width:46px; height:46px; background:var(--text); border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; transition:background .22s; }
+.hp-step:hover .hp-step-icon { background:var(--primary); }
+.hp-step h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:18px; color:var(--text); margin-bottom:10px; }
+.hp-step p { font-size:14px; color:var(--text-muted); line-height:1.7; }
 
-  .footer-top {
-    display: grid;
-    grid-template-columns: 1.6fr repeat(3, 1fr);
-    gap: 48px;
-    padding-bottom: 48px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-  }
+/* BENEFITS */
+.hp-benefits { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:20px; }
+.hp-benefit-card { padding:36px 32px; border:1.5px solid var(--border-c); border-radius:var(--radius-lg); background:var(--bg); transition:border-color .22s,transform .22s,box-shadow .22s; }
+.hp-benefit-card:hover { border-color:var(--primary); transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,200,83,.1); }
+.hp-benefit-icon { width:48px; height:48px; background:var(--primary-lt); border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+.hp-benefit-card h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:17px; color:var(--text); margin-bottom:10px; }
+.hp-benefit-card p { font-size:14px; color:var(--text-muted); line-height:1.7; }
 
-  .footer-logo {
-    font-family: var(--font-d); font-weight: 800; font-size: 20px;
-    color: var(--white); letter-spacing: -.5px;
-    display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
-    text-decoration: none;
-  }
-  .footer-logo-icon {
-    width: 30px; height: 30px; background: var(--green); border-radius: 7px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 800; color: var(--white); font-family: var(--font-d);
-  }
-  .footer-logo-text span { color: var(--green); }
-  .footer-tagline {
-    font-size: 13px; color: rgba(255,255,255,.4);
-    line-height: 1.7; max-width: 240px; margin-bottom: 24px;
-  }
+/* SELLERS GRID */
+.hp-sellers-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; }
+.hp-seller-card { background:var(--bg); border:1.5px solid var(--border-c); border-radius:var(--radius); overflow:hidden; text-decoration:none; color:inherit; display:block; transition:transform .2s,box-shadow .2s,border-color .2s; }
+.hp-seller-card:hover { transform:translateY(-3px); box-shadow:0 8px 32px rgba(0,0,0,.08); border-color:#bbb; }
+.hp-seller-img { height:100px; position:relative; overflow:hidden; background:var(--bg-alt); }
+.hp-seller-img img { width:100%; height:100%; object-fit:cover; display:block; }
+.hp-seller-fallback { width:100%; height:100%; background:var(--text); display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:36px; color:#fff; }
+.hp-seller-badge-ft { position:absolute; top:8px; left:8px; background:var(--primary); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:100px; }
+.hp-seller-body { padding:14px 16px 16px; }
+.hp-seller-name { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; color:var(--text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hp-seller-cat { font-size:11px; color:var(--text-muted); margin-bottom:10px; }
+.hp-seller-count { display:inline-flex; align-items:center; gap:4px; background:var(--bg-alt); border-radius:100px; padding:3px 10px; font-size:11px; font-weight:600; color:var(--text-muted); }
+.hp-sellers-sublabel { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; opacity:.7; }
 
-  /* Social icons */
-  .footer-socials { display: flex; gap: 10px; }
-  .social-icon {
-    width: 36px; height: 36px;
-    background: rgba(255,255,255,.07);
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    text-decoration: none; color: rgba(255,255,255,.5);
-    transition: all .18s;
-  }
-  .social-icon:hover { background: var(--green); border-color: var(--green); color: var(--white); transform: translateY(-2px); }
+/* PHONE MOCKUP */
+.hp-phone-wrap { display:flex; justify-content:center; margin-top:52px; }
+.hp-phone { width:260px; background:var(--bg); border-radius:28px; box-shadow:0 40px 80px rgba(0,0,0,.14); overflow:hidden; border:2px solid var(--border-c); animation:phoneFloat 5s ease-in-out infinite; }
+@keyframes phoneFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.hp-phone-header { background:var(--primary); padding:18px 18px 14px; color:#fff; }
+.hp-phone-top { display:flex; align-items:center; gap:10px; }
+.hp-phone-avatar { width:34px; height:34px; background:rgba(255,255,255,.25); border-radius:50%; }
+.hp-phone-name { font-weight:600; font-size:14px; }
+.hp-phone-url { font-size:11px; opacity:.75; margin-top:1px; }
+.hp-phone-products { padding:14px; display:grid; grid-template-columns:1fr 1fr; gap:8px; background:var(--bg-alt); }
+.hp-phone-product { background:var(--bg); border-radius:8px; overflow:hidden; }
+.hp-phone-img { height:72px; background:linear-gradient(135deg,#e8e8e8,#d0d0d0); display:flex; align-items:center; justify-content:center; font-size:24px; }
+.hp-phone-info { padding:7px 8px; }
+.hp-phone-name-txt { font-size:10px; font-weight:600; color:var(--text); }
+.hp-phone-price { font-size:10px; color:var(--primary); font-weight:700; margin-top:1px; }
+.hp-phone-cta { margin:0 14px 14px; background:var(--primary); color:#fff; padding:9px; border-radius:7px; text-align:center; font-size:12px; font-weight:600; }
 
-  /* Footer link columns */
-  .footer-col h4 {
-    font-family: var(--font-d); font-weight: 700; font-size: 12px;
-    color: var(--white); letter-spacing: 1.5px; margin-bottom: 18px;
-    text-transform: uppercase; opacity: .7;
-  }
-  .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-  .footer-col ul li a {
-    font-size: 14px; color: rgba(255,255,255,.4);
-    text-decoration: none; transition: color .18s;
-  }
-  .footer-col ul li a:hover { color: var(--white); }
+/* CTA */
+.hp-cta { padding:100px 40px; background:var(--text); color:#fff; text-align:center; position:relative; overflow:hidden; }
+.hp-cta::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px); background-size:52px 52px; }
+.hp-cta>*{position:relative;z-index:1;}
+.hp-cta .hp-section-label { color:var(--primary); }
+.hp-cta h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(30px,5.5vw,58px); letter-spacing:-2px; margin-bottom:16px; color:#fff; }
+.hp-cta p { font-size:17px; color:rgba(255,255,255,.5); margin-bottom:44px; }
+.hp-cta-btn { display:inline-flex; align-items:center; gap:8px; padding:16px 36px; background:var(--primary); color:#fff; border-radius:100px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:700; text-decoration:none; transition:all .22s; cursor:pointer; border:none; }
+.hp-cta-btn:hover { background:var(--primary-dark); transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,200,83,.35); }
 
-  /* Footer bottom */
-  .footer-bottom {
-    display: flex; align-items: center; justify-content: space-between;
-    flex-wrap: wrap; gap: 12px; padding-top: 28px;
-  }
-  .footer-bottom p { font-size: 13px; color: rgba(255,255,255,.3); }
+/* FAQ */
+.hp-faq-section { padding:90px 40px; background:var(--bg); }
+.hp-faq-sub { font-size:16px; color:var(--text-muted); margin-bottom:52px; }
+.hp-faq-list { border:1.5px solid var(--border-c); border-radius:var(--radius-lg); overflow:hidden; }
+.hp-faq-item { border-bottom:1.5px solid var(--border-c); }
+.hp-faq-item:last-child { border-bottom:none; }
+.hp-faq-question { width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:22px 28px; background:none; border:none; text-align:left; font-family:'Syne',sans-serif; font-size:16px; font-weight:600; color:var(--text); cursor:pointer; transition:background .18s,color .18s; }
+.hp-faq-question:hover { background:var(--bg-alt); color:var(--primary); }
+.hp-faq-icon { flex-shrink:0; color:var(--text-muted); transition:transform .3s,color .18s; }
+.hp-faq-item.open .hp-faq-question { background:var(--bg-alt); color:var(--primary); }
+.hp-faq-item.open .hp-faq-icon { transform:rotate(180deg); color:var(--primary); }
+.hp-faq-answer { max-height:0; overflow:hidden; transition:max-height .38s ease; background:var(--bg-alt); }
+.hp-faq-item.open .hp-faq-answer { max-height:400px; }
+.hp-faq-answer p { padding:0 28px 24px; font-size:15px; color:var(--text-muted); line-height:1.75; }
 
-  /* =============================================
-     FADE IN — DOCUMENT 3 EXACT
-     ============================================= */
-  .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
-  .fade-in.visible { opacity: 1; transform: translateY(0); }
+/* FOOTER */
+.hp-footer { background:var(--text); color:#fff; padding:64px 40px 32px; }
+.hp-footer-inner { max-width:1200px; margin:0 auto; }
+.hp-footer-top { display:grid; grid-template-columns:1.8fr repeat(3,1fr); gap:48px; padding-bottom:48px; border-bottom:1px solid rgba(255,255,255,.08); }
+.hp-footer-logo { font-family:'Syne',sans-serif; font-weight:800; font-size:20px; color:#fff; text-decoration:none; display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+.hp-footer-logo span { color:var(--primary); }
+.hp-footer-tagline { font-size:13px; color:rgba(255,255,255,.4); line-height:1.7; max-width:240px; margin-bottom:24px; }
+.hp-footer-socials { display:flex; gap:10px; flex-wrap:wrap; }
+.hp-social { width:36px; height:36px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1); border-radius:8px; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.45); text-decoration:none; transition:all .18s; }
+.hp-social:hover { background:var(--primary); border-color:var(--primary); color:#fff; transform:translateY(-2px); }
+.hp-footer-col h4 { font-family:'Syne',sans-serif; font-weight:700; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:rgba(255,255,255,.5); margin-bottom:18px; }
+.hp-footer-col ul { list-style:none; padding:0; display:flex; flex-direction:column; gap:10px; }
+.hp-footer-col ul li a { font-size:14px; color:rgba(255,255,255,.35); text-decoration:none; transition:color .18s; }
+.hp-footer-col ul li a:hover { color:#fff; }
+.hp-footer-bottom { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; padding-top:28px; }
+.hp-footer-bottom p { font-size:13px; color:rgba(255,255,255,.25); }
 
-  /* =============================================
-     RESPONSIVE
-     ============================================= */
-  @media (max-width: 768px) {
-    /* Nav mobile — Document 4 exact */
-    .container { padding: 0 20px; }
-    .mobile-menu-btn { display: flex; }
-    .nav-links {
-      display: none; position: fixed; top: 64px; left: 0; right: 0;
-      background: var(--white); border-bottom: 1px solid var(--border);
-      padding: 16px 20px 24px; flex-direction: column; align-items: stretch;
-      gap: 4px; box-shadow: var(--sh-md); z-index: 199;
-    }
-    .nav-links.active { display: flex; }
-    .nav-link { padding: 12px 16px; border-radius: var(--r-md); }
-    .btn { width: 100%; justify-content: center; margin-top: 8px; border-radius: var(--r-md); }
-    .nav-dropdown { width: 100%; }
-    .nav-profile-btn { width: 100%; justify-content: flex-start; border-radius: var(--r-md); padding: 10px 14px; }
-    .dropdown-menu { position: static; box-shadow: none; border: 1px solid var(--border); margin-top: 4px; opacity: 1; pointer-events: auto; transform: none; border-radius: var(--r-md); display: none; }
-    .dropdown-menu.active { display: block; }
-    .theme-toggle { display: none; }
-    [data-theme="dark"] .nav-links { background: #0f0f0f; border-color: #222; }
+.hp-fade { opacity:0; transform:translateY(22px); transition:opacity .6s ease,transform .6s ease; }
+.hp-fade.visible { opacity:1; transform:translateY(0); }
 
-    /* Page sections */
-    .hero { padding: 100px 20px 60px; min-height: 20vh; }
-    .proof-bar { padding: 20px; gap: 24px; }
-    .section { padding: 60px 20px; }
-    .sellers-section { padding: 60px 20px; }
-    .demo-section { padding: 60px 20px; }
-    .cta-section { padding: 80px 20px; }
-    .faq-section { padding: 60px 20px; }
-    .faq-question { padding: 18px 20px; }
-    .faq-answer p { padding: 0 20px 20px; }
-    .faq-question span { font-size: 15px; }
-
-    /* Footer */
-    footer { padding: 48px 20px 24px; }
-    .footer-top { grid-template-columns: 1fr 1fr; gap: 32px; }
-    .footer-brand { grid-column: 1 / -1; }
-    .sellers-grid { grid-template-columns: repeat(2, 1fr); }
-  }
-  @media (max-width: 480px) {
-    .footer-top { grid-template-columns: 1fr; }
-    .footer-brand { grid-column: auto; }
-    .sellers-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .footer-socials { flex-wrap: wrap; }
-  }
+@media(max-width:900px){.hp-steps{grid-template-columns:1fr}.hp-footer-top{grid-template-columns:1fr 1fr;gap:36px}.hp-footer-brand{grid-column:1 / -1}}
+@media(max-width:768px){.hp-hero{padding:80px 20px 60px}.hp-section,.hp-section-alt,.hp-faq-section,.hp-cta{padding:64px 20px}.hp-sellers-grid{grid-template-columns:repeat(2,1fr);gap:12px}.hp-footer{padding:48px 20px 24px}}
+@media(max-width:560px){.hp-hero-actions{flex-direction:column;align-items:stretch}.hp-btn-primary,.hp-ghost-btn{width:100%;justify-content:center}.hp-footer-top{grid-template-columns:1fr}}
 </style>
-
-
 {% endblock %}
 
 {% block content %}
 
-
 <!-- =============================================
-     HERO — DOCUMENT 3 EXACT
+     UPLOAD ENTRY MODAL
      ============================================= -->
-<section class="hero">
-  <div class="hero-tag"><span class="dot"></span> No payment. No coding. Just sell.</div>
-  <h1>Upload 50 Products<br><span class="accent">in 1 Click.</span></h1>
-  <p class="hero-sub">Turn your WhatsApp products into a permanent shop link. Share it. Sell it. Done.</p>
-  <div class="hero-actions">
-    {% if user.is_authenticated %}
-      <a href="{% url 'upload_product' %}" class="btn-hero">
-        Add Products
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </a>
-      <a href="/{{ user.slug }}" target="_blank" class="btn-ghost">View my store ↗</a>
-      {% else %}
-        <a href="{% url 'guest_upload' %}" class="btn-hero">   {# was register #}
-          Start Uploading
-        </a>
-        <a href="#how" class="btn-ghost">See how it works ↓</a>
-      {% endif %}
-  </div>
-</section>
+<div class="entry-overlay" id="entryOverlay">
+  <div class="entry-modal">
+    <a href="{% url 'home' %}" class="entry-logo">Vendo<span>page</span></a>
+    <h2>Set up your store</h2>
+    <p>Enter your store details. You'll upload your products right after — takes 30 seconds.</p>
 
+    <div class="em-group">
+      <label class="em-label">Business / Store Name</label>
+      <input type="text" class="em-input" id="emBizName"
+             placeholder="e.g. Chioma Fashion" autocomplete="off">
+    </div>
 
-<!-- =============================================
-     PROOF BAR — DOCUMENT 3 EXACT
-     ============================================= -->
-<div class="proof-bar">
-  <div class="proof-item">
-    <span class="proof-num">50+</span>
-    <span class="proof-label">Products<br>per upload</span>
-  </div>
-  <div class="proof-item">
-    <span class="proof-num">0</span>
-    <span class="proof-label">Coding<br>required</span>
-  </div>
-  <div class="proof-item">
-    <span class="proof-num">30s</span>
-    <span class="proof-label">To publish<br>your store</span>
-  </div>
-  <div class="proof-item">
-    <span class="proof-num">100%</span>
-    <span class="proof-label">WhatsApp<br>friendly</span>
-  </div>
-  <div class="proof-item">
-    <span class="proof-num">Free</span>
-    <span class="proof-label">Always<br>forever</span>
+    <div class="em-group">
+      <label class="em-label">Your Store URL</label>
+      <div class="slug-row">
+        <span class="slug-prefix">vendopage.com/</span>
+        <input type="text" class="slug-input" id="emUsername"
+               placeholder="chioma" maxlength="30" autocomplete="off">
+      </div>
+      <div class="em-hint" id="emHint">This will be your permanent store link</div>
+    </div>
+
+    <button class="em-submit" id="emSubmit" onclick="startUpload()">
+      <span class="em-spin" id="emSpin"></span>
+      <span id="emBtnTxt">Continue to Upload</span>
+    </button>
+    <p class="em-signin">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
   </div>
 </div>
 
+<!-- HERO -->
+<section class="hp-hero">
+  <div class="hp-hero-inner">
+    <div class="hp-hero-tag">
+      <span class="hp-hero-dot"></span>
+      No payment. No coding. Just sell.
+    </div>
+    <h1>Upload 50 Products<br><span class="hp-accent">in 1 Click.</span></h1>
+    <p class="hp-hero-sub">Turn your WhatsApp catalogue into a permanent store link. Share it everywhere. Sell instantly.</p>
+    <div class="hp-hero-actions">
+      {% if user.is_authenticated %}
+        <a href="{% url 'upload_product' %}" class="hp-btn-primary">
+          Add Products
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a href="/{{ user.slug }}" target="_blank" class="hp-ghost-btn">View my store</a>
+      {% else %}
+        <button class="hp-btn-primary" onclick="openEntryModal()">
+          Upload Your Products
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        </button>
+        <a href="#how" class="hp-ghost-btn">See how it works</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
 
-<!-- =============================================
-     HOW IT WORKS — DOCUMENT 3 EXACT
-     ============================================= -->
-<section class="section" id="how">
-  <div style="max-width: 1000px; margin: 0 auto;">
-    <p class="section-label">The Flow</p>
-    <h2 class="section-title">3 steps to your store</h2>
-    <div class="steps">
-      <div class="step fade-in">
-        <div class="step-num">01</div>
-        <div class="step-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
-        </div>
-        <h3>Drag & Drop</h3>
-        <p>Drop all your product photos at once. As many as you want. WhatsApp screenshots? Fine. Camera shots? Perfect.</p>
+<!-- PROOF BAR -->
+<div class="hp-proof">
+  <div class="hp-proof-track" id="proofTrack">
+    <div class="hp-proof-item"><span class="hp-proof-num">50+</span><span class="hp-proof-label">Products<br>per upload</span></div>
+    <div class="hp-proof-divider"></div>
+    <div class="hp-proof-item"><span class="hp-proof-num">0</span><span class="hp-proof-label">Coding<br>required</span></div>
+    <div class="hp-proof-divider"></div>
+    <div class="hp-proof-item"><span class="hp-proof-num">30s</span><span class="hp-proof-label">Store live<br>in seconds</span></div>
+    <div class="hp-proof-divider"></div>
+    <div class="hp-proof-item"><span class="hp-proof-num">100%</span><span class="hp-proof-label">WhatsApp<br>friendly</span></div>
+    <div class="hp-proof-divider"></div>
+    <div class="hp-proof-item"><span class="hp-proof-num">Free</span><span class="hp-proof-label">Always<br>forever</span></div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="hp-section" id="how">
+  <div class="hp-container">
+    <div class="hp-section-head hp-fade">
+      <span class="hp-section-label">The Flow</span>
+      <h2 class="hp-section-title">3 steps to your store</h2>
+      <p class="hp-section-sub">No technical skills needed. If you can send a WhatsApp message, you can build your store.</p>
+    </div>
+    <div class="hp-steps">
+      <div class="hp-step hp-fade">
+        <div class="hp-step-num">01</div>
+        <div class="hp-step-icon"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+        <h3>Upload your photos</h3>
+        <p>Drop all your product photos at once. WhatsApp screenshots, camera shots — anything works. Up to 50 at a time.</p>
       </div>
-      <div class="step fade-in">
-        <div class="step-num">02</div>
-        <div class="step-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        </div>
-        <h3>Type Like WhatsApp</h3>
-        <p>Add descriptions naturally. "🔥 Black Ankara Gown – ₦18,000. DM to order." That's all. No forms.</p>
+      <div class="hp-step hp-fade">
+        <div class="hp-step-num">02</div>
+        <div class="hp-step-icon"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+        <h3>Add descriptions &amp; prices</h3>
+        <p>Type naturally — name, price, size. Just like you would in a WhatsApp message. No complicated forms.</p>
       </div>
-      <div class="step fade-in">
-        <div class="step-num">03</div>
-        <div class="step-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-        </div>
-        <h3>Get Your Store Link</h3>
-        <p>Hit Publish. Get <strong>vendopage.com/yourname</strong>. Share it on WhatsApp status, Instagram bio, everywhere.</p>
+      <div class="hp-step hp-fade">
+        <div class="hp-step-num">03</div>
+        <div class="hp-step-icon"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
+        <h3>Share your link</h3>
+        <p>Get your permanent store link — <strong>vendopage.com/yourname</strong>. Post it on WhatsApp status, Instagram bio, anywhere.</p>
       </div>
     </div>
   </div>
 </section>
 
-
-<!-- =============================================
-     BENEFITS — DOCUMENT 3 EXACT
-     ============================================= -->
-<section class="section" id="benefits" style="padding-top: 0;">
-  <div style="max-width: 1000px; margin: 0 auto;">
-    <p class="section-label">Why Vendopage</p>
-    <h2 class="section-title">Built for how<br>vendors actually work</h2>
-    <div class="benefits-grid">
-      <div class="benefit-card fade-in">
-        <span class="benefit-icon">📦</span>
-        <h3>Bulk Upload</h3>
-        <p>Stop posting one product at a time. Upload your whole catalogue in one go — 50 products in under a minute.</p>
-      </div>
-      <div class="benefit-card fade-in">
-        <span class="benefit-icon">🔗</span>
-        <h3>Permanent Shop Link</h3>
-        <p>Your store lives forever at your personal link. No expiry. No disappearing statuses. Always on.</p>
-      </div>
-      <div class="benefit-card fade-in">
-        <span class="benefit-icon">💬</span>
-        <h3>WhatsApp Orders</h3>
-        <p>Buyers click "Order on WhatsApp" and a message is pre-typed for them. Zero friction. More sales.</p>
-      </div>
-      <div class="benefit-card fade-in">
-        <span class="benefit-icon">📱</span>
-        <h3>Mobile-First</h3>
-        <p>Built for phone vendors. Upload from your phone, manage from your phone. No laptop needed.</p>
-      </div>
-      <div class="benefit-card fade-in">
-        <span class="benefit-icon">⚡</span>
-        <h3>Instant Setup</h3>
-        <p>No complicated forms. No payment integration. No technical skills. If you can send WhatsApp, you can use Vendopage.</p>
-      </div>
-      <div class="benefit-card fade-in">
-        <span class="benefit-icon">✅</span>
-        <h3>Mark Sold Out</h3>
-        <p>Update your inventory with one tap. Mark items sold out, delete products, re-arrange — all from your dashboard.</p>
-      </div>
+<!-- BENEFITS -->
+<section class="hp-section-alt">
+  <div class="hp-container">
+    <div class="hp-section-head hp-fade">
+      <span class="hp-section-label">Why Vendopage</span>
+      <h2 class="hp-section-title">Built for how vendors<br>actually work</h2>
+    </div>
+    <div class="hp-benefits">
+      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><h3>Bulk Upload</h3><p>Stop posting one product at a time. Upload your whole catalogue in one go — 50 products in under a minute.</p></div>
+      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div><h3>Permanent Link</h3><p>Your store lives forever at your personal link. No expiry. No disappearing statuses. Always accessible.</p></div>
+      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><h3>WhatsApp Orders</h3><p>Buyers click "Order on WhatsApp" and a pre-typed message opens instantly on their phone. Zero friction.</p></div>
+      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div><h3>Mobile-First</h3><p>Designed for phone vendors. Upload, manage, and share entirely from your phone. No laptop needed.</p></div>
+      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>Instant Setup</h3><p>No forms, no payment integration, no technical skills. Your store is live in under 30 seconds.</p></div>
+      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><h3>Inventory Control</h3><p>Mark items sold out, archive old products, or delete them entirely — all from your dashboard in one tap.</p></div>
     </div>
   </div>
 </section>
 
-
-<!-- =============================================
-     LIVE SELLERS — pulled from views.py home()
-     Only renders if sellers exist (5+ products)
-     ============================================= -->
+<!-- LIVE SELLERS -->
 {% if featured_sellers or sellers %}
-<section class="sellers-section" id="stores">
-  <div class="sellers-inner">
-    <p class="section-label fade-in">Live Stores</p>
-    <h2 class="section-title fade-in" style="margin-bottom: 32px;">Vendors already<br>selling on Vendopage</h2>
-
+<section class="hp-section" id="stores">
+  <div class="hp-container">
+    <div class="hp-section-head hp-fade">
+      <span class="hp-section-label">Live Stores</span>
+      <h2 class="hp-section-title">Vendors already selling<br>on Vendopage</h2>
+    </div>
     {% if featured_sellers %}
-      <p class="sellers-sub-label">⭐ Featured</p>
-      <div class="sellers-grid" style="margin-bottom: 40px;">
+      <p class="hp-sellers-sublabel" style="margin-bottom:16px;">Featured</p>
+      <div class="hp-sellers-grid" style="margin-bottom:36px;">
         {% for seller in featured_sellers %}
-        <a href="{% url 'seller_page' seller.slug %}" class="seller-card">
-          <div class="seller-card-img">
-            {% if seller.profile_picture %}
-              <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
-            {% else %}
-              <div class="seller-fallback">{{ seller.business_name|first }}</div>
-            {% endif %}
-            <span class="seller-featured-badge">⭐ Featured</span>
+        <a href="{% url 'seller_page' seller.slug %}" class="hp-seller-card">
+          <div class="hp-seller-img">
+            {% if seller.profile_picture %}<img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">{% else %}<div class="hp-seller-fallback">{{ seller.business_name|first }}</div>{% endif %}
+            <span class="hp-seller-badge-ft">Featured</span>
           </div>
-          <div class="seller-card-body">
-            <div class="seller-card-name">{{ seller.business_name }}</div>
-            <div class="seller-card-cat">{{ seller.get_category_display }}</div>
-            <span class="seller-card-count">{{ seller.product_count }} products</span>
-          </div>
+          <div class="hp-seller-body"><div class="hp-seller-name">{{ seller.business_name }}</div><div class="hp-seller-cat">{{ seller.get_category_display }}</div><span class="hp-seller-count">{{ seller.product_count }} products</span></div>
         </a>
         {% endfor %}
       </div>
     {% endif %}
-
     {% if sellers %}
-      {% if featured_sellers %}<p class="sellers-sub-label" style="margin-top: 8px;">All Vendors</p>{% endif %}
-      <div class="sellers-grid">
+      {% if featured_sellers %}<p class="hp-sellers-sublabel" style="margin-bottom:16px;">All Vendors</p>{% endif %}
+      <div class="hp-sellers-grid">
         {% for seller in sellers %}
-        <a href="{% url 'seller_page' seller.slug %}" class="seller-card">
-          <div class="seller-card-img">
-            {% if seller.profile_picture %}
-              <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
-            {% else %}
-              <div class="seller-fallback">{{ seller.business_name|first }}</div>
-            {% endif %}
-          </div>
-          <div class="seller-card-body">
-            <div class="seller-card-name">{{ seller.business_name }}</div>
-            <div class="seller-card-cat">{{ seller.get_category_display }}</div>
-            <span class="seller-card-count">{{ seller.product_count }} products</span>
-          </div>
+        <a href="{% url 'seller_page' seller.slug %}" class="hp-seller-card">
+          <div class="hp-seller-img">{% if seller.profile_picture %}<img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">{% else %}<div class="hp-seller-fallback">{{ seller.business_name|first }}</div>{% endif %}</div>
+          <div class="hp-seller-body"><div class="hp-seller-name">{{ seller.business_name }}</div><div class="hp-seller-cat">{{ seller.get_category_display }}</div><span class="hp-seller-count">{{ seller.product_count }} products</span></div>
         </a>
         {% endfor %}
       </div>
@@ -836,284 +443,247 @@
 </section>
 {% endif %}
 
-
-<!-- =============================================
-     DEMO MOCKUP — DOCUMENT 3 EXACT
-     ============================================= -->
-<div class="demo-section">
-  <div class="demo-container">
-    <div style="text-align: center;">
-      <p class="section-label">Live Preview</p>
-      <h2 class="section-title" style="margin-bottom: 0;">What your buyers see</h2>
-      <p style="color: var(--gray); margin-top: 8px;">A clean store they can scroll and order from instantly</p>
+<!-- PHONE MOCKUP -->
+<section class="hp-section-alt">
+  <div class="hp-container">
+    <div class="hp-section-head center hp-fade">
+      <span class="hp-section-label">Live Preview</span>
+      <h2 class="hp-section-title">What your buyers see</h2>
+      <p class="hp-section-sub">A clean, fast store they can browse and order from instantly — no app needed.</p>
     </div>
-    <div class="demo-phone">
-      <div class="phone-header">
-        <div class="phone-header-top">
-          <div class="phone-avatar"></div>
-          <div>
-            <div class="phone-name">Chioma Fashion 💃</div>
-            <div class="phone-status">vendopage.com/chioma-fashion</div>
-          </div>
+    <div class="hp-phone-wrap">
+      <div class="hp-phone">
+        <div class="hp-phone-header"><div class="hp-phone-top"><div class="hp-phone-avatar"></div><div><div class="hp-phone-name">Chioma Fashion</div><div class="hp-phone-url">vendopage.com/chioma</div></div></div></div>
+        <div class="hp-phone-products">
+          <div class="hp-phone-product"><div class="hp-phone-img">👗</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Ankara Gown</div><div class="hp-phone-price">₦18,000</div></div></div>
+          <div class="hp-phone-product"><div class="hp-phone-img">👜</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Leather Bag</div><div class="hp-phone-price">₦12,500</div></div></div>
+          <div class="hp-phone-product"><div class="hp-phone-img">👠</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Block Heels</div><div class="hp-phone-price">₦9,000</div></div></div>
+          <div class="hp-phone-product"><div class="hp-phone-img">💍</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Gold Set</div><div class="hp-phone-price">₦7,000</div></div></div>
         </div>
-      </div>
-      <div class="phone-products">
-        <div class="phone-product"><div class="phone-img">👗</div><div class="phone-info"><div class="phone-info-name">Ankara Gown</div><div class="phone-info-price">₦18,000</div></div></div>
-        <div class="phone-product"><div class="phone-img">👜</div><div class="phone-info"><div class="phone-info-name">Leather Bag</div><div class="phone-info-price">₦12,500</div></div></div>
-        <div class="phone-product"><div class="phone-img">👠</div><div class="phone-info"><div class="phone-info-name">Block Heels</div><div class="phone-info-price">₦9,000</div></div></div>
-        <div class="phone-product"><div class="phone-img">💍</div><div class="phone-info"><div class="phone-info-name">Gold Set</div><div class="phone-info-price">₦7,000</div></div></div>
-      </div>
-      <div class="phone-order-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.5 2C6.262 2 2 6.262 2 11.5c0 1.888.549 3.647 1.49 5.135L2 22l5.545-1.46A9.453 9.453 0 0011.5 21c5.238 0 9.5-4.262 9.5-9.5S16.738 2 11.5 2z"/></svg>
-        Order on WhatsApp
+        <div class="hp-phone-cta">Order on WhatsApp</div>
       </div>
     </div>
   </div>
-</div>
+</section>
 
-
-<!-- =============================================
-     CTA — DOCUMENT 3 EXACT
-     ============================================= -->
-<section class="cta-section">
-  <p class="section-label">Get Started Free</p>
+<!-- CTA -->
+<section class="hp-cta">
+  <span class="hp-section-label">Get Started Free</span>
   <h2>Your store.<br>Live in 30 seconds.</h2>
   <p>No payment. No setup. No stress.</p>
   {% if user.is_authenticated %}
-    <a href="{% url 'upload_product' %}" class="btn-hero" style="margin: 0 auto; display: inline-flex;">
-      Add More Products
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-    </a>
+    <a href="{% url 'upload_product' %}" class="hp-cta-btn">Add More Products <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
   {% else %}
-    <a href="{% url 'register' %}" class="btn-hero" style="margin: 0 auto; display: inline-flex;">
-      Create My Store Free
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-    </a>
+    <button class="hp-cta-btn" onclick="openEntryModal()">Upload Your Products <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></button>
   {% endif %}
 </section>
 
-
-<!-- =============================================
-     FAQ — your exact structure, Doc 3 styles
-     ============================================= -->
-<section class="faq-section" id="faq">
-  <div class="faq-inner">
-    <p class="section-label">Got Questions</p>
-    <h2 class="section-title">Frequently Asked<br>Questions</h2>
-    <p class="faq-subtitle">Everything you need to know before you start selling</p>
-
-    <div class="faq-list">
-      <div class="faq-item">
-        <button class="faq-question">
-          <span>Is VendoPage really free?</span>
-          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div class="faq-answer">
-          <p>Yes! We offer a free forever plan with all essential features. You can create your catalog, add unlimited products, and start selling immediately without paying a cent.</p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">
-          <span>Do I need technical skills to use VendoPage?</span>
-          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div class="faq-answer">
-          <p>Not at all! VendoPage is designed for everyone. If you can use WhatsApp, you can use VendoPage. Just upload photos, add descriptions, and you're ready to sell.</p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">
-          <span>How do customers purchase products?</span>
-          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div class="faq-answer">
-          <p>Customers browse your catalog on VendoPage, then click the WhatsApp button to message you directly about products they're interested in. You handle the sale through WhatsApp as usual.</p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">
-          <span>Can I customize my catalog page?</span>
-          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div class="faq-answer">
-          <p>Absolutely! Add your profile photo, write your bio, and organize your products however you like. Your store link stays the same — <strong>vendopage.com/yourname</strong> — forever.</p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">
-          <span>What types of businesses can use VendoPage?</span>
-          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div class="faq-answer">
-          <p>VendoPage works for any business! Fashion, electronics, beauty products, food, handmade items, services — if you're selling online, VendoPage is for you.</p>
-        </div>
-      </div>
-
-      <div class="faq-item">
-        <button class="faq-question">
-          <span>Will my store link ever expire?</span>
-          <svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
-        </button>
-        <div class="faq-answer">
-          <p>Never. Unlike WhatsApp Status that disappears in 24 hours, your Vendopage store link is permanent. Share it once and your customers can always find your products.</p>
-        </div>
-      </div>
+<!-- FAQ -->
+<section class="hp-faq-section" id="faq">
+  <div class="hp-container-sm">
+    <div class="hp-fade">
+      <span class="hp-section-label">Got Questions</span>
+      <h2 class="hp-section-title">Frequently Asked Questions</h2>
+      <p class="hp-faq-sub">Everything you need to know before you start selling.</p>
+    </div>
+    <div class="hp-faq-list">
+      <div class="hp-faq-item"><button class="hp-faq-question"><span>Is Vendopage really free?</span><svg class="hp-faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="hp-faq-answer"><p>Yes — free forever. Create your catalogue, add unlimited products, and start selling without paying anything. Premium plans available for extra features.</p></div></div>
+      <div class="hp-faq-item"><button class="hp-faq-question"><span>Do I need any technical skills?</span><svg class="hp-faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="hp-faq-answer"><p>None at all. If you can use WhatsApp, you can use Vendopage. Upload photos, add prices, and your store is live.</p></div></div>
+      <div class="hp-faq-item"><button class="hp-faq-question"><span>How do customers buy from me?</span><svg class="hp-faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="hp-faq-answer"><p>Customers browse your store and tap "Order on WhatsApp." A pre-typed message opens instantly on their phone and sends directly to you.</p></div></div>
+      <div class="hp-faq-item"><button class="hp-faq-question"><span>Will my store link ever expire?</span><svg class="hp-faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="hp-faq-answer"><p>Never. Unlike WhatsApp Status that disappears in 24 hours, your Vendopage link is permanent. Share it once and customers can always find your products.</p></div></div>
+      <div class="hp-faq-item"><button class="hp-faq-question"><span>Can I use Vendopage for any type of business?</span><svg class="hp-faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="hp-faq-answer"><p>Yes — fashion, food, electronics, beauty, handmade goods, services. If you sell it, Vendopage works for it.</p></div></div>
     </div>
   </div>
 </section>
 
-
-<footer>
-  <div class="footer-inner">
-    <div class="footer-top">
-
-      <!-- Brand column -->
-      <div class="footer-brand">
-        <a href="{% url 'home' %}" class="footer-logo">
-          <div class="footer-logo-icon">V</div>
-          <span class="footer-logo-text">Vendo<span>page</span></span>
-        </a>
-        <p class="footer-tagline">The permanent product catalog built for WhatsApp vendors across Nigeria and Africa.</p>
-        <div class="footer-socials">
-          <!-- WhatsApp -->
-          <a href="https://wa.me/2348000000000" target="_blank" rel="noopener" class="social-icon" aria-label="WhatsApp">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-          </a>
-          <!-- Instagram -->
-          <a href="https://instagram.com/vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-          </a>
-          <!-- Twitter / X -->
-          <a href="https://twitter.com/vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="Twitter / X">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          </a>
-          <!-- TikTok -->
-          <a href="https://tiktok.com/@vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="TikTok">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
-          </a>
-          <!-- Facebook -->
-          <a href="https://facebook.com/vendopage" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook">
-            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          </a>
+<!-- FOOTER -->
+<footer class="hp-footer">
+  <div class="hp-footer-inner">
+    <div class="hp-footer-top">
+      <div class="hp-footer-brand">
+        <a href="{% url 'home' %}" class="hp-footer-logo">Vendo<span>page</span></a>
+        <p class="hp-footer-tagline">The permanent product catalogue built for WhatsApp vendors across Nigeria and Africa.</p>
+        <div class="hp-footer-socials">
+          <a href="#" class="hp-social" aria-label="WhatsApp"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></a>
+          <a href="#" class="hp-social" aria-label="Instagram"><svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
         </div>
       </div>
-
-      <!-- Product links -->
-      <div class="footer-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="#how">How it works</a></li>
-          <li><a href="#benefits">Benefits</a></li>
-          <li><a href="#faq">FAQ</a></li>
-          <li><a href="{% url 'register' %}">Get Started Free</a></li>
-          {% if user.is_authenticated %}
-            <li><a href="{% url 'upload_product' %}">Upload Products</a></li>
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-          {% endif %}
-        </ul>
-      </div>
-
-      <!-- Company links -->
-      <div class="footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="{% url 'about' %}">About Us</a></li>
-          <li><a href="{% url 'contact' %}">Contact</a></li>
-          <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
-          <li><a href="{% url 'terms' %}">Terms of Service</a></li>
-        </ul>
-      </div>
-
-      <!-- Account links -->
-      <div class="footer-col">
-        <h4>Account</h4>
-        <ul>
-          {% if user.is_authenticated %}
-            <li><a href="/{{ user.slug }}" target="_blank">My Store ↗</a></li>
-            <li><a href="{% url 'settings' %}">Settings</a></li>
-            <li><a href="{% url 'subscription' %}">Subscription</a></li>
-            <li><a href="{% url 'logout' %}">Logout</a></li>
-          {% else %}
-            <li><a href="{% url 'login' %}">Sign In</a></li>
-            <li><a href="{% url 'register' %}">Create Account</a></li>
-            <li><a href="{% url 'forgot_password' %}">Forgot Password</a></li>
-          {% endif %}
-        </ul>
-      </div>
-
+      <div class="hp-footer-col"><h4>Product</h4><ul><li><a href="#how">How it works</a></li><li><a href="#stores">Live Stores</a></li><li><a href="#faq">FAQ</a></li><li><a href="#" onclick="openEntryModal();return false;">Get Started Free</a></li></ul></div>
+      <div class="hp-footer-col"><h4>Company</h4><ul><li><a href="{% url 'about' %}">About Us</a></li><li><a href="{% url 'contact' %}">Contact</a></li><li><a href="{% url 'privacy' %}">Privacy Policy</a></li><li><a href="{% url 'terms' %}">Terms of Service</a></li></ul></div>
+      <div class="hp-footer-col"><h4>Account</h4><ul>{% if user.is_authenticated %}<li><a href="{% url 'dashboard' %}">Dashboard</a></li><li><a href="/{{ user.slug }}" target="_blank">My Store</a></li><li><a href="{% url 'settings' %}">Settings</a></li><li><a href="{% url 'logout' %}">Log Out</a></li>{% else %}<li><a href="{% url 'login' %}">Sign In</a></li><li><a href="#" onclick="openEntryModal();return false;">Create Account</a></li>{% endif %}</ul></div>
     </div>
-
-    <div class="footer-bottom">
-      <p>© {% now "Y" %} Vendopage. Built for Nigerian vendors. Powered by hustle. 🇳🇬</p>
-     
-    </div>
+    <div class="hp-footer-bottom"><p>© {% now "Y" %} Vendopage. Built for Nigerian vendors.</p><p>Made with care in Nigeria.</p></div>
   </div>
 </footer>
-
 
 {% endblock %}
 
 {% block extra_js %}
-
-
 <script>
+/* =============================================
+   PROOF BAR
+   ============================================= */
+(function() {
+  const track = document.getElementById('proofTrack');
+  if (track) track.innerHTML += track.innerHTML;
+})();
 
-  const proofBar = document.querySelector('.proof-bar');
-
-  // 1. Wrap the existing items in a moving div
-  const inner = document.createElement('div');
-  inner.classList.add('scrolling-inner');
-  inner.innerHTML = proofBar.innerHTML;
-
-  // 2. Clone the content to create a seamless loop
-  inner.innerHTML += inner.innerHTML;
-
-  // 3. Clear the original bar and inject the new moving inner div
-  proofBar.innerHTML = '';
-  proofBar.appendChild(inner);
-
-
-  /* ---------- FAQ accordion ---------- */
-  document.querySelectorAll('.faq-question').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const item = btn.closest('.faq-item');
-      const isOpen = item.classList.contains('open');
-      // close all first
-      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-      // open clicked if it was closed
-      if (!isOpen) item.classList.add('open');
-    });
+/* =============================================
+   FAQ
+   ============================================= */
+document.querySelectorAll('.hp-faq-question').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.closest('.hp-faq-item');
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.hp-faq-item').forEach(i => i.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
   });
+});
 
-  /* ---------- Fade-in observer (Document 3 exact) ---------- */
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        const children = e.target.querySelectorAll('.fade-in');
-        children.forEach((child, i) => {
-          setTimeout(() => child.classList.add('visible'), i * 100);
-        });
-      }
-    });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+/* =============================================
+   SCROLL FADE
+   ============================================= */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.hp-fade').forEach(el => observer.observe(el));
 
-  /* ---------- Smooth scroll with sticky header offset ---------- */
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const id = a.getAttribute('href').slice(1);
-      const el = document.getElementById(id);
-      if (el) {
-        e.preventDefault();
-        const top = el.getBoundingClientRect().top + window.scrollY - 72;
-        window.scrollTo({ top, behavior: 'smooth' });
-      }
-    });
+/* Smooth scroll */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   });
+});
+
+/* =============================================
+   ENTRY MODAL
+   ============================================= */
+let usernameCheckTimer = null;
+let usernameAvailable  = false;
+
+function openEntryModal() {
+  document.getElementById('entryOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => document.getElementById('emBizName').focus(), 100);
+}
+
+function closeEntryModal() {
+  document.getElementById('entryOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* Auto-fill username from business name */
+document.getElementById('emBizName').addEventListener('input', function() {
+  const slug = this.value.toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '')
+    .trim()
+    .replace(/\s+/g, '_')
+    .substring(0, 30);
+  const uInp = document.getElementById('emUsername');
+  if (!uInp._manuallyEdited) uInp.value = slug;
+  if (slug) checkUsername(slug);
+});
+
+document.getElementById('emUsername').addEventListener('input', function() {
+  this._manuallyEdited = true;
+  /* Sanitise */
+  this.value = this.value.toLowerCase().replace(/[^a-z0-9_]/g, '').substring(0, 30);
+  checkUsername(this.value);
+});
+
+function checkUsername(val) {
+  const hint = document.getElementById('emHint');
+  if (!val || val.length < 2) {
+    hint.textContent = 'Min. 2 characters';
+    hint.className = 'em-hint';
+    usernameAvailable = false;
+    return;
+  }
+  hint.textContent = 'Checking...';
+  hint.className = 'em-hint';
+  clearTimeout(usernameCheckTimer);
+  usernameCheckTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`/api/check-username/?u=${encodeURIComponent(val)}`);
+      const data = await res.json();
+      if (data.available) {
+        hint.textContent = `vendopage.com/${val} is available`;
+        hint.className = 'em-hint available';
+        usernameAvailable = true;
+      } else {
+        hint.textContent = `${val} is already taken — try another`;
+        hint.className = 'em-hint taken';
+        usernameAvailable = false;
+      }
+    } catch(e) {
+      hint.textContent = 'Could not check — you can still continue';
+      hint.className = 'em-hint';
+      usernameAvailable = true; /* allow proceed on network error */
+    }
+  }, 500);
+}
+
+async function startUpload() {
+  const bizName  = document.getElementById('emBizName').value.trim();
+  const username = document.getElementById('emUsername').value.trim();
+  const btn      = document.getElementById('emSubmit');
+  const spin     = document.getElementById('emSpin');
+  const txt      = document.getElementById('emBtnTxt');
+
+  if (!bizName) {
+    document.getElementById('emBizName').classList.add('error');
+    document.getElementById('emBizName').focus();
+    return;
+  }
+  if (!username || username.length < 2) {
+    document.getElementById('emUsername').focus();
+    return;
+  }
+
+  btn.disabled = true;
+  spin.style.display = 'block';
+  txt.textContent = 'Setting up...';
+
+  try {
+    const res = await fetch('/api/guest-init/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': '{{ csrf_token }}',
+      },
+      body: JSON.stringify({ business_name: bizName, username: username }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      window.location.href = '/upload/';
+    } else {
+      /* Username taken — show error */
+      document.getElementById('emHint').textContent = data.error || 'Username is taken. Try another.';
+      document.getElementById('emHint').className = 'em-hint taken';
+      btn.disabled = false;
+      spin.style.display = 'none';
+      txt.textContent = 'Continue to Upload';
+    }
+  } catch(e) {
+    btn.disabled = false;
+    spin.style.display = 'none';
+    txt.textContent = 'Continue to Upload';
+  }
+}
+
+/* Close on overlay click */
+document.getElementById('entryOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeEntryModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEntryModal(); });
+
+/* Enter key submits */
+['emBizName', 'emUsername'].forEach(id => {
+  document.getElementById(id)?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') startUpload();
+  });
+});
 </script>
 {% endblock %}

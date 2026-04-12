@@ -178,23 +178,25 @@
   </ul>
   {% endif %}
 
-  <!-- =============================================
-       APPEARANCE
-       ============================================= -->
+  <!-- Appearance card in settings.html -->
   <div class="s-card">
     <div class="s-card-head"><h2>Appearance</h2><p>Choose how Vendopage looks for you.</p></div>
     <div class="s-card-body">
       <div class="toggle-row">
         <div class="toggle-info">
           <h3>Color Mode</h3>
-          <p>Saved and applied everywhere.</p>
+          <p>Auto follows your phone's system theme.</p>
         </div>
         <div class="mode-pills">
-          <button class="mode-pill light-pill" id="pillLight" onclick="setMode('light')">
+          <button class="mode-pill" id="pillLight" onclick="pickMode('light')">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             Light
           </button>
-          <button class="mode-pill" id="pillDark" onclick="setMode('dark')">
+          <button class="mode-pill" id="pillAuto" onclick="pickMode('auto')">
+            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 010 20V2z" fill="currentColor" stroke="none"/></svg>
+            Auto
+          </button>
+          <button class="mode-pill" id="pillDark" onclick="pickMode('dark')">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
             Dark
           </button>
@@ -514,24 +516,22 @@ function showMsg(msg, type) {
 }
 
 /* =============================================
-   DARK / LIGHT MODE
+   DARK / LIGHT / AUTO MODE
    ============================================= */
-function setMode(mode) {
-  localStorage.setItem('vp-theme', mode);
-  applyMode(mode);
-  document.getElementById('pillLight').classList.toggle('active', mode === 'light');
-  document.getElementById('pillDark').classList.toggle('active', mode === 'dark');
+function pickMode(mode) {
+  window.vpSetTheme(mode); 
+  ['Light','Auto','Dark'].forEach(m => {
+    document.getElementById('pill'+m).classList.remove('active');
+  });
+  document.getElementById('pill' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
 }
-function applyMode(mode) {
-  if (mode === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-  else document.documentElement.removeAttribute('data-theme');
-}
+
 (function() {
-  const saved = localStorage.getItem('vp-theme') || 'light';
-  applyMode(saved);
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('pillLight').classList.toggle('active', saved === 'light');
-    document.getElementById('pillDark').classList.toggle('active', saved === 'dark');
+  const saved = localStorage.getItem('vp-theme') || 'auto';
+  document.addEventListener('DOMContentLoaded', function() {
+    const cap = saved.charAt(0).toUpperCase() + saved.slice(1);
+    const el = document.getElementById('pill' + cap);
+    if (el) el.classList.add('active');
   });
 })();
 

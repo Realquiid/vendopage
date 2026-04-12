@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Sign In or Create Account — Vendopage{% endblock %}
+{% block title %}Complete Your Account — Vendopage{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -25,6 +25,14 @@
 .auth-title { font-family:var(--font-d); font-weight:800; font-size:22px; letter-spacing:-.5px; margin-bottom:3px; }
 .auth-sub { font-size:13px; color:var(--gray); }
 
+/* Guest context banner */
+.guest-context {
+  background: #f0fff5; border-bottom: 1px solid #bbf7d0;
+  padding: 14px 20px;
+  font-size: 13px; color: #166534; line-height: 1.5;
+}
+.guest-context strong { color: #14532d; }
+
 .auth-tabs { display:flex; margin-top:22px; border-bottom:1px solid var(--border); }
 .auth-tab { flex:1; padding:12px; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-1px; font-family:var(--font-b); font-size:14px; font-weight:500; color:var(--gray); cursor:pointer; transition:all .2s; }
 .auth-tab:hover { color:var(--dark); }
@@ -47,71 +55,33 @@
 
 .f-wrap { display:flex; align-items:center; border:1.5px solid var(--border); border-radius:10px; background:var(--white); overflow:hidden; transition:border-color .2s, box-shadow .2s; }
 .f-wrap:focus-within { border-color:var(--green); box-shadow:0 0 0 3px rgba(0,200,83,.08); }
+.f-wrap.readonly { background:var(--light); }
 .f-icon { padding:0 9px 0 12px; color:var(--gray-lt); display:flex; align-items:center; flex-shrink:0; }
 .f-input { flex:1; min-width:0; padding:12px 12px 12px 0; border:none; outline:none; background:transparent; font-family:var(--font-b); font-size:14px; color:var(--dark); }
 .f-input::placeholder { color:var(--gray-lt); }
+.f-input[readonly] { color:var(--gray); }
 .f-pass-toggle { padding:0 12px; background:none; border:none; cursor:pointer; color:var(--gray-lt); display:flex; align-items:center; }
 .f-hint { font-size:12px; color:var(--gray-lt); margin-top:4px; }
-.slug-preview { font-size:12px; color:var(--gray-lt); margin-top:4px; }
-.slug-preview strong { color:var(--dark); }
 
-/* =========================================
-   PHONE FIELD — country code + number
-   Dropdown is OUTSIDE the input wrapper
-   so overflow:hidden doesn't clip it
-   ========================================= */
+/* Phone field */
 .phone-field-wrap { position: relative; }
-
-.phone-field {
-  display: flex; border: 1.5px solid var(--border); border-radius: 10px;
-  background: var(--white); overflow: hidden;
-  transition: border-color .2s, box-shadow .2s;
-}
+.phone-field { display: flex; border: 1.5px solid var(--border); border-radius: 10px; background: var(--white); overflow: hidden; transition: border-color .2s, box-shadow .2s; }
 .phone-field:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,200,83,.08); }
-
-.cc-btn {
-  display: flex; align-items: center; gap: 5px;
-  padding: 12px 10px 12px 12px;
-  border: none; border-right: 1px solid var(--border);
-  background: var(--light); cursor: pointer;
-  font-family: var(--font-b); font-size: 13px; font-weight: 600; color: var(--dark);
-  white-space: nowrap; flex-shrink: 0; min-width: 88px;
-  transition: background .15s;
-}
+.cc-btn { display: flex; align-items: center; gap: 5px; padding: 12px 10px 12px 12px; border: none; border-right: 1px solid var(--border); background: var(--light); cursor: pointer; font-family: var(--font-b); font-size: 13px; font-weight: 600; color: var(--dark); white-space: nowrap; flex-shrink: 0; min-width: 88px; transition: background .15s; }
 .cc-btn:hover { background: #e8e8e4; }
 .cc-flag { font-size: 18px; line-height: 1; }
+.cc-flag img { display: block; border-radius: 2px; }
+.ci-flag img { display: block; border-radius: 2px; }
 .cc-dial { font-size: 13px; font-weight: 700; }
 .cc-caret { color: var(--gray-lt); }
-
-/* Spinner while detecting */
-.cc-spin {
-  width: 14px; height: 14px; flex-shrink: 0;
-  border: 2px solid var(--border); border-top-color: var(--green);
-  border-radius: 50%; animation: ccspin .7s linear infinite;
-}
+.cc-spin { width: 14px; height: 14px; flex-shrink: 0; border: 2px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: ccspin .7s linear infinite; }
 @keyframes ccspin { to { transform: rotate(360deg); } }
-
-.cc-number {
-  flex: 1; padding: 12px; border: none; outline: none;
-  background: transparent; font-family: var(--font-b); font-size: 14px; color: var(--dark);
-  min-width: 0;
-}
+.cc-number { flex: 1; padding: 12px; border: none; outline: none; background: transparent; font-family: var(--font-b); font-size: 14px; color: var(--dark); min-width: 0; }
 .cc-number::placeholder { color: var(--gray-lt); }
-
-/* Dropdown — positioned relative to phone-field-wrap, NOT inside overflow:hidden */
-.cc-dropdown {
-  display: none;
-  position: absolute; top: calc(100% + 6px); left: 0;
-  width: 100%; min-width: 260px;
-  background: var(--white); border: 1.5px solid var(--border);
-  border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.12);
-  z-index: 9999; overflow: hidden;
-  flex-direction: column; max-height: 240px;
-}
+.cc-dropdown { display: none; position: absolute; top: calc(100% + 6px); left: 0; width: 100%; min-width: 260px; background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.12); z-index: 9999; overflow: hidden; flex-direction: column; max-height: 240px; }
 .cc-dropdown.open { display: flex; }
 .cc-search { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .cc-search input { width:100%; border:none; outline:none; font-family:var(--font-b); font-size:13px; background:transparent; color:var(--dark); }
-.cc-search input::placeholder { color: var(--gray-lt); }
 .cc-list { overflow-y: auto; flex: 1; }
 .cc-item { display:flex; align-items:center; gap:10px; padding:9px 12px; cursor:pointer; font-size:13px; transition:background .13s; }
 .cc-item:hover { background: var(--light); }
@@ -146,10 +116,11 @@
   <div class="auth-head">
     <a href="{% url 'home' %}" class="auth-logo">Vendo<span>page</span></a>
     <h1 class="auth-title" id="authTitle">
-      {% if active_tab == 'login' %}Welcome back{% else %}Create your store{% endif %}
+      {% if active_tab == 'login' %}Welcome back{% else %}Almost done{% endif %}
     </h1>
     <p class="auth-sub" id="authSub">
-      {% if active_tab == 'login' %}Sign in to manage your store{% else %}Free forever. No payment needed.{% endif %}
+      {% if active_tab == 'login' %}Sign in to manage your store
+      {% else %}Add your contact details to publish your store{% endif %}
     </p>
   </div>
 
@@ -160,7 +131,7 @@
 
   <div class="auth-body">
 
-    <!-- ===== LOGIN ===== -->
+    <!-- LOGIN -->
     <div class="tab-panel {% if active_tab == 'login' %}active{% endif %}" id="panelLogin">
       {% if error and active_tab == 'login' %}<div class="auth-error">{{ error }}</div>{% endif %}
       {% if messages %}{% for m in messages %}<div class="auth-success">{{ m }}</div>{% endfor %}{% endif %}
@@ -194,7 +165,7 @@
       </form>
     </div>
 
-    <!-- ===== REGISTER ===== -->
+    <!-- REGISTER — simplified, username comes from session -->
     <div class="tab-panel {% if active_tab != 'login' %}active{% endif %}" id="panelRegister">
       {% if errors and active_tab == 'register' %}
       <div class="auth-error">
@@ -204,45 +175,44 @@
 
       <form method="POST" action="{% url 'register' %}{% if request.GET.guest %}?guest=1{% endif %}">
         {% csrf_token %}
-        <!-- Hidden fields — filled by JS from detected/selected country -->
-        <input type="hidden" name="country_code"    id="hCountryCode"   value="+234">
-        <input type="hidden" name="currency_code"   id="hCurrencyCode"  value="NGN">
+        <!-- Hidden fields — filled by JS -->
+        <input type="hidden" name="country_code"    id="hCountryCode"    value="+234">
+        <input type="hidden" name="currency_code"   id="hCurrencyCode"   value="NGN">
         <input type="hidden" name="currency_symbol" id="hCurrencySymbol" value="₦">
         <input type="hidden" name="category" value="other">
 
+        <!-- Business name — pre-filled from session, read-only if coming from guest flow -->
         <div class="f-group">
           <label class="f-label">Business Name</label>
-          <div class="f-wrap">
+          <div class="f-wrap {% if business_name %}readonly{% endif %}">
             <span class="f-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
-            <input type="text" name="business_name" class="f-input" placeholder="Your store name" value="{{ business_name|default:'' }}" required>
+            <input type="text" name="business_name" class="f-input"
+                   placeholder="Your store name"
+                   value="{{ business_name|default:'' }}"
+                   {% if business_name %}readonly{% endif %}
+                   required>
           </div>
         </div>
 
         <!-- WhatsApp with country picker -->
         <div class="f-group">
           <label class="f-label">WhatsApp Number</label>
-          <!-- IMPORTANT: phone-field-wrap is the positioning parent for the dropdown -->
           <div class="phone-field-wrap">
             <div class="phone-field" id="phoneField">
-              <!-- Country button -->
               <button type="button" class="cc-btn" id="ccBtn">
-                <span class="cc-flag" id="ccFlag">🌍</span>
-                <span class="cc-dial" id="ccDial"><span class="cc-spin" id="ccSpin"></span></span>
+                <span class="cc-flag" id="ccFlag"><img src="https://flagcdn.com/20x15/ng.png" width="20" height="15" alt="ng" style="border-radius:2px;"></span>
+                <span class="cc-dial" id="ccDial">+234</span>
                 <svg class="cc-caret" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <!-- Number input -->
               <input type="tel" name="whatsapp_number" id="ccNumber" class="cc-number"
                      placeholder="8012345678" value="{{ whatsapp_number|default:'' }}" required>
             </div>
-            <!-- Dropdown OUTSIDE the overflow:hidden phone-field but INSIDE phone-field-wrap -->
             <div class="cc-dropdown" id="ccDropdown">
-              <div class="cc-search">
-                <input type="text" id="ccSearch" placeholder="Search country or dial code…" autocomplete="off">
-              </div>
+              <div class="cc-search"><input type="text" id="ccSearch" placeholder="Search country or dial code…" autocomplete="off"></div>
               <div class="cc-list" id="ccList"></div>
             </div>
           </div>
-          <div class="f-hint">Enter number without country code — we prepend it automatically.</div>
+          <div class="f-hint">Enter number without country code.</div>
         </div>
 
         <div class="f-group">
@@ -251,16 +221,6 @@
             <span class="f-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></span>
             <input type="email" name="email" class="f-input" placeholder="you@example.com" value="{{ email|default:'' }}" required>
           </div>
-        </div>
-
-        <div class="f-group">
-          <label class="f-label">Username</label>
-          <div class="f-wrap">
-            <span class="f-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
-            <input type="text" name="username" id="usernameInp" class="f-input" placeholder="Choose a username"
-                   value="{{ username|default:'' }}" oninput="updateSlug(this.value)" required>
-          </div>
-          <div class="slug-preview">Your store: vendopage.com/<strong id="slugVal">username</strong></div>
         </div>
 
         <div class="f-group">
@@ -279,142 +239,228 @@
           <div class="f-hint">Min. 6 characters</div>
         </div>
 
-        <button type="submit" class="auth-submit">Create Free Store</button>
-        <p class="auth-terms">
-          By signing up you agree to our <a href="{% url 'terms' %}">Terms</a> and <a href="{% url 'privacy' %}">Privacy Policy</a>.
-        </p>
+        <button type="submit" class="auth-submit">Publish My Store</button>
+        <p class="auth-terms">By signing up you agree to our <a href="{% url 'terms' %}">Terms</a> and <a href="{% url 'privacy' %}">Privacy Policy</a>.</p>
       </form>
     </div>
 
-  </div><!-- /auth-body -->
+  </div>
 
-  <div class="auth-perks">
+  <!-- <div class="auth-perks">
     <div class="auth-perk"><div class="auth-perk-val">Free</div><div class="auth-perk-label">Always free</div></div>
     <div class="auth-perk"><div class="auth-perk-val">30s</div><div class="auth-perk-label">Store live fast</div></div>
     <div class="auth-perk"><div class="auth-perk-val">WhatsApp</div><div class="auth-perk-label">Orders direct</div></div>
-  </div>
+  </div> -->
 
 </div>
 </div>
 {% endblock %}
-
 {% block extra_js %}
 <script>
-/* =======================================================
-   COUNTRY DATA
-   ======================================================= */
 const COUNTRIES = [
-  {n:'Nigeria',        f:'🇳🇬', d:'+234', c:'NGN', s:'₦'},
-  {n:'Ghana',          f:'🇬🇭', d:'+233', c:'GHS', s:'₵'},
-  {n:'Kenya',          f:'🇰🇪', d:'+254', c:'KES', s:'KSh'},
-  {n:'South Africa',   f:'🇿🇦', d:'+27',  c:'ZAR', s:'R'},
-  {n:'United States',  f:'🇺🇸', d:'+1',   c:'USD', s:'$'},
-  {n:'United Kingdom', f:'🇬🇧', d:'+44',  c:'GBP', s:'£'},
-  {n:'Canada',         f:'🇨🇦', d:'+1',   c:'CAD', s:'CA$'},
-  {n:'Australia',      f:'🇦🇺', d:'+61',  c:'AUD', s:'A$'},
-  {n:'India',          f:'🇮🇳', d:'+91',  c:'INR', s:'₹'},
-  {n:'Pakistan',       f:'🇵🇰', d:'+92',  c:'PKR', s:'₨'},
-  {n:'Bangladesh',     f:'🇧🇩', d:'+880', c:'BDT', s:'৳'},
-  {n:'Uganda',         f:'🇺🇬', d:'+256', c:'UGX', s:'USh'},
-  {n:'Tanzania',       f:'🇹🇿', d:'+255', c:'TZS', s:'TSh'},
-  {n:'Ethiopia',       f:'🇪🇹', d:'+251', c:'ETB', s:'Br'},
-  {n:'Egypt',          f:'🇪🇬', d:'+20',  c:'EGP', s:'E£'},
-  {n:'Morocco',        f:'🇲🇦', d:'+212', c:'MAD', s:'MAD'},
-  {n:'Cameroon',       f:'🇨🇲', d:'+237', c:'XAF', s:'CFA'},
-  {n:'Senegal',        f:'🇸🇳', d:'+221', c:'XOF', s:'CFA'},
-  {n:'Rwanda',         f:'🇷🇼', d:'+250', c:'RWF', s:'FRw'},
-  {n:'Zambia',         f:'🇿🇲', d:'+260', c:'ZMW', s:'ZK'},
-  {n:'Zimbabwe',       f:'🇿🇼', d:'+263', c:'ZWL', s:'Z$'},
-  {n:'Germany',        f:'🇩🇪', d:'+49',  c:'EUR', s:'€'},
-  {n:'France',         f:'🇫🇷', d:'+33',  c:'EUR', s:'€'},
-  {n:'Italy',          f:'🇮🇹', d:'+39',  c:'EUR', s:'€'},
-  {n:'Spain',          f:'🇪🇸', d:'+34',  c:'EUR', s:'€'},
-  {n:'Netherlands',    f:'🇳🇱', d:'+31',  c:'EUR', s:'€'},
-  {n:'Brazil',         f:'🇧🇷', d:'+55',  c:'BRL', s:'R$'},
-  {n:'Mexico',         f:'🇲🇽', d:'+52',  c:'MXN', s:'MX$'},
-  {n:'UAE',            f:'🇦🇪', d:'+971', c:'AED', s:'د.إ'},
-  {n:'Saudi Arabia',   f:'🇸🇦', d:'+966', c:'SAR', s:'SR'},
-  {n:'China',          f:'🇨🇳', d:'+86',  c:'CNY', s:'¥'},
-  {n:'Japan',          f:'🇯🇵', d:'+81',  c:'JPY', s:'¥'},
-  {n:'Indonesia',      f:'🇮🇩', d:'+62',  c:'IDR', s:'Rp'},
-  {n:'Malaysia',       f:'🇲🇾', d:'+60',  c:'MYR', s:'RM'},
-  {n:'Philippines',    f:'🇵🇭', d:'+63',  c:'PHP', s:'₱'},
+  {n:'Afghanistan',f:'af',d:'+93',c:'AFN',s:'؋'},
+  {n:'Albania',f:'al',d:'+355',c:'ALL',s:'L'},
+  {n:'Algeria',f:'dz',d:'+213',c:'DZD',s:'د.ج'},
+  {n:'Angola',f:'ao',d:'+244',c:'AOA',s:'Kz'},
+  {n:'Argentina',f:'ar',d:'+54',c:'ARS',s:'$'},
+  {n:'Armenia',f:'am',d:'+374',c:'AMD',s:'֏'},
+  {n:'Australia',f:'au',d:'+61',c:'AUD',s:'A$'},
+  {n:'Austria',f:'at',d:'+43',c:'EUR',s:'€'},
+  {n:'Azerbaijan',f:'az',d:'+994',c:'AZN',s:'₼'},
+  {n:'Bahrain',f:'bh',d:'+973',c:'BHD',s:'BD'},
+  {n:'Bangladesh',f:'bd',d:'+880',c:'BDT',s:'৳'},
+  {n:'Belarus',f:'by',d:'+375',c:'BYN',s:'Br'},
+  {n:'Belgium',f:'be',d:'+32',c:'EUR',s:'€'},
+  {n:'Benin',f:'bj',d:'+229',c:'XOF',s:'CFA'},
+  {n:'Bolivia',f:'bo',d:'+591',c:'BOB',s:'Bs'},
+  {n:'Bosnia',f:'ba',d:'+387',c:'BAM',s:'KM'},
+  {n:'Botswana',f:'bw',d:'+267',c:'BWP',s:'P'},
+  {n:'Brazil',f:'br',d:'+55',c:'BRL',s:'R$'},
+  {n:'Bulgaria',f:'bg',d:'+359',c:'BGN',s:'лв'},
+  {n:'Burkina Faso',f:'bf',d:'+226',c:'XOF',s:'CFA'},
+  {n:'Burundi',f:'bi',d:'+257',c:'BIF',s:'Fr'},
+  {n:'Cambodia',f:'kh',d:'+855',c:'KHR',s:'៛'},
+  {n:'Cameroon',f:'cm',d:'+237',c:'XAF',s:'CFA'},
+  {n:'Canada',f:'ca',d:'+1',c:'CAD',s:'CA$'},
+  {n:'Cape Verde',f:'cv',d:'+238',c:'CVE',s:'$'},
+  {n:'Chad',f:'td',d:'+235',c:'XAF',s:'CFA'},
+  {n:'Chile',f:'cl',d:'+56',c:'CLP',s:'$'},
+  {n:'China',f:'cn',d:'+86',c:'CNY',s:'¥'},
+  {n:'Colombia',f:'co',d:'+57',c:'COP',s:'$'},
+  {n:'Congo (DRC)',f:'cd',d:'+243',c:'CDF',s:'Fr'},
+  {n:'Congo (Rep.)',f:'cg',d:'+242',c:'XAF',s:'CFA'},
+  {n:'Costa Rica',f:'cr',d:'+506',c:'CRC',s:'₡'},
+  {n:'Croatia',f:'hr',d:'+385',c:'EUR',s:'€'},
+  {n:'Cuba',f:'cu',d:'+53',c:'CUP',s:'$'},
+  {n:'Cyprus',f:'cy',d:'+357',c:'EUR',s:'€'},
+  {n:'Czech Republic',f:'cz',d:'+420',c:'CZK',s:'Kč'},
+  {n:'Denmark',f:'dk',d:'+45',c:'DKK',s:'kr'},
+  {n:'Djibouti',f:'dj',d:'+253',c:'DJF',s:'Fr'},
+  {n:'Dominican Republic',f:'do',d:'+1',c:'DOP',s:'$'},
+  {n:'Ecuador',f:'ec',d:'+593',c:'USD',s:'$'},
+  {n:'Egypt',f:'eg',d:'+20',c:'EGP',s:'E£'},
+  {n:'El Salvador',f:'sv',d:'+503',c:'USD',s:'$'},
+  {n:'Eritrea',f:'er',d:'+291',c:'ERN',s:'Nfk'},
+  {n:'Estonia',f:'ee',d:'+372',c:'EUR',s:'€'},
+  {n:'Eswatini',f:'sz',d:'+268',c:'SZL',s:'L'},
+  {n:'Ethiopia',f:'et',d:'+251',c:'ETB',s:'Br'},
+  {n:'Finland',f:'fi',d:'+358',c:'EUR',s:'€'},
+  {n:'France',f:'fr',d:'+33',c:'EUR',s:'€'},
+  {n:'Gabon',f:'ga',d:'+241',c:'XAF',s:'CFA'},
+  {n:'Gambia',f:'gm',d:'+220',c:'GMD',s:'D'},
+  {n:'Georgia',f:'ge',d:'+995',c:'GEL',s:'₾'},
+  {n:'Germany',f:'de',d:'+49',c:'EUR',s:'€'},
+  {n:'Ghana',f:'gh',d:'+233',c:'GHS',s:'₵'},
+  {n:'Greece',f:'gr',d:'+30',c:'EUR',s:'€'},
+  {n:'Guatemala',f:'gt',d:'+502',c:'GTQ',s:'Q'},
+  {n:'Guinea',f:'gn',d:'+224',c:'GNF',s:'Fr'},
+  {n:'Guinea-Bissau',f:'gw',d:'+245',c:'XOF',s:'CFA'},
+  {n:'Haiti',f:'ht',d:'+509',c:'HTG',s:'G'},
+  {n:'Honduras',f:'hn',d:'+504',c:'HNL',s:'L'},
+  {n:'Hungary',f:'hu',d:'+36',c:'HUF',s:'Ft'},
+  {n:'Iceland',f:'is',d:'+354',c:'ISK',s:'kr'},
+  {n:'India',f:'in',d:'+91',c:'INR',s:'₹'},
+  {n:'Indonesia',f:'id',d:'+62',c:'IDR',s:'Rp'},
+  {n:'Iran',f:'ir',d:'+98',c:'IRR',s:'﷼'},
+  {n:'Iraq',f:'iq',d:'+964',c:'IQD',s:'ع.د'},
+  {n:'Ireland',f:'ie',d:'+353',c:'EUR',s:'€'},
+  {n:'Israel',f:'il',d:'+972',c:'ILS',s:'₪'},
+  {n:'Italy',f:'it',d:'+39',c:'EUR',s:'€'},
+  {n:'Ivory Coast',f:'ci',d:'+225',c:'XOF',s:'CFA'},
+  {n:'Jamaica',f:'jm',d:'+1',c:'JMD',s:'$'},
+  {n:'Japan',f:'jp',d:'+81',c:'JPY',s:'¥'},
+  {n:'Jordan',f:'jo',d:'+962',c:'JOD',s:'JD'},
+  {n:'Kazakhstan',f:'kz',d:'+7',c:'KZT',s:'₸'},
+  {n:'Kenya',f:'ke',d:'+254',c:'KES',s:'KSh'},
+  {n:'Kuwait',f:'kw',d:'+965',c:'KWD',s:'KD'},
+  {n:'Kyrgyzstan',f:'kg',d:'+996',c:'KGS',s:'лв'},
+  {n:'Laos',f:'la',d:'+856',c:'LAK',s:'₭'},
+  {n:'Latvia',f:'lv',d:'+371',c:'EUR',s:'€'},
+  {n:'Lebanon',f:'lb',d:'+961',c:'LBP',s:'£'},
+  {n:'Lesotho',f:'ls',d:'+266',c:'LSL',s:'L'},
+  {n:'Liberia',f:'lr',d:'+231',c:'LRD',s:'$'},
+  {n:'Libya',f:'ly',d:'+218',c:'LYD',s:'LD'},
+  {n:'Lithuania',f:'lt',d:'+370',c:'EUR',s:'€'},
+  {n:'Luxembourg',f:'lu',d:'+352',c:'EUR',s:'€'},
+  {n:'Madagascar',f:'mg',d:'+261',c:'MGA',s:'Ar'},
+  {n:'Malawi',f:'mw',d:'+265',c:'MWK',s:'MK'},
+  {n:'Malaysia',f:'my',d:'+60',c:'MYR',s:'RM'},
+  {n:'Maldives',f:'mv',d:'+960',c:'MVR',s:'Rf'},
+  {n:'Mali',f:'ml',d:'+223',c:'XOF',s:'CFA'},
+  {n:'Malta',f:'mt',d:'+356',c:'EUR',s:'€'},
+  {n:'Mauritania',f:'mr',d:'+222',c:'MRU',s:'UM'},
+  {n:'Mauritius',f:'mu',d:'+230',c:'MUR',s:'₨'},
+  {n:'Mexico',f:'mx',d:'+52',c:'MXN',s:'$'},
+  {n:'Moldova',f:'md',d:'+373',c:'MDL',s:'L'},
+  {n:'Mongolia',f:'mn',d:'+976',c:'MNT',s:'₮'},
+  {n:'Montenegro',f:'me',d:'+382',c:'EUR',s:'€'},
+  {n:'Morocco',f:'ma',d:'+212',c:'MAD',s:'MAD'},
+  {n:'Mozambique',f:'mz',d:'+258',c:'MZN',s:'MT'},
+  {n:'Myanmar',f:'mm',d:'+95',c:'MMK',s:'K'},
+  {n:'Namibia',f:'na',d:'+264',c:'NAD',s:'$'},
+  {n:'Nepal',f:'np',d:'+977',c:'NPR',s:'₨'},
+  {n:'Netherlands',f:'nl',d:'+31',c:'EUR',s:'€'},
+  {n:'New Zealand',f:'nz',d:'+64',c:'NZD',s:'$'},
+  {n:'Nicaragua',f:'ni',d:'+505',c:'NIO',s:'C$'},
+  {n:'Niger',f:'ne',d:'+227',c:'XOF',s:'CFA'},
+  {n:'Nigeria',f:'ng',d:'+234',c:'NGN',s:'₦'},
+  {n:'North Korea',f:'kp',d:'+850',c:'KPW',s:'₩'},
+  {n:'North Macedonia',f:'mk',d:'+389',c:'MKD',s:'ден'},
+  {n:'Norway',f:'no',d:'+47',c:'NOK',s:'kr'},
+  {n:'Oman',f:'om',d:'+968',c:'OMR',s:'OMR'},
+  {n:'Pakistan',f:'pk',d:'+92',c:'PKR',s:'₨'},
+  {n:'Palestine',f:'ps',d:'+970',c:'ILS',s:'₪'},
+  {n:'Panama',f:'pa',d:'+507',c:'PAB',s:'B/.'},
+  {n:'Papua New Guinea',f:'pg',d:'+675',c:'PGK',s:'K'},
+  {n:'Paraguay',f:'py',d:'+595',c:'PYG',s:'₲'},
+  {n:'Peru',f:'pe',d:'+51',c:'PEN',s:'S/.'},
+  {n:'Philippines',f:'ph',d:'+63',c:'PHP',s:'₱'},
+  {n:'Poland',f:'pl',d:'+48',c:'PLN',s:'zł'},
+  {n:'Portugal',f:'pt',d:'+351',c:'EUR',s:'€'},
+  {n:'Qatar',f:'qa',d:'+974',c:'QAR',s:'QR'},
+  {n:'Romania',f:'ro',d:'+40',c:'RON',s:'lei'},
+  {n:'Russia',f:'ru',d:'+7',c:'RUB',s:'₽'},
+  {n:'Rwanda',f:'rw',d:'+250',c:'RWF',s:'FRw'},
+  {n:'Saudi Arabia',f:'sa',d:'+966',c:'SAR',s:'SR'},
+  {n:'Senegal',f:'sn',d:'+221',c:'XOF',s:'CFA'},
+  {n:'Serbia',f:'rs',d:'+381',c:'RSD',s:'din'},
+  {n:'Sierra Leone',f:'sl',d:'+232',c:'SLL',s:'Le'},
+  {n:'Singapore',f:'sg',d:'+65',c:'SGD',s:'$'},
+  {n:'Slovakia',f:'sk',d:'+421',c:'EUR',s:'€'},
+  {n:'Slovenia',f:'si',d:'+386',c:'EUR',s:'€'},
+  {n:'Somalia',f:'so',d:'+252',c:'SOS',s:'Sh'},
+  {n:'South Africa',f:'za',d:'+27',c:'ZAR',s:'R'},
+  {n:'South Korea',f:'kr',d:'+82',c:'KRW',s:'₩'},
+  {n:'South Sudan',f:'ss',d:'+211',c:'SSP',s:'£'},
+  {n:'Spain',f:'es',d:'+34',c:'EUR',s:'€'},
+  {n:'Sri Lanka',f:'lk',d:'+94',c:'LKR',s:'₨'},
+  {n:'Sudan',f:'sd',d:'+249',c:'SDG',s:'£'},
+  {n:'Sweden',f:'se',d:'+46',c:'SEK',s:'kr'},
+  {n:'Switzerland',f:'ch',d:'+41',c:'CHF',s:'CHF'},
+  {n:'Syria',f:'sy',d:'+963',c:'SYP',s:'£'},
+  {n:'Taiwan',f:'tw',d:'+886',c:'TWD',s:'NT$'},
+  {n:'Tajikistan',f:'tj',d:'+992',c:'TJS',s:'SM'},
+  {n:'Tanzania',f:'tz',d:'+255',c:'TZS',s:'TSh'},
+  {n:'Thailand',f:'th',d:'+66',c:'THB',s:'฿'},
+  {n:'Togo',f:'tg',d:'+228',c:'XOF',s:'CFA'},
+  {n:'Trinidad & Tobago',f:'tt',d:'+1',c:'TTD',s:'TT$'},
+  {n:'Tunisia',f:'tn',d:'+216',c:'TND',s:'DT'},
+  {n:'Turkey',f:'tr',d:'+90',c:'TRY',s:'₺'},
+  {n:'Turkmenistan',f:'tm',d:'+993',c:'TMT',s:'T'},
+  {n:'Uganda',f:'ug',d:'+256',c:'UGX',s:'USh'},
+  {n:'Ukraine',f:'ua',d:'+380',c:'UAH',s:'₴'},
+  {n:'United Arab Emirates',f:'ae',d:'+971',c:'AED',s:'د.إ'},
+  {n:'United Kingdom',f:'gb',d:'+44',c:'GBP',s:'£'},
+  {n:'United States',f:'us',d:'+1',c:'USD',s:'$'},
+  {n:'Uruguay',f:'uy',d:'+598',c:'UYU',s:'$'},
+  {n:'Uzbekistan',f:'uz',d:'+998',c:'UZS',s:'лв'},
+  {n:'Venezuela',f:'ve',d:'+58',c:'VES',s:'Bs'},
+  {n:'Vietnam',f:'vn',d:'+84',c:'VND',s:'₫'},
+  {n:'Yemen',f:'ye',d:'+967',c:'YER',s:'﷼'},
+  {n:'Zambia',f:'zm',d:'+260',c:'ZMW',s:'ZK'},
+  {n:'Zimbabwe',f:'zw',d:'+263',c:'ZWL',s:'$'},
 ];
 
-/* Fallback map: ISO country code → dial */
-const ISO_DIAL = {
-  NG:'+234',GH:'+233',KE:'+254',ZA:'+27',US:'+1',GB:'+44',CA:'+1',
-  AU:'+61',IN:'+91',PK:'+92',BD:'+880',UG:'+256',TZ:'+255',ET:'+251',
-  EG:'+20',MA:'+212',CM:'+237',SN:'+221',RW:'+250',ZM:'+260',ZW:'+263',
-  DE:'+49',FR:'+33',IT:'+39',ES:'+34',NL:'+31',BR:'+55',MX:'+52',
-  AE:'+971',SA:'+966',CN:'+86',JP:'+81',ID:'+62',MY:'+60',PH:'+63',
-};
+const ISO_DIAL = {};
+COUNTRIES.forEach(c => { ISO_DIAL[c.f.toUpperCase()] = c.d; });
 
-let chosen = null; /* null = not yet detected */
+let chosen = null;
 
-/* =======================================================
-   RENDER DROPDOWN ITEMS
-   ======================================================= */
-function renderList(list) {
-  document.getElementById('ccList').innerHTML = list.map(c => `
-    <div class="cc-item${chosen && chosen.d===c.d?' active':''}"
-         onclick="selectCountry('${c.d}')">
-      <span class="ci-flag">${c.f}</span>
-      <span class="ci-name">${c.n}</span>
-      <span class="ci-dial">${c.d}</span>
-    </div>`).join('');
+function flagImg(code) {
+  return `<img src="https://flagcdn.com/20x15/${code}.png" width="20" height="15" alt="${code}" style="border-radius:2px;flex-shrink:0;">`;
 }
 
-/* =======================================================
-   SELECT A COUNTRY — updates button + hidden fields
-   ======================================================= */
-function selectCountry(dial) {
-  const c = COUNTRIES.find(x => x.d === dial);
+function renderList(list) {
+  document.getElementById('ccList').innerHTML = list.map(c =>
+    `<div class="cc-item${chosen&&chosen.d===c.d&&chosen.f===c.f?' active':''}" onclick="selectCountry('${c.f}')">
+      <span class="ci-flag">${flagImg(c.f)}</span>
+      <span class="ci-name">${c.n}</span>
+      <span class="ci-dial">${c.d}</span>
+    </div>`
+  ).join('');
+}
+
+function selectCountry(code) {
+  const c = COUNTRIES.find(x => x.f === code);
   if (!c) return;
   chosen = c;
-
-  /* Update button */
-  document.getElementById('ccFlag').textContent = c.f;
+  document.getElementById('ccFlag').innerHTML = flagImg(c.f);
   document.getElementById('ccDial').textContent = c.d;
-
-  /* Remove spinner if still there */
-  const spin = document.getElementById('ccSpin');
-  if (spin) spin.remove();
-
-  /* Update hidden fields */
   document.getElementById('hCountryCode').value    = c.d;
   document.getElementById('hCurrencyCode').value   = c.c;
   document.getElementById('hCurrencySymbol').value = c.s;
-
-  /* Close dropdown */
   closeDropdown();
-
-  /* Re-render to highlight selected */
   renderList(COUNTRIES);
 }
 
-/* =======================================================
-   OPEN / CLOSE DROPDOWN
-   ======================================================= */
 function openDropdown() {
   renderList(COUNTRIES);
   document.getElementById('ccDropdown').classList.add('open');
-  /* Focus search after short delay so it's visible */
-  setTimeout(() => {
-    const s = document.getElementById('ccSearch');
-    if (s) { s.value = ''; s.focus(); }
-  }, 60);
+  setTimeout(() => { const s = document.getElementById('ccSearch'); if(s){s.value='';s.focus();} }, 60);
 }
+function closeDropdown() { document.getElementById('ccDropdown').classList.remove('open'); }
 
-function closeDropdown() {
-  document.getElementById('ccDropdown').classList.remove('open');
-}
-
-/* =======================================================
-   DETECT COUNTRY FROM IP — no default shown while loading
-   ======================================================= */
 async function detectCountry() {
-  /* Try ipapi.co */
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 4000);
@@ -423,96 +469,62 @@ async function detectCountry() {
     if (!r.ok) throw new Error();
     const d = await r.json();
     if (d.error) throw new Error();
-    const dial = '+' + String(d.country_calling_code || '').replace(/\+/g, '');
-    const match = COUNTRIES.find(c => c.d === dial);
-    if (match) { selectCountry(match.d); return; }
-    throw new Error('not in list');
-  } catch(e1) {}
-
-  /* Fallback: ip-api.com */
-  try {
-    const r2 = await fetch('https://ip-api.com/json/?fields=countryCode');
-    const d2 = await r2.json();
-    const dial2 = ISO_DIAL[d2.countryCode];
-    if (dial2) { selectCountry(dial2); return; }
-  } catch(e2) {}
-
-  /* Both failed — show picker prompt */
-  const spin = document.getElementById('ccSpin');
-  if (spin) spin.remove();
-  document.getElementById('ccDial').textContent = 'Pick';
-  document.getElementById('ccFlag').textContent = '🌍';
+    const code = (d.country_code || '').toLowerCase();
+    const match = COUNTRIES.find(c => c.f === code);
+    if (match) { selectCountry(match.f); return; }
+    throw new Error();
+  } catch(e1) {
+    try {
+      const r2 = await fetch('https://ip-api.com/json/?fields=countryCode');
+      const d2 = await r2.json();
+      const code2 = (d2.countryCode || '').toLowerCase();
+      const match2 = COUNTRIES.find(c => c.f === code2);
+      if (match2) { selectCountry(match2.f); return; }
+    } catch(e2) {}
+  }
 }
 
-/* =======================================================
-   WIRE UP EVENTS — all in DOMContentLoaded
-   ======================================================= */
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function() {
+  selectCountry('ng');
+  detectCountry();
 
-  /* Country button click */
-  document.getElementById('ccBtn').addEventListener('click', function () {
+  document.getElementById('ccBtn').addEventListener('click', function() {
     const drop = document.getElementById('ccDropdown');
-    if (drop.classList.contains('open')) closeDropdown();
-    else openDropdown();
+    if (drop.classList.contains('open')) closeDropdown(); else openDropdown();
   });
-
-  /* Search filter */
-  document.getElementById('ccSearch').addEventListener('input', function () {
+  document.getElementById('ccSearch').addEventListener('input', function() {
     const q = this.value.toLowerCase();
-    const filtered = q
-      ? COUNTRIES.filter(c =>
-          c.n.toLowerCase().includes(q) ||
-          c.d.includes(q) ||
-          c.c.toLowerCase().includes(q))
-      : COUNTRIES;
-    renderList(filtered);
+    renderList(q ? COUNTRIES.filter(c =>
+      c.n.toLowerCase().includes(q) || c.d.includes(q) || c.c.toLowerCase().includes(q)
+    ) : COUNTRIES);
   });
-
-  /* Close on outside click */
-  document.addEventListener('click', function (e) {
+  document.addEventListener('click', function(e) {
     const wrap = document.getElementById('phoneField').closest('.phone-field-wrap');
     if (!wrap.contains(e.target)) closeDropdown();
   });
-
-  /* Slug init for validation error repopulation */
-  const uInp = document.getElementById('usernameInp');
-  if (uInp && uInp.value) updateSlug(uInp.value);
-
-  /* Start IP detection */
-  detectCountry();
 });
 
-/* =======================================================
-   HELPERS
-   ======================================================= */
 const TABS = {
-  login:    {title:'Welcome back',       sub:'Sign in to manage your store'},
-  register: {title:'Create your store',  sub:'Free forever. No payment needed.'},
+  login:    {title:'Welcome back',   sub:'Sign in to manage your store'},
+  register: {title:'Almost done',    sub:'Add your contact details to publish your store'},
 };
 let currentTab = '{{ active_tab|default:"register" }}';
-
 function switchTab(tab) {
   if (tab === currentTab) return;
   currentTab = tab;
-  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
-  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
-  document.getElementById('panelLogin').classList.toggle('active', tab === 'login');
-  document.getElementById('panelRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('tabLogin').classList.toggle('active', tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active', tab==='register');
+  document.getElementById('panelLogin').classList.toggle('active', tab==='login');
+  document.getElementById('panelRegister').classList.toggle('active', tab==='register');
   document.getElementById('authTitle').textContent = TABS[tab].title;
   document.getElementById('authSub').textContent   = TABS[tab].sub;
 }
-
 function togglePass(id, btn) {
-  const inp  = document.getElementById(id);
+  const inp = document.getElementById(id);
   const show = inp.type === 'password';
-  inp.type   = show ? 'text' : 'password';
+  inp.type = show ? 'text' : 'password';
   btn.querySelectorAll('.eye-show').forEach(e => e.style.display = show ? 'none' : '');
   btn.querySelectorAll('.eye-hide').forEach(e => e.style.display = show ? '' : 'none');
-}
-
-function updateSlug(val) {
-  const slug = val.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || 'username';
-  document.getElementById('slugVal').textContent = slug;
 }
 </script>
 {% endblock %}

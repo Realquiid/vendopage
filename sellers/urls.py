@@ -58,6 +58,11 @@ urlpatterns = [
     path('terms/', views.terms, name='terms'),
     path('contact/', views.contact, name='contact'),
 
+    # path('preview/store/', views.guest_store_preview, name='guest_store_preview'),
+    path('api/check-username/', views.check_username, name='check_username'),
+    path('api/guest-init/',     views.guest_init,     name='guest_init'),
+    path('preview/<str:guest_key>/', views.guest_store_preview, name='guest_store_preview'),
+
        
     # Seller page (must be last - catch-all)
     path('<slug:slug>/', views.seller_page, name='seller_page'),

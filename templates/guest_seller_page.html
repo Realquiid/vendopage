@@ -1,0 +1,291 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>{{ business_name }} — Vendopage Preview</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green:#00C853; --green-dk:#00a844;
+  --dark:#0A0A0A; --gray:#6B6B6B; --gray-lt:#9B9B9B;
+  --light:#F7F7F5; --border:#E8E8E4; --white:#ffffff;
+  --wa:#25D366; --wa-dk:#22c55e;
+  --font-d:'Syne',sans-serif; --font-b:'DM Sans',sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+
+/* Top bar */
+.top-bar{background:var(--white);border-bottom:1px solid var(--border);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+.top-logo{font-family:var(--font-d);font-weight:800;font-size:16px;color:var(--dark);text-decoration:none;}
+.top-logo span{color:var(--green);}
+.top-claim{font-size:12px;font-weight:700;color:var(--white);background:var(--green);padding:7px 16px;border-radius:100px;text-decoration:none;transition:background .18s;white-space:nowrap;}
+.top-claim:hover{background:var(--green-dk);}
+
+/* Preview bar */
+.preview-bar{background:#fefce8;border-bottom:1px solid #fde68a;padding:10px 20px;text-align:center;font-size:13px;font-weight:500;color:#92400e;}
+.preview-bar strong{color:#78350f;}
+
+/* Profile */
+.profile-section{padding:24px 24px 20px;border-bottom:1px solid var(--border);}
+.profile-inner{display:flex;align-items:flex-start;gap:16px;}
+.profile-avatar{width:60px;height:60px;border-radius:50%;background:var(--green);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-weight:800;font-size:22px;color:var(--white);}
+.profile-name{font-family:var(--font-d);font-weight:800;font-size:19px;letter-spacing:-.4px;margin-bottom:3px;}
+.profile-url{font-size:12px;color:var(--gray-lt);margin-bottom:8px;}
+.profile-url strong{color:var(--green);}
+.profile-meta{display:flex;gap:14px;}
+.profile-meta span{font-size:12px;color:var(--gray-lt);font-weight:500;}
+.profile-meta strong{color:var(--dark);font-weight:700;}
+
+/* Grid */
+.products-wrap{padding:16px 24px 200px;}
+.products-meta{font-size:13px;color:var(--gray-lt);margin-bottom:12px;}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+@media(max-width:480px){.products-wrap{padding:12px 12px 200px;}.profile-section{padding:20px 12px 16px;}.top-bar{padding:12px 16px;}.products-grid{grid-template-columns:repeat(2,1fr);gap:8px;}}
+
+/* Product card */
+.product-card{background:var(--white);cursor:pointer;border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:transform .15s,box-shadow .15s;}
+.product-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
+.card-gallery{width:100%;aspect-ratio:1;position:relative;overflow:hidden;background:var(--light);}
+.car-wrap{width:100%;height:100%;position:relative;overflow:hidden;}
+.car-track{display:flex;height:100%;transition:transform .3s ease;}
+.car-slide{flex-shrink:0;width:100%;height:100%;}
+.car-slide img{width:100%;height:100%;object-fit:cover;display:block;}
+.car-btn{position:absolute;top:50%;transform:translateY(-50%);width:24px;height:24px;background:rgba(255,255,255,.9);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:5;}
+.car-btn.prev{left:4px;} .car-btn.next{right:4px;}
+.car-dots{position:absolute;bottom:6px;left:50%;transform:translateX(-50%);display:flex;gap:3px;z-index:5;}
+.car-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.5);border:none;padding:0;cursor:pointer;}
+.car-dot.active{background:var(--white);}
+.price-badge{position:absolute;bottom:7px;left:7px;background:rgba(0,0,0,.6);color:var(--white);font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;z-index:4;}
+.card-body{padding:9px 11px 11px;}
+.card-desc{font-size:12px;color:var(--gray);line-height:1.4;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.card-wa{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:7px;background:var(--wa);color:var(--white);border:none;border-radius:6px;font-family:var(--font-b);font-size:11px;font-weight:600;cursor:pointer;transition:background .18s;}
+.card-wa:hover{background:var(--wa-dk);}
+
+/* Bottom bar */
+.wa-bar-outer{position:fixed;bottom:0;left:0;right:0;background:var(--white);border-top:1px solid var(--border);z-index:40;padding:12px 20px;display:flex;justify-content:center;}
+.wa-bar-inner{width:100%;max-width:440px;}
+.wa-main{width:100%;background:var(--green);color:var(--white);border:none;border-radius:9px;font-family:var(--font-b);font-size:14px;font-weight:700;padding:14px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:background .18s;}
+.wa-main:hover{background:var(--green-dk);}
+
+/* =============================================
+   REGISTRATION MODAL
+   ============================================= */
+.reg-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
+.reg-overlay.open{opacity:1;pointer-events:auto;}
+.reg-modal{background:var(--white);width:100%;max-width:480px;border-radius:24px 24px 0 0;padding:0 24px 44px;transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);}
+.reg-overlay.open .reg-modal{transform:translateY(0);}
+.reg-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:14px auto 24px;}
+.reg-tag{display:inline-block;font-size:11px;font-weight:700;color:var(--green);background:#f0fff5;border:1px solid #bbf7d0;border-radius:100px;padding:3px 10px;letter-spacing:.3px;margin-bottom:14px;}
+.reg-modal h2{font-family:var(--font-d);font-weight:800;font-size:22px;letter-spacing:-.5px;margin-bottom:8px;color:var(--dark);}
+.reg-modal p{font-size:14px;color:var(--gray);line-height:1.6;margin-bottom:20px;}
+.reg-store-url{font-family:var(--font-d);font-weight:700;font-size:15px;color:var(--green);background:#f0fff5;border:1px solid #bbf7d0;border-radius:10px;padding:10px 14px;margin-bottom:20px;word-break:break-all;}
+.reg-store-url span{color:var(--gray-lt);}
+
+.reg-perks{display:flex;flex-direction:column;gap:10px;margin-bottom:28px;}
+.reg-perk{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--dark);}
+.reg-check{width:20px;height:20px;border-radius:50%;background:var(--green);flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.reg-check svg{color:#fff;}
+
+.reg-btns{display:flex;flex-direction:column;gap:10px;}
+.reg-btn-primary{display:block;width:100%;padding:15px;text-align:center;background:var(--green);color:#fff;border:none;border-radius:100px;font-family:var(--font-b);font-size:15px;font-weight:700;text-decoration:none;transition:background .18s;cursor:pointer;}
+.reg-btn-primary:hover{background:var(--green-dk);}
+.reg-btn-secondary{display:block;width:100%;padding:14px;text-align:center;background:var(--white);color:var(--dark);border:1.5px solid var(--border);border-radius:100px;font-family:var(--font-b);font-size:14px;font-weight:600;text-decoration:none;transition:all .18s;}
+.reg-btn-secondary:hover{border-color:var(--dark);}
+.reg-dismiss{background:none;border:none;cursor:pointer;font-family:var(--font-b);font-size:13px;color:var(--gray-lt);display:block;width:100%;text-align:center;margin-top:14px;}
+.reg-dismiss:hover{color:var(--gray);}
+
+/* Nudge after dismissal */
+.reg-nudge{position:fixed;bottom:0;left:0;right:0;background:var(--dark);color:var(--white);padding:14px 20px 20px;z-index:200;display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.reg-nudge.show{display:flex;}
+.reg-nudge p{font-size:13px;color:rgba(255,255,255,.7);}
+.reg-nudge a{background:var(--green);color:#fff;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;transition:background .18s;}
+.reg-nudge a:hover{background:var(--green-dk);}
+
+.empty{padding:60px 20px;text-align:center;color:var(--gray-lt);}
+.empty p{font-size:14px;margin-top:12px;}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <a href="{% url 'home' %}" class="top-logo">Vendo<span>page</span></a>
+  <a href="{% url 'register' %}?guest=1" class="top-claim">Claim this store</a>
+</div>
+
+<div class="preview-bar">
+  This is a live preview of <strong>{{ business_name }}</strong>. Register to publish it and receive WhatsApp orders.
+</div>
+
+<div class="profile-section">
+  <div class="profile-inner">
+    <div class="profile-avatar">{{ business_name|first }}</div>
+    <div>
+      <div class="profile-name">{{ business_name }}</div>
+      {% if username %}
+      <div class="profile-url">Your link: <strong>vendopage.com/{{ username }}</strong></div>
+      {% endif %}
+      <div class="profile-meta">
+        <span><strong>{{ products|length }}</strong> product{{ products|length|pluralize }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="products-wrap">
+  <div class="products-meta">{{ products|length }} product{{ products|length|pluralize }}</div>
+  {% if products %}
+  <div class="products-grid">
+    {% for product in products %}
+    <div class="product-card" onclick="openRegModal()">
+      <div class="card-gallery" id="gal-{{ product.id }}">
+        {% if product.images.count > 1 %}
+        <div class="car-wrap">
+          <div class="car-track" id="ct-{{ product.id }}">
+            {% for image in product.images.all %}
+            <div class="car-slide"><img src="{{ image.image_url }}" alt="" loading="lazy"></div>
+            {% endfor %}
+          </div>
+          <button class="car-btn prev" onclick="event.stopPropagation();carMove('{{ product.id }}',-1)">
+            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button class="car-btn next" onclick="event.stopPropagation();carMove('{{ product.id }}',1)">
+            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+          <div class="car-dots">
+            {% for image in product.images.all %}
+            <button class="car-dot {% if forloop.first %}active{% endif %}" onclick="event.stopPropagation();carGo('{{ product.id }}',{{ forloop.counter0 }})"></button>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+          {% with product.images.first as img %}{% if img %}
+          <img src="{{ img.image_url }}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block;">
+          {% endif %}{% endwith %}
+        {% endif %}
+        {% if product.price %}<span class="price-badge">₦{{ product.price|floatformat:0 }}</span>{% endif %}
+      </div>
+      <div class="card-body">
+        {% if product.description %}<p class="card-desc">{{ product.description }}</p>{% endif %}
+        <button class="card-wa" onclick="event.stopPropagation();openRegModal()">
+          <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Order on WhatsApp
+        </button>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <svg width="44" height="44" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    <p>No products found. <a href="{% url 'upload_product' %}" style="color:var(--green);font-weight:600;">Go upload some.</a></p>
+  </div>
+  {% endif %}
+</div>
+
+<div class="wa-bar-outer">
+  <div class="wa-bar-inner">
+    <button class="wa-main" onclick="openRegModal()">
+      Register to enable WhatsApp orders
+    </button>
+  </div>
+</div>
+
+<!-- Registration modal -->
+<div class="reg-overlay" id="regOverlay" onclick="handleOverlay(event)">
+  <div class="reg-modal">
+    <div class="reg-handle"></div>
+    <div class="reg-tag">Your store is ready</div>
+    <h2>One step to go live</h2>
+    <p>Add your email, password and WhatsApp number to publish your store and start receiving orders.</p>
+
+    {% if username %}
+    <div class="reg-store-url">
+      <span>vendopage.com/</span>{{ username }}
+    </div>
+    {% endif %}
+
+    <div class="reg-perks">
+      <div class="reg-perk">
+        <div class="reg-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        All {{ products|length }} product{{ products|length|pluralize }} move to your account automatically
+      </div>
+      <div class="reg-perk">
+        <div class="reg-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        Customers order directly on WhatsApp
+      </div>
+      <div class="reg-perk">
+        <div class="reg-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        Add, edit, archive and manage products
+      </div>
+      <div class="reg-perk">
+        <div class="reg-check"><svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        Free forever — no credit card needed
+      </div>
+    </div>
+
+    <div class="reg-btns">
+      <a href="{% url 'register' %}?guest=1" class="reg-btn-primary">
+        Complete Registration — Keep My Products
+      </a>
+      <a href="{% url 'login' %}" class="reg-btn-secondary">
+        I already have an account
+      </a>
+    </div>
+    <button class="reg-dismiss" onclick="dismissModal()">I'll do this later</button>
+  </div>
+</div>
+
+<div class="reg-nudge" id="regNudge">
+  <p>Register to publish your store and get your link.</p>
+  <a href="{% url 'register' %}?guest=1">Complete Registration</a>
+</div>
+
+<script>
+const cars = {};
+function carInit(id) {
+  const t = document.getElementById(`ct-${id}`);
+  const dots = document.querySelectorAll(`#gal-${id} .car-dot`);
+  if (!t) return;
+  cars[id] = {cur:0, total:dots.length, t, dots};
+}
+function carMove(id, d) {
+  if (!cars[id]) carInit(id);
+  const c = cars[id];
+  c.cur = (c.cur + d + c.total) % c.total;
+  c.t.style.transform = `translateX(-${c.cur*100}%)`;
+  c.dots.forEach((dot,i) => dot.classList.toggle('active', i===c.cur));
+}
+function carGo(id, i) {
+  if (!cars[id]) carInit(id);
+  cars[id].cur = i;
+  cars[id].t.style.transform = `translateX(-${i*100}%)`;
+  cars[id].dots.forEach((d,j) => d.classList.toggle('active', j===i));
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.car-track').forEach(t => carInit(t.id.replace('ct-', '')));
+});
+
+function openRegModal() {
+  document.getElementById('regOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function dismissModal() {
+  document.getElementById('regOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('regNudge').classList.add('show');
+}
+function handleOverlay(e) {
+  if (e.target === document.getElementById('regOverlay')) dismissModal();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') dismissModal(); });
+
+/* Auto-open after 3 seconds */
+setTimeout(openRegModal, 3000);
+</script>
+</body>
+</html>
