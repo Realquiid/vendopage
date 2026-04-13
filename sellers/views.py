@@ -657,11 +657,13 @@ If you didn't request this, ignore this email.
             # Don't reveal whether the email exists
             pass
 
+
+        
         except Exception as e:
             logger.error(f"Password reset email failed: {str(e)}")
-            messages.error(request, 'Could not send email. Please try again.')
+            messages.error(request, f'Email error: {str(e)}')  # show error on screen temporarily
             return render(request, 'auth/forgot_password.html')
-
+            
         # Reached here either from DoesNotExist or success
         return redirect('verify_reset_code')
 
