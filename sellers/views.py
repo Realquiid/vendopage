@@ -569,152 +569,102 @@ import string
 import uuid
 from decouple import config
 
-def  forgot_password(request):
+def forgot_password(request):
     """Request password reset - sends 5-digit code via email"""
     if request.method == 'POST':
         email = request.POST.get('email', '').strip().lower()
-        
+
         try:
             seller = Seller.objects.get(email__iexact=email)
-            
+
             # Generate 5-digit code
             reset_code = ''.join(random.choices(string.digits, k=5))
-            
-            # Store code in session
+
+            # Store in session
             request.session['reset_code'] = reset_code
             request.session['reset_email'] = email
-            request.session['reset_code_expires'] = (timezone.now() + timedelta(minutes=10)).isoformat()
-            
-            # Email content
-            subject = 'VendoPage - Password Reset Code'
-            
-            html_message = f'''
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            </head>
-            <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f7;">
-                <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f7; padding: 40px 20px;">
-                    <tr>
-                        <td align="center">
-                            <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-                                <tr>
-                                    <td style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); padding: 40px 40px 30px; text-align: center;">
-                                        <h1 style="margin: 0; color: #ffffff; font-size: 32px; font-weight: 800; letter-spacing: -0.5px;">VendoPage</h1>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 40px;">
-                                        <h2 style="margin: 0 0 16px; color: #1f2937; font-size: 24px; font-weight: 700;">Password Reset Request</h2>
-                                        <p style="margin: 0 0 24px; color: #6b7280; font-size: 16px; line-height: 1.6;">Hi {seller.business_name},</p>
-                                        <p style="margin: 0 0 24px; color: #6b7280; font-size: 16px; line-height: 1.6;">We received a request to reset your password. Use the code below to continue:</p>
-                                        <table width="100%" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
-                                            <tr>
-                                                <td align="center" style="background-color: #f3f4f6; border-radius: 8px; padding: 32px;">
-                                                    <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Your Reset Code</p>
-                                                    <p style="margin: 0; color: #6366f1; font-size: 48px; font-weight: 800; letter-spacing: 8px; font-family: 'Courier New', monospace;">{reset_code}</p>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <p style="margin: 24px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">⏱️ This code expires in <strong>10 minutes</strong></p>
-                                        <p style="margin: 16px 0 0; color: #6b7280; font-size: 14px; line-height: 1.6;">If you didn't request this password reset, please ignore this email. Your password won't be changed.</p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="background-color: #f9fafb; padding: 24px 40px; border-top: 1px solid #e5e7eb;">
-                                        <p style="margin: 0; color: #9ca3af; font-size: 12px; text-align: center;">© 2026 VendoPage. Making WhatsApp selling easier.</p>
-                                        <p style="margin: 8px 0 0; color: #9ca3af; font-size: 12px; text-align: center;">Need help? Contact us at support@vendopage.com</p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-            </body>
-            </html>
-            '''
-            
-            plain_message = f'''
-VendoPage - Password Reset
+            request.session['reset_code_expires'] = (
+                timezone.now() + timedelta(minutes=10)
+            ).isoformat()
 
+            subject = 'Vendopage — Your Password Reset Code'
+
+            plain_message = f'''
 Hi {seller.business_name},
 
 Your password reset code is: {reset_code}
 
 This code expires in 10 minutes.
 
-If you didn't request this, please ignore this email.
+If you didn't request this, ignore this email.
 
-- VendoPage Team
+— Vendopage Team
             '''
-            
-            # Try sending with Hostinger first
-            email_sent = False
-            try:
-                send_mail(
-                    subject,
-                    plain_message,
-                    settings.DEFAULT_FROM_EMAIL,
-                    [email],
-                    fail_silently=False,
-                    html_message=html_message,
-                )
-                email_sent = True
-                print(f"✅ Email sent successfully via Hostinger")
-                
-            except Exception as e:
-                print(f"❌ Hostinger failed: {str(e)}")
-                
-                # 🔧 FIXED: Gmail fallback with proper settings
-                try:
-                    import smtplib
-                    from email.mime.multipart import MIMEMultipart
-                    from email.mime.text import MIMEText
-                    
-                    # Get Gmail credentials
-                    gmail_user = config('GMAIL_USER', default='')
-                    gmail_password = config('GMAIL_PASSWORD', default='')
-                    
-                    if not gmail_user or not gmail_password:
-                        raise Exception("Gmail credentials not configured")
-                    
-                    # Create message
-                    msg = MIMEMultipart('alternative')
-                    msg['Subject'] = subject
-                    msg['From'] = f'VendoPage <{gmail_user}>'
-                    msg['To'] = email
-                    
-                    # Attach plain text and HTML
-                    msg.attach(MIMEText(plain_message, 'plain'))
-                    msg.attach(MIMEText(html_message, 'html'))
-                    
-                    # Send via Gmail SMTP (port 587 with TLS)
-                    server = smtplib.SMTP('smtp.gmail.com', 587, timeout=10)
-                    server.starttls()  # Use TLS
-                    server.login(gmail_user, gmail_password)
-                    server.send_message(msg)
-                    server.quit()
-                    
-                    email_sent = True
-                    print(f"✅ Email sent successfully via Gmail fallback")
-                    
-                except Exception as gmail_error:
-                    print(f"❌ Gmail fallback failed: {str(gmail_error)}")
-            
-            if email_sent:
-                # messages.success(request, f'✓ Reset code sent to {email}. Check your inbox!')
-                return redirect('verify_reset_code')
-            else:
-                messages.error(request, 'Could not send email. Please try again or contact support.')
-                return render(request, 'auth/forgot_password.html')
-                
-        except Seller.DoesNotExist:
-            # Don't reveal if email exists
-            messages.success(request, f'If an account with {email} exists, we sent a reset code.')
+
+            html_message = f'''
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f5f5f7;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;padding:40px 20px;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.08);">
+        <tr>
+          <td style="background:#00C853;padding:32px 40px;text-align:center;">
+            <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Vendopage</h1>
+            <p style="margin:6px 0 0;color:rgba(255,255,255,.75);font-size:13px;">WhatsApp Product Catalog</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:36px 40px;">
+            <h2 style="margin:0 0 12px;color:#0A0A0A;font-size:20px;font-weight:700;">Password Reset</h2>
+            <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.6;">Hi {seller.business_name}, use the code below to reset your password.</p>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+              <tr>
+                <td align="center" style="background:#f0fff5;border:1.5px solid #bbf7d0;border-radius:10px;padding:28px;">
+                  <p style="margin:0 0 6px;color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Your Reset Code</p>
+                  <p style="margin:0;color:#00a844;font-size:44px;font-weight:800;letter-spacing:10px;font-family:'Courier New',monospace;">{reset_code}</p>
+                </td>
+              </tr>
+            </table>
+            <p style="margin:0 0 8px;color:#6b7280;font-size:13px;line-height:1.6;">This code expires in <strong>10 minutes</strong>.</p>
+            <p style="margin:0;color:#6b7280;font-size:13px;line-height:1.6;">If you didn't request this, you can safely ignore this email.</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;">
+            <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center;">© 2026 Vendopage · support@vendopage.com</p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
+            '''
+
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,
+                [email],
+                fail_silently=False,
+                html_message=html_message,
+            )
             return redirect('verify_reset_code')
-    
+
+        except Seller.DoesNotExist:
+            # Don't reveal whether the email exists
+            pass
+
+        except Exception as e:
+            logger.error(f"Password reset email failed: {str(e)}")
+            messages.error(request, 'Could not send email. Please try again.')
+            return render(request, 'auth/forgot_password.html')
+
+        # Reached here either from DoesNotExist or success
+        return redirect('verify_reset_code')
+
     return render(request, 'auth/forgot_password.html')
 
 def verify_reset_code(request):
