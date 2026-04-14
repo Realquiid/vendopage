@@ -181,6 +181,9 @@
         <input type="hidden" name="currency_symbol" id="hCurrencySymbol" value="₦">
         <input type="hidden" name="category" value="other">
 
+        <!-- Add this inside the register form, after the hidden fields -->
+        <input type="hidden" name="username" id="hUsername" value="{{ username|default:'' }}">
+
         <!-- Business name — pre-filled from session, read-only if coming from guest flow -->
         <div class="f-group">
           <label class="f-label">Business Name</label>
@@ -428,6 +431,25 @@ let chosen = null;
 
 function flagImg(code) {
   return `<img src="https://flagcdn.com/20x15/${code}.png" width="20" height="15" alt="${code}" style="border-radius:2px;flex-shrink:0;">`;
+}
+
+// Add inside the DOMContentLoaded or at bottom of extra_js
+const bizInput = document.querySelector('input[name="business_name"]');
+const hUsername = document.getElementById('hUsername');
+
+// Only auto-generate if username isn't already set from session
+if (bizInput && hUsername && !hUsername.value) {
+  bizInput.addEventListener('input', function() {
+    // Only update if field is not readonly (meaning no session value)
+    if (!this.readOnly) {
+      const slug = this.value.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .trim()
+        .replace(/\s+/g, '_')
+        .substring(0, 30);
+      hUsername.value = slug;
+    }
+  });
 }
 
 function renderList(list) {

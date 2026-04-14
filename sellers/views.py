@@ -569,6 +569,7 @@ import string
 import uuid
 from decouple import config
 
+
 def forgot_password(request):
     """Request password reset - sends 5-digit code via email"""
     if request.method == 'POST':
@@ -651,23 +652,20 @@ If you didn't request this, ignore this email.
                 fail_silently=False,
                 html_message=html_message,
             )
-            return redirect('verify_reset_code')
 
         except Seller.DoesNotExist:
-            # Don't reveal whether the email exists
-            pass
+            pass  # Don't reveal whether email exists
 
-
-        
         except Exception as e:
             logger.error(f"Password reset email failed: {str(e)}")
-            messages.error(request, f'Email error: {str(e)}')  # show error on screen temporarily
+            messages.error(request, f'Email error: {str(e)}')
             return render(request, 'auth/forgot_password.html')
-            
-        # Reached here either from DoesNotExist or success
+
+        # Reaches here after success OR DoesNotExist — both redirect
         return redirect('verify_reset_code')
 
     return render(request, 'auth/forgot_password.html')
+
 
 def verify_reset_code(request):
     """Verify the 5-digit code"""
@@ -1280,6 +1278,17 @@ def register_view(request):
             request.session.get('guest_username') or
             request.POST.get('username', '')
         ).strip().lower()
+
+        if not username and business_name:
+            import re
+            username = re.sub(r'[^a-z0-9]', '_', business_name.lower()).strip('_')[:28]
+
+        # If generated username is taken, append a short suffix
+        if username and Seller.objects.filter(username__iexact=username).exists():
+            if not request.session.get('guest_username'):
+                # Only auto-fix if not from modal (modal should have pre-checked)
+                import random
+                username = f"{username[:25]}_{random.randint(10,99)}"
  
         business_name   = (
             request.session.get('guest_business_name') or
