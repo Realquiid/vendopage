@@ -21,6 +21,10 @@ from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal, InvalidOperation
 import uuid
 import json
+from sellers.email import send_password_reset_email
+import random
+import string
+import logging
 
 # Helper function to reset weekly analytics
 def reset_weekly_analytics_if_needed(seller):
@@ -560,15 +564,9 @@ def change_password(request):
     return redirect('settings')
 
 
-from django.core.mail import send_mail
-from django.conf import settings
-from django.utils import timezone
-from datetime import timedelta
-import random
-import string
-import uuid
-from decouple import config
 
+
+logger = logging.getLogger(__name__)
 
 def forgot_password(request):
     """Request password reset - sends 5-digit code via email"""
@@ -588,80 +586,26 @@ def forgot_password(request):
                 timezone.now() + timedelta(minutes=10)
             ).isoformat()
 
-            subject = 'Vendopage — Your Password Reset Code'
-
-            plain_message = f'''
-Hi {seller.business_name},
-
-Your password reset code is: {reset_code}
-
-This code expires in 10 minutes.
-
-If you didn't request this, ignore this email.
-
-— Vendopage Team
-            '''
-
-            html_message = f'''
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f5f5f7;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;padding:40px 20px;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.08);">
-        <tr>
-          <td style="background:#00C853;padding:32px 40px;text-align:center;">
-            <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Vendopage</h1>
-            <p style="margin:6px 0 0;color:rgba(255,255,255,.75);font-size:13px;">WhatsApp Product Catalog</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:36px 40px;">
-            <h2 style="margin:0 0 12px;color:#0A0A0A;font-size:20px;font-weight:700;">Password Reset</h2>
-            <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.6;">Hi {seller.business_name}, use the code below to reset your password.</p>
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
-              <tr>
-                <td align="center" style="background:#f0fff5;border:1.5px solid #bbf7d0;border-radius:10px;padding:28px;">
-                  <p style="margin:0 0 6px;color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Your Reset Code</p>
-                  <p style="margin:0;color:#00a844;font-size:44px;font-weight:800;letter-spacing:10px;font-family:'Courier New',monospace;">{reset_code}</p>
-                </td>
-              </tr>
-            </table>
-            <p style="margin:0 0 8px;color:#6b7280;font-size:13px;line-height:1.6;">This code expires in <strong>10 minutes</strong>.</p>
-            <p style="margin:0;color:#6b7280;font-size:13px;line-height:1.6;">If you didn't request this, you can safely ignore this email.</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;">
-            <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center;">© 2026 Vendopage · support@vendopage.com</p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>
-            '''
-
-            send_mail(
-                subject,
-                plain_message,
-                settings.DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=False,
-                html_message=html_message,
+            # Send via Brevo
+            email_sent = send_password_reset_email(
+                to_email=email,
+                business_name=seller.business_name,
+                reset_code=reset_code
             )
+
+            if not email_sent:
+                messages.error(request, 'Failed to send reset email. Please try again.')
+                return render(request, 'auth/forgot_password.html')
 
         except Seller.DoesNotExist:
             pass  # Don't reveal whether email exists
 
         except Exception as e:
-            logger.error(f"Password reset email failed: {str(e)}")
-            messages.error(request, f'Email error: {str(e)}')
+            logger.error(f"Password reset failed: {str(e)}")
+            messages.error(request, f'Something went wrong. Please try again.')
             return render(request, 'auth/forgot_password.html')
 
-        # Reaches here after success OR DoesNotExist — both redirect
+        # Redirect whether email exists or not (security)
         return redirect('verify_reset_code')
 
     return render(request, 'auth/forgot_password.html')
