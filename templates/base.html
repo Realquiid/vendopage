@@ -453,7 +453,10 @@
 
 <main>{% block content %}{% endblock %}</main>
 
-{% include 'includes/footer.html' %}
+
+{% block footer %}
+  {% include 'includes/footer.html' %}
+{% endblock %}
 
 <script>
 function toggleDropdown() {
