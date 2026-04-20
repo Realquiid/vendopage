@@ -1,7 +1,28 @@
 # sellers/email.py
+import os
 import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from django.conf import settings
+
+SITE_URL = 'https://vendopage.com'
+SUPPORT_EMAIL = 'support@vendopage.com'
+
+# Templates directory — sits next to this file: sellers/email_templates/
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'email_templates')
+
+
+def _load_template(filename):
+    path = os.path.join(TEMPLATE_DIR, filename)
+    with open(path, 'r', encoding='utf-8') as f:
+        return f.read()
+
+
+def _render(filename, context):
+    """Simple {{key}} → value replacement. No Django template engine needed."""
+    html = _load_template(filename)
+    for key, value in context.items():
+        html = html.replace('{{' + key + '}}', str(value))
+    return html
 
 
 def send_email_via_brevo(to_email, subject, html_content, text_content=None):
@@ -19,7 +40,7 @@ def send_email_via_brevo(to_email, subject, html_content, text_content=None):
 
         send_smtp_email = sib_api_v3_sdk.SendSmtpEmail(
             to=[{"email": to_email}],
-            sender={"email": "support@vendopage.com", "name": "Vendopage"},
+            sender={"email": SUPPORT_EMAIL, "name": "Vendopage"},
             subject=subject,
             html_content=html_content,
             text_content=text_content
@@ -37,50 +58,124 @@ def send_email_via_brevo(to_email, subject, html_content, text_content=None):
         return False
 
 
+# ─────────────────────────────────────────────
+# 1. PASSWORD RESET
+# ─────────────────────────────────────────────
 def send_password_reset_email(to_email, business_name, reset_code):
-    html_content = f'''
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
-<body style="margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;background:#f5f5f7;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f7;padding:40px 20px;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.08);">
-        <tr>
-          <td style="background:#00C853;padding:32px 40px;text-align:center;">
-            <h1 style="margin:0;color:#ffffff;font-size:28px;font-weight:800;letter-spacing:-0.5px;">Vendopage</h1>
-            <p style="margin:6px 0 0;color:rgba(255,255,255,.75);font-size:13px;">WhatsApp Product Catalog</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="padding:36px 40px;">
-            <h2 style="margin:0 0 12px;color:#0A0A0A;font-size:20px;font-weight:700;">Password Reset</h2>
-            <p style="margin:0 0 24px;color:#6b7280;font-size:15px;line-height:1.6;">Hi {business_name}, use the code below to reset your password.</p>
-            <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
-              <tr>
-                <td align="center" style="background:#f0fff5;border:1.5px solid #bbf7d0;border-radius:10px;padding:28px;">
-                  <p style="margin:0 0 6px;color:#6b7280;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600;">Your Reset Code</p>
-                  <p style="margin:0;color:#00a844;font-size:44px;font-weight:800;letter-spacing:10px;font-family:'Courier New',monospace;">{reset_code}</p>
-                </td>
-              </tr>
-            </table>
-            <p style="margin:0 0 8px;color:#6b7280;font-size:13px;line-height:1.6;">This code expires in <strong>10 minutes</strong>.</p>
-            <p style="margin:0;color:#6b7280;font-size:13px;line-height:1.6;">If you didn't request this, you can safely ignore this email.</p>
-          </td>
-        </tr>
-        <tr>
-          <td style="background:#f9fafb;padding:20px 40px;border-top:1px solid #e5e7eb;">
-            <p style="margin:0;color:#9ca3af;font-size:12px;text-align:center;">© 2026 Vendopage · support@vendopage.com</p>
-          </td>
-        </tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>
-    '''
+    html = _render('password_reset.html', {
+        'business_name': business_name,
+        'reset_code': reset_code,
+    })
     return send_email_via_brevo(
         to_email=to_email,
-        subject='Vendopage — Your Password Reset Code',
-        html_content=html_content
+        subject='Your Vendopage password reset code',
+        html_content=html,
+    )
+
+
+# ─────────────────────────────────────────────
+# 2. WELCOME
+# ─────────────────────────────────────────────
+def send_welcome_email(to_email, business_name, store_url):
+    html = _render('welcome.html', {
+        'business_name': business_name,
+        'store_url': store_url,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'{business_name}, your Vendopage store is live!',
+        html_content=html,
+    )
+
+
+# ─────────────────────────────────────────────
+# 3. FIRST PRODUCT UPLOADED
+# ─────────────────────────────────────────────
+def send_first_product_email(to_email, business_name, store_url):
+    html = _render('first_product.html', {
+        'business_name': business_name,
+        'store_url': store_url,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject='Your product is live — keep going!',
+        html_content=html,
+    )
+
+
+# ─────────────────────────────────────────────
+# 4. FIRST WHATSAPP CLICK
+# ─────────────────────────────────────────────
+def send_first_whatsapp_click_email(to_email, business_name, store_url):
+    html = _render('first_whatsapp_click.html', {
+        'business_name': business_name,
+        'store_url': store_url,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject='Someone just clicked to order from you on Vendopage!',
+        html_content=html,
+    )
+
+
+# ─────────────────────────────────────────────
+# 5. WEEKLY SUMMARY
+# ─────────────────────────────────────────────
+def send_weekly_summary_email(to_email, business_name, store_url,
+                               page_views, whatsapp_clicks, active_products,
+                               prev_page_views=0):
+    views_change = page_views - prev_page_views
+    if views_change > 0:
+        trend = f'+{views_change} from last week'
+        trend_color = '#16a34a'
+    elif views_change < 0:
+        trend = f'{views_change} from last week'
+        trend_color = '#dc2626'
+    else:
+        trend = 'same as last week'
+        trend_color = '#888888'
+
+    # Only inject the tip row when views are low
+    if page_views < 20:
+        low_views_tip = '''
+  <tr>
+    <td style="padding:16px 48px 0;">
+      <p style="margin:0;font-size:15px;color:#444444;line-height:1.7;">
+        <strong style="color:#111111;">Tip:</strong> Sellers who share their store link on WhatsApp Status every week see 2x more visitors. Try it today — it takes 30 seconds.
+      </p>
+    </td>
+  </tr>'''
+    else:
+        low_views_tip = ''
+
+    html = _render('weekly_summary.html', {
+        'business_name': business_name,
+        'store_url': store_url,
+        'page_views': page_views,
+        'whatsapp_clicks': whatsapp_clicks,
+        'active_products': active_products,
+        'trend': trend,
+        'trend_color': trend_color,
+        'low_views_tip': low_views_tip,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'Your Vendopage week: {page_views} views, {whatsapp_clicks} WhatsApp clicks',
+        html_content=html,
+    )
+
+
+# ─────────────────────────────────────────────
+# 6. RE-ENGAGEMENT (5 days inactive)
+# ─────────────────────────────────────────────
+def send_reengagement_email(to_email, business_name, store_url, days_inactive=5):
+    html = _render('reengagement.html', {
+        'business_name': business_name,
+        'store_url': store_url,
+        'days_inactive': days_inactive,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f"{business_name}, your store hasn't been updated in {days_inactive} days",
+        html_content=html,
     )

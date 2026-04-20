@@ -1,73 +1,330 @@
-
-
-<!-- ============================================ -->
-<!-- FILE 3: templates/pages/terms.html -->
-<!-- ============================================ -->
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Terms of Service — VendoPage{% endblock %}
+{% block meta_description %}VendoPage Terms of Service. Read our terms, seller responsibilities, prohibited content rules, and how we handle accounts globally.{% endblock %}
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+<style>
+:root {
+  --primary:#00C853; --primary-dark:#00a844; --primary-lt:#e8fff0;
+  --bg:#ffffff; --bg-alt:#F7F7F5; --text:#0A0A0A; --text-muted:#6B6B6B;
+  --border-c:#E8E8E4; --radius:12px; --radius-lg:20px;
+}
+
+[data-theme="dark"] .lg-hero,
+[data-theme="dark"] .lg-body { background:#141414; }
+[data-theme="dark"] .lg-sidebar-wrap { background:#1a1a1a; }
+[data-theme="dark"] .lg-hero h1,
+[data-theme="dark"] .lg-section-title,
+[data-theme="dark"] .lg-toc-title { color:#f0f0f0; }
+[data-theme="dark"] .lg-hero-sub,
+[data-theme="dark"] .lg-section-body,
+[data-theme="dark"] .lg-section-body p,
+[data-theme="dark"] .lg-section-body li,
+[data-theme="dark"] .lg-toc-link { color:#a0a0a0; }
+[data-theme="dark"] .lg-toc-link:hover,
+[data-theme="dark"] .lg-toc-link.active { color:var(--primary); }
+[data-theme="dark"] .lg-section { border-color:#2e2e2e; }
+[data-theme="dark"] .lg-highlight { background:#1e1e1e; border-color:#3a3a3a; }
+[data-theme="dark"] .lg-highlight-title { color:#f0f0f0; }
+[data-theme="dark"] .lg-badge { background:#1e1e1e; border-color:#2e2e2e; color:#a0a0a0; }
+[data-theme="dark"] .lg-toc { background:#1e1e1e; border-color:#2e2e2e; }
+
+.lg-hero {
+  padding:90px 40px 60px; background:var(--bg);
+  border-bottom:1.5px solid var(--border-c);
+}
+.lg-hero-inner { max-width:1080px; margin:0 auto; }
+.lg-label { display:inline-block; font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--primary); margin-bottom:16px; }
+.lg-hero h1 {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:clamp(30px,5vw,56px); letter-spacing:-2px;
+  color:var(--text); margin-bottom:16px; line-height:1.05;
+}
+.lg-hero-sub { font-size:15px; color:var(--text-muted); line-height:1.65; }
+.lg-hero-meta { display:flex; gap:16px; margin-top:20px; flex-wrap:wrap; }
+.lg-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 12px; background:var(--bg-alt);
+  border:1.5px solid var(--border-c); border-radius:100px;
+  font-size:12px; color:var(--text-muted); font-weight:500;
+}
+
+.lg-layout { max-width:1080px; margin:0 auto; padding:60px 40px; display:grid; grid-template-columns:220px 1fr; gap:60px; align-items:start; }
+
+/* SIDEBAR TOC */
+.lg-sidebar-wrap { position:sticky; top:88px; }
+.lg-toc {
+  background:var(--bg); border:1.5px solid var(--border-c);
+  border-radius:var(--radius-lg); padding:20px 0; overflow:hidden;
+}
+.lg-toc-title { font-family:'Syne',sans-serif; font-weight:700; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text); padding:0 20px 12px; border-bottom:1px solid var(--border-c); margin-bottom:8px; }
+.lg-toc-link {
+  display:block; padding:8px 20px; font-size:13px; font-weight:500;
+  color:var(--text-muted); text-decoration:none;
+  transition:color .15s, background .15s; border-left:2px solid transparent;
+}
+.lg-toc-link:hover { color:var(--primary); background:var(--primary-lt); }
+.lg-toc-link.active { color:var(--primary); border-left-color:var(--primary); background:var(--primary-lt); }
+
+/* CONTENT */
+.lg-section { padding:36px 0; border-bottom:1.5px solid var(--border-c); }
+.lg-section:last-child { border-bottom:none; }
+.lg-section-title {
+  font-family:'Syne',sans-serif; font-weight:700;
+  font-size:clamp(18px,2.5vw,24px); color:var(--text);
+  margin-bottom:16px; letter-spacing:-.5px; scroll-margin-top:110px;
+}
+.lg-section-body { font-size:14px; color:var(--text-muted); line-height:1.85; }
+.lg-section-body p { margin-bottom:14px; }
+.lg-section-body p:last-child { margin-bottom:0; }
+.lg-section-body h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:15px; color:var(--text); margin:20px 0 10px; }
+.lg-section-body ul, .lg-section-body ol { margin:12px 0 14px 20px; }
+.lg-section-body li { margin-bottom:7px; line-height:1.7; }
+.lg-section-body a { color:var(--primary); text-decoration:none; }
+.lg-section-body a:hover { text-decoration:underline; }
+
+.lg-highlight {
+  background:var(--primary-lt); border-left:3px solid var(--primary);
+  border-radius:0 var(--radius) var(--radius) 0;
+  padding:16px 20px; margin:20px 0;
+}
+.lg-highlight-title { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--text); margin-bottom:6px; }
+.lg-highlight p { font-size:13px; color:var(--text-muted); margin:0; line-height:1.7; }
+
+.lg-body { background:var(--bg); }
+
+@media(max-width:900px) {
+  .lg-layout { grid-template-columns:1fr; gap:0; padding:40px 20px; }
+  .lg-hero { padding:64px 20px 48px; }
+  .lg-sidebar-wrap { position:static; margin-bottom:32px; }
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<section class="page-section">
-    <div class="container-narrow">
-        <div class="page-header">
-            <h1 class="page-title">Terms of Service</h1>
-            <p class="page-subtitle">Last updated: January 27, 2026</p>
-        </div>
-        
-        <div class="page-content">
-            <h2>Agreement to Terms</h2>
-            <p>By using VendoPage, you agree to these terms. If you don't agree, please don't use our service.</p>
-            
-            <h2>Use of Service</h2>
-            <h3>Eligibility</h3>
-            <p>You must be at least 18 years old to use VendoPage.</p>
-            
-            <h3>Account Responsibilities</h3>
-            <ul>
-                <li>Provide accurate information</li>
-                <li>Keep your account secure</li>
-                <li>Accept responsibility for account activity</li>
-            </ul>
-            
-            <h2>Seller Responsibilities</h2>
-            <p>As a seller, you agree to:</p>
-            <ul>
-                <li>Only list products you have the right to sell</li>
-                <li>Provide accurate descriptions and pricing</li>
-                <li>Honor sales and deliveries</li>
-                <li>Comply with all applicable laws</li>
-            </ul>
-            
-            <h2>Prohibited Content</h2>
-            <p>You may not sell or promote:</p>
-            <ul>
-                <li>Illegal goods or services</li>
-                <li>Counterfeit or stolen items</li>
-                <li>Weapons or hazardous materials</li>
-                <li>Adult content or services</li>
-                <li>Items infringing intellectual property</li>
-            </ul>
-            
-            <h2>Account Termination</h2>
-            <p>We may suspend or terminate accounts that violate these terms or engage in harmful activities.</p>
-            
-            <h2>Payments</h2>
-            <p>VendoPage connects sellers and buyers. All transactions happen directly between you and your customers. We are not responsible for payment disputes.</p>
-            
-            <h2>Limitation of Liability</h2>
-            <p>VendoPage is provided "as is" without warranties. We are not liable for damages arising from your use of the service.</p>
-            
-            <h2>Changes to Terms</h2>
-            <p>We may update these terms. Continued use after changes means you accept the new terms.</p>
-            
-            <h2>Contact</h2>
-            <p>Questions? Email us at <a href="mailto:support@vendopage.com">support@vendopage.com</a></p>
-        </div>
-    </div>
-</section>
 
+<div class="lg-hero">
+  <div class="lg-hero-inner">
+    <span class="lg-label">Legal</span>
+    <h1>Terms of Service</h1>
+    <p class="lg-hero-sub">These terms govern your use of VendoPage. Please read them carefully — they apply to vendors, buyers, and visitors in every country.</p>
+    <div class="lg-hero-meta">
+      <span class="lg-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Last updated: January 27, 2026
+      </span>
+      <span class="lg-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Applies globally
+      </span>
+    </div>
+  </div>
+</div>
+
+<div class="lg-body">
+  <div class="lg-layout">
+
+    <!-- SIDEBAR -->
+    <div class="lg-sidebar-wrap">
+      <nav class="lg-toc" id="lgToc">
+        <div class="lg-toc-title">Contents</div>
+        <a class="lg-toc-link" href="#agreement">Agreement to Terms</a>
+        <a class="lg-toc-link" href="#eligibility">Eligibility</a>
+        <a class="lg-toc-link" href="#accounts">Account Responsibilities</a>
+        <a class="lg-toc-link" href="#sellers">Seller Responsibilities</a>
+        <a class="lg-toc-link" href="#prohibited">Prohibited Content</a>
+        <a class="lg-toc-link" href="#payments">Payments & Transactions</a>
+        <a class="lg-toc-link" href="#ip">Intellectual Property</a>
+        <a class="lg-toc-link" href="#termination">Account Termination</a>
+        <a class="lg-toc-link" href="#liability">Limitation of Liability</a>
+        <a class="lg-toc-link" href="#changes">Changes to Terms</a>
+        <a class="lg-toc-link" href="#contact">Contact</a>
+      </nav>
+    </div>
+
+    <!-- CONTENT -->
+    <main>
+
+      <div class="lg-section" id="agreement">
+        <h2 class="lg-section-title">Agreement to Terms</h2>
+        <div class="lg-section-body">
+          <p>By accessing or using VendoPage ("the Platform", "we", "us", "our"), you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these terms, please do not use VendoPage.</p>
+          <p>These terms apply to all users of the platform including vendors, buyers, and visitors, in every country. VendoPage is a global platform — these terms are governed by applicable law in your jurisdiction to the extent required.</p>
+          <div class="lg-highlight">
+            <div class="lg-highlight-title">Simple version</div>
+            <p>Using VendoPage means you've read and accepted these rules. We've tried to write them in plain language.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg-section" id="eligibility">
+        <h2 class="lg-section-title">Eligibility</h2>
+        <div class="lg-section-body">
+          <p>You must be at least 18 years old to create a VendoPage account and operate as a seller. Buyers of any age may browse public store pages, but purchases are made directly through WhatsApp between buyer and seller — VendoPage has no involvement in those transactions.</p>
+          <p>By creating an account, you represent and warrant that you are 18 or older, and that you have the legal right and capacity to enter into these terms in your country.</p>
+        </div>
+      </div>
+
+      <div class="lg-section" id="accounts">
+        <h2 class="lg-section-title">Account Responsibilities</h2>
+        <div class="lg-section-body">
+          <p>When you create a VendoPage account, you are responsible for:</p>
+          <ul>
+            <li>Providing accurate and truthful account information (business name, email address, contact details)</li>
+            <li>Keeping your account credentials secure and not sharing your password</li>
+            <li>All activity that takes place under your account</li>
+            <li>Notifying us immediately at <a href="mailto:support@vendopage.com">support@vendopage.com</a> if you suspect unauthorised access</li>
+          </ul>
+          <p>You may not create multiple accounts to circumvent suspensions, impersonate another person or business, or use VendoPage on behalf of a third party without their authorisation.</p>
+          <h3>Your store URL</h3>
+          <p>Your store URL (vendopage.com/yourname) is chosen at registration and is associated with your account. VendoPage reserves the right to reclaim URLs that are inactive, used to impersonate, or violate these terms.</p>
+        </div>
+      </div>
+
+      <div class="lg-section" id="sellers">
+        <h2 class="lg-section-title">Seller Responsibilities</h2>
+        <div class="lg-section-body">
+          <p>As a vendor on VendoPage, you agree to the following:</p>
+          <ul>
+            <li>Only list products or services you have the legal right to sell in your country</li>
+            <li>Provide accurate product descriptions, photos, and pricing — no misleading claims</li>
+            <li>Honour the terms of any sale you agree to with a customer</li>
+            <li>Handle customer disputes, refunds, and deliveries directly — VendoPage is not a party to your transactions</li>
+            <li>Comply with all applicable local, national, and international laws regarding your products and business operations</li>
+            <li>Not use VendoPage to collect personal data from buyers beyond what is necessary for the transaction</li>
+          </ul>
+          <div class="lg-highlight">
+            <div class="lg-highlight-title">Important</div>
+            <p>VendoPage is a storefront platform. All transactions happen directly between you and your buyers via WhatsApp. We do not process payments, hold funds, or take commissions. You are fully responsible for your sales.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg-section" id="prohibited">
+        <h2 class="lg-section-title">Prohibited Content</h2>
+        <div class="lg-section-body">
+          <p>The following content is strictly prohibited on VendoPage, regardless of country or jurisdiction:</p>
+          <h3>Illegal goods and services</h3>
+          <ul>
+            <li>Narcotics, controlled substances, or drug paraphernalia</li>
+            <li>Weapons, ammunition, or explosive materials</li>
+            <li>Stolen, counterfeit, or fraudulent goods</li>
+            <li>Products that violate import/export regulations</li>
+          </ul>
+          <h3>Harmful content</h3>
+          <ul>
+            <li>Adult, explicit, or pornographic content</li>
+            <li>Content that exploits minors in any form</li>
+            <li>Content promoting violence, hatred, or discrimination</li>
+            <li>Misleading health or medical claims</li>
+          </ul>
+          <h3>Intellectual property violations</h3>
+          <ul>
+            <li>Products infringing trademarks, copyrights, or patents</li>
+            <li>Counterfeit branded goods or replicas sold as genuine</li>
+            <li>Unauthorised use of other businesses' branding or materials</li>
+          </ul>
+          <p>Violation of these rules will result in immediate account suspension and may be reported to relevant authorities.</p>
+        </div>
+      </div>
+
+      <div class="lg-section" id="payments">
+        <h2 class="lg-section-title">Payments & Transactions</h2>
+        <div class="lg-section-body">
+          <p>VendoPage does not process payments. All transactions occur directly between vendors and their customers outside of the platform — typically via WhatsApp communication, bank transfer, mobile money, or other local payment methods.</p>
+          <p>VendoPage is not responsible for:</p>
+          <ul>
+            <li>Payment disputes between vendors and buyers</li>
+            <li>Failed deliveries, lost orders, or product quality issues</li>
+            <li>Fraud perpetrated by any party in a transaction</li>
+            <li>Currency exchange rates or international transaction fees</li>
+          </ul>
+          <p>Vendors using VendoPage are responsible for any applicable taxes, duties, or fees in their jurisdiction related to their sales.</p>
+        </div>
+      </div>
+
+      <div class="lg-section" id="ip">
+        <h2 class="lg-section-title">Intellectual Property</h2>
+        <div class="lg-section-body">
+          <p>You retain ownership of all content you upload to VendoPage — including product photos, descriptions, and store information. By uploading content, you grant VendoPage a non-exclusive, worldwide, royalty-free licence to display your content on the platform for the purpose of operating your store.</p>
+          <p>VendoPage's own branding, interface design, code, and platform features are protected intellectual property. You may not copy, reproduce, or distribute any part of VendoPage's proprietary assets without express written permission.</p>
+        </div>
+      </div>
+
+      <div class="lg-section" id="termination">
+        <h2 class="lg-section-title">Account Termination</h2>
+        <div class="lg-section-body">
+          <p>You may delete your account at any time from your account settings. Upon deletion, your store page and product listings will be removed.</p>
+          <p>VendoPage reserves the right to suspend or permanently terminate accounts that:</p>
+          <ul>
+            <li>Violate these Terms of Service</li>
+            <li>Engage in fraud, spam, or harmful activity</li>
+            <li>List prohibited content</li>
+            <li>Receive sustained reports of misconduct from buyers</li>
+            <li>Are inactive for an extended period (we will provide reasonable notice)</li>
+          </ul>
+          <p>We will make reasonable efforts to notify you before terminating your account unless the violation is severe or time-sensitive.</p>
+        </div>
+      </div>
+
+      <div class="lg-section" id="liability">
+        <h2 class="lg-section-title">Limitation of Liability</h2>
+        <div class="lg-section-body">
+          <p>VendoPage is provided "as is" and "as available" without warranties of any kind, either express or implied. We do not warrant that the platform will be uninterrupted, error-free, or completely secure.</p>
+          <p>To the maximum extent permitted by applicable law, VendoPage and its team shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the platform, including but not limited to lost revenue, lost data, or business interruption.</p>
+          <p>Nothing in these terms excludes or limits liability for death or personal injury caused by negligence, or for fraud or fraudulent misrepresentation, where such exclusion is prohibited by applicable law.</p>
+        </div>
+      </div>
+
+      <div class="lg-section" id="changes">
+        <h2 class="lg-section-title">Changes to Terms</h2>
+        <div class="lg-section-body">
+          <p>We may update these Terms of Service from time to time. When we make significant changes, we will notify registered users by email and update the "last updated" date at the top of this page.</p>
+          <p>Your continued use of VendoPage after changes take effect constitutes your acceptance of the revised terms. If you disagree with any changes, you may delete your account.</p>
+        </div>
+      </div>
+
+      <div class="lg-section" id="contact">
+        <h2 class="lg-section-title">Contact</h2>
+        <div class="lg-section-body">
+          <p>If you have questions about these Terms of Service, please contact us:</p>
+          <ul>
+            <li>General support: <a href="mailto:support@vendopage.com">support@vendopage.com</a></li>
+            <li>Legal enquiries: <a href="mailto:legal@vendopage.com">legal@vendopage.com</a></li>
+          </ul>
+          <p>You can also use our <a href="{% url 'contact' %}">contact form</a> to reach the right team.</p>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const sections = document.querySelectorAll('.lg-section');
+const tocLinks = document.querySelectorAll('.lg-toc-link');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`.lg-toc-link[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin:'-30% 0px -60% 0px' });
+sections.forEach(s => obs.observe(s));
+
+tocLinks.forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const id = link.getAttribute('href').slice(1);
+    document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+});
+</script>
 {% endblock %}

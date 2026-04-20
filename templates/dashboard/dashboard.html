@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
+ {% load cdn_tags %}
 {% load static %}
+
 
 {% block title %}Dashboard — Vendopage{% endblock %}
 
@@ -529,7 +531,9 @@
         <div class="card-img">
           {% with product.get_primary_image as primary %}
             {% if primary %}
-              <img src="{{ primary.image_url }}" alt="Product" loading="lazy">
+              <!-- <img src="{{ primary.image_url }}" alt="Product" loading="lazy"> -->
+             
+             <img src="{{ primary.image_url|cdn_url:400 }}" alt="Product" loading="lazy">
             {% else %}
               <div class="card-img-placeholder">📦</div>
             {% endif %}
@@ -729,14 +733,8 @@
   </div>
 </div>
 
-
 <!-- Toast -->
 <div class="toast" id="toast"></div>
-
-
-<!-- =============================================
-     SCRIPTS
-     ============================================= -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 const CSRF = '{{ csrf_token }}';

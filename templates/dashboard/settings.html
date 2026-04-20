@@ -441,13 +441,9 @@
 
 </div>
 </div>
-
+{% block footer %}{% endblock %}
 <script>
-/* =============================================
-   PROFILE PICTURE — direct Cloudinary upload
-   Bypasses Django file handling which was causing failures.
-   Uploads to Cloudinary, then sends the URL to Django to save.
-   ============================================= */
+
 const CLOUD  = 'dqxlkie1i';
 const PRESET = 'vendopage_unsigned';
 const CDN    = `https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`;

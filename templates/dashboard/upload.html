@@ -323,7 +323,7 @@
 </div>
 
 <div class="toast-up" id="toast"></div>
-
+{% block footer %}{% endblock %}
 <script>
 const IS_AUTH    = {{ user.is_authenticated|lower }};
 const CSRF       = '{{ csrf_token }}';
@@ -363,16 +363,41 @@ function maybeCompress(file) {
   });
 }
 
-/* ---- Upload one file to Cloudinary ---- */
 async function uploadOne(file) {
-  const blob = await maybeCompress(file);
+  let uploadFile = file;
+  
+  try {
+    uploadFile = await maybeCompress(file);
+  } catch(e) {
+    console.warn('Compression failed, using original', e);
+    uploadFile = file;
+  }
+
   const fd = new FormData();
-  fd.append('file', blob);
+  fd.append('file', uploadFile);
   fd.append('upload_preset', 'vendopage_unsigned');
   fd.append('folder', 'vendopage/products');
-  const res = await fetch(CDN_URL, {method:'POST', body:fd});
-  if (!res.ok) throw new Error('Upload failed');
+
+  // Remove eager — it's causing the 400 on unsigned presets
+  // Unsigned presets don't allow eager transformations unless
+  // explicitly enabled in the preset settings on Cloudinary dashboard
+  // fd.append('eager', '...');  ← DELETE THIS
+  // fd.append('eager_async', 'true'); ← DELETE THIS
+
+  console.log('Uploading to Cloudinary, preset:', fd.get('upload_preset'));
+
+  const res = await fetch(CDN_URL, {method: 'POST', body: fd});
+  if (!res.ok) {
+    const errData = await res.json();
+    console.error('Cloudinary error:', errData);
+    throw new Error(errData.error?.message || 'Upload failed');
+  }
   return (await res.json()).secure_url;
+}
+
+function cdnUrl(url, width = 600) {
+  if (!url || !url.includes('/upload/')) return url;
+  return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_limit/`);
 }
 
 /* ---- Concurrency runner ---- */
@@ -410,7 +435,7 @@ function makeSlot(i) {
     el.className = 'slot filled' + (p.saved ? ' done' : '');
     el.innerHTML = `
       <span class="slot-badge-imgs">${p.srcs.filter(s=>s).length} photo${p.srcs.filter(s=>s).length>1?'s':''}</span>
-      <img class="slot-cover" src="${cover}" alt="">
+      <img class="slot-cover" src="${cdnUrl(cover, 400)}" alt="" loading="lazy">
       <div class="slot-overlay">
         <div class="slot-desc">${p.desc || ''}</div>
         ${p.price ? `<div class="slot-price">${CURRENCY}${Number(p.price).toLocaleString()}</div>` : ''}
@@ -438,7 +463,7 @@ function setSlotDone(i) {
   el.className = 'slot filled done';
   el.innerHTML = `
     <span class="slot-badge-imgs">Saved</span>
-    <img class="slot-cover" src="${p.srcs.find(s=>s)}" alt="">
+    <img class="slot-cover" src="${cdnUrl(p.srcs.find(s=>s), 400)}" alt="" loading="lazy">
     <div class="slot-overlay">
       <div class="slot-desc">${p.desc || ''}</div>
       ${p.price ? `<div class="slot-price">${CURRENCY}${Number(p.price).toLocaleString()}</div>` : ''}
@@ -522,13 +547,6 @@ function saveSlot() {
   if (Object.keys(prods).length >= slots - 2) { slots += 5; buildGrid(); }
 }
 
-/* =============================================
-   PUBLISH
-   One function for everyone — guest and auth.
-   The server returns the correct redirect_url:
-     guest → /preview/<guest_key>/
-     auth  → /dashboard/
-   ============================================= */
 function handlePublish() {
   if (!Object.keys(prods).length) { toast('Add at least one product first'); return; }
   saveToServer();
@@ -586,6 +604,7 @@ async function saveToServer() {
       headers: { 'X-CSRFToken': CSRF },
     });
     const data = await res.json();
+    console.log('Server response:', res.status, data);
 
     if (res.ok && data.success) {
       keys.forEach(k => setSlotDone(Number(k)));

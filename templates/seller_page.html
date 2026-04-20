@@ -33,7 +33,6 @@
   --wa:#25D366; --wa-dk:#22c55e;
   --font-d:'Syne',sans-serif; --font-b:'DM Sans',sans-serif;
 }
-
 [data-theme="dark"] {
   --light:#1a1a1a; --white:#1e1e1e; --border:#333333;
   --dark:#f0f0f0; --gray:#a0a0a0; --gray-lt:#555555;
@@ -58,8 +57,9 @@
 [data-theme="dark"] .owner-banner { background:#0a0a0a; }
 [data-theme="dark"] .empty { color:#555; }
 [data-theme="dark"] .products-meta { color:#555; }
-[data-theme="dark"] .cta-strip { background:#111; border-color:#222; }
-[data-theme="dark"] .cta-strip p { color:rgba(255,255,255,.5); }
+[data-theme="dark"] .cta-strip { background:#141414; border-color:#2a2a2a; }
+[data-theme="dark"] .cta-strip-text { color:rgba(255,255,255,.35); }
+[data-theme="dark"] .cta-strip-text a { color:rgba(255,255,255,.5); }
 
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
@@ -114,15 +114,15 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
 .search-inner input::placeholder{color:var(--gray-lt);}
 .products-meta{padding:0 24px 12px;font-size:13px;color:var(--gray-lt);}
 
-/* ---- Products grid — full width ---- */
-.products-wrap{padding:0 24px 80px;}
+/* ---- Products grid ---- */
+.products-wrap{padding:0 24px 64px;}
 .products-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  gap:12px;
+  grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+  gap:10px;
 }
 @media(max-width:480px){
-  .products-wrap{padding:0 12px 80px;}
+  .products-wrap{padding:0 12px 64px;}
   .search-wrap{padding:12px 12px;}
   .products-meta{padding:0 12px 10px;}
   .profile-section{padding:20px 12px 16px;}
@@ -139,9 +139,9 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
 }
 .product-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08);}
 
-/* Image area — 4:3 ratio gives a good balanced height */
+/* Image area */
 .card-gallery{
-  width:100%;aspect-ratio:4/3;
+  width:100%;aspect-ratio:1/1;
   position:relative;overflow:hidden;background:var(--light);
   flex-shrink:0;
 }
@@ -169,70 +169,57 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
 }
 .img-count{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.5);color:var(--white);font-size:10px;font-weight:600;padding:2px 5px;border-radius:4px;z-index:4;}
 
-/* Card body */
+.card-tap-hint{
+  position:absolute;bottom:0;left:0;right:0;
+  background:linear-gradient(transparent, rgba(0,0,0,.45));
+  display:flex;align-items:flex-end;justify-content:center;
+  padding-bottom:8px;z-index:3;height:48px;
+  opacity:0;transition:opacity .2s;
+  pointer-events:none;
+}
+.product-card:hover .card-tap-hint{opacity:1;}
+.card-tap-hint span{
+  font-size:10px;font-weight:600;color:#fff;
+  letter-spacing:.4px;text-transform:uppercase;
+}
+
 .card-body{padding:8px 10px 10px;flex:1;display:flex;flex-direction:column;}
 .card-desc{
-  font-size:12px;color:var(--gray);line-height:1.4;margin-bottom:8px;flex:1;
+  font-size:12px;color:var(--gray);line-height:1.4;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
 }
-/* Small WhatsApp button per card */
-.card-wa{
-  display:flex;align-items:center;justify-content:center;gap:5px;
-  width:100%;padding:7px 6px;
-  background:var(--wa);color:var(--white);
-  border:none;border-radius:7px;
-  font-family:var(--font-b);font-size:11px;font-weight:600;
-  text-decoration:none;cursor:pointer;transition:background .18s;
-  flex-shrink:0;
-}
-.card-wa:hover{background:var(--wa-dk);}
 
 /* ---- Empty ---- */
 .empty{padding:60px 20px;text-align:center;color:var(--gray-lt);}
 .empty p{font-size:14px;margin-top:12px;}
 
-/* =============================================
-   FIXED BOTTOM CTA STRIP
-   "Create your own store" — replaces the old
-   WhatsApp bottom bar. Always visible.
-   ============================================= */
+/* ---- Bottom CTA strip ---- */
 .cta-strip{
   position:fixed;bottom:0;left:0;right:0;
   background:var(--white);border-top:1px solid var(--border);
-  padding:12px 20px;z-index:100;
+  padding:9px 20px;z-index:100;
   display:flex;align-items:center;justify-content:center;
 }
-.cta-strip-inner{
-  width:100%;max-width:500px;
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
+.cta-strip-text{
+  font-size:12px;color:var(--gray-lt);
+  text-align:center;line-height:1.4;
 }
-.cta-strip p{font-size:13px;color:var(--gray);font-weight:500;line-height:1.4;}
-.cta-strip p strong{color:var(--dark);display:block;font-size:13px;}
-.cta-strip a{
-  flex-shrink:0;
-  background:var(--green);color:var(--white);
-  padding:10px 20px;border-radius:100px;
-  font-family:var(--font-b);font-size:13px;font-weight:700;
-  text-decoration:none;transition:background .18s;white-space:nowrap;
+.cta-strip-text a{
+  color:var(--green);font-weight:600;
+  text-decoration:none;
 }
-.cta-strip a:hover{background:var(--green-dk);}
+.cta-strip-text a:hover{text-decoration:underline;}
 
-/* Owner sees dashboard link instead */
 .cta-strip-owner{
   position:fixed;bottom:0;left:0;right:0;
   background:var(--dark);border-top:1px solid #222;
-  padding:12px 20px;z-index:100;
+  padding:10px 20px;z-index:100;
   display:flex;align-items:center;justify-content:center;gap:16px;
 }
 .cta-strip-owner span{font-size:13px;color:rgba(255,255,255,.6);}
-.cta-strip-owner a{background:var(--green);color:#fff;padding:8px 18px;border-radius:100px;font-size:13px;font-weight:700;text-decoration:none;}
+.cta-strip-owner a{background:var(--green);color:#fff;padding:7px 16px;border-radius:100px;font-size:13px;font-weight:700;text-decoration:none;}
 
-/* =============================================
-   LIGHTBOX / FULL IMAGE MODAL
-   Opens when user taps a product image.
-   Shows full images with slide, price, desc,
-   and WhatsApp order button.
-   ============================================= */
+/* ---- Lightbox ---- */
 .lightbox{
   position:fixed;inset:0;z-index:500;
   background:rgba(0,0,0,.92);
@@ -242,7 +229,6 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
 }
 .lightbox.open{display:flex;}
 
-/* Close button */
 .lb-close{
   position:absolute;top:14px;right:14px;z-index:10;
   width:34px;height:34px;border-radius:50%;
@@ -252,7 +238,6 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
 }
 .lb-close:hover{background:rgba(255,255,255,.22);}
 
-/* Image carousel area */
 .lb-images{
   flex:1;width:100%;position:relative;overflow:hidden;
   display:flex;align-items:center;justify-content:center;
@@ -268,15 +253,13 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
 }
 .lb-slide img{
   max-width:100%;max-height:100%;
-  object-fit:contain;border-radius:8px;
-  display:block;
+  object-fit:contain;border-radius:8px;display:block;
 }
 .lb-slide canvas{
   max-width:100%;max-height:100%;
   border-radius:8px;display:block;
 }
 
-/* Prev/next */
 .lb-btn{
   position:absolute;top:50%;transform:translateY(-50%);
   width:36px;height:36px;border-radius:50%;
@@ -293,7 +276,6 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
 .lb-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35);border:none;padding:0;cursor:pointer;}
 .lb-dot.active{background:#fff;}
 
-/* Info panel at bottom */
 .lb-info-box{
   flex-shrink:0;width:100%;
   background:var(--white);border-top:1px solid var(--border);
@@ -374,17 +356,19 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
            data-id="{{ product.id }}"
            data-description="{{ product.description|default:'' }}"
            data-price="{{ product.price|default:'' }}"
-           data-wa-msg="{{ product.get_whatsapp_message|urlencode }}">
+           data-wa-msg="{{ product.get_whatsapp_message|urlencode }}"
+           onclick="openLightbox({{ product.id }})">
 
-        <!-- Image gallery — click opens lightbox -->
-        <div class="card-gallery" id="gal-{{ product.id }}"
-             onclick="openLightbox({{ product.id }})">
+        <div class="card-gallery" id="gal-{{ product.id }}">
           {% if product.images.count > 1 %}
           <div class="car-wrap">
             <div class="car-track" id="ct-{{ product.id }}">
               {% for image in product.images.all %}
               <div class="car-slide">
-                <img src="{{ image.image_url }}" alt="" loading="lazy" crossorigin="anonymous">
+                {# CDN-optimized URL — f_auto,q_auto,w_600 applied directly in src #}
+                <img src="{{ image.image_url|stringformat:'s'|truncatechars:0 }}{% if '/upload/' in image.image_url %}{{ image.image_url|cut:'/upload/'|stringformat:'s' }}{% else %}{{ image.image_url }}{% endif %}"
+                     data-rawsrc="{{ image.image_url }}"
+                     alt="" loading="lazy" crossorigin="anonymous">
               </div>
               {% endfor %}
             </div>
@@ -405,7 +389,10 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
           {% else %}
             {% with product.images.first as img %}{% if img %}
             <div class="car-slide" style="width:100%;height:100%;position:relative;">
-              <img src="{{ img.image_url }}" alt="" loading="lazy" crossorigin="anonymous"
+              {# Single image — also gets CDN optimization via JS on DOMContentLoaded #}
+              <img data-rawsrc="{{ img.image_url }}"
+                   src="{{ img.image_url }}"
+                   alt="" loading="lazy" crossorigin="anonymous"
                    style="width:100%;height:100%;object-fit:cover;display:block;">
             </div>
             {% endif %}{% endwith %}
@@ -413,18 +400,15 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
           {% if product.price %}
             <span class="price-badge">{{ seller.currency_symbol|default:"₦" }}{{ product.price|floatformat:0 }}</span>
           {% endif %}
+          <div class="card-tap-hint"><span>tap to order</span></div>
         </div>
 
+        {% if product.description %}
         <div class="card-body">
-          {% if product.description %}<p class="card-desc">{{ product.description }}</p>{% endif %}
-          <a href="https://wa.me/{{ seller.whatsapp_number }}?text={{ product.get_whatsapp_message|urlencode }}"
-             class="card-wa"
-             onclick="trackWa({{ product.id }})"
-             target="_blank">
-            <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
-            Order on WhatsApp
-          </a>
+          <p class="card-desc">{{ product.description }}</p>
         </div>
+        {% endif %}
+
       </div>
       {% endfor %}
     </div>
@@ -438,11 +422,6 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
 
 </div><!-- /page-wrap -->
 
-<!-- =============================================
-   FIXED BOTTOM STRIP
-   Owner sees "Go to Dashboard"
-   Visitors see "Create your own store"
-   ============================================= -->
 {% if is_owner %}
 <div class="cta-strip-owner">
   <span>You are in preview mode</span>
@@ -450,20 +429,13 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
 </div>
 {% else %}
 <div class="cta-strip">
-  <div class="cta-strip-inner">
-    <p>
-      <strong>Want a store like this?</strong>
-      Free. Live in 30 seconds.
-    </p>
-    <a href="{% url 'home' %}">Create Your Store</a>
-  </div>
+  <p class="cta-strip-text">
+    Powered by <strong style="font-weight:700;color:var(--dark);">Vendopage</strong> &nbsp;·&nbsp;
+    <a href="{% url 'home' %}">Create your free store →</a>
+  </p>
 </div>
 {% endif %}
 
-<!-- =============================================
-   LIGHTBOX
-   Full image view with slide + product info
-   ============================================= -->
 <div class="lightbox" id="lightbox">
   <button class="lb-close" onclick="closeLightbox()">
     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -493,15 +465,26 @@ body{font-family:var(--font-b);background:var(--white);color:var(--dark);-webkit
 <div class="toast-el" id="toast"></div>
 
 <script>
+/* ---- CDN URL helper — rewrites Cloudinary URLs to serve optimized versions ---- */
+function cdnUrl(url, width) {
+  if (!url || !url.includes('/upload/')) return url;
+  return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_limit/`);
+}
+
 const SELLER_WA   = '{{ seller.whatsapp_number }}';
 const SELLER_NAME = '{{ seller.business_name|escapejs }}';
 const CURRENCY    = '{{ seller.currency_symbol|default:"₦"|escapejs }}';
 const IS_OWNER    = {{ is_owner|lower }};
 const WM_ACTIVE   = {{ seller.watermark_enabled|default:"True"|lower }};
 
-/* =============================================
-   WATERMARK — reduced density (2-3 names per image)
-   ============================================= */
+/* ---- Apply CDN URLs to all grid images on load ---- */
+function applyAllCdnUrls() {
+  document.querySelectorAll('[data-rawsrc]').forEach(img => {
+    img.src = cdnUrl(img.dataset.rawsrc, 600);
+  });
+}
+
+/* ---- Watermark ---- */
 function applyWatermark(img, canvas) {
   const w = img.naturalWidth  || img.width  || 400;
   const h = img.naturalHeight || img.height || 400;
@@ -511,21 +494,16 @@ function applyWatermark(img, canvas) {
   if (!WM_ACTIVE) return;
 
   ctx.save();
-  ctx.globalAlpha = 0.18;
+  ctx.globalAlpha = 0.20;
   ctx.fillStyle = '#ffffff';
-  /* Larger font + wider gap = fewer repetitions = ~2-3 names visible */
-  const fs  = Math.max(14, Math.round(w * 0.07));
+  const fs = Math.max(16, Math.round(Math.min(w, h) * 0.08));
   ctx.font = `600 ${fs}px 'DM Sans',sans-serif`;
   ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
   ctx.translate(w / 2, h / 2);
-  ctx.rotate(-28 * Math.PI / 180);
-  /* Increase gap to reduce name count on screen */
-  const gap  = fs * 7;
-  const cols = Math.ceil(w / gap) + 2;
-  const rows = Math.ceil(h / gap) + 2;
-  for (let r = 0; r < rows; r++)
-    for (let c = 0; c < cols; c++)
-      ctx.fillText(SELLER_NAME, -cols/2*gap + c*gap, -rows/2*gap + r*gap);
+  ctx.rotate(-25 * Math.PI / 180);
+  const lineH = Math.round(h * 0.38);
+  [-lineH, 0, lineH].forEach(dy => ctx.fillText(SELLER_NAME, 0, dy));
   ctx.restore();
 }
 
@@ -541,9 +519,7 @@ function initWatermarks() {
   });
 }
 
-/* =============================================
-   CARD CAROUSEL
-   ============================================= */
+/* ---- Card carousel ---- */
 const cars = {};
 function carInit(id) {
   const t    = document.getElementById(`ct-${id}`);
@@ -565,72 +541,55 @@ function carGo(id, i) {
   cars[id].dots.forEach((d,j) => d.classList.toggle('active', j===i));
 }
 
-/* =============================================
-   PRODUCT DATA MAP
-   ============================================= */
+/* ---- Product data map — CDN URLs applied here for lightbox ---- */
 const pData = {};
 document.querySelectorAll('.product-card').forEach(card => {
   const id   = card.dataset.id;
   const imgs = [];
-  card.querySelectorAll('.car-slide img').forEach(i => imgs.push(i.src));
-  /* fallback: single image not in car-slide */
+  card.querySelectorAll('.car-slide img').forEach(i => imgs.push(i.dataset.rawsrc || i.src));
   if (!imgs.length) {
     const solo = card.querySelector('.card-gallery img');
-    if (solo) imgs.push(solo.src);
+    if (solo) imgs.push(solo.dataset.rawsrc || solo.src);
   }
   pData[id] = {
     desc:  card.dataset.description,
     price: card.dataset.price,
     waMsg: card.dataset.waMsg,
-    imgs,
+    imgs:  imgs.map(url => cdnUrl(url, 800)), // lightbox uses 800 — fuller screen size
   };
 });
 
-/* =============================================
-   LIGHTBOX
-   ============================================= */
-let lbCur   = 0;
-let lbTotal = 0;
-let lbProductId = null;
+/* ---- Lightbox ---- */
+let lbCur = 0, lbTotal = 0, lbProductId = null;
 
 function openLightbox(id) {
   const p = pData[id]; if (!p || !p.imgs.length) return;
-  lbProductId = id;
-  lbCur   = 0;
-  lbTotal = p.imgs.length;
+  lbProductId = id; lbCur = 0; lbTotal = p.imgs.length;
 
-  /* Build slides */
   const track = document.getElementById('lbTrack');
   track.style.transform = 'translateX(0)';
-  track.innerHTML = p.imgs.map(src => `
-    <div class="lb-slide">
-      <canvas></canvas>
-    </div>`).join('');
+  track.innerHTML = p.imgs.map(() => `<div class="lb-slide"><canvas></canvas></div>`).join('');
 
-  /* Draw watermarked canvases */
   track.querySelectorAll('.lb-slide').forEach((slide, i) => {
-    const cv  = slide.querySelector('canvas');
+    const cv = slide.querySelector('canvas');
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => applyWatermark(img, cv);
     img.src = p.imgs[i];
   });
 
-  /* Dots */
   const dotsEl = document.getElementById('lbDots');
   dotsEl.innerHTML = p.imgs.map((_, i) =>
     `<button class="lb-dot ${i===0?'active':''}" onclick="lbGo(${i})"></button>`
   ).join('');
 
-  /* Show/hide nav buttons */
   document.getElementById('lbPrev').style.display = lbTotal > 1 ? 'flex' : 'none';
   document.getElementById('lbNext').style.display = lbTotal > 1 ? 'flex' : 'none';
   dotsEl.style.display = lbTotal > 1 ? 'flex' : 'none';
 
-  /* Info */
-  document.getElementById('lbPrice').textContent =
-    p.price ? `${CURRENCY}${Number(p.price).toLocaleString()}` : '';
+  document.getElementById('lbPrice').textContent = p.price ? `${CURRENCY}${Number(p.price).toLocaleString()}` : '';
   document.getElementById('lbDesc').textContent = p.desc || '';
+
   const waBtn = document.getElementById('lbWaBtn');
   waBtn.href    = `https://wa.me/${SELLER_WA}?text=${p.waMsg}`;
   waBtn.onclick = () => trackWa(id);
@@ -644,39 +603,25 @@ function closeLightbox() {
   document.body.style.overflow = '';
   lbProductId = null;
 }
-
-function lbMove(d) {
-  lbCur = (lbCur + d + lbTotal) % lbTotal;
-  lbApply();
-}
-function lbGo(i) {
-  lbCur = i;
-  lbApply();
-}
+function lbMove(d) { lbCur = (lbCur + d + lbTotal) % lbTotal; lbApply(); }
+function lbGo(i)   { lbCur = i; lbApply(); }
 function lbApply() {
   document.getElementById('lbTrack').style.transform = `translateX(-${lbCur*100}%)`;
-  document.querySelectorAll('#lbDots .lb-dot').forEach((d,i) =>
-    d.classList.toggle('active', i===lbCur));
+  document.querySelectorAll('#lbDots .lb-dot').forEach((d,i) => d.classList.toggle('active', i===lbCur));
 }
 
-/* Swipe support */
-(function() {
+/* ---- Swipe support ---- */
+(function(){
   let sx = 0;
   const lb = document.getElementById('lightbox');
   lb.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, {passive:true});
-  lb.addEventListener('touchend', e => {
-    const dx = e.changedTouches[0].clientX - sx;
-    if (Math.abs(dx) > 40) lbMove(dx < 0 ? 1 : -1);
-  });
-  /* Click on overlay (not info box) closes */
+  lb.addEventListener('touchend',   e => { const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx)>40) lbMove(dx<0?1:-1); });
   document.getElementById('lbImages').addEventListener('click', e => {
     if (e.target === document.getElementById('lbImages')) closeLightbox();
   });
 })();
 
-/* =============================================
-   TRACKING / SEARCH
-   ============================================= */
+/* ---- Tracking / Search ---- */
 function trackWa(id) {
   if (!IS_OWNER) fetch(`/api/product/${id}/track-whatsapp/`, {method:'POST'}).catch(()=>{});
 }
@@ -697,15 +642,13 @@ function showToast(msg) {
 }
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'Escape')      closeLightbox();
   if (e.key === 'ArrowLeft'  && lbProductId) lbMove(-1);
   if (e.key === 'ArrowRight' && lbProductId) lbMove(1);
 });
 
-/* =============================================
-   INIT
-   ============================================= */
 document.addEventListener('DOMContentLoaded', () => {
+  applyAllCdnUrls(); // rewrites all [data-rawsrc] images to CDN-optimized URLs
   document.querySelectorAll('.car-track').forEach(t => carInit(t.id.split('-')[1]));
   initWatermarks();
 });
