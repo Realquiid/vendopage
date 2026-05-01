@@ -154,7 +154,12 @@ if not DEBUG:
 FLUTTERWAVE_PUBLIC_KEY = config('FLUTTERWAVE_PUBLIC_KEY', default='')
 FLUTTERWAVE_SECRET_KEY = config('FLUTTERWAVE_SECRET_KEY', default='')
 FLUTTERWAVE_ENCRYPTION_KEY = config('FLUTTERWAVE_ENCRYPTION_KEY', default='')
+FLW_SECRET_HASH = config('FLW_SECRET_HASH', default='')
 
+  
+TEMPLATES[0]['OPTIONS']['context_processors'] += [
+    'sellers.context_processors.admin_badge_counts',
+]
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME'),

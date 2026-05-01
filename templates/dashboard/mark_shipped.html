@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mark as Shipped — Order #{{ order.order_ref|slice:":8"|upper }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.ship-page { background:var(--light); min-height:calc(100vh - 64px); padding:40px 20px 80px; display:flex; align-items:flex-start; justify-content:center; }
+.ship-card { background:var(--white); border:1px solid var(--border); border-radius:24px; width:100%; max-width:580px; overflow:hidden; }
+
+.ship-header { padding:28px 32px; border-bottom:1px solid var(--border); }
+.ship-header h1 { font-family:var(--font-d); font-weight:800; font-size:24px; letter-spacing:-1px; margin-bottom:6px; }
+.ship-header p { font-size:13px; color:var(--gray); line-height:1.6; }
+.ship-order-ref { display:inline-flex; align-items:center; gap:6px; background:var(--dark); color:#fff; font-family:monospace; font-size:12px; font-weight:700; padding:3px 10px; border-radius:100px; letter-spacing:1px; margin-bottom:10px; }
+
+/* Order mini-summary */
+.order-mini { background:var(--light); border-radius:14px; padding:16px 18px; margin-bottom:20px; }
+.order-mini-row { display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; }
+.order-mini-row:last-child { margin-bottom:0; font-weight:700; font-size:14px; }
+.order-mini-label { color:var(--gray); }
+
+.ship-body { padding:24px 32px; }
+.form-group { margin-bottom:20px; }
+.form-label { font-size:13px; font-weight:700; color:var(--gray); margin-bottom:8px; display:block; }
+.form-label .opt { color:var(--gray-lt); font-weight:400; }
+.form-input { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--r-md); font-family:var(--font-b); font-size:14px; outline:none; transition:border-color .18s; box-sizing:border-box; background:var(--white); color:var(--dark); }
+.form-input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(0,194,168,.1); }
+.form-input::placeholder { color:var(--gray-lt); }
+
+/* Escrow notice */
+.escrow-notice { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:1px solid #86efac; border-radius:14px; padding:16px 18px; margin-bottom:20px; }
+.escrow-notice h4 { font-size:13px; font-weight:700; color:#15803d; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.escrow-notice ul { font-size:13px; color:#166534; margin:0; padding-left:18px; line-height:1.8; }
+
+/* Auto-release info */
+.autorelease-info { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:12px 14px; margin-bottom:20px; font-size:13px; color:#1d4ed8; line-height:1.6; }
+
+.ship-footer { padding:20px 32px; border-top:1px solid var(--border); display:flex; gap:10px; }
+.btn-cancel { flex:1; padding:12px; border-radius:var(--r-pill); border:1px solid var(--border); background:var(--light); font-family:var(--font-b); font-size:14px; font-weight:600; cursor:pointer; transition:all .18s; color:var(--dark); text-decoration:none; text-align:center; }
+.btn-cancel:hover { border-color:var(--dark); }
+.btn-ship-confirm { flex:2; padding:12px; border-radius:var(--r-pill); border:none; background:var(--dark); color:#fff; font-family:var(--font-b); font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:8px; }
+.btn-ship-confirm:hover { background:#222; transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,.15); }
+.btn-ship-confirm:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+[data-theme="dark"] .ship-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .ship-header,.ship-footer { border-color:#2e2e2e; }
+[data-theme="dark"] .order-mini { background:#252525; }
+[data-theme="dark"] .form-input { background:#2a2a2a; border-color:#3a3a3a; color:#f0f0f0; }
+
+@media(max-width:500px) {
+  .ship-header,.ship-body,.ship-footer { padding:20px; }
+  .ship-footer { flex-direction:column-reverse; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ship-page">
+<div class="ship-card">
+
+  <div class="ship-header">
+    <div class="ship-order-ref">#{{ order.order_ref|slice:":8"|upper }}</div>
+    <h1>🚚 Mark as Shipped</h1>
+    <p>Enter your shipping details. The buyer will be notified by email and can track their order.</p>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="ship-body">
+
+      <!-- Mini order summary -->
+      <div class="order-mini">
+        <div class="order-mini-row">
+          <span class="order-mini-label">Buyer</span>
+          <span>{{ order.buyer_name }}</span>
+        </div>
+        <div class="order-mini-row">
+          <span class="order-mini-label">Delivery address</span>
+          <span>{{ order.delivery_address }}{% if order.delivery_city %}, {{ order.delivery_city }}{% endif %}</span>
+        </div>
+        <div class="order-mini-row">
+          <span class="order-mini-label">Phone</span>
+          <span>{{ order.buyer_phone }}</span>
+        </div>
+        <div class="order-mini-row">
+          <span class="order-mini-label">Items</span>
+          <span>{{ order.items.count }} item{{ order.items.count|pluralize }}</span>
+        </div>
+        <div class="order-mini-row">
+          <span class="order-mini-label">Order value</span>
+          <span>{{ order.currency }} {{ order.subtotal|floatformat:0 }}</span>
+        </div>
+      </div>
+
+      <!-- Escrow notice -->
+      <div class="escrow-notice">
+        <h4>🔒 Escrow Timeline</h4>
+        <ul>
+          <li>Once you ship, the buyer has 72 hours to confirm receipt.</li>
+          <li>If they don't respond, funds are automatically released to you.</li>
+          <li>Your payout: <strong>{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</strong></li>
+        </ul>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="courier-name">
+          Courier / Logistics Service <span class="opt">(optional)</span>
+        </label>
+        <input type="text" id="courier-name" name="courier_name" class="form-input" placeholder="e.g. GIG Logistics, DHL, Kwik Delivery">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="tracking-info">
+          Tracking Number / Info <span class="opt">(optional)</span>
+        </label>
+        <input type="text" id="tracking-info" name="tracking_info" class="form-input" placeholder="e.g. GIG-1234567890 or 'Dispatched via bike rider'">
+      </div>
+
+      <div class="autorelease-info">
+        ℹ️ After marking as shipped, if the buyer does not confirm receipt within <strong>72 hours</strong>, funds will be automatically released to your account.
+      </div>
+
+    </div>
+
+    <div class="ship-footer">
+      <a href="{% url 'vendor_order_detail' order.order_ref %}" class="btn-cancel">Cancel</a>
+      <button type="submit" class="btn-ship-confirm" id="shipBtn">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        Confirm Shipment
+      </button>
+    </div>
+  </form>
+
+</div>
+</div>
+{% block footer %}{% endblock %}
+<script>
+document.querySelector('form').addEventListener('submit', function() {
+  const btn = document.getElementById('shipBtn');
+  btn.textContent = 'Updating order…';
+  btn.disabled = true;
+});
+</script>
+{% endblock %}

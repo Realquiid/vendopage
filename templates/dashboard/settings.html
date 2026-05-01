@@ -5,93 +5,340 @@
 
 {% block extra_css %}
 <style>
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+═══════════════════════════════════════════════════════════════ */
 .settings-page {
   background: var(--light);
   min-height: calc(100vh - 64px);
-  padding: 40px 20px 80px;
+  padding-bottom: 80px;
 }
-.settings-wrap { max-width: 700px; margin: 0 auto; }
+.settings-wrap { max-width: 760px; margin: 0 auto; }
 
-.settings-head { margin-bottom: 32px; }
-.settings-head h1 { font-family: var(--font-d); font-weight: 800; font-size: 28px; letter-spacing: -1px; margin-bottom: 4px; }
-.settings-head p { font-size: 14px; color: var(--gray); }
+/* ═══════════════════════════════════════════════════════════════
+   HERO
+═══════════════════════════════════════════════════════════════ */
+.settings-hero { padding: 36px 32px 0; }
+.settings-hero h1 {
+  font-family: var(--font-d); font-weight: 800; font-size: 26px;
+  letter-spacing: -0.8px; margin-bottom: 2px; color: var(--dark);
+}
+.settings-hero p { font-size: 13px; color: var(--gray); }
 
-/* Messages */
+/* ═══════════════════════════════════════════════════════════════
+   TAB NAV
+═══════════════════════════════════════════════════════════════ */
+.tab-nav-outer {
+  position: sticky; top: 64px; z-index: 50;
+  background: var(--light); padding: 0 32px;
+  margin-top: 24px; border-bottom: 1px solid var(--border);
+}
+[data-theme="dark"] .tab-nav-outer { background: #141414; border-color: #2a2a2a; }
+
+.tab-nav {
+  display: flex; gap: 0; overflow-x: auto;
+  scrollbar-width: none; -ms-overflow-style: none;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  position: relative; display: flex; align-items: center; gap: 7px;
+  padding: 14px 18px 13px; font-family: var(--font-b); font-size: 13px;
+  font-weight: 600; color: var(--gray); background: none; border: none;
+  cursor: pointer; white-space: nowrap; transition: color .18s;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab-btn:hover { color: var(--dark); }
+.tab-btn.active { color: var(--dark); border-bottom-color: var(--green); }
+.tab-btn svg { opacity: .7; }
+.tab-btn.active svg { opacity: 1; color: var(--green); }
+[data-theme="dark"] .tab-btn { color: #666; }
+[data-theme="dark"] .tab-btn:hover { color: #f0f0f0; }
+[data-theme="dark"] .tab-btn.active { color: #f0f0f0; border-bottom-color: var(--green); }
+
+/* ═══════════════════════════════════════════════════════════════
+   TAB PANELS
+═══════════════════════════════════════════════════════════════ */
+.tab-panels { padding: 28px 32px 0; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ═══════════════════════════════════════════════════════════════
+   MESSAGES
+═══════════════════════════════════════════════════════════════ */
 .msg-list { list-style: none; margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; }
 .msg-item { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 500; }
 .msg-item.success { background: #f0fff5; border: 1px solid #bbf7d0; color: #166534; }
 .msg-item.error   { background: #fff5f5; border: 1px solid #fecaca; color: #991b1b; }
+[data-theme="dark"] .msg-item.success { background: #0a1f12; border-color: #166534; color: #4ade80; }
+[data-theme="dark"] .msg-item.error   { background: #1f0a0a; border-color: #991b1b; color: #f87171; }
 
-/* Card */
-.s-card { background: var(--white); border: 1px solid var(--border); border-radius: 20px; margin-bottom: 14px; overflow: hidden; }
+/* ═══════════════════════════════════════════════════════════════
+   CARD
+═══════════════════════════════════════════════════════════════ */
+.s-card {
+  background: var(--white); border: 1px solid var(--border);
+  border-radius: 20px; margin-bottom: 16px; overflow: hidden;
+}
 .s-card-head { padding: 22px 26px 0; }
-.s-card-head h2 { font-family: var(--font-d); font-weight: 700; font-size: 16px; margin-bottom: 3px; }
-.s-card-head p { font-size: 13px; color: var(--gray); }
+.s-card-head h2 { font-family: var(--font-d); font-weight: 700; font-size: 16px; margin-bottom: 3px; color: var(--dark); }
+.s-card-head p  { font-size: 13px; color: var(--gray); margin-top: 2px; }
 .s-card-body { padding: 18px 26px 26px; }
-.s-divider { border: none; border-top: 1px solid var(--border); margin: 22px 0; }
+.s-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+[data-theme="dark"] .s-card { background: #1e1e1e; border-color: #2e2e2e; }
+[data-theme="dark"] .s-card-head h2 { color: #f0f0f0; }
+[data-theme="dark"] .s-card-head p  { color: #888; }
+[data-theme="dark"] .s-divider { border-color: #2e2e2e; }
 
-/* Fields */
+/* ═══════════════════════════════════════════════════════════════
+   FORM FIELDS
+═══════════════════════════════════════════════════════════════ */
 .f-group { margin-bottom: 16px; }
-.f-label { font-size: 13px; font-weight: 600; color: var(--gray); margin-bottom: 5px; display: block; }
+.f-label { font-size: 13px; font-weight: 600; color: var(--gray); margin-bottom: 6px; display: block; }
+[data-theme="dark"] .f-label { color: #aaa; }
+
 .f-input, .f-textarea, .f-select {
   width: 100%; background: var(--light); border: 1px solid var(--border);
   border-radius: 11px; padding: 11px 14px;
   font-family: var(--font-b); font-size: 14px; color: var(--dark);
-  outline: none; transition: border-color .18s;
+  outline: none; transition: border-color .18s, background .18s;
+  box-sizing: border-box;
 }
 .f-input:focus, .f-textarea:focus, .f-select:focus { border-color: var(--green); background: var(--white); }
 .f-input:disabled { opacity: .45; cursor: not-allowed; }
-.f-hint { font-size: 12px; color: var(--gray-lt); margin-top: 4px; }
+.f-hint { font-size: 12px; color: var(--gray-lt); margin-top: 5px; line-height: 1.4; }
 .f-textarea { resize: vertical; min-height: 85px; }
 .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-@media (max-width: 560px) { .f-row { grid-template-columns: 1fr; } }
 
-/* Avatar — upload via Cloudinary directly */
+[data-theme="dark"] .f-input,
+[data-theme="dark"] .f-textarea,
+[data-theme="dark"] .f-select { background: #252525; border-color: #3a3a3a; color: #f0f0f0; }
+[data-theme="dark"] .f-input:focus,
+[data-theme="dark"] .f-textarea:focus,
+[data-theme="dark"] .f-select:focus { background: #2e2e2e; border-color: var(--green); }
+[data-theme="dark"] .f-input:disabled { opacity: .35; }
+[data-theme="dark"] .f-hint { color: #666; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PAYOUT — ACCOUNT NUMBER INPUT WITH INLINE BADGE
+═══════════════════════════════════════════════════════════════ */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.acct-input-wrap { position: relative; }
+.acct-input-wrap .f-input {
+  padding-right: 130px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+}
+
+.acct-badge {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  display: none; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 100px;
+  white-space: nowrap; pointer-events: none;
+}
+.acct-badge.show       { display: flex; }
+.acct-badge.checking   { background: var(--light); border: 1px solid var(--border); color: var(--gray); }
+.acct-badge.verified   { background: #f0fff5; border: 1px solid #bbf7d0; color: #166534; }
+.acct-badge.unverified { background: #fff5f5; border: 1px solid #fecaca; color: #991b1b; }
+[data-theme="dark"] .acct-badge.checking   { background: #252525; border-color: #3a3a3a; color: #aaa; }
+[data-theme="dark"] .acct-badge.verified   { background: #0a1f12; border-color: #166534; color: #4ade80; }
+[data-theme="dark"] .acct-badge.unverified { background: #1f0a0a; border-color: #991b1b; color: #f87171; }
+
+.spin-ring {
+  width: 10px; height: 10px; border-radius: 50%;
+  border: 2px solid currentColor; border-top-color: transparent;
+  animation: spin .65s linear infinite; opacity: .7;
+}
+
+/* Resolved name banner */
+.acct-name-banner {
+  display: none; align-items: center; gap: 10px;
+  margin-top: 8px; padding: 13px 16px; border-radius: 11px;
+  font-size: 14px; font-weight: 700; line-height: 1.3;
+}
+.acct-name-banner.show    { display: flex; }
+.acct-name-banner.success { background: #f0fff5; border: 1px solid #bbf7d0; color: #166534; }
+.acct-name-banner.error   { background: #fff5f5; border: 1px solid #fecaca; color: #991b1b; font-weight: 500; font-size: 13px; }
+[data-theme="dark"] .acct-name-banner.success { background: #0a1f12; border-color: #166534; color: #4ade80; }
+[data-theme="dark"] .acct-name-banner.error   { background: #1f0a0a; border-color: #991b1b; color: #f87171; }
+.acct-name-banner svg { flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PAYOUT — BANK PICKER
+═══════════════════════════════════════════════════════════════ */
+.bank-picker {
+  border: 1.5px solid var(--border); border-radius: 12px;
+  overflow: hidden; transition: border-color .18s; background: var(--light);
+}
+.bank-picker:focus-within { border-color: var(--green); background: var(--white); }
+[data-theme="dark"] .bank-picker { background: #252525; border-color: #3a3a3a; }
+[data-theme="dark"] .bank-picker:focus-within { background: #2e2e2e; border-color: var(--green); }
+
+/* Search row */
+.bp-search-row {
+  display: flex; align-items: center; gap: 0;
+  padding: 0 12px; border-bottom: 1px solid var(--border);
+}
+[data-theme="dark"] .bp-search-row { border-color: #3a3a3a; }
+
+.bp-search-icon { color: var(--gray-lt); flex-shrink: 0; pointer-events: none; }
+
+.bp-input {
+  flex: 1; background: none; border: none; outline: none;
+  padding: 12px 10px; font-family: var(--font-b); font-size: 14px;
+  color: var(--dark); min-width: 0;
+}
+[data-theme="dark"] .bp-input { color: #f0f0f0; }
+.bp-input::placeholder { color: var(--gray-lt); }
+
+.bp-clear {
+  background: none; border: none; cursor: pointer;
+  color: var(--gray-lt); padding: 4px 6px; font-size: 13px;
+  border-radius: 4px; display: none; line-height: 1;
+}
+.bp-clear:hover { color: var(--dark); background: var(--light); }
+[data-theme="dark"] .bp-clear:hover { color: #f0f0f0; background: #333; }
+
+/* Selected bank pill row */
+.bp-selected {
+  display: none; align-items: center; gap: 10px;
+  padding: 12px 14px; background: rgba(34,197,94,.07);
+  border-bottom: 1px solid var(--border);
+}
+.bp-selected.show { display: flex; }
+[data-theme="dark"] .bp-selected { background: rgba(34,197,94,.1); border-color: #3a3a3a; }
+.bp-selected-name { font-size: 14px; font-weight: 700; color: var(--green-dk, #15803d); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-theme="dark"] .bp-selected-name { color: #4ade80; }
+.bp-change {
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  color: var(--gray); font-size: 12px; font-weight: 600; font-family: var(--font-b);
+  padding: 4px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0;
+  transition: all .15s;
+}
+.bp-change:hover { border-color: var(--dark); color: var(--dark); }
+[data-theme="dark"] .bp-change { border-color: #3a3a3a; color: #888; }
+[data-theme="dark"] .bp-change:hover { border-color: #888; color: #f0f0f0; }
+
+/* Dropdown list */
+.bp-list {
+  display: none; max-height: 230px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.bp-list.open { display: block; }
+.bp-list::-webkit-scrollbar { width: 4px; }
+.bp-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.bp-item {
+  padding: 11px 14px; font-size: 13px; color: var(--dark);
+  cursor: pointer; transition: background .1s; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.bp-item:last-child { border-bottom: none; }
+.bp-item:hover, .bp-item.kbdfocus { background: rgba(34,197,94,.07); color: var(--green-dk, #15803d); }
+[data-theme="dark"] .bp-item { color: #e0e0e0; border-color: #2a2a2a; }
+[data-theme="dark"] .bp-item:hover,
+[data-theme="dark"] .bp-item.kbdfocus { background: rgba(34,197,94,.12); color: #4ade80; }
+
+.bp-empty {
+  padding: 20px 14px; font-size: 13px; color: var(--gray-lt);
+  text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+
+/* Count badge inside picker */
+.bp-count-row {
+  padding: 7px 14px; font-size: 11px; color: var(--gray-lt);
+  border-top: 1px solid var(--border); text-align: right;
+}
+[data-theme="dark"] .bp-count-row { border-color: #2a2a2a; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PAYOUT — SAVED ACCOUNT DISPLAY
+═══════════════════════════════════════════════════════════════ */
+.payout-saved {
+  background: var(--light); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.payout-saved-name { font-family: var(--font-d); font-weight: 700; font-size: 15px; margin-bottom: 2px; color: var(--dark); }
+.payout-saved-meta { font-size: 13px; color: var(--gray); }
+[data-theme="dark"] .payout-saved { background: #252525; border-color: #3a3a3a; }
+[data-theme="dark"] .payout-saved-name { color: #f0f0f0; }
+[data-theme="dark"] .payout-saved-meta { color: #888; }
+
+/* Verified badge */
+.payout-verified-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #f0fff5; border: 1px solid #bbf7d0;
+  color: #166534; font-size: 12px; font-weight: 600;
+  padding: 3px 10px; border-radius: 100px; margin-top: 5px;
+}
+[data-theme="dark"] .payout-verified-badge { background: #0a1f12; border-color: #166534; color: #4ade80; }
+
+/* Save row */
+.payout-save-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 20px; flex-wrap: wrap;
+}
+.payout-save-hint {
+  font-size: 12px; color: var(--gray-lt); transition: color .2s; line-height: 1.4;
+}
+.payout-save-hint.ready { color: var(--green-dk, #15803d); font-weight: 600; }
+[data-theme="dark"] .payout-save-hint.ready { color: #4ade80; }
+
+/* ═══════════════════════════════════════════════════════════════
+   HOW PAYOUTS WORK
+═══════════════════════════════════════════════════════════════ */
+.payout-steps { display: flex; flex-direction: column; gap: 16px; }
+.payout-step  { display: flex; gap: 14px; align-items: flex-start; }
+.payout-step-num {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: var(--green); color: #fff;
+  font-family: var(--font-d); font-weight: 800; font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.payout-step-title { font-weight: 600; font-size: 13px; margin-bottom: 2px; color: var(--dark); }
+.payout-step-desc  { font-size: 12px; color: var(--gray); line-height: 1.4; }
+[data-theme="dark"] .payout-step-title { color: #f0f0f0; }
+[data-theme="dark"] .payout-step-desc  { color: #888; }
+
+/* ═══════════════════════════════════════════════════════════════
+   AVATAR
+═══════════════════════════════════════════════════════════════ */
 .avatar-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .avatar-circle {
-  width: 76px; height: 76px; border-radius: 50%;
-  background: var(--green); flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
+  width: 76px; height: 76px; border-radius: 50%; background: var(--green);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   font-family: var(--font-d); font-weight: 800; font-size: 30px; color: #fff;
   overflow: hidden; position: relative;
 }
 .avatar-circle img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .avatar-uploading {
-  position: absolute; inset: 0; background: rgba(0,0,0,.45);
-  border-radius: 50%; display: none; align-items: center; justify-content: center;
+  position: absolute; inset: 0; background: rgba(0,0,0,.45); border-radius: 50%;
+  display: none; align-items: center; justify-content: center;
 }
 .avatar-uploading svg { animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.avatar-ctrl { display: flex; flex-direction: column; gap: 7px; }
-.avatar-hint { font-size: 12px; color: var(--gray-lt); }
+.avatar-hint { font-size: 12px; color: var(--gray-lt); margin-top: 6px; }
+[data-theme="dark"] .avatar-hint { color: #666; }
 
-/* Link box */
-.link-box { display: flex; align-items: center; background: var(--light); border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
-.link-box input { flex: 1; background: none; border: none; outline: none; padding: 11px 13px; font-family: var(--font-b); font-size: 14px; color: var(--dark); cursor: pointer; }
-.link-copy-btn { padding: 11px 14px; background: none; border: none; border-left: 1px solid var(--border); cursor: pointer; color: var(--gray); transition: all .18s; display: flex; align-items: center; }
-.link-copy-btn:hover { background: var(--green); color: #fff; }
-
-/* Plan */
-.plan-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 100px; font-size: 13px; font-weight: 700; }
-.plan-free { background: var(--light); border: 1px solid var(--border); color: var(--gray); }
-.plan-premium { background: #fefce8; border: 1px solid #fde68a; color: #92400e; }
-.features-list { margin: 14px 0; display: flex; flex-direction: column; gap: 7px; }
-.feature-item { display: flex; align-items: center; gap: 9px; font-size: 14px; }
-.feature-item svg { color: var(--green); flex-shrink: 0; }
-
-/* =============================================
-   WATERMARK TOGGLE — clean toggle switch
-   ============================================= */
+/* ═══════════════════════════════════════════════════════════════
+   TOGGLE SWITCH
+═══════════════════════════════════════════════════════════════ */
 .toggle-row {
   display: flex; align-items: center; justify-content: space-between;
   gap: 16px; flex-wrap: wrap; padding: 4px 0;
 }
-.toggle-info h3 { font-family: var(--font-d); font-weight: 700; font-size: 15px; margin-bottom: 3px; }
-.toggle-info p { font-size: 13px; color: var(--gray); line-height: 1.4; }
+.toggle-info h3 { font-family: var(--font-d); font-weight: 700; font-size: 15px; margin-bottom: 3px; color: var(--dark); }
+.toggle-info p  { font-size: 13px; color: var(--gray); line-height: 1.4; }
 .toggle-info .plan-note { font-size: 12px; color: var(--gray-lt); margin-top: 4px; }
 .toggle-info .plan-note a { color: var(--green); font-weight: 600; text-decoration: none; }
+[data-theme="dark"] .toggle-info h3 { color: #f0f0f0; }
+[data-theme="dark"] .toggle-info p  { color: #888; }
+[data-theme="dark"] .toggle-info .plan-note { color: #555; }
 
-/* iOS-style toggle switch */
 .switch { position: relative; width: 46px; height: 26px; flex-shrink: 0; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .switch-track {
@@ -100,17 +347,33 @@
 }
 .switch input:checked + .switch-track { background: var(--green); }
 .switch-thumb {
-  position: absolute; top: 3px; left: 3px;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.2);
-  transition: transform .2s;
+  position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+  border-radius: 50%; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,.2);
+  transition: transform .2s; pointer-events: none;
 }
 .switch input:checked ~ .switch-thumb { transform: translateX(20px); }
 
-/* =============================================
-   DARK / LIGHT MODE
-   ============================================= */
-.mode-pills { display: flex; gap: 6px; }
+/* ═══════════════════════════════════════════════════════════════
+   STORE MODE CARD
+═══════════════════════════════════════════════════════════════ */
+.store-mode-card {
+  background: var(--dark); border-radius: 16px; padding: 22px 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 20px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.store-mode-info h3 { font-family: var(--font-d); font-weight: 700; font-size: 15px; color: #fff; margin-bottom: 3px; }
+.store-mode-info p  { font-size: 13px; color: rgba(255,255,255,.5); max-width: 380px; }
+.store-mode-badge {
+  display: inline-block; background: var(--green); color: #fff;
+  font-size: 10px; font-weight: 700; letter-spacing: .8px;
+  padding: 2px 9px; border-radius: 100px; margin-bottom: 6px;
+}
+[data-theme="dark"] .store-mode-card { background: #111; border: 1px solid #2e2e2e; }
+
+/* ═══════════════════════════════════════════════════════════════
+   MODE PILLS
+═══════════════════════════════════════════════════════════════ */
+.mode-pills { display: flex; gap: 6px; flex-wrap: wrap; }
 .mode-pill {
   display: flex; align-items: center; gap: 7px;
   padding: 8px 14px; border-radius: var(--r-pill);
@@ -120,15 +383,56 @@
 }
 .mode-pill:hover { border-color: var(--dark); color: var(--dark); }
 .mode-pill.active { border-color: var(--dark); background: var(--dark); color: #fff; }
-.mode-pill.active.light-pill { border-color: var(--border); background: var(--white); color: var(--dark); box-shadow: 0 0 0 2px var(--dark); }
+[data-theme="dark"] .mode-pill { background: #1e1e1e; border-color: #3a3a3a; color: #888; }
+[data-theme="dark"] .mode-pill:hover { border-color: #888; color: #f0f0f0; }
+[data-theme="dark"] .mode-pill.active { background: #f0f0f0; border-color: #f0f0f0; color: #0a0a0a; }
 
-/* Buttons */
+/* ═══════════════════════════════════════════════════════════════
+   LINK BOX
+═══════════════════════════════════════════════════════════════ */
+.link-box { display: flex; align-items: center; background: var(--light); border: 1px solid var(--border); border-radius: 11px; overflow: hidden; }
+.link-box input { flex: 1; background: none; border: none; outline: none; padding: 11px 13px; font-family: var(--font-b); font-size: 14px; color: var(--dark); cursor: pointer; min-width: 0; }
+.link-copy-btn { padding: 11px 14px; background: none; border: none; border-left: 1px solid var(--border); cursor: pointer; color: var(--gray); transition: all .18s; display: flex; align-items: center; flex-shrink: 0; }
+.link-copy-btn:hover { background: var(--green); color: #fff; }
+[data-theme="dark"] .link-box { background: #252525; border-color: #3a3a3a; }
+[data-theme="dark"] .link-box input { color: #f0f0f0; }
+[data-theme="dark"] .link-copy-btn { border-color: #3a3a3a; color: #888; }
+[data-theme="dark"] .link-copy-btn:hover { background: var(--green); color: #fff; }
+
+/* ═══════════════════════════════════════════════════════════════
+   PLAN BADGE
+═══════════════════════════════════════════════════════════════ */
+.plan-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 100px; font-size: 13px; font-weight: 700; }
+.plan-free    { background: var(--light); border: 1px solid var(--border); color: var(--gray); }
+.plan-premium { background: #fefce8; border: 1px solid #fde68a; color: #92400e; }
+[data-theme="dark"] .plan-free { background: #252525; border-color: #3a3a3a; color: #888; }
+[data-theme="dark"] .plan-premium { background: #2a1f00; border-color: #7c5a00; color: #fbbf24; }
+
+.features-list { margin: 14px 0; display: flex; flex-direction: column; gap: 7px; }
+.feature-item { display: flex; align-items: center; gap: 9px; font-size: 14px; color: var(--dark); }
+.feature-item svg { color: var(--green); flex-shrink: 0; }
+[data-theme="dark"] .feature-item { color: #e0e0e0; }
+
+/* ═══════════════════════════════════════════════════════════════
+   NOTICE / WARNING
+═══════════════════════════════════════════════════════════════ */
+.notice-warn {
+  background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 16px; font-size: 13px; color: #92400e;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+[data-theme="dark"] .notice-warn { background: #2a1f00; border-color: #7c5a00; color: #fbbf24; }
+
+/* ═══════════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════════ */
 .btn-primary {
   background: var(--green); color: #fff; border: none; border-radius: var(--r-pill);
   padding: 11px 22px; font-family: var(--font-b); font-size: 14px; font-weight: 700;
   cursor: pointer; transition: background .18s; display: inline-flex; align-items: center; gap: 6px;
 }
 .btn-primary:hover { background: var(--green-dk); }
+.btn-primary:disabled { background: var(--gray-lt); cursor: not-allowed; }
 .btn-secondary {
   background: var(--white); color: var(--dark); border: 1.5px solid var(--border);
   border-radius: var(--r-pill); padding: 11px 22px;
@@ -145,11 +449,36 @@
 }
 .btn-danger:hover { background: #fef2f2; border-color: #f87171; }
 .btn-sm { padding: 7px 14px; font-size: 13px; }
+[data-theme="dark"] .btn-secondary { background: #252525; border-color: #3a3a3a; color: #f0f0f0; }
+[data-theme="dark"] .btn-secondary:hover { border-color: #888; }
+[data-theme="dark"] .btn-danger { background: #1f0a0a; border-color: #7f1d1d; color: #f87171; }
+[data-theme="dark"] .btn-danger:hover { background: #2a0f0f; border-color: #f87171; }
 
-@media (max-width: 480px) {
-  .settings-page { padding: 24px 16px 60px; }
-  .s-card-head { padding: 18px 18px 0; }
-  .s-card-body { padding: 14px 18px 22px; }
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .settings-hero       { padding: 20px 16px 0; }
+  .settings-hero h1    { font-size: 22px; }
+  .tab-nav-outer       { padding: 0 16px; top: 56px; }
+  .tab-panels          { padding: 16px 16px 0; }
+  .s-card-head         { padding: 18px 18px 0; }
+  .s-card-body         { padding: 14px 18px 20px; }
+  .tab-btn             { padding: 12px 12px 11px; font-size: 12px; gap: 5px; }
+  .tab-btn svg         { display: none; }
+  .store-mode-card     { flex-direction: column; align-items: flex-start; }
+  .f-row               { grid-template-columns: 1fr; }
+  .payout-save-row     { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .payout-save-row .btn-primary { width: 100%; justify-content: center; }
+  .acct-input-wrap .f-input { padding-right: 14px; letter-spacing: .5px; font-size: 14px; }
+  .acct-badge          { position: static; transform: none; display: none !important; }
+  .acct-badge-mobile   { display: flex; margin-top: 6px; }
+  .toggle-row          { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .mode-pills          { width: 100%; }
+  .mode-pill           { flex: 1; justify-content: center; }
+}
+@media (max-width: 360px) {
+  .tab-btn { padding: 10px 8px; font-size: 11px; }
 }
 </style>
 {% endblock %}
@@ -158,390 +487,947 @@
 <div class="settings-page">
 <div class="settings-wrap">
 
-  <div class="settings-head">
+  <div class="settings-hero">
     <h1>Settings</h1>
-    <p>Manage your account, business info, and preferences.</p>
+    <p>Manage your store, account, and preferences.</p>
   </div>
 
   {% if messages %}
-  <ul class="msg-list">
-    {% for message in messages %}
-    <li class="msg-item {% if message.tags == 'error' %}error{% else %}success{% endif %}">
-      {% if message.tags == 'error' %}
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-      {% else %}
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-      {% endif %}
-      {{ message }}
-    </li>
-    {% endfor %}
-  </ul>
+  <div style="padding: 16px 32px 0;">
+    <ul class="msg-list">
+      {% for message in messages %}
+      <li class="msg-item {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+        {% if message.tags == 'error' %}
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        {% else %}
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        {% endif %}
+        {{ message }}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
   {% endif %}
 
-  <!-- Appearance card in settings.html -->
-  <div class="s-card">
-    <div class="s-card-head"><h2>Appearance</h2><p>Choose how Vendopage looks for you.</p></div>
-    <div class="s-card-body">
-      <div class="toggle-row">
-        <div class="toggle-info">
-          <h3>Color Mode</h3>
-          <p>Auto follows your phone's system theme.</p>
-        </div>
-        <div class="mode-pills">
-          <button class="mode-pill" id="pillLight" onclick="pickMode('light')">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-            Light
-          </button>
-          <button class="mode-pill" id="pillAuto" onclick="pickMode('auto')">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 010 20V2z" fill="currentColor" stroke="none"/></svg>
-            Auto
-          </button>
-          <button class="mode-pill" id="pillDark" onclick="pickMode('dark')">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-            Dark
-          </button>
-        </div>
-      </div>
-    </div>
+  <!-- ── Tab Nav ───────────────────────────────────────────── -->
+  <div class="tab-nav-outer">
+    <nav class="tab-nav" role="tablist">
+      <button class="tab-btn active" onclick="switchTab('store', this)" role="tab">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Store
+      </button>
+      <button class="tab-btn" onclick="switchTab('payout', this)" role="tab">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        Payout
+      </button>
+      <button class="tab-btn" onclick="switchTab('profile', this)" role="tab">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile
+      </button>
+      <button class="tab-btn" onclick="switchTab('account', this)" role="tab">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Account
+      </button>
+      <button class="tab-btn" onclick="switchTab('appearance', this)" role="tab">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"/></svg>
+        Appearance
+      </button>
+      <button class="tab-btn" onclick="switchTab('plan', this)" role="tab">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Plan
+      </button>
+    </nav>
   </div>
 
-  <!-- =============================================
-       PROFILE PICTURE — Cloudinary direct upload
-       fixes the failing upload issue
-       ============================================= -->
-  <div class="s-card">
-    <div class="s-card-head"><h2>Profile Picture</h2><p>Shown on your public storefront.</p></div>
-    <div class="s-card-body">
-      <div class="avatar-row">
-        <div class="avatar-circle" id="avatarCircle">
-          {% if user.profile_picture %}
-            <img src="{{ user.profile_picture.url }}" alt="" id="avatarImg">
-          {% else %}
-            <span id="avatarLetter">{{ user.business_name|first }}</span>
-          {% endif %}
-          <div class="avatar-uploading" id="avatarSpinner">
-            <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
-          </div>
-        </div>
-        <div>
-          <div class="avatar-ctrl">
-            <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
-            <button type="button" onclick="document.getElementById('avatarFile').click()" class="btn-secondary btn-sm">
-              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-              Choose Photo
-            </button>
-            {% if user.profile_picture %}
-            <form method="POST" action="{% url 'update_profile_picture' %}" style="display:inline;">
-              {% csrf_token %}
-              <button type="submit" name="remove_picture" value="true" class="btn-danger btn-sm">Remove</button>
-            </form>
-            {% endif %}
-          </div>
-          <p class="avatar-hint" style="margin-top:7px;">JPG, PNG or GIF · Max 5MB · Square works best</p>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="tab-panels">
 
-  <!-- =============================================
-       WATERMARK
-       ============================================= -->
-  <div class="s-card">
-    <div class="s-card-head">
-      <h2>Product Watermark</h2>
-      <p>Protect your product images by adding your store name as a watermark.</p>
-    </div>
-    <div class="s-card-body">
-      <form method="POST" action="{% url 'update_watermark' %}">
-        {% csrf_token %}
-        <div class="toggle-row" style="margin-bottom:16px;">
-          <div class="toggle-info">
-            <h3>Show watermark on images</h3>
-            <p>Your business name appears diagonally across each product photo when customers view or download it.</p>
-            {% if user.subscription_type == 'free' %}
-            <p class="plan-note">Premium sellers can disable watermarks. <a href="{% url 'subscription' %}">Upgrade</a></p>
-            {% endif %}
-          </div>
+    <!-- ══════════════════════════════════════════════════════
+         STORE TAB
+    ══════════════════════════════════════════════════════ -->
+    <div class="tab-panel active" id="tab-store">
+
+      <div class="store-mode-card">
+        <div class="store-mode-info">
+          <div class="store-mode-badge">NEW</div>
+          <h3>Store Mode — Escrow Payments</h3>
+          <p>Enable buyers to pay directly on your page. Funds are held safely until you ship and they confirm receipt.</p>
+        </div>
+        <form method="POST" action="{% url 'toggle_store_mode' %}" style="flex-shrink:0;">
+          {% csrf_token %}
           <label class="switch">
-            <input type="checkbox" name="watermark_enabled" id="wmToggle"
-              {% if user.watermark_enabled %}checked{% endif %}
-              {% if user.subscription_type == 'free' %}disabled{% endif %}
+            <input type="checkbox" name="store_mode"
+              {% if user.store_mode %}checked{% endif %}
               onchange="this.form.submit()">
             <span class="switch-track"></span>
             <span class="switch-thumb"></span>
           </label>
-        </div>
-        {% if user.subscription_type == 'premium' %}
-          <p style="font-size:13px;color:var(--gray);">
-            As a Premium seller, you can turn watermarks on or off. The toggle saves instantly.
-          </p>
-        {% else %}
-          <p style="font-size:13px;color:var(--gray-lt);">
-            Watermarks are <strong style="color:var(--dark);">on by default</strong> for free accounts and cannot be disabled.
-            <a href="{% url 'subscription' %}" style="color:var(--green);font-weight:600;text-decoration:none;">Upgrade to Premium</a> to remove them.
-          </p>
-        {% endif %}
-      </form>
-    </div>
-  </div>
-
-  <!-- =============================================
-       BUSINESS INFO
-       ============================================= -->
-  <div class="s-card">
-    <div class="s-card-head"><h2>Business Information</h2><p>Shown to customers on your store page.</p></div>
-    <div class="s-card-body">
-      <form method="POST" action="{% url 'update_business_info' %}">
-        {% csrf_token %}
-        <div class="f-group">
-          <label class="f-label">Business Name</label>
-          <input type="text" name="business_name" class="f-input" value="{{ user.business_name }}" required>
-        </div>
-        <div class="f-group">
-          <label class="f-label">Bio <span style="font-weight:400;color:var(--gray-lt);font-size:11px;">(optional)</span></label>
-          <textarea name="bio" class="f-textarea" placeholder="Tell customers about your business…">{{ user.bio }}</textarea>
-          <div class="f-hint">Appears as the tagline on your storefront.</div>
-        </div>
-        <div class="f-row">
-          <div class="f-group">
-            <label class="f-label">Category</label>
-            <select name="category" class="f-select">
-              <option value="fashion"     {% if user.category == 'fashion' %}selected{% endif %}>Fashion &amp; Clothing</option>
-              <option value="beauty"      {% if user.category == 'beauty' %}selected{% endif %}>Beauty &amp; Cosmetics</option>
-              <option value="electronics" {% if user.category == 'electronics' %}selected{% endif %}>Electronics</option>
-              <option value="food"        {% if user.category == 'food' %}selected{% endif %}>Food &amp; Beverages</option>
-              <option value="home"        {% if user.category == 'home' %}selected{% endif %}>Home &amp; Living</option>
-              <option value="sports"      {% if user.category == 'sports' %}selected{% endif %}>Sports &amp; Fitness</option>
-              <option value="health"      {% if user.category == 'health' %}selected{% endif %}>Health &amp; Wellness</option>
-              <option value="other"       {% if user.category == 'other' %}selected{% endif %}>Other</option>
-            </select>
-          </div>
-          <div class="f-group">
-            <label class="f-label">WhatsApp Number</label>
-            <input type="tel" name="whatsapp_number" class="f-input" value="{{ user.whatsapp_number }}" required>
-            <div class="f-hint">Include country code — e.g. 2348012345678</div>
-          </div>
-        </div>
-        <button type="submit" class="btn-primary">Save Changes</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- =============================================
-       ACCOUNT
-       ============================================= -->
-  <div class="s-card">
-    <div class="s-card-head"><h2>Account Settings</h2><p>Manage your login credentials.</p></div>
-    <div class="s-card-body">
-      <form method="POST" action="{% url 'update_account' %}">
-        {% csrf_token %}
-        <div class="f-row">
-          <div class="f-group">
-            <label class="f-label">Email Address</label>
-            <input type="email" name="email" class="f-input" value="{{ user.email }}" required>
-          </div>
-          <div class="f-group">
-            <label class="f-label">Username</label>
-            <input type="text" class="f-input" value="{{ user.username }}" disabled>
-            <div class="f-hint">Username cannot be changed.</div>
-          </div>
-        </div>
-        <button type="submit" class="btn-primary">Update Email</button>
-      </form>
-      <hr class="s-divider">
-      <h3 style="font-family:var(--font-d);font-weight:700;font-size:14px;margin-bottom:14px;">Change Password</h3>
-      <form method="POST" action="{% url 'change_password' %}">
-        {% csrf_token %}
-        <div class="f-group">
-          <label class="f-label">Current Password</label>
-          <input type="password" name="current_password" class="f-input" required>
-        </div>
-        <div class="f-row">
-          <div class="f-group">
-            <label class="f-label">New Password</label>
-            <input type="password" name="new_password" class="f-input" required>
-          </div>
-          <div class="f-group">
-            <label class="f-label">Confirm New Password</label>
-            <input type="password" name="confirm_password" class="f-input" required>
-          </div>
-        </div>
-        <button type="submit" class="btn-secondary">Change Password</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- =============================================
-       PUBLIC PAGE
-       ============================================= -->
-  <div class="s-card">
-    <div class="s-card-head"><h2>Your Public Page</h2><p>Share this link on WhatsApp, Instagram bio, or anywhere.</p></div>
-    <div class="s-card-body">
-      <div class="f-group">
-        <label class="f-label">Your Store URL</label>
-        <div class="link-box">
-          <input type="text" value="{{ request.scheme }}://{{ request.get_host }}/{{ user.slug }}" readonly id="publicLink" onclick="this.select()">
-          <button class="link-copy-btn" onclick="copyLink()" title="Copy">
-            <svg id="copyIcon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-            <svg id="checkIcon" style="display:none;" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          </button>
-        </div>
+        </form>
       </div>
-      <a href="/{{ user.slug }}" target="_blank" class="btn-secondary btn-sm">
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        View Public Page
-      </a>
-    </div>
-  </div>
 
-  <!-- =============================================
-       SUBSCRIPTION
-       ============================================= -->
-  <div class="s-card">
-    <div class="s-card-head"><h2>Subscription</h2><p>Your current plan and features.</p></div>
-    <div class="s-card-body">
-      <div style="margin-bottom:14px;">
-        {% if user.subscription_type == 'premium' %}
-          <span class="plan-badge plan-premium">Premium</span>
-        {% else %}
-          <span class="plan-badge plan-free">Free Plan</span>
-        {% endif %}
+      {% if not user.bank_account %}
+      <div class="notice-warn">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        You need to add a payout account before enabling Store Mode.
+        <button onclick="switchTab('payout', document.querySelector('[onclick*=payout]'))" style="background:none;border:none;color:inherit;font-weight:700;cursor:pointer;text-decoration:underline;padding:0;">Go to Payout →</button>
       </div>
-      <div class="features-list">
-        <div class="feature-item">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          Unlimited Products
-        </div>
-        <div class="feature-item">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          Custom Store URL
-        </div>
-        <div class="feature-item">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          WhatsApp Integration
-        </div>
-        {% if user.subscription_type == 'premium' %}
-        <div class="feature-item">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          Disable Product Watermarks
-        </div>
-        <div class="feature-item">
-          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-          No "Powered by" Badge
-        </div>
-        {% endif %}
-      </div>
-      {% if user.subscription_type == 'free' %}
-      <a href="{% url 'subscription' %}" class="btn-primary" style="margin-top:4px;">
-        Upgrade to Premium
-      </a>
       {% endif %}
-    </div>
-  </div>
 
+      <div class="s-card">
+        <div class="s-card-head"><h2>Business Information</h2><p>Shown to customers on your storefront.</p></div>
+        <div class="s-card-body">
+          <form method="POST" action="{% url 'update_business_info' %}">
+            {% csrf_token %}
+            <div class="f-group">
+              <label class="f-label">Business Name</label>
+              <input type="text" name="business_name" class="f-input" value="{{ user.business_name }}" required>
+            </div>
+            <div class="f-group">
+              <label class="f-label">Bio <span style="font-weight:400;color:var(--gray-lt);font-size:11px;">(optional)</span></label>
+              <textarea name="bio" class="f-textarea" placeholder="Tell customers about your business…">{{ user.bio }}</textarea>
+            </div>
+            <div class="f-row">
+              <div class="f-group">
+                <label class="f-label">Category</label>
+                <select name="category" class="f-select">
+                  <option value="fashion"     {% if user.category == 'fashion' %}selected{% endif %}>Fashion &amp; Clothing</option>
+                  <option value="beauty"      {% if user.category == 'beauty' %}selected{% endif %}>Beauty &amp; Cosmetics</option>
+                  <option value="electronics" {% if user.category == 'electronics' %}selected{% endif %}>Electronics</option>
+                  <option value="food"        {% if user.category == 'food' %}selected{% endif %}>Food &amp; Beverages</option>
+                  <option value="home"        {% if user.category == 'home' %}selected{% endif %}>Home &amp; Living</option>
+                  <option value="sports"      {% if user.category == 'sports' %}selected{% endif %}>Sports &amp; Fitness</option>
+                  <option value="health"      {% if user.category == 'health' %}selected{% endif %}>Health &amp; Wellness</option>
+                  <option value="other"       {% if user.category == 'other' %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+              <div class="f-group">
+                <label class="f-label">WhatsApp Number</label>
+                <input type="tel" name="whatsapp_number" class="f-input" value="{{ user.whatsapp_number }}" required>
+                <div class="f-hint">Include country code — e.g. 2348012345678</div>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">Save Changes</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="s-card">
+        <div class="s-card-head"><h2>Product Watermark</h2><p>Protect your product images.</p></div>
+        <div class="s-card-body">
+          <form method="POST" action="{% url 'update_watermark' %}">
+            {% csrf_token %}
+            <div class="toggle-row">
+              <div class="toggle-info">
+                <h3>Show watermark on images</h3>
+                <p>Your business name appears diagonally across each product photo.</p>
+                {% if user.subscription_type == 'free' %}
+                <p class="plan-note">Premium sellers can disable watermarks. <a href="{% url 'subscription' %}">Upgrade</a></p>
+                {% endif %}
+              </div>
+              <label class="switch">
+                <input type="checkbox" name="watermark_enabled" id="wmToggle"
+                  {% if user.watermark_enabled %}checked{% endif %}
+                  {% if user.subscription_type == 'free' %}disabled{% endif %}
+                  onchange="this.form.submit()">
+                <span class="switch-track"></span>
+                <span class="switch-thumb"></span>
+              </label>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="s-card">
+        <div class="s-card-head"><h2>Your Store Link</h2><p>Share this everywhere.</p></div>
+        <div class="s-card-body">
+          <div class="link-box">
+            <input type="text" value="{{ request.scheme }}://{{ request.get_host }}/{{ user.slug }}" readonly id="publicLink" onclick="this.select()">
+            <button class="link-copy-btn" onclick="copyLink()" title="Copy">
+              <svg id="copyIcon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+              <svg id="checkIcon" style="display:none;" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+          </div>
+          <div style="margin-top:12px;">
+            <a href="/{{ user.slug }}" target="_blank" class="btn-secondary btn-sm">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              View Public Page
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-store -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         PAYOUT TAB
+    ══════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-payout">
+
+      <div class="s-card">
+        <div class="s-card-head">
+          <h2>Payout Account</h2>
+          <p>Where we send your money after a buyer confirms receipt. Required for Store Mode.</p>
+        </div>
+        <div class="s-card-body">
+
+          <!-- Saved account summary (shown when account exists and form hidden) -->
+          {% if user.bank_account %}
+          <div class="payout-saved" id="payoutSavedRow">
+            <div>
+              <div class="payout-saved-name">{{ user.bank_account.account_name }}</div>
+              <div class="payout-saved-meta">
+                {{ user.bank_account.bank_name }}&nbsp;&nbsp;·&nbsp;&nbsp;****{{ user.bank_account.account_number|slice:"-4:" }}
+              </div>
+              {% if user.bank_account.is_verified %}
+              <div class="payout-verified-badge">
+                <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Verified
+              </div>
+              {% endif %}
+            </div>
+            <button type="button" class="btn-secondary btn-sm" onclick="showPayoutForm()">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Change
+            </button>
+          </div>
+          {% endif %}
+
+          <!-- Payout form -->
+          <form method="POST" action="{% url 'update_payout_account' %}" id="payoutForm"
+                  {% if user.bank_account %}style="display:none"{% endif %}>
+              {% csrf_token %}
+
+              <input type="hidden" id="hBankCode"  name="bank_code"    value="{{ user.bank_account.bank_code|default:'' }}">
+              <input type="hidden" id="hBankName"  name="bank_name"    value="{{ user.bank_account.bank_name|default:'' }}">
+              <input type="hidden" id="hAcctName"  name="account_name" value="{{ user.bank_account.account_name|default:'' }}">
+
+              <!-- Account Number -->
+              <div class="f-group">
+                <label class="f-label">Account Number</label>
+                <div class="acct-input-wrap">
+                  <input
+                    type="text" id="acctNum" name="account_number" class="f-input"
+                    value="{{ user.bank_account.account_number|default:'' }}"
+                    placeholder="0000000000"
+                    maxlength="10" inputmode="numeric" autocomplete="off"
+                    oninput="onAcctInput(this)">
+                  <span class="acct-badge" id="acctBadge"></span>
+                </div>
+                <span class="acct-badge acct-badge-mobile" id="acctBadgeMobile" style="display:none;margin-top:6px;width:fit-content;position:static;transform:none;"></span>
+              </div>
+
+              <!-- Bank Picker -->
+              <div class="f-group">
+                <label class="f-label">Bank</label>
+                <div class="bank-picker" id="bankPicker">
+                  <div class="bp-selected" id="bpSelected">
+                    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--green);flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+                    <span class="bp-selected-name" id="bpSelectedName">—</span>
+                    <button type="button" class="bp-change" onclick="resetBank()">Change</button>
+                  </div>
+                  <div class="bp-search-row" id="bpSearchRow">
+                    <svg class="bp-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" class="bp-input" id="bpInput"
+                      placeholder="Search 700+ banks..."
+                      autocomplete="off"
+                      oninput="filterBanks(this.value)"
+                      onfocus="openBpList()">
+                    <button type="button" class="bp-clear" id="bpClear" onclick="clearBpSearch()">✕</button>
+                  </div>
+                  <div class="bp-list" id="bpList">
+                    <div class="bp-empty" id="bpEmpty">
+                      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+                      Loading banks...
+                    </div>
+                  </div>
+                  <div class="bp-count-row" id="bpCountRow" style="display:none;"></div>
+                </div>
+                <div class="f-hint" id="bpHint">All Nigerian banks — commercial, microfinance &amp; fintech</div>
+              </div>
+
+              <!-- ✅ NEW: Account Name field (auto-fills after verification) -->
+              <div class="f-group" id="acctNameGroup" style="display:{% if user.bank_account and user.bank_account.account_name %}block{% else %}none{% endif %}">
+                <label class="f-label">
+                  Account Name
+                  <span style="color:var(--green);font-weight:600;font-size:11px;margin-left:6px;">auto-verified</span>
+                </label>
+                <div class="acct-name-banner show success" id="acctBanner">
+                  {% if user.bank_account and user.bank_account.account_name %}
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  {{ user.bank_account.account_name }}
+                  {% endif %}
+                </div>
+                <div class="f-hint">Name fetched directly from your bank. If it doesn't match, check the number and bank selected.</div>
+              </div>
+
+              <div class="payout-save-row">
+                <button type="submit" class="btn-primary" id="payoutSaveBtn"
+                  {% if not user.bank_account %}disabled{% endif %}>
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                  Save Payout Account
+                </button>
+                <span class="payout-save-hint" id="payoutSaveHint">
+                  {% if user.bank_account %}Change details above and save.{% else %}Enter your account number then select your bank.{% endif %}
+                </span>
+              </div>
+            </form>
+
+        </div>
+      </div>
+
+      <div class="s-card">
+        <div class="s-card-head"><h2>How Payouts Work</h2></div>
+        <div class="s-card-body">
+          <div class="payout-steps">
+            <div class="payout-step">
+              <div class="payout-step-num">1</div>
+              <div><div class="payout-step-title">Buyer pays</div><div class="payout-step-desc">Funds are held securely by Vendopage in escrow.</div></div>
+            </div>
+            <div class="payout-step">
+              <div class="payout-step-num">2</div>
+              <div><div class="payout-step-title">You ship the order</div><div class="payout-step-desc">Mark it shipped in your orders dashboard.</div></div>
+            </div>
+            <div class="payout-step">
+              <div class="payout-step-num">3</div>
+              <div><div class="payout-step-title">Buyer confirms receipt</div><div class="payout-step-desc">Or funds auto-release after 72 hours if buyer doesn't respond.</div></div>
+            </div>
+            <div class="payout-step">
+              <div class="payout-step-num">4</div>
+              <div><div class="payout-step-desc">Funds sent directly to your bank account minus the {{ platform_fee_percent }}% platform fee.</div></div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-payout -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         PROFILE TAB
+    ══════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-profile">
+      <div class="s-card">
+        <div class="s-card-head"><h2>Profile Picture</h2><p>Shown on your public storefront.</p></div>
+        <div class="s-card-body">
+          <div class="avatar-row">
+            <div class="avatar-circle" id="avatarCircle">
+              {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="" id="avatarImg">
+              {% else %}
+                <span id="avatarLetter">{{ user.business_name|first }}</span>
+              {% endif %}
+              <div class="avatar-uploading" id="avatarSpinner">
+                <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+                <button type="button" onclick="document.getElementById('avatarFile').click()" class="btn-secondary btn-sm">
+                  <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  Choose Photo
+                </button>
+                {% if user.profile_picture %}
+                <form method="POST" action="{% url 'update_profile_picture' %}" style="display:inline;">
+                  {% csrf_token %}
+                  <button type="submit" name="remove_picture" value="true" class="btn-danger btn-sm">Remove</button>
+                </form>
+                {% endif %}
+              </div>
+              <p class="avatar-hint">JPG, PNG or GIF · Max 5MB · Square works best</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /tab-profile -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         ACCOUNT TAB
+    ══════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-account">
+      <div class="s-card">
+        <div class="s-card-head"><h2>Account Settings</h2><p>Manage your login credentials.</p></div>
+        <div class="s-card-body">
+          <form method="POST" action="{% url 'update_account' %}">
+            {% csrf_token %}
+            <div class="f-row">
+              <div class="f-group">
+                <label class="f-label">Email Address</label>
+                <input type="email" name="email" class="f-input" value="{{ user.email }}" required>
+              </div>
+              <div class="f-group">
+                <label class="f-label">Username</label>
+                <input type="text" class="f-input" value="{{ user.username }}" disabled>
+                <div class="f-hint">Username cannot be changed.</div>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">Update Email</button>
+          </form>
+
+          <hr class="s-divider">
+
+          <h3 style="font-family:var(--font-d);font-weight:700;font-size:14px;margin-bottom:14px;color:var(--dark);">Change Password</h3>
+          <form method="POST" action="{% url 'change_password' %}">
+            {% csrf_token %}
+            <div class="f-group">
+              <label class="f-label">Current Password</label>
+              <input type="password" name="current_password" class="f-input" required>
+            </div>
+            <div class="f-row">
+              <div class="f-group">
+                <label class="f-label">New Password</label>
+                <input type="password" name="new_password" class="f-input" required>
+              </div>
+              <div class="f-group">
+                <label class="f-label">Confirm New Password</label>
+                <input type="password" name="confirm_password" class="f-input" required>
+              </div>
+            </div>
+            <button type="submit" class="btn-secondary">Change Password</button>
+          </form>
+        </div>
+      </div>
+    </div><!-- /tab-account -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         APPEARANCE TAB
+    ══════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-appearance">
+      <div class="s-card">
+        <div class="s-card-head"><h2>Appearance</h2><p>Choose how Vendopage looks for you.</p></div>
+        <div class="s-card-body">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <h3>Color Mode</h3>
+              <p>Auto follows your device's system theme.</p>
+            </div>
+            <div class="mode-pills">
+              <button class="mode-pill" id="pillLight" onclick="pickMode('light')">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                Light
+              </button>
+              <button class="mode-pill" id="pillAuto" onclick="pickMode('auto')">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 010 20V2z" fill="currentColor" stroke="none"/></svg>
+                Auto
+              </button>
+              <button class="mode-pill" id="pillDark" onclick="pickMode('dark')">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+                Dark
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /tab-appearance -->
+
+
+    <!-- ══════════════════════════════════════════════════════
+         PLAN TAB
+    ══════════════════════════════════════════════════════ -->
+    <div class="tab-panel" id="tab-plan">
+      <div class="s-card">
+        <div class="s-card-head"><h2>Subscription</h2><p>Your current plan and features.</p></div>
+        <div class="s-card-body">
+          <div style="margin-bottom:14px;">
+            {% if user.subscription_type == 'premium' %}
+              <span class="plan-badge plan-premium">⭐ Premium</span>
+            {% else %}
+              <span class="plan-badge plan-free">Free Plan</span>
+            {% endif %}
+          </div>
+          <div class="features-list">
+            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited Products</div>
+            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom Store URL</div>
+            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>WhatsApp Integration</div>
+            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Store Mode (Escrow Payments)</div>
+            {% if user.subscription_type == 'premium' %}
+            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Disable Product Watermarks</div>
+            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>No "Powered by" Badge</div>
+            {% endif %}
+          </div>
+          {% if user.subscription_type == 'free' %}
+          <a href="{% url 'subscription' %}" class="btn-primary" style="margin-top:8px;">Upgrade to Premium</a>
+          {% endif %}
+        </div>
+      </div>
+    </div><!-- /tab-plan -->
+
+  </div><!-- /tab-panels -->
 </div>
 </div>
 {% block footer %}{% endblock %}
-<script>
 
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   GLOBALS
+═══════════════════════════════════════════════════════════════ */
+const CSRF = '{{ csrf_token }}';
+
+/* ═══════════════════════════════════════════════════════════════
+   TAB SWITCHING
+═══════════════════════════════════════════════════════════════ */
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  history.replaceState(null, '', '#' + name);
+  if (name === 'payout' && !banksLoaded) fetchBanks();
+}
+
+/* Handle hash on load */
+(function () {
+  const hash  = location.hash.replace('#', '');
+  const valid = ['store','payout','profile','account','appearance','plan'];
+  if (hash && valid.includes(hash)) {
+    const btn = document.querySelector(`.tab-btn[onclick*="'${hash}'"]`);
+    if (btn) switchTab(hash, btn);
+  }
+})();
+
+/* ═══════════════════════════════════════════════
+   PAYOUT STATE
+═══════════════════════════════════════════════ */
+let allBanks    = [];
+let banksLoaded = false;
+let selBank     = {
+  code: '{{ user.bank_account.bank_code|default:""|escapejs }}',
+  name: '{{ user.bank_account.bank_name|default:""|escapejs }}'
+};
+let acctOk      = {% if user.bank_account and user.bank_account.account_name %}true{% else %}false{% endif %};
+let verifyTimer = null;
+let kbdIdx      = -1;
+
+/* ═══════════════════════════════════════════════
+   SHOW / HIDE FORM
+═══════════════════════════════════════════════ */
+function showPayoutForm() {
+  const savedRow = document.getElementById('payoutSavedRow');
+  if (savedRow) savedRow.style.display = 'none';
+  document.getElementById('payoutForm').style.display = '';
+  if (!banksLoaded) fetchBanks();
+  if (selBank.code) showBpPill(selBank.name);
+  const acc = document.getElementById('acctNum').value.trim();
+  if (acc.length === 10 && selBank.code) doVerify(acc, selBank.code);
+}
+
+/* ═══════════════════════════════════════════════
+   FETCH BANKS (Flutterwave via Django proxy)
+═══════════════════════════════════════════════ */
+async function fetchBanks() {
+  setBpEmpty('<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Loading banks...');
+  try {
+    const r    = await fetch('/api/banks/');
+    const data = await r.json();
+    if (data.success && data.banks && data.banks.length) {
+      allBanks    = data.banks;
+      banksLoaded = true;
+      renderBpItems(allBanks);
+      const countRow = document.getElementById('bpCountRow');
+      countRow.style.display  = 'block';
+      countRow.textContent = `${allBanks.length} banks available`;
+      document.getElementById('bpHint').textContent = `${allBanks.length} banks loaded — type to search`;
+    } else {
+      throw new Error('empty');
+    }
+  } catch {
+    setBpEmpty('Could not load banks. Please refresh the page.');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER BANK LIST
+═══════════════════════════════════════════════ */
+function renderBpItems(banks) {
+  const list = document.getElementById('bpList');
+  document.getElementById('bpEmpty').style.display = 'none';
+  if (!banks.length) {
+    list.innerHTML = '<div class="bp-empty">No banks match your search</div>';
+    return;
+  }
+  list.innerHTML = banks.map((b, i) =>
+    `<div class="bp-item" data-idx="${i}"
+          onclick="selectBank('${esc(b.code)}','${esc(b.name)}')"
+          onmouseenter="kbdIdx=${i}">
+      ${escHtml(b.name)}
+    </div>`
+  ).join('');
+}
+
+function setBpEmpty(html) {
+  const el = document.getElementById('bpEmpty');
+  el.innerHTML = html; el.style.display = 'flex';
+  document.getElementById('bpList').innerHTML = '';
+  document.getElementById('bpList').appendChild(el);
+}
+
+function esc(s)    { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ═══════════════════════════════════════════════
+   FILTER BANKS
+═══════════════════════════════════════════════ */
+// ── Bank aliases / common nicknames ─────────────────────────
+const BANK_ALIASES = {
+  'opay': 'OPay',
+  'kuda': 'Kuda',
+  'gtb': 'Guaranty Trust',
+  'gtbank': 'Guaranty Trust',
+  'uba': 'United Bank',
+  'fcmb': 'First City Monument',
+  'first bank': 'First Bank',
+  'firstbank': 'First Bank',
+  'fbn': 'First Bank',
+  'zenith': 'Zenith',
+  'access': 'Access',
+  'sterling': 'Sterling',
+  'fidelity': 'Fidelity',
+  'union': 'Union Bank',
+  'unity': 'Unity Bank',
+  'wema': 'Wema',
+  'polaris': 'Polaris',
+  'stanbic': 'Stanbic',
+  'standard': 'Standard Chartered',
+  'eco': 'EcoBank',
+  'ecobank': 'EcoBank',
+  'heritage': 'Heritage',
+  'providus': 'Providus',
+  'palmpay': 'PalmPay',
+  'palm': 'PalmPay',
+  'moniepoint': 'Moniepoint',
+  'monie': 'Moniepoint',
+  'vfd': 'VFD',
+  'jaiz': 'Jaiz',
+  'keystone': 'Keystone',
+  'parallex': 'Parallex',
+};
+
+function filterBanks(q) {
+  kbdIdx = -1;
+  document.getElementById('bpClear').style.display = q ? 'block' : 'none';
+
+  if (!q.trim()) {
+    renderBpItems(allBanks);
+    openBpList();
+    return;
+  }
+
+  const query = q.toLowerCase().trim();
+
+  // Check if query matches an alias → boost those results
+  const aliasMatch = BANK_ALIASES[query];
+
+  const scored = allBanks.map(bank => {
+    const name = bank.name.toLowerCase();
+    let score = 0;
+
+    if (name === query) score = 100;                          // exact match
+    else if (name.startsWith(query)) score = 80;             // starts with
+    else if (name.includes(query)) score = 60;               // contains
+    else if (aliasMatch && name.includes(aliasMatch.toLowerCase())) score = 75; // alias match
+
+    // Also check each word in bank name
+    const words = name.split(/[\s\/\-&]+/);
+    words.forEach(word => {
+      if (word.startsWith(query) && score < 70) score = 70;
+      if (word === query && score < 90) score = 90;
+    });
+
+    return { bank, score };
+  })
+  .filter(x => x.score > 0)
+  .sort((a, b) => b.score - a.score)
+  .map(x => x.bank);
+
+  renderBpItems(scored);
+  openBpList();
+}
+/* ═══════════════════════════════════════════════
+   OPEN / CLOSE LIST
+═══════════════════════════════════════════════ */
+function openBpList() {
+  if (!banksLoaded) fetchBanks();
+  document.getElementById('bpList').classList.add('open');
+  setTimeout(() => {
+    document.addEventListener('click', closeBpOutside, { once: true });
+  }, 60);
+}
+
+function closeBpOutside(e) {
+  if (!document.getElementById('bankPicker').contains(e.target)) {
+    document.getElementById('bpList').classList.remove('open');
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   SELECT BANK
+═══════════════════════════════════════════════ */
+function selectBank(code, name) {
+  selBank = { code, name };
+  document.getElementById('hBankCode').value = code;
+  document.getElementById('hBankName').value = name;
+  document.getElementById('bpList').classList.remove('open');
+  showBpPill(name);
+  document.getElementById('bpHint').textContent = name + ' ✓';
+
+  const acc = document.getElementById('acctNum').value.trim();
+  if (acc.length === 10) doVerify(acc, code);
+  else updateSaveBtn();
+}
+
+function showBpPill(name) {
+  document.getElementById('bpSearchRow').style.display = 'none';
+  document.getElementById('bpSelected').classList.add('show');
+  document.getElementById('bpSelectedName').textContent = name;
+}
+
+function resetBank() {
+  selBank = { code: '', name: '' };
+  document.getElementById('hBankCode').value = '';
+  document.getElementById('hBankName').value = '';
+  document.getElementById('bpSearchRow').style.display = '';
+  document.getElementById('bpSelected').classList.remove('show');
+  document.getElementById('bpInput').value = '';
+  document.getElementById('bpClear').style.display = 'none';
+  document.getElementById('bpHint').textContent = 'All Nigerian banks — commercial, microfinance & fintech';
+  renderBpItems(allBanks);
+  acctOk = false;
+  clearBanner();
+  setBadge('');
+  updateSaveBtn();
+  document.getElementById('bpInput').focus();
+  openBpList();
+}
+
+function clearBpSearch() {
+  document.getElementById('bpInput').value = '';
+  document.getElementById('bpClear').style.display = 'none';
+  renderBpItems(allBanks);
+}
+
+/* ═══════════════════════════════════════════════
+   KEYBOARD NAV
+═══════════════════════════════════════════════ */
+document.addEventListener('keydown', function(e) {
+  const list = document.getElementById('bpList');
+  if (!list.classList.contains('open')) return;
+  const items = list.querySelectorAll('.bp-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); kbdIdx = Math.min(kbdIdx+1, items.length-1); hlKbd(items); }
+  if (e.key === 'ArrowUp')   { e.preventDefault(); kbdIdx = Math.max(kbdIdx-1, 0); hlKbd(items); }
+  if (e.key === 'Enter' && kbdIdx >= 0) { e.preventDefault(); items[kbdIdx].click(); }
+  if (e.key === 'Escape') list.classList.remove('open');
+});
+
+function hlKbd(items) {
+  items.forEach(i => i.classList.remove('kbdfocus'));
+  if (kbdIdx >= 0) { items[kbdIdx].classList.add('kbdfocus'); items[kbdIdx].scrollIntoView({ block: 'nearest' }); }
+}
+
+/* ═══════════════════════════════════════════════
+   ACCOUNT NUMBER INPUT
+═══════════════════════════════════════════════ */
+function onAcctInput(el) {
+  el.value = el.value.replace(/\D/g, '');
+  clearTimeout(verifyTimer);
+  acctOk = false;
+  clearBanner();
+  setBadge('');
+  updateSaveBtn();
+
+  if (el.value.length === 10) {
+    if (selBank.code) {
+      setBadge('checking');
+      verifyTimer = setTimeout(() => doVerify(el.value, selBank.code), 700);
+    } else {
+      showBanner('Select your bank first — we\'ll verify automatically.', 'error');
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   VERIFY ACCOUNT (Flutterwave via Django proxy)
+═══════════════════════════════════════════════ */
+async function doVerify(accountNumber, bankCode) {
+  setBadge('checking');
+  clearBanner();
+  try {
+    const r = await fetch('/api/verify-bank-account/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ account_number: accountNumber, bank_code: bankCode }),
+    });
+    const data = await r.json();
+
+    if (data.success && data.account_name) {
+      document.getElementById('hAcctName').value = data.account_name;
+      setBadge('verified');
+      showBanner(data.account_name, 'success');
+      acctOk = true;
+    } else {
+      setBadge('unverified');
+      showBanner(data.error || 'Account not found. Check the number and bank selected.', 'error');
+      acctOk = false;
+    }
+  } catch {
+    setBadge('unverified');
+    showBanner('Could not verify right now — you can still save and we\'ll verify on our end.', 'error');
+    acctOk = true;
+  }
+  updateSaveBtn();
+}
+
+/* ═══════════════════════════════════════════════
+   BADGE
+═══════════════════════════════════════════════ */
+function setBadge(state) {
+  const isMobile = window.innerWidth <= 600;
+  const el = isMobile ? document.getElementById('acctBadgeMobile') : document.getElementById('acctBadge');
+  ['acctBadge','acctBadgeMobile'].forEach(id => {
+    const b = document.getElementById(id);
+    b.className = id === 'acctBadge' ? 'acct-badge' : 'acct-badge acct-badge-mobile';
+    b.innerHTML = ''; b.style.display = 'none';
+  });
+  if (!state) return;
+  el.style.display = 'flex';
+  el.classList.add('show', state);
+  const icons = {
+    checking:   '<span class="spin-ring"></span> Verifying...',
+    verified:   '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Verified',
+    unverified: '<svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Not found',
+  };
+  el.innerHTML = icons[state] || '';
+}
+
+/* ═══════════════════════════════════════════════
+   BANNER (account name display)
+═══════════════════════════════════════════════ */
+function showBanner(msg, type) {
+  const el    = document.getElementById('acctBanner');
+  const group = document.getElementById('acctNameGroup');
+  el.className = `acct-name-banner show ${type}`;
+  const icon = type === 'success'
+    ? '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+    : '<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  el.innerHTML = icon + escHtml(msg);
+  /* Show the account name group only on success */
+  if (group) group.style.display = type === 'success' ? 'block' : 'none';
+}
+
+function clearBanner() {
+  const el    = document.getElementById('acctBanner');
+  const group = document.getElementById('acctNameGroup');
+  el.className = 'acct-name-banner';
+  el.innerHTML = '';
+  if (group) group.style.display = 'none';
+}
+
+/* ═══════════════════════════════════════════════
+   SAVE BUTTON STATE
+═══════════════════════════════════════════════ */
+function updateSaveBtn() {
+  const acc  = document.getElementById('acctNum').value.trim();
+  const btn  = document.getElementById('payoutSaveBtn');
+  const hint = document.getElementById('payoutSaveHint');
+  const ready = acctOk && selBank.code && acc.length === 10;
+
+  btn.disabled   = !ready;
+  hint.className = 'payout-save-hint' + (ready ? ' ready' : '');
+
+  if (ready)              hint.textContent = '✓ Account verified — ready to save.';
+  else if (!acc)          hint.textContent = 'Enter your 10-digit account number.';
+  else if (acc.length<10) hint.textContent = `${10 - acc.length} more digit${10-acc.length===1?'':'s'} needed.`;
+  else if (!selBank.code) hint.textContent = 'Now select your bank to verify automatically.';
+  else                    hint.textContent = 'Verifying your account details...';
+}
+
+/* Load banks immediately when payout tab is active on page load */
+document.addEventListener('DOMContentLoaded', () => {
+  if (location.hash === '#payout') fetchBanks();
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   AVATAR UPLOAD (Cloudinary unsigned)
+═══════════════════════════════════════════════════════════════ */
 const CLOUD  = 'dqxlkie1i';
 const PRESET = 'vendopage_unsigned';
 const CDN    = `https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`;
-const CSRF   = '{{ csrf_token }}';
 
 async function uploadAvatar(input) {
   const file = input.files[0];
   if (!file) return;
   if (file.size > 5 * 1024 * 1024) { showMsg('Image too large. Max 5MB.', 'error'); return; }
-
-  /* Show spinner */
   document.getElementById('avatarSpinner').style.display = 'flex';
-
   try {
-    /* 1. Upload to Cloudinary */
     const fd = new FormData();
-    fd.append('file', file);
-    fd.append('upload_preset', PRESET);
-    fd.append('folder', 'vendopage/profiles');
-    const r    = await fetch(CDN, { method: 'POST', body: fd });
+    fd.append('file', file); fd.append('upload_preset', PRESET); fd.append('folder', 'vendopage/profiles');
+    const r = await fetch(CDN, { method: 'POST', body: fd });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error?.message || 'Upload failed');
-
-    const url = data.secure_url;
-
-    /* 2. Send URL to Django to save on seller profile */
     const dfd = new FormData();
-    dfd.append('profile_picture_url', url);
-    const dr = await fetch('{% url "update_profile_picture" %}', {
-      method: 'POST', body: dfd,
-      headers: { 'X-CSRFToken': CSRF }
-    });
+    dfd.append('profile_picture_url', data.secure_url);
+    const dr = await fetch('{% url "update_profile_picture" %}', { method: 'POST', body: dfd, headers: { 'X-CSRFToken': CSRF } });
     if (!dr.ok) throw new Error('Save failed');
-
-    /* 3. Update avatar preview */
     const circle = document.getElementById('avatarCircle');
     let img = document.getElementById('avatarImg');
-    if (!img) {
-      circle.innerHTML = '';
-      img = document.createElement('img');
-      img.id = 'avatarImg';
-      circle.appendChild(img);
-    }
-    img.src = url;
+    if (!img) { circle.innerHTML = ''; img = document.createElement('img'); img.id = 'avatarImg'; circle.appendChild(img); }
+    img.src = data.secure_url;
     showMsg('Profile picture updated!', 'success');
-
-  } catch(e) {
+  } catch (e) {
     showMsg('Upload failed: ' + e.message, 'error');
   } finally {
     document.getElementById('avatarSpinner').style.display = 'none';
   }
 }
 
-function showMsg(msg, type) {
-  const el = document.createElement('li');
-  el.className = `msg-item ${type}`;
-  el.innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ${msg}`;
-  const list = document.querySelector('.msg-list') || (() => {
-    const ul = document.createElement('ul');
-    ul.className = 'msg-list';
-    document.querySelector('.settings-wrap').prepend(ul);
-    return ul;
-  })();
-  list.appendChild(el);
-  setTimeout(() => el.remove(), 4000);
-}
-
-/* =============================================
-   DARK / LIGHT / AUTO MODE
-   ============================================= */
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE
+═══════════════════════════════════════════════════════════════ */
 function pickMode(mode) {
-  window.vpSetTheme(mode); 
-  ['Light','Auto','Dark'].forEach(m => {
-    document.getElementById('pill'+m).classList.remove('active');
-  });
+  window.vpSetTheme(mode);
+  ['Light','Auto','Dark'].forEach(m => document.getElementById('pill'+m).classList.remove('active'));
   document.getElementById('pill' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
 }
-
-(function() {
+(function () {
   const saved = localStorage.getItem('vp-theme') || 'auto';
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', () => {
     const cap = saved.charAt(0).toUpperCase() + saved.slice(1);
-    const el = document.getElementById('pill' + cap);
+    const el  = document.getElementById('pill' + cap);
     if (el) el.classList.add('active');
   });
 })();
 
-/* =============================================
-   COPY LINK
-   ============================================= */
+/* ═══════════════════════════════════════════════════════════════
+   COPY STORE LINK
+═══════════════════════════════════════════════════════════════ */
 function copyLink() {
-  navigator.clipboard.writeText(document.getElementById('publicLink').value).catch(()=>{});
-  document.getElementById('copyIcon').style.display = 'none';
+  navigator.clipboard.writeText(document.getElementById('publicLink').value).catch(() => {});
+  document.getElementById('copyIcon').style.display  = 'none';
   document.getElementById('checkIcon').style.display = 'block';
   setTimeout(() => {
-    document.getElementById('copyIcon').style.display = 'block';
+    document.getElementById('copyIcon').style.display  = 'block';
     document.getElementById('checkIcon').style.display = 'none';
   }, 2000);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════════ */
+function showMsg(msg, type) {
+  const el = document.createElement('li');
+  el.className = `msg-item ${type}`;
+  el.innerHTML = `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ${msg}`;
+  let list = document.querySelector('.msg-list');
+  if (!list) {
+    list = document.createElement('ul');
+    list.className = 'msg-list';
+    document.querySelector('.settings-wrap').insertBefore(list, document.querySelector('.tab-nav-outer'));
+  }
+  list.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
 }
 </script>
 {% endblock %}

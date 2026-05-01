@@ -1,0 +1,110 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Reviews — VendoPage Admin{% endblock %}
+{% block breadcrumb %}Reviews{% endblock %}
+{% block nav_reviews %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Reviews</div>
+    <div class="page-subtitle">All buyer reviews across the platform</div>
+  </div>
+</div>
+
+<!-- Filter bar -->
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;">
+  <form method="GET" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <select name="rating" class="form-select" style="max-width:150px;">
+      <option value="">All Ratings</option>
+      {% for r in "12345" %}
+      <option value="{{ r }}" {% if request.GET.rating == r %}selected{% endif %}>{{ r }} Star{{ r|pluralize }}</option>
+      {% endfor %}
+    </select>
+    <select name="verified" class="form-select" style="max-width:160px;">
+      <option value="">All Reviews</option>
+      <option value="1" {% if request.GET.verified == '1' %}selected{% endif %}>Verified Only</option>
+      <option value="0" {% if request.GET.verified == '0' %}selected{% endif %}>Unverified</option>
+    </select>
+    <button type="submit" class="btn btn-amber btn-sm">Apply</button>
+    <a href="{% url 'admin_reviews' %}" class="btn btn-ghost btn-sm">Clear</a>
+  </form>
+</div>
+
+<div class="data-table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Order</th>
+        <th>Seller</th>
+        <th>Buyer</th>
+        <th>Rating</th>
+        <th>Comment</th>
+        <th>Verified</th>
+        <th>Date</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for review in reviews %}
+      <tr>
+        <td>
+          <a href="{% url 'admin_orders' %}?search={{ review.order.order_ref|slice:':8' }}"
+             class="mono amber" style="font-size:12px;text-decoration:none;">
+            #{{ review.order.order_ref|slice:":8"|upper }}
+          </a>
+        </td>
+        <td>
+          <a href="{% url 'admin_seller_detail' review.seller.id %}" style="font-weight:600;text-decoration:none;color:var(--text);">
+            {{ review.seller.business_name }}
+          </a>
+        </td>
+        <td style="font-size:13px;">{{ review.order.buyer_name }}</td>
+        <td>
+          <div style="display:flex;gap:2px;align-items:center;">
+            {% for i in "12345" %}
+              {% if forloop.counter <= review.rating %}
+                <span style="color:var(--amber);font-size:14px;">★</span>
+              {% else %}
+                <span style="color:var(--bg4);font-size:14px;">★</span>
+              {% endif %}
+            {% endfor %}
+            <span class="mono muted" style="font-size:11px;margin-left:4px;">{{ review.rating }}/5</span>
+          </div>
+        </td>
+        <td style="max-width:260px;">
+          <div style="font-size:13px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            {{ review.comment|default:"—" }}
+          </div>
+        </td>
+        <td>
+          {% if review.is_verified %}
+            <span class="badge badge-green">✓ Verified</span>
+          {% else %}
+            <span class="badge badge-gray">Unverified</span>
+          {% endif %}
+        </td>
+        <td class="mono muted" style="font-size:12px;">{{ review.created_at|date:"M d, Y" }}</td>
+        <td>
+          <form method="POST" action="{% url 'admin_delete_review' review.id %}"
+                onsubmit="return confirm('Delete this review? This cannot be undone.')">
+            {% csrf_token %}
+            <button class="btn btn-danger btn-sm">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="8">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="empty-title">No reviews found</div>
+          <div class="empty-sub">Adjust filters or wait for buyers to leave reviews</div>
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

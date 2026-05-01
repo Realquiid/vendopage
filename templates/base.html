@@ -1,3 +1,4 @@
+
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -94,6 +95,121 @@
       transition: background-color .3s, color .3s;
     }
 
+    /* ── TOAST SYSTEM ────────────────────────────────────────── */
+    #vp-toast-container {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+      width: max-content;
+      max-width: calc(100vw - 32px);
+    }
+
+    .vp-toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 18px;
+      border-radius: var(--r-pill);
+      font-family: var(--font-b);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 1.4;
+      box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.10);
+      pointer-events: auto;
+      cursor: pointer;
+      max-width: 420px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      /* entrance */
+      animation: vp-toast-in .32s cubic-bezier(.34,1.56,.64,1) forwards;
+      transform-origin: bottom center;
+    }
+    .vp-toast.hiding {
+      animation: vp-toast-out .28s ease-in forwards;
+    }
+
+    /* Toast variants */
+    .vp-toast-success {
+      background: #0A0A0A;
+      color: #ffffff;
+      border: 1px solid #1a1a1a;
+    }
+    [data-theme="dark"] .vp-toast-success {
+      background: #f0fdf4;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+    .vp-toast-error {
+      background: #FF4444;
+      color: #ffffff;
+      border: 1px solid #e53935;
+    }
+    .vp-toast-warning {
+      background: #f59e0b;
+      color: #ffffff;
+      border: 1px solid #d97706;
+    }
+    .vp-toast-info {
+      background: #0284c7;
+      color: #ffffff;
+      border: 1px solid #0369a1;
+    }
+
+    .vp-toast-icon {
+      flex-shrink: 0;
+      font-size: 15px;
+      line-height: 1;
+    }
+    .vp-toast-msg {
+      flex: 1;
+      min-width: 0;
+    }
+    .vp-toast-close {
+      flex-shrink: 0;
+      opacity: .6;
+      font-size: 16px;
+      line-height: 1;
+      margin-left: 4px;
+      cursor: pointer;
+    }
+    .vp-toast-close:hover { opacity: 1; }
+
+    .vp-toast-progress {
+      position: absolute;
+      bottom: 0; left: 0;
+      height: 3px;
+      border-radius: 0 0 var(--r-pill) var(--r-pill);
+      background: rgba(255,255,255,.35);
+      animation: vp-progress linear forwards;
+    }
+    .vp-toast { position: relative; }
+
+    @keyframes vp-toast-in {
+      from { opacity:0; transform: translateY(16px) scale(.92); }
+      to   { opacity:1; transform: translateY(0)    scale(1);   }
+    }
+    @keyframes vp-toast-out {
+      from { opacity:1; transform: translateY(0)    scale(1);   }
+      to   { opacity:0; transform: translateY(10px) scale(.94); }
+    }
+    @keyframes vp-progress {
+      from { width: 100%; }
+      to   { width: 0%;   }
+    }
+
+    @media (max-width: 480px) {
+      #vp-toast-container { bottom: 16px; max-width: calc(100vw - 24px); }
+      .vp-toast { font-size: 13px; padding: 12px 15px; white-space: normal; }
+    }
+
     /* ── NAVBAR ── */
     .nav {
       position: sticky; top: 0; z-index: 500;
@@ -111,10 +227,8 @@
       justify-content: space-between; gap: 24px;
     }
 
-    /* Logo — now an image */
     .nav-logo { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
     .nav-logo img { height: 130px; width: auto; display: block; }
-    /* Dark mode: swap to white logo */
     .nav-logo .logo-dark { display: block; }
     .nav-logo .logo-light { display: none; }
     [data-theme="dark"] .nav-logo .logo-dark { display: none; }
@@ -302,8 +416,6 @@
     [data-theme="dark"] .drawer-link svg { color: #555; }
     [data-theme="dark"] .drawer-sep { background: #2a2a2a; }
 
-    /* (keep all your other dark mode rules here — settings, dashboard, upload, homepage) */
-
     @media (max-width: 900px) { .nav-inner { padding: 0 20px; } }
     @media (max-width: 768px) {
       .nav-links { display: none; }
@@ -311,19 +423,26 @@
       .nav-profile { display: none; }
       .nav-hamburger { display: flex; }
     }
-
-
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
 
+<!-- ── TOAST CONTAINER ──────────────────────────────────────── -->
+<div id="vp-toast-container"></div>
+
+<!-- Django messages → JS toasts (hidden, parsed by JS below) -->
+{% if messages %}
+<script id="vp-django-messages" type="application/json">
+[{% for message in messages %}{"level":"{{ message.tags }}","text":"{{ message|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+{% endif %}
+
 <nav class="nav">
   <div class="nav-inner">
     <a href="/" class="nav-logo">
-
-      <img class="logo-dark" src="{% static 'images/logoo.png' %}" alt="Vendopage" loading="lazy" >
-      <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage" loading="lazy" >
+      <img class="logo-dark" src="{% static 'images/logoo.png' %}" alt="Vendopage" loading="lazy">
+      <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage" loading="lazy">
     </a>
 
     <div class="nav-right">
@@ -383,7 +502,7 @@
   <div class="drawer-head">
     <a href="/" class="drawer-logo">
       <img class="logo-dark" src="{% static 'images/logoo.png' %}" alt="Vendopage" loading="lazy">
-      <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage" loading="lazy" >
+      <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage" loading="lazy">
     </a>
     <button class="drawer-close" onclick="closeDrawer()" aria-label="Close menu">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
@@ -452,10 +571,106 @@
 </div>
 
 <main>{% block content %}{% endblock %}</main>
+{% block footer %}
+  {% include 'includes/footer.html' %}
+{% endblock %}
 
-{% include 'includes/footer.html' %}
 
 <script>
+/* ── TOAST ENGINE ─────────────────────────────────────────── */
+(function() {
+  const DURATION = 3200; // ms before auto-dismiss
+
+  const ICONS = {
+    success: '✓',
+    error:   '✕',
+    warning: '⚠',
+    info:    'ℹ',
+    default: '●',
+  };
+
+  // Map Django message tags → toast variant
+  function resolveVariant(tag) {
+    if (!tag) return 'info';
+    if (tag.includes('success')) return 'success';
+    if (tag.includes('error') || tag.includes('danger')) return 'error';
+    if (tag.includes('warning')) return 'warning';
+    if (tag.includes('info'))    return 'info';
+    return 'info';
+  }
+
+  function showToast(message, variant) {
+    variant = variant || 'info';
+    const container = document.getElementById('vp-toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `vp-toast vp-toast-${variant}`;
+    toast.setAttribute('role', 'alert');
+
+    const icon = document.createElement('span');
+    icon.className = 'vp-toast-icon';
+    icon.textContent = ICONS[variant] || ICONS.default;
+
+    const msg = document.createElement('span');
+    msg.className = 'vp-toast-msg';
+    msg.textContent = message;
+
+    const close = document.createElement('span');
+    close.className = 'vp-toast-close';
+    close.textContent = '×';
+    close.addEventListener('click', () => dismiss(toast));
+
+    const progress = document.createElement('div');
+    progress.className = 'vp-toast-progress';
+    progress.style.animationDuration = DURATION + 'ms';
+
+    toast.appendChild(icon);
+    toast.appendChild(msg);
+    toast.appendChild(close);
+    toast.appendChild(progress);
+    container.appendChild(toast);
+
+    // Click anywhere on toast to dismiss
+    toast.addEventListener('click', function(e) {
+      if (e.target !== close) dismiss(toast);
+    });
+
+    // Auto-dismiss
+    const timer = setTimeout(() => dismiss(toast), DURATION);
+    toast._dismissTimer = timer;
+  }
+
+  function dismiss(toast) {
+    if (toast._dismissed) return;
+    toast._dismissed = true;
+    clearTimeout(toast._dismissTimer);
+    toast.classList.add('hiding');
+    toast.addEventListener('animationend', () => toast.remove(), { once: true });
+    // Fallback remove
+    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 400);
+  }
+
+  // Expose globally so views/JS can call vpToast(msg, type)
+  window.vpToast = showToast;
+
+  // Boot: fire Django messages after DOM ready
+  document.addEventListener('DOMContentLoaded', function() {
+    const el = document.getElementById('vp-django-messages');
+    if (!el) return;
+    try {
+      const messages = JSON.parse(el.textContent || '[]');
+      // Stagger multiple messages
+      messages.forEach(function(m, i) {
+        setTimeout(function() {
+          showToast(m.text, resolveVariant(m.level));
+        }, i * 180);
+      });
+    } catch(e) {}
+  });
+})();
+
+/* ── NAV / DRAWER ────────────────────────────────────────── */
 function toggleDropdown() {
   const btn = document.getElementById('navProfileBtn');
   const panel = document.getElementById('navDropdown');

@@ -1,0 +1,382 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout — {{ seller.business_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.checkout-page { background:var(--light); min-height:calc(100vh - 64px); padding:40px 20px 80px; }
+.checkout-inner { max-width:920px; margin:0 auto; }
+
+.checkout-header { margin-bottom:32px; }
+.checkout-header h1 { font-family:var(--font-d); font-weight:800; font-size:28px; letter-spacing:-1px; margin-bottom:4px; }
+.checkout-header p { font-size:14px; color:var(--gray); }
+.breadcrumb { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--gray-lt); margin-bottom:24px; }
+.breadcrumb a { color:var(--green); text-decoration:none; }
+.breadcrumb span { color:var(--gray-lt); }
+
+.checkout-layout { display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start; }
+
+/* ── Payment type banner ─────────────────────────────────── */
+.pt-banner {
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  padding:13px 16px; border-radius:14px; margin-bottom:20px;
+  font-size:13px; font-weight:500;
+}
+.pt-banner.escrow { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
+.pt-banner.direct { background:#fefce8; border:1px solid #fde68a; color:#92400e; }
+.pt-banner-left { display:flex; align-items:center; gap:8px; }
+.pt-banner-left strong { font-weight:700; }
+.pt-change-btn {
+  font-size:12px; font-weight:600; color:var(--gray);
+  background:none; border:1px solid var(--border); border-radius:100px;
+  padding:4px 12px; cursor:pointer; transition:all .15s; white-space:nowrap;
+}
+.pt-change-btn:hover { color:var(--dark); border-color:var(--dark); }
+
+/* ── Form card ──────────────────────────────────────────── */
+.checkout-form-card { background:var(--white); border:1px solid var(--border); border-radius:20px; overflow:hidden; }
+.form-section { padding:24px; border-bottom:1px solid var(--border); }
+.form-section:last-child { border-bottom:none; }
+.form-section-title { font-family:var(--font-d); font-weight:700; font-size:16px; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+.form-section-title .sec-num { width:24px; height:24px; border-radius:50%; background:var(--dark); color:var(--white); font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.form-group { margin-bottom:14px; }
+.form-group:last-child { margin-bottom:0; }
+.form-label { font-size:13px; font-weight:600; color:var(--gray); margin-bottom:6px; display:block; }
+.form-label .req { color:var(--red); margin-left:2px; }
+.form-input { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--r-md); font-family:var(--font-b); font-size:14px; outline:none; transition:border-color .18s, box-shadow .18s; background:var(--white); color:var(--dark); box-sizing:border-box; }
+.form-input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(0,194,168,.1); }
+.form-input::placeholder { color:var(--gray-lt); }
+
+/* Delivery skipped notice */
+.delivery-skip-notice {
+  display:flex; align-items:flex-start; gap:12px;
+  padding:16px; border-radius:14px; background:#fef3c7;
+  border:1px solid #fde68a; font-size:13px; color:#92400e; line-height:1.6;
+}
+.delivery-skip-notice .wa-icon { font-size:20px; flex-shrink:0; margin-top:1px; }
+
+/* ── Order review ───────────────────────────────────────── */
+.order-review-card { background:var(--white); border:1px solid var(--border); border-radius:20px; overflow:hidden; position:sticky; top:80px; }
+.order-review-head { padding:18px 20px; border-bottom:1px solid var(--border); }
+.order-review-head h3 { font-family:var(--font-d); font-weight:700; font-size:16px; }
+.order-item-row { display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border); }
+.order-item-row:last-of-type { border-bottom:none; }
+.oi-img { width:52px; height:52px; border-radius:10px; object-fit:cover; background:var(--light); flex-shrink:0; }
+.oi-img-ph { width:52px; height:52px; border-radius:10px; background:var(--light); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.oi-info { flex:1; min-width:0; }
+.oi-name { font-size:13px; font-weight:600; margin-bottom:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.oi-meta { font-size:12px; color:var(--gray-lt); }
+.oi-price { font-size:14px; font-weight:700; color:var(--dark); flex-shrink:0; }
+.order-totals { padding:16px 20px; border-top:1px solid var(--border); }
+.tot-row { display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px; color:var(--gray); }
+.tot-row.grand { font-weight:800; font-size:17px; color:var(--dark); border-top:1px solid var(--border); padding-top:10px; margin-top:10px; margin-bottom:0; }
+
+/* ── Place order button ─────────────────────────────────── */
+.place-order-btn { width:100%; padding:15px; border-radius:var(--r-pill); border:none; background:var(--dark); color:var(--white); font-family:var(--font-b); font-size:15px; font-weight:700; cursor:pointer; transition:all .2s; margin:16px 20px 0; width:calc(100% - 40px); display:flex; align-items:center; justify-content:center; gap:8px; }
+.place-order-btn:hover:not(:disabled) { background:#222; transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,.15); }
+.place-order-btn:disabled { opacity:.5; cursor:not-allowed; }
+.place-order-btn.direct { background:var(--green); }
+.place-order-btn.direct:hover:not(:disabled) { background:var(--green-dk); box-shadow:0 6px 20px rgba(0,200,83,.3); }
+.place-order-wrap { padding:0 0 20px; }
+.secure-note { display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; color:var(--gray-lt); margin:10px 20px 0; }
+.escrow-info { margin:12px 20px 20px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px 14px; font-size:12px; color:#166534; line-height:1.6; }
+.direct-info { margin:12px 20px 20px; background:#fefce8; border:1px solid #fde68a; border-radius:10px; padding:12px 14px; font-size:12px; color:#92400e; line-height:1.6; }
+
+[data-theme="dark"] .checkout-form-card,
+[data-theme="dark"] .order-review-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .form-input { background:#2a2a2a; border-color:#3a3a3a; color:#f0f0f0; }
+[data-theme="dark"] .form-section { border-color:#2e2e2e; }
+[data-theme="dark"] .order-item-row { border-color:#2a2a2a; }
+[data-theme="dark"] .order-totals { border-color:#2a2a2a; }
+[data-theme="dark"] .tot-row.grand { border-color:#3a3a3a; }
+
+@media(max-width:768px) {
+  .checkout-layout { grid-template-columns:1fr; }
+  .order-review-card { position:static; order:-1; }
+  .form-row { grid-template-columns:1fr; }
+  .place-order-btn { margin:16px 16px 0; width:calc(100% - 32px); }
+  .secure-note { margin:10px 16px 0; }
+  .escrow-info, .direct-info { margin:12px 16px 20px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-page">
+<div class="checkout-inner">
+
+  <div class="breadcrumb">
+    <a href="/{{ seller.slug }}">{{ seller.business_name }}</a>
+    <span>›</span>
+    <a href="/order/{{ seller.slug }}/cart/">Cart</a>
+    <span>›</span>
+    <span>Checkout</span>
+  </div>
+
+  <div class="checkout-header">
+    <h1>Checkout</h1>
+    <p>Complete your order from <strong>{{ seller.business_name }}</strong></p>
+  </div>
+
+  <div id="emptyCartNotice" style="display:none; text-align:center; padding:80px 20px;">
+    <div style="font-size:56px;margin-bottom:16px;">🛒</div>
+    <h3 style="font-family:var(--font-d);font-weight:700;font-size:20px;margin-bottom:8px;">Your cart is empty</h3>
+    <p style="color:var(--gray-lt);margin-bottom:20px;">Go back and add some products.</p>
+    <a href="/order/{{ seller.slug }}/cart/" class="btn btn-primary">Back to Cart</a>
+  </div>
+
+  <div class="checkout-layout" id="checkoutLayout">
+
+    <!-- Checkout Form -->
+    <div>
+
+      <!-- Payment type banner (populated by JS) -->
+      <div id="ptBanner" class="pt-banner escrow" style="display:none;">
+        <div class="pt-banner-left">
+          <span id="ptBannerIcon">🔒</span>
+          <span id="ptBannerText"><strong>Protected Pay</strong> — funds held until you confirm receipt</span>
+        </div>
+        <button class="pt-change-btn" onclick="goBackToCart()">Change</button>
+      </div>
+
+      <form method="POST" action="{% url 'initiate_payment' seller.slug %}" id="checkoutForm">
+        {% csrf_token %}
+        <input type="hidden" name="cart_json" id="cartJsonInput">
+        <input type="hidden" name="payment_type" id="paymentTypeInput" value="escrow">
+        <input type="hidden" name="delivery_required" id="deliveryRequiredInput" value="1">
+
+        <div class="checkout-form-card">
+
+          <!-- Section 1: Contact -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span class="sec-num">1</span>
+              Contact Details
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Full Name <span class="req">*</span></label>
+                <input type="text" name="buyer_name" class="form-input" placeholder="Your full name" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number <span class="req">*</span></label>
+                <input type="tel" name="buyer_phone" class="form-input" placeholder="e.g. 08012345678" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address <span class="req">*</span></label>
+              <input type="email" name="buyer_email" class="form-input" placeholder="you@example.com" required>
+              <p style="font-size:12px;color:var(--gray-lt);margin-top:5px;">Order confirmation and tracking will be sent here.</p>
+            </div>
+          </div>
+
+          <!-- Section 2: Delivery (shown/hidden based on delivery_required) -->
+          <div class="form-section" id="deliverySection">
+            <div class="form-section-title">
+              <span class="sec-num">2</span>
+              Delivery Address
+            </div>
+            <div class="form-group">
+              <label class="form-label">Street Address <span class="req">*</span></label>
+              <input type="text" name="delivery_address" id="deliveryAddressInput" class="form-input" placeholder="House number, street name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">City / State</label>
+              <input type="text" name="delivery_city" class="form-input" placeholder="e.g. Lagos, Lagos State">
+            </div>
+          </div>
+
+          <!-- Delivery skipped notice (shown when delivery_required = false) -->
+          <div class="form-section" id="deliverySkipSection" style="display:none;">
+            <div class="delivery-skip-notice">
+              <span class="wa-icon">💬</span>
+              <div>
+                <strong>No delivery address needed right now.</strong><br>
+                {{ seller.business_name }} will contact you on WhatsApp after payment to arrange delivery details.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+    <!-- Order Review -->
+    <div>
+      <div class="order-review-card">
+        <div class="order-review-head">
+          <h3>Your Order (<span id="reviewCount">0</span> items)</h3>
+        </div>
+        <div id="reviewItemsList"></div>
+        <div class="order-totals">
+          <div class="tot-row"><span>Subtotal</span><span id="reviewSubtotal">{{ currency }}0</span></div>
+          <div class="tot-row"><span>Delivery</span><span id="reviewDeliveryRow">To be arranged</span></div>
+          <div class="tot-row grand"><span>Total</span><span id="reviewTotal">{{ currency }}0</span></div>
+        </div>
+        <div class="place-order-wrap">
+          <button class="place-order-btn" id="placeOrderBtn" onclick="submitOrder()" disabled>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            <span id="placeOrderLabel">Pay Now</span>
+          </button>
+          <div class="secure-note">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Powered by Flutterwave
+          </div>
+          <!-- Dynamic info box (escrow vs direct) -->
+          <div class="escrow-info" id="payInfoEscrow">
+            🔒 <strong>Escrow Protection:</strong> Your payment is held securely until you confirm receipt of your order.
+          </div>
+          <div class="direct-info" id="payInfoDirect" style="display:none;">
+            ⚡ <strong>Direct Payment:</strong> Payment goes straight to the vendor immediately after confirmation.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+{% block footer %}{% endblock %}
+<script>
+const CURRENCY = '{{ currency|escapejs }}';
+const SLUG = '{{ seller.slug|escapejs }}';
+
+function formatAmount(n) {
+  return CURRENCY + Number(n).toLocaleString('en-NG', {minimumFractionDigits:0, maximumFractionDigits:0});
+}
+
+/* ── Read payment preferences saved from cart modal ────── */
+function getPaymentPrefs() {
+  return {
+    paymentType:      sessionStorage.getItem('vp_payment_type_' + SLUG) || 'escrow',
+    deliveryRequired: sessionStorage.getItem('vp_delivery_required_' + SLUG) !== '0',
+  };
+}
+
+function applyPaymentPrefs() {
+  const prefs = getPaymentPrefs();
+  const isEscrow = prefs.paymentType === 'escrow';
+  const needDelivery = prefs.deliveryRequired;
+
+  // Hidden form inputs
+  document.getElementById('paymentTypeInput').value = prefs.paymentType;
+  document.getElementById('deliveryRequiredInput').value = needDelivery ? '1' : '0';
+
+  // Banner
+  const banner = document.getElementById('ptBanner');
+  banner.style.display = 'flex';
+  if (isEscrow) {
+    banner.className = 'pt-banner escrow';
+    document.getElementById('ptBannerIcon').textContent = '🔒';
+    document.getElementById('ptBannerText').innerHTML = '<strong>Protected Pay</strong> — funds held until you confirm receipt';
+  } else {
+    banner.className = 'pt-banner direct';
+    document.getElementById('ptBannerIcon').textContent = '⚡';
+    document.getElementById('ptBannerText').innerHTML = '<strong>Direct Pay</strong> — payment goes straight to vendor';
+  }
+
+  // Pay button
+  const btn = document.getElementById('placeOrderBtn');
+  const label = document.getElementById('placeOrderLabel');
+  if (isEscrow) {
+    btn.classList.remove('direct');
+    label.textContent = 'Pay Now (Protected)';
+  } else {
+    btn.classList.add('direct');
+    label.textContent = 'Pay Now (Direct)';
+  }
+
+  // Info boxes
+  document.getElementById('payInfoEscrow').style.display = isEscrow ? '' : 'none';
+  document.getElementById('payInfoDirect').style.display = isEscrow ? 'none' : '';
+
+  // Delivery section
+  const deliverySection = document.getElementById('deliverySection');
+  const skipSection = document.getElementById('deliverySkipSection');
+  const addrInput = document.getElementById('deliveryAddressInput');
+
+  if (needDelivery) {
+    deliverySection.style.display = '';
+    skipSection.style.display = 'none';
+    addrInput.required = true;
+  } else {
+    deliverySection.style.display = 'none';
+    skipSection.style.display = '';
+    addrInput.required = false;
+    addrInput.value = 'To be arranged via WhatsApp';
+    document.getElementById('reviewDeliveryRow').textContent = 'Via WhatsApp';
+  }
+}
+
+function goBackToCart() {
+  window.location.href = '/order/{{ seller.slug }}/cart/';
+}
+
+function loadAndRender() {
+  let cart = {};
+  try { cart = JSON.parse(sessionStorage.getItem('vp_cart_' + SLUG) || '{}'); } catch(e) {}
+
+  const ids = Object.keys(cart);
+  const layout = document.getElementById('checkoutLayout');
+  const notice = document.getElementById('emptyCartNotice');
+  const btn = document.getElementById('placeOrderBtn');
+
+  if (ids.length === 0) {
+    layout.style.display = 'none';
+    notice.style.display = 'block';
+    return;
+  }
+
+  document.getElementById('cartJsonInput').value = JSON.stringify(cart);
+
+  let subtotal = 0;
+  let html = '';
+  let count = 0;
+  ids.forEach(id => {
+    const item = cart[id];
+    subtotal += item.price * item.qty;
+    count += item.qty;
+    const imgHtml = item.imageUrl
+      ? `<img class="oi-img" src="${item.imageUrl}" alt="${item.name}">`
+      : `<div class="oi-img-ph">📦</div>`;
+    html += `<div class="order-item-row">
+      ${imgHtml}
+      <div class="oi-info">
+        <div class="oi-name">${item.name || 'Product'}</div>
+        <div class="oi-meta">Qty: ${item.qty}</div>
+      </div>
+      <div class="oi-price">${formatAmount(item.price * item.qty)}</div>
+    </div>`;
+  });
+
+  document.getElementById('reviewItemsList').innerHTML = html;
+  document.getElementById('reviewCount').textContent = count;
+  document.getElementById('reviewSubtotal').textContent = formatAmount(subtotal);
+  document.getElementById('reviewTotal').textContent = formatAmount(subtotal);
+  btn.disabled = false;
+}
+
+function submitOrder() {
+  const form = document.getElementById('checkoutForm');
+  let cart = {};
+  try { cart = JSON.parse(sessionStorage.getItem('vp_cart_' + SLUG) || '{}'); } catch(e) {}
+  document.getElementById('cartJsonInput').value = JSON.stringify(cart);
+
+  const prefs = getPaymentPrefs();
+  document.getElementById('paymentTypeInput').value = prefs.paymentType;
+  document.getElementById('deliveryRequiredInput').value = prefs.deliveryRequired ? '1' : '0';
+
+  const btn = document.getElementById('placeOrderBtn');
+  btn.querySelector('span').textContent = 'Redirecting to payment…';
+  btn.disabled = true;
+  form.submit();
+}
+
+loadAndRender();
+applyPaymentPrefs();
+</script>
+{% endblock %}
+

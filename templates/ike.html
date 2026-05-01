@@ -822,3 +822,485 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEntryMo
 });
 </script>
 {% endblock %}
+
+
+
+
+
+<h2 class="sr-only">VendoPage homepage trust, currency, and feature sections</h2>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--font-sans);background:transparent;color:var(--color-text-primary)}
+
+.sec{padding:72px 40px}
+.sec-alt{padding:72px 40px;background:var(--color-background-secondary)}
+.wrap{max-width:1060px;margin:0 auto}
+.label{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#00C853;margin-bottom:10px;display:block}
+.title{font-size:clamp(22px,3.5vw,38px);font-weight:500;letter-spacing:-1px;color:var(--color-text-primary);line-height:1.1;margin-bottom:12px}
+.sub{font-size:15px;color:var(--color-text-secondary);line-height:1.65;max-width:500px}
+.head-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:36px;flex-wrap:wrap}
+
+/* ── CURRENCY DETECTOR ── */
+.currency-hero{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+.currency-live{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.currency-top{padding:18px 20px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;gap:12px}
+.currency-flag{font-size:28px;line-height:1;flex-shrink:0}
+.currency-detected{font-size:12px;color:var(--color-text-secondary);margin-bottom:2px}
+.currency-name{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.currency-badge{margin-left:auto;background:var(--color-background-success);color:var(--color-text-success);font-size:10px;font-weight:500;padding:3px 9px;border-radius:var(--border-radius-md)}
+.currency-products{padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cprod{background:var(--color-background-secondary);border-radius:var(--border-radius-md);overflow:hidden}
+.cprod-img{height:64px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--color-background-secondary)}
+.cprod-info{padding:7px 9px}
+.cprod-name{font-size:10px;font-weight:500;color:var(--color-text-primary)}
+.cprod-price{font-size:11px;color:#00C853;font-weight:500;margin-top:2px}
+.currency-order{margin:0 14px 14px;background:#00C853;color:#fff;padding:9px;border-radius:8px;text-align:center;font-size:11px;font-weight:500}
+
+.currency-picker{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.cpick-item{display:flex;align-items:center;gap:12px;padding:10px 14px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);cursor:pointer;transition:border-color .18s,background .18s}
+.cpick-item:hover,.cpick-item.active{border-color:#00C853;background:rgba(0,200,83,.05)}
+.cpick-flag{font-size:20px;flex-shrink:0}
+.cpick-info{flex:1}
+.cpick-country{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.cpick-code{font-size:11px;color:var(--color-text-secondary)}
+.cpick-symbol{font-size:18px;font-weight:500;color:var(--color-text-secondary);margin-left:auto}
+.cpick-check{width:18px;height:18px;border-radius:50%;background:#00C853;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0;transition:opacity .18s}
+.cpick-check svg{display:block}
+.cpick-item.active .cpick-check{opacity:1}
+
+/* ── TRUST / FEATURES ── */
+.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.trust-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:24px 20px;transition:border-color .2s,transform .2s}
+.trust-card:hover{border-color:rgba(0,200,83,.4);transform:translateY(-3px)}
+.trust-icon{width:40px;height:40px;border-radius:var(--border-radius-md);background:rgba(0,200,83,.08);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.trust-card h3{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:7px}
+.trust-card p{font-size:12px;color:var(--color-text-secondary);line-height:1.7}
+.trust-tag{display:inline-flex;align-items:center;gap:5px;margin-top:10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:3px 9px;font-size:10px;font-weight:500;color:var(--color-text-secondary)}
+
+/* ── ESCROW FLOW ── */
+.escrow-flow{display:flex;align-items:flex-start;gap:0;position:relative;margin-top:44px}
+.escrow-step{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.escrow-step::after{content:'';position:absolute;top:20px;left:50%;width:100%;height:1px;background:var(--color-border-tertiary)}
+.escrow-step:last-child::after{display:none}
+.es-dot{width:40px;height:40px;border-radius:50%;background:var(--color-background-secondary);border:0.5px solid var(--color-border-secondary);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;flex-shrink:0;font-size:14px;font-weight:500;color:var(--color-text-secondary)}
+.escrow-step.done .es-dot{background:rgba(0,200,83,.1);border-color:rgba(0,200,83,.3);color:#00C853}
+.escrow-step.active .es-dot{background:#00C853;border-color:#00C853;color:#fff}
+.es-label{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-top:10px}
+.es-sub{font-size:11px;color:var(--color-text-secondary);margin-top:3px;max-width:100px}
+
+/* ── VENDOR STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:20px 16px}
+.stat-num{font-size:28px;font-weight:500;color:var(--color-text-primary);letter-spacing:-1px}
+.stat-label{font-size:12px;color:var(--color-text-secondary);margin-top:4px}
+.stat-delta{font-size:11px;color:#00C853;margin-top:6px;display:flex;align-items:center;gap:4px}
+
+/* ── REVIEWS ── */
+.reviews-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.review-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:18px}
+.review-stars{display:flex;gap:2px;margin-bottom:10px}
+.star{font-size:13px;color:#F59E0B}
+.review-text{font-size:13px;color:var(--color-text-secondary);line-height:1.65;margin-bottom:12px}
+.review-author{display:flex;align-items:center;gap:10px}
+.review-avatar{width:30px;height:30px;border-radius:50%;background:#00C853;color:#fff;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.review-name{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.review-country{font-size:11px;color:var(--color-text-secondary)}
+.review-badge{display:inline-flex;align-items:center;gap:4px;margin-left:auto;background:var(--color-background-success);color:var(--color-text-success);font-size:9px;font-weight:500;padding:2px 7px;border-radius:var(--border-radius-md)}
+
+/* ── CTA STRIP ── */
+.cta-strip{background:#0A0A0A;border-radius:var(--border-radius-lg);padding:40px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.cta-strip h3{font-size:clamp(18px,2.5vw,26px);font-weight:500;color:#fff;letter-spacing:-.5px;line-height:1.2}
+.cta-strip p{font-size:13px;color:rgba(255,255,255,.4);margin-top:6px}
+.cta-btn{display:inline-flex;align-items:center;gap:9px;padding:12px 22px;background:#00C853;color:#fff;border-radius:100px;font-size:14px;font-weight:500;text-decoration:none;cursor:pointer;border:none;transition:background .2s;flex-shrink:0}
+.cta-btn:hover{background:#00a844}
+.cta-btn .dot{width:20px;height:20px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+@media(max-width:780px){
+  .currency-hero,.trust-grid,.stats-grid,.reviews-row{grid-template-columns:1fr}
+  .escrow-flow{flex-direction:column;gap:12px}
+  .escrow-step::after{display:none}
+  .sec,.sec-alt{padding:48px 20px}
+}
+</style>
+
+<!-- ── SECTION 1: LIVE CURRENCY DETECTION ── -->
+<div class="sec-alt">
+<div class="wrap">
+  <div class="head-row">
+    <div>
+      <span class="label">Works everywhere</span>
+      <h2 class="title">Your store auto-detects<br>every buyer's currency</h2>
+      <p class="sub">Buyers in Ghana see cedis. Buyers in London see pounds. Buyers in Dubai see dirhams. Your store adjusts automatically — no setup needed.</p>
+    </div>
+  </div>
+
+  <div class="currency-hero">
+    <!-- Live phone mockup -->
+    <div>
+      <div class="currency-live">
+        <div class="currency-top">
+          <div class="currency-flag" id="liveFlag">🇳🇬</div>
+          <div>
+            <div class="currency-detected">Auto-detected currency</div>
+            <div class="currency-name" id="liveCurrencyName">Nigerian Naira (₦)</div>
+          </div>
+          <div class="currency-badge">Live</div>
+        </div>
+        <div class="currency-products">
+          <div class="cprod">
+            <div class="cprod-img">👗</div>
+            <div class="cprod-info">
+              <div class="cprod-name">Ankara Gown</div>
+              <div class="cprod-price" id="p1">₦18,000</div>
+            </div>
+          </div>
+          <div class="cprod">
+            <div class="cprod-img">👜</div>
+            <div class="cprod-info">
+              <div class="cprod-name">Leather Bag</div>
+              <div class="cprod-price" id="p2">₦12,500</div>
+            </div>
+          </div>
+          <div class="cprod">
+            <div class="cprod-img">👠</div>
+            <div class="cprod-info">
+              <div class="cprod-name">Block Heels</div>
+              <div class="cprod-price" id="p3">₦9,000</div>
+            </div>
+          </div>
+          <div class="cprod">
+            <div class="cprod-img">💍</div>
+            <div class="cprod-info">
+              <div class="cprod-name">Gold Set</div>
+              <div class="cprod-price" id="p4">₦7,000</div>
+            </div>
+          </div>
+        </div>
+        <div class="currency-order">Order on WhatsApp</div>
+      </div>
+    </div>
+
+    <!-- Currency switcher -->
+    <div>
+      <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px">Try switching to a different country:</p>
+      <div class="currency-picker" id="currencyPicker">
+        <div class="cpick-item active" data-flag="🇳🇬" data-name="Nigerian Naira (₦)" data-sym="₦" data-rates="18000,12500,9000,7000" onclick="switchCurrency(this)">
+          <div class="cpick-flag">🇳🇬</div>
+          <div class="cpick-info">
+            <div class="cpick-country">Nigeria</div>
+            <div class="cpick-code">NGN</div>
+          </div>
+          <div class="cpick-symbol">₦</div>
+          <div class="cpick-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="cpick-item" data-flag="🇬🇧" data-name="British Pound (£)" data-sym="£" data-rates="11,7.50,5.40,4.20" onclick="switchCurrency(this)">
+          <div class="cpick-flag">🇬🇧</div>
+          <div class="cpick-info">
+            <div class="cpick-country">United Kingdom</div>
+            <div class="cpick-code">GBP</div>
+          </div>
+          <div class="cpick-symbol">£</div>
+          <div class="cpick-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="cpick-item" data-flag="🇦🇪" data-name="UAE Dirham (د.إ)" data-sym="د.إ" data-rates="52,36,26,20" onclick="switchCurrency(this)">
+          <div class="cpick-flag">🇦🇪</div>
+          <div class="cpick-info">
+            <div class="cpick-country">United Arab Emirates</div>
+            <div class="cpick-code">AED</div>
+          </div>
+          <div class="cpick-symbol">د.إ</div>
+          <div class="cpick-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="cpick-item" data-flag="🇬🇭" data-name="Ghanaian Cedi (GH₵)" data-sym="GH₵" data-rates="175,120,87,68" onclick="switchCurrency(this)">
+          <div class="cpick-flag">🇬🇭</div>
+          <div class="cpick-info">
+            <div class="cpick-country">Ghana</div>
+            <div class="cpick-code">GHS</div>
+          </div>
+          <div class="cpick-symbol">GH₵</div>
+          <div class="cpick-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="cpick-item" data-flag="🇺🇸" data-name="US Dollar ($)" data-sym="$" data-rates="14,9.50,6.80,5.30" onclick="switchCurrency(this)">
+          <div class="cpick-flag">🇺🇸</div>
+          <div class="cpick-info">
+            <div class="cpick-country">United States</div>
+            <div class="cpick-code">USD</div>
+          </div>
+          <div class="cpick-symbol">$</div>
+          <div class="cpick-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+      </div>
+      <p style="font-size:11px;color:var(--color-text-secondary);margin-top:12px">Detected from buyer's IP automatically — 180+ countries supported</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── SECTION 2: TRUST & SECURITY ── -->
+<div class="sec">
+<div class="wrap">
+  <div class="head-row">
+    <div>
+      <span class="label">Built-in protection</span>
+      <h2 class="title">Every sale is protected.<br>For buyers and sellers.</h2>
+      <p class="sub">From first click to final payout — your money, your products, your reputation are secured.</p>
+    </div>
+  </div>
+
+  <div class="trust-grid">
+    <div class="trust-card">
+      <div class="trust-icon">
+        <svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3>Escrow protection</h3>
+      <p>Payment is held securely until the buyer confirms they received their order. No more "sent and ghosted."</p>
+      <span class="trust-tag">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Powered by Flutterwave
+      </span>
+    </div>
+    <div class="trust-card">
+      <div class="trust-icon">
+        <svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <h3>Auto-release in 72hrs</h3>
+      <p>If the buyer doesn't respond in 72 hours after delivery, funds are automatically released to the vendor.</p>
+      <span class="trust-tag">Zero manual follow-up</span>
+    </div>
+    <div class="trust-card">
+      <div class="trust-icon">
+        <svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      </div>
+      <h3>Dispute resolution</h3>
+      <p>If something goes wrong, buyers can raise a dispute. Our team reviews it and releases funds fairly.</p>
+      <span class="trust-tag">Team-reviewed within 48hrs</span>
+    </div>
+    <div class="trust-card">
+      <div class="trust-icon">
+        <svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h3>Verified payout</h3>
+      <p>Vendor bank accounts are verified before any payout is sent. Your earnings land in the right account.</p>
+      <span class="trust-tag">Bank-verified accounts</span>
+    </div>
+    <div class="trust-card">
+      <div class="trust-icon">
+        <svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <h3>Verified reviews</h3>
+      <p>Only buyers who completed a real purchase can leave a review. No fake ratings — ever.</p>
+      <span class="trust-tag">Order-linked only</span>
+    </div>
+    <div class="trust-card">
+      <div class="trust-icon">
+        <svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      </div>
+      <h3>Premium badge</h3>
+      <p>Premium vendors get a verified badge on their store. Buyers know exactly who they're dealing with.</p>
+      <span class="trust-tag">Builds buyer confidence</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── SECTION 3: ESCROW ORDER FLOW ── -->
+<div class="sec-alt">
+<div class="wrap">
+  <div style="text-align:center;margin-bottom:44px">
+    <span class="label">How payments work</span>
+    <h2 class="title">From order to payout — fully protected</h2>
+    <p class="sub" style="margin:0 auto">Enable Store Mode and accept direct payments on your page. Every naira is held safely until delivery is confirmed.</p>
+  </div>
+
+  <div class="escrow-flow">
+    <div class="escrow-step done">
+      <div class="es-dot">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="es-label">Buyer pays</div>
+      <div class="es-sub">Secured via Flutterwave</div>
+    </div>
+    <div class="escrow-step done">
+      <div class="es-dot">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="es-label">Escrow holds funds</div>
+      <div class="es-sub">Money is secured</div>
+    </div>
+    <div class="escrow-step active">
+      <div class="es-dot">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+      </div>
+      <div class="es-label">You ship</div>
+      <div class="es-sub">Tracking sent to buyer</div>
+    </div>
+    <div class="escrow-step">
+      <div class="es-dot" style="font-size:12px">72h</div>
+      <div class="es-label">Buyer confirms</div>
+      <div class="es-sub">Or auto-releases</div>
+    </div>
+    <div class="escrow-step">
+      <div class="es-dot">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div class="es-label">Payout sent</div>
+      <div class="es-sub">Direct to your bank</div>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;display:flex;align-items:center;justify-content:center;gap:24px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--color-text-secondary)">
+      <div style="width:8px;height:8px;border-radius:50%;background:#00C853"></div>
+      Free plan — WhatsApp ordering
+    </div>
+    <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--color-text-secondary)">
+      <div style="width:8px;height:8px;border-radius:50%;background:#F59E0B"></div>
+      Store Mode — direct escrow payments
+    </div>
+    <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--color-text-secondary)">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--color-border-secondary)"></div>
+      Premium — verified badge + analytics
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── SECTION 4: PLATFORM STATS ── -->
+<div class="sec">
+<div class="wrap">
+  <div class="stats-grid" style="margin-bottom:48px">
+    <div class="stat-card">
+      <div class="stat-num">180+</div>
+      <div class="stat-label">Countries with auto-currency</div>
+      <div class="stat-delta">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        Includes all African markets
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">72h</div>
+      <div class="stat-label">Max escrow hold period</div>
+      <div class="stat-delta">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        Auto-released if no dispute
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">50+</div>
+      <div class="stat-label">Products per batch upload</div>
+      <div class="stat-delta">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        Under 60 seconds
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Order-verified reviews only</div>
+      <div class="stat-delta">
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+        No fake ratings possible
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews -->
+  <div style="margin-bottom:12px">
+    <span class="label">Vendor reviews</span>
+    <h2 class="title" style="margin-bottom:24px">What vendors are saying</h2>
+  </div>
+  <div class="reviews-row">
+    <div class="review-card">
+      <div class="review-stars">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+      <p class="review-text">"I uploaded 40 products in one go. My UK customers now see prices in pounds automatically — I didn't set anything up."</p>
+      <div class="review-author">
+        <div class="review-avatar">AC</div>
+        <div>
+          <div class="review-name">Adaeze C.</div>
+          <div class="review-country">🇳🇬 Lagos, Nigeria</div>
+        </div>
+        <div class="review-badge">
+          <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Verified order
+        </div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+      <p class="review-text">"The escrow feature changed everything. Buyers trust me more now. My first week with Store Mode I made 3x normal sales."</p>
+      <div class="review-author">
+        <div class="review-avatar">KO</div>
+        <div>
+          <div class="review-name">Kunle O.</div>
+          <div class="review-country">🇳🇬 Ibadan, Nigeria</div>
+        </div>
+        <div class="review-badge">
+          <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Verified order
+        </div>
+      </div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">
+        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+      </div>
+      <p class="review-text">"My Ghanaian diaspora customers in London see GBP prices now. Vendopage figured it out by itself. No settings, nothing."</p>
+      <div class="review-author">
+        <div class="review-avatar">EF</div>
+        <div>
+          <div class="review-name">Efe F.</div>
+          <div class="review-country">🇳🇬 Abuja, Nigeria</div>
+        </div>
+        <div class="review-badge">
+          <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+          Verified order
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── CTA STRIP ── -->
+<div class="sec" style="padding-top:0">
+<div class="wrap">
+  <div class="cta-strip">
+    <div>
+      <h3>Ready to sell smarter?<br>Your store is free — forever.</h3>
+      <p>No credit card. No setup. Live in 30 seconds.</p>
+    </div>
+    <button class="cta-btn" onclick="sendPrompt('I want to create my Vendopage store — what do I need to get started?')">
+      Create your free store
+      <span class="dot">
+        <svg width="9" height="9" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </button>
+  </div>
+</div>
+</div>
+
+<script>
+function switchCurrency(el) {
+  document.querySelectorAll('.cpick-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+  const flag = el.dataset.flag;
+  const name = el.dataset.name;
+  const sym  = el.dataset.sym;
+  const rates = el.dataset.rates.split(',');
+  document.getElementById('liveFlag').textContent = flag;
+  document.getElementById('liveCurrencyName').textContent = name;
+  const ids = ['p1','p2','p3','p4'];
+  ids.forEach((id, i) => {
+    const el2 = document.getElementById(id);
+    const val = parseFloat(rates[i]);
+    if (val >= 1000) {
+      el2.textContent = sym + val.toLocaleString();
+    } else {
+      el2.textContent = sym + val.toFixed(2);
+    }
+  });
+}
+</script>

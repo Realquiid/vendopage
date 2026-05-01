@@ -1,0 +1,121 @@
+{% extends 'admin/base_admin.html' %}
+{% comment %}
+
+{% endcomment %}
+
+
+{% block title %}Payout Queue — VendoPage Admin{% endblock %}
+{% block breadcrumb %}Payout Queue{% endblock %}
+{% block nav_payouts %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Payout Queue</div>
+    <div class="page-subtitle">Orders awaiting vendor payout · escrow released</div>
+  </div>
+  <div class="page-actions">
+    <div style="background:var(--amber-glow);border:1px solid rgba(245,158,11,.25);border-radius:var(--r-sm);padding:10px 16px;font-family:var(--font-mono);font-size:12px;color:var(--amber);">
+      {{ pending_payouts_count|default:"0" }} pending · ₦{{ total_pending_amount|default:"0"|floatformat:0 }} total
+    </div>
+  </div>
+</div>
+
+{% if pending_orders %}
+<div class="data-table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Order Ref</th>
+        <th>Seller</th>
+        <th>Bank Account</th>
+        <th>Payout Amount</th>
+        <th>Order Status</th>
+        <th>Delivered At</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in pending_orders %}
+      <tr>
+        <td class="mono amber" style="font-size:12px;font-weight:600;">#{{ order.order_ref|slice:":8"|upper }}</td>
+        <td>
+          <a href="{% url 'admin_seller_detail' order.seller.id %}" style="font-weight:600;text-decoration:none;color:var(--text);">{{ order.seller.business_name }}</a>
+          <div class="mono muted" style="font-size:11px;">@{{ order.seller.username }}</div>
+        </td>
+        <td>
+          {# OneToOne → use bank_account (singular), guard with try via template if tag #}
+          {% if order.seller.bank_account %}
+            {% with bank=order.seller.bank_account %}
+            <div style="font-size:13px;font-weight:600;">{{ bank.bank_name }}</div>
+            <div class="mono muted" style="font-size:11px;">****{{ bank.account_number|slice:"-4:" }} · {{ bank.account_name }}</div>
+            {% if bank.is_verified %}
+              <span class="badge badge-green" style="margin-top:4px;">✓ Verified</span>
+            {% else %}
+              <span class="badge badge-red" style="margin-top:4px;">⚠ Unverified</span>
+            {% endif %}
+            {% endwith %}
+          {% else %}
+            <span class="badge badge-red">No Bank Account</span>
+          {% endif %}
+        </td>
+        <td>
+          <div class="mono green" style="font-size:16px;font-weight:600;">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
+          <div class="mono muted" style="font-size:11px;">Fee: {{ order.currency }} {{ order.platform_fee|floatformat:0 }}</div>
+        </td>
+        <td>
+          {% if order.status == 'delivered' %}<span class="badge badge-green">Delivered</span>
+          {% elif order.status == 'completed' %}<span class="badge badge-green">Completed</span>
+          {% else %}<span class="badge badge-gray">{{ order.status }}</span>{% endif %}
+        </td>
+        <td class="mono muted" style="font-size:12px;">{{ order.delivered_at|date:"M d, Y H:i"|default:"—" }}</td>
+        <td>
+          <form method="POST" action="{% url 'admin_trigger_payout' order.id %}" onsubmit="return confirm('Trigger payout of {{ order.currency }} {{ order.vendor_payout|floatformat:0 }} to {{ order.seller.business_name }}?')">
+            {% csrf_token %}
+            <button class="btn btn-amber btn-sm">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/></svg>
+              Pay Now
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">
+    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+  </div>
+  <div class="empty-title">Queue is clear</div>
+  <div class="empty-sub">No pending payouts right now 🎉</div>
+</div>
+{% endif %}
+
+{% if recent_payouts %}
+<div style="margin-top:28px;">
+  <div class="card-head" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:14px 20px;">
+    <span class="card-title">Recent Completed Payouts</span>
+  </div>
+  <div class="data-table-wrap" style="border-radius:0 0 var(--r-lg) var(--r-lg);border-top:none;">
+    <table class="data-table">
+      <thead>
+        <tr><th>Order</th><th>Seller</th><th>Amount</th><th>Transfer ID</th><th>Paid At</th></tr>
+      </thead>
+      <tbody>
+        {% for order in recent_payouts %}
+        <tr>
+          <td class="mono amber" style="font-size:12px;">#{{ order.order_ref|slice:":8"|upper }}</td>
+          <td style="font-weight:600;">{{ order.seller.business_name }}</td>
+          <td class="mono green">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</td>
+          <td class="mono muted" style="font-size:11px;">{{ order.flutterwave_transfer_id|default:"—" }}</td>
+          <td class="mono muted">{{ order.payout_at|date:"M d, Y"|default:"—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

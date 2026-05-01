@@ -179,3 +179,176 @@ def send_reengagement_email(to_email, business_name, store_url, days_inactive=5)
         subject=f"{business_name}, your store hasn't been updated in {days_inactive} days",
         html_content=html,
     )
+
+
+
+def _send(to_email, subject, body):
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=subject,
+        html_content=f"<pre style='font-family:sans-serif;white-space:pre-wrap;'>{body}</pre>",
+        text_content=body,
+    )
+
+
+def send_order_confirmed_buyer(to_email, buyer_name, order_ref, seller_name,
+                                items, subtotal, currency):
+    """Sent to buyer immediately after payment is verified."""
+    item_lines = '\n'.join(
+        f"  • {item.product_name} × {item.quantity}  —  {currency}{item.price:,.0f}"
+        for item in items
+    )
+    subject = f"Your order #{order_ref} is confirmed — {seller_name}"
+    body = f"""Hi {buyer_name},
+
+Your payment has been received and your order is confirmed. 🎉
+
+Order #{order_ref}
+{seller_name}
+
+Items:
+{item_lines}
+
+Total: {currency}{subtotal:,.0f}
+
+Your funds are held safely in escrow. The seller will ship your order soon.
+Once you receive your items, confirm delivery at:
+https://vendopage.com/order/{order_ref}/
+
+If anything goes wrong, you can raise a dispute from that same page.
+
+— Vendopage
+"""
+    return _send(to_email, subject, body)
+
+
+def send_new_order_vendor(to_email, business_name, buyer_name, order_ref,
+                           items, subtotal, currency, dashboard_url):
+    """Sent to vendor when a new order comes in."""
+    item_lines = '\n'.join(
+        f"  • {item.product_name} × {item.quantity}"
+        for item in items
+    )
+    subject = f"New order #{order_ref} — {currency}{subtotal:,.0f}"
+    body = f"""Hi {business_name},
+
+You have a new order! 🛒
+
+Order #{order_ref}
+Buyer: {buyer_name}
+Amount: {currency}{subtotal:,.0f}
+
+Items:
+{item_lines}
+
+The buyer's payment is held in escrow. Please ship the order and mark it as shipped in your dashboard:
+{dashboard_url}
+
+You will receive your payout as soon as the buyer confirms receipt (or automatically after 72 hours).
+
+— Vendopage
+"""
+    return _send(to_email, subject, body)
+
+
+def send_order_shipped_buyer(to_email, buyer_name, order_ref, seller_name,
+                              tracking_info, courier_name, order_url):
+    """Sent to buyer when vendor marks order as shipped."""
+    tracking_line = ''
+    if courier_name or tracking_info:
+        tracking_line = f"\nCourier: {courier_name or '—'}\nTracking: {tracking_info or '—'}\n"
+
+    subject = f"Your order #{order_ref} has been shipped"
+    body = f"""Hi {buyer_name},
+
+Good news! {seller_name} has shipped your order. 📦
+{tracking_line}
+Once you receive your items, please confirm delivery here:
+{order_url}
+
+You have 72 hours to confirm. If we don't hear from you, the funds will be released to the seller automatically.
+
+If you have any problems with your order, you can raise a dispute from the order page before confirming.
+
+— Vendopage
+"""
+    return _send(to_email, subject, body)
+
+
+def send_payment_sent_vendor(to_email, business_name, amount, currency,
+                              order_ref, bank_name, account_number):
+    """Sent to vendor when payout is triggered."""
+    subject = f"Payment sent — {currency}{amount:,.0f} for order #{order_ref}"
+    body = f"""Hi {business_name},
+
+Your payout has been processed. 💰
+
+Order: #{order_ref}
+Amount: {currency}{amount:,.0f}
+Bank: {bank_name}
+Account: ****{account_number}
+
+Funds are on their way to your account. Transfer times depend on your bank (usually within a few hours).
+
+— Vendopage
+"""
+    return _send(to_email, subject, body)
+
+
+def send_dispute_opened(vendor_email, buyer_email, order_ref, reason):
+    """Sent to both parties when a dispute is raised."""
+    subject = f"Dispute opened on order #{order_ref}"
+    vendor_body = f"""Hi,
+
+A buyer has raised a dispute on order #{order_ref}.
+
+Reason: {reason}
+
+Please log in to your dashboard to view the dispute and submit your response within 48 hours:
+https://vendopage.com/dashboard/orders/{order_ref}/
+
+Our team will review both sides and make a final decision.
+
+— Vendopage
+"""
+    buyer_body = f"""Hi,
+
+Your dispute on order #{order_ref} has been received.
+
+Reason: {reason}
+
+Our team will review your case within 48 hours. The vendor has been notified and given 48 hours to respond.
+
+You can track your dispute status here:
+https://vendopage.com/order/{order_ref}/
+
+— Vendopage
+"""
+    _send(vendor_email, subject, vendor_body)
+    _send(buyer_email,  subject, buyer_body)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# INTERNAL: _send helper
+# This should already exist in your email.py. If not, add it:
+#
+# import sib_api_v3_sdk
+# from django.conf import settings
+#
+# def _send(to_email, subject, body):
+#     try:
+#         configuration = sib_api_v3_sdk.Configuration()
+#         configuration.api_key['api-key'] = settings.BREVO_API_KEY
+#         api = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
+#         email = sib_api_v3_sdk.SendSmtpEmail(
+#             to=[{'email': to_email}],
+#             sender={'name': 'Vendopage', 'email': 'noreply@vendopage.com'},
+#             subject=subject,
+#             text_content=body,
+#         )
+#         api.send_transac_email(email)
+#         return True
+#     except Exception as e:
+#         logger.error(f"Email send failed: {e}")
+#         return False
+# ─────────────────────────────────────────────────────────────────────────────

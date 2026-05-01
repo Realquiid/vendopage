@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Raise Dispute — Order #{{ order.order_ref|slice:":8"|upper }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.dispute-page { background:var(--light); min-height:calc(100vh - 64px); padding:40px 20px 80px; display:flex; align-items:flex-start; justify-content:center; }
+.dispute-card { background:var(--white); border:1px solid var(--border); border-radius:24px; width:100%; max-width:600px; overflow:hidden; }
+.dispute-header { padding:28px 32px 20px; border-bottom:1px solid var(--border); }
+.dispute-header h1 { font-family:var(--font-d); font-weight:800; font-size:24px; letter-spacing:-1px; margin-bottom:6px; }
+.dispute-header p { font-size:13px; color:var(--gray); line-height:1.6; }
+.dispute-order-ref { display:inline-flex; align-items:center; gap:6px; background:var(--dark); color:var(--white); font-family:monospace; font-size:12px; font-weight:700; padding:3px 10px; border-radius:100px; letter-spacing:1px; margin-bottom:10px; }
+
+.dispute-body { padding:28px 32px; }
+.form-group { margin-bottom:20px; }
+.form-label { font-size:13px; font-weight:700; color:var(--gray); margin-bottom:8px; display:block; }
+.form-label .req { color:var(--red); }
+
+/* Radio reason cards */
+.reason-options { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.reason-opt { position:relative; }
+.reason-opt input[type="radio"] { position:absolute; opacity:0; width:0; height:0; }
+.reason-opt label { display:flex; flex-direction:column; align-items:center; gap:6px; padding:14px 12px; border:2px solid var(--border); border-radius:14px; cursor:pointer; text-align:center; font-size:12px; font-weight:600; transition:all .18s; background:var(--white); }
+.reason-opt label:hover { border-color:var(--gray); }
+.reason-opt input:checked + label { border-color:var(--red); background:#fff5f5; color:var(--red); }
+.reason-opt-icon { font-size:24px; }
+
+.form-input, .form-textarea { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--r-md); font-family:var(--font-b); font-size:14px; outline:none; transition:border-color .18s; box-sizing:border-box; color:var(--dark); background:var(--white); }
+.form-input:focus, .form-textarea:focus { border-color:var(--red); }
+.form-textarea { resize:vertical; min-height:120px; line-height:1.6; }
+
+.info-box { background:#fff7ed; border:1px solid #fed7aa; border-radius:12px; padding:14px 16px; margin-bottom:20px; font-size:13px; color:#92400e; line-height:1.6; }
+.info-box strong { color:#c2410c; }
+
+.dispute-footer { padding:20px 32px; border-top:1px solid var(--border); display:flex; gap:10px; }
+.btn-cancel { flex:1; padding:12px; border-radius:var(--r-pill); border:1px solid var(--border); background:var(--light); font-family:var(--font-b); font-size:14px; font-weight:600; cursor:pointer; transition:all .18s; color:var(--dark); text-decoration:none; text-align:center; }
+.btn-cancel:hover { border-color:var(--dark); }
+.btn-submit-dispute { flex:2; padding:12px; border-radius:var(--r-pill); border:none; background:var(--red); color:#fff; font-family:var(--font-b); font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; }
+.btn-submit-dispute:hover { background:#dc2626; }
+
+[data-theme="dark"] .dispute-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .dispute-header { border-color:#2e2e2e; }
+[data-theme="dark"] .dispute-footer { border-color:#2e2e2e; }
+[data-theme="dark"] .reason-opt label { background:#2a2a2a; border-color:#3a3a3a; color:#ccc; }
+[data-theme="dark"] .form-input, [data-theme="dark"] .form-textarea { background:#2a2a2a; border-color:#3a3a3a; color:#f0f0f0; }
+
+@media(max-width:500px) {
+  .reason-options { grid-template-columns:1fr 1fr; }
+  .dispute-header, .dispute-body, .dispute-footer { padding:20px 20px; }
+  .dispute-footer { flex-direction:column; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dispute-page">
+<div class="dispute-card">
+
+  <div class="dispute-header">
+    <div class="dispute-order-ref">#{{ order.order_ref|slice:":8"|upper }}</div>
+    <h1>⚠️ Raise a Dispute</h1>
+    <p>Something went wrong with your order? Let us know. Our team reviews all disputes within 48 hours and your payment remains in escrow until resolved.</p>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="dispute-body">
+
+      <div class="info-box">
+        <strong>Before raising a dispute:</strong> We recommend trying to contact the seller first via WhatsApp. Many issues can be resolved quickly through direct communication.
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">What's the issue? <span class="req">*</span></label>
+        <div class="reason-options">
+          <div class="reason-opt">
+            <input type="radio" name="reason" id="r_not_received" value="not_received" checked>
+            <label for="r_not_received">
+              <span class="reason-opt-icon">📦</span>
+              Item not received
+            </label>
+          </div>
+          <div class="reason-opt">
+            <input type="radio" name="reason" id="r_wrong_item" value="wrong_item">
+            <label for="r_wrong_item">
+              <span class="reason-opt-icon">❌</span>
+              Wrong item sent
+            </label>
+          </div>
+          <div class="reason-opt">
+            <input type="radio" name="reason" id="r_damaged" value="damaged">
+            <label for="r_damaged">
+              <span class="reason-opt-icon">💔</span>
+              Item damaged
+            </label>
+          </div>
+          <div class="reason-opt">
+            <input type="radio" name="reason" id="r_other" value="other">
+            <label for="r_other">
+              <span class="reason-opt-icon">🤔</span>
+              Other issue
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="dispute-msg">Describe the problem <span class="req">*</span></label>
+        <textarea id="dispute-msg" name="message" class="form-textarea" placeholder="Please describe in detail what happened and what resolution you expect..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="evidence-url">Evidence (optional)</label>
+        <input type="url" id="evidence-url" name="evidence_url" class="form-input" placeholder="Link to photo/video evidence (e.g. Google Drive, Cloudinary)">
+        <p style="font-size:12px;color:var(--gray-lt);margin-top:5px;">Upload a photo/video to a cloud service and paste the link here.</p>
+      </div>
+
+    </div>
+
+    <div class="dispute-footer">
+      <a href="/order/{{ order.order_ref }}/" class="btn-cancel">Cancel</a>
+      <button type="submit" class="btn-submit-dispute">Submit Dispute</button>
+    </div>
+  </form>
+
+</div>
+</div>
+{% block footer %}{% endblock %}
+{% endblock %}

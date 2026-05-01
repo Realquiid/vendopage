@@ -172,7 +172,8 @@
       </div>
       {% endif %}
 
-      <form method="POST" action="{% url 'register' %}{% if request.GET.guest %}?guest=1{% endif %}">
+      
+      <form method="POST" action="{% url 'register' %}">
         {% csrf_token %}
         <!-- Hidden fields — filled by JS -->
         <input type="hidden" name="country_code"    id="hCountryCode"    value="+234">
@@ -181,17 +182,16 @@
         <input type="hidden" name="category" value="other">
 
         <!-- Add this inside the register form, after the hidden fields -->
-        <input type="hidden" name="username" id="hUsername" value="{{ username|default:'' }}">
+        <input type="hidden" name="username" id="hUsername" value="">
 
         <!-- Business name — pre-filled from session, read-only if coming from guest flow -->
         <div class="f-group">
           <label class="f-label">Business Name</label>
-          <div class="f-wrap {% if business_name %}readonly{% endif %}">
+          <div class="f-wrap">
             <span class="f-icon"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
             <input type="text" name="business_name" class="f-input"
                    placeholder="Your store name"
-                   value="{{ business_name|default:'' }}"
-                   {% if business_name %}readonly{% endif %}
+                   value=""
                    required>
           </div>
         </div>
@@ -428,24 +428,20 @@ function flagImg(code) {
   return `<img src="https://flagcdn.com/20x15/${code}.png" width="20" height="15" alt="${code}" style="border-radius:2px;flex-shrink:0;">`;
 }
 
-// Add inside the DOMContentLoaded or at bottom of extra_js
-const bizInput = document.querySelector('input[name="business_name"]');
-const hUsername = document.getElementById('hUsername');
-
-// Only auto-generate if username isn't already set from session
-if (bizInput && hUsername && !hUsername.value) {
-  bizInput.addEventListener('input', function() {
-    // Only update if field is not readonly (meaning no session value)
-    if (!this.readOnly) {
-      const slug = this.value.toLowerCase()
+// Always generate username from business name
+document.addEventListener('DOMContentLoaded', function() {
+  const bizInput = document.querySelector('input[name="business_name"]');
+  const hUsername = document.getElementById('hUsername');
+  if (bizInput && hUsername) {
+    bizInput.addEventListener('input', function() {
+      hUsername.value = this.value.toLowerCase()
         .replace(/[^a-z0-9\s]/g, '')
         .trim()
         .replace(/\s+/g, '_')
         .substring(0, 30);
-      hUsername.value = slug;
-    }
-  });
-}
+    });
+  }
+});
 
 function renderList(list) {
   document.getElementById('ccList').innerHTML = list.map(c =>

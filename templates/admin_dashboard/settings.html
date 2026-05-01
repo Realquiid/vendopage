@@ -1,0 +1,214 @@
+{% extends 'admin_dashboard/base_admin.html' %}
+
+{% block title %}Platform Settings — VendoPage Admin{% endblock %}
+{% block breadcrumb %}Platform Settings{% endblock %}
+{% block nav_settings %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+.settings-grid { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:18px; }
+.settings-section {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--r-lg); overflow:hidden;
+}
+.settings-section-head {
+  padding:14px 18px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px;
+}
+.settings-section-icon {
+  width:32px; height:32px; border-radius:var(--r-sm);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.settings-section-title { font-family:var(--font-head); font-size:13px; font-weight:700; color:var(--text); }
+.settings-section-desc  { font-size:11px; color:var(--text3); margin-top:1px; }
+.settings-section-body  { padding:18px; }
+
+.setting-row { margin-bottom:16px; }
+.setting-row:last-child { margin-bottom:0; }
+.setting-label { font-family:var(--font-mono); font-size:11px; letter-spacing:.5px; text-transform:uppercase; color:var(--text3); margin-bottom:6px; display:block; }
+.setting-hint  { font-size:12px; color:var(--text3); margin-top:6px; line-height:1.5; }
+
+.current-val {
+  display:inline-flex; align-items:center; gap:6px;
+  background:var(--amber-glow); border:1px solid rgba(245,158,11,.2);
+  border-radius:var(--r-pill); padding:3px 12px;
+  font-family:var(--font-mono); font-size:13px; color:var(--amber); font-weight:600;
+}
+
+.stat-summary-row { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; margin-bottom:18px; }
+.stat-mini {
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:var(--r-md); padding:13px 14px;
+}
+.stat-mini-label { font-family:var(--font-mono); font-size:10px; letter-spacing:.8px; text-transform:uppercase; color:var(--text3); margin-bottom:5px; }
+.stat-mini-val   { font-family:var(--font-head); font-size:20px; font-weight:800; color:var(--text); }
+.stat-mini-sub   { font-family:var(--font-mono); font-size:11px; color:var(--text3); margin-top:3px; }
+
+@media(max-width:700px){ .settings-grid{ grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Platform Settings</div>
+    <div class="page-subtitle">fee structure · subscription pricing · platform controls</div>
+  </div>
+  <div class="page-actions">
+    <span class="badge badge-green">● Live</span>
+    <span class="mono muted" style="font-size:11px;">Changes apply immediately</span>
+  </div>
+</div>
+
+<!-- Platform KPI summary -->
+<div class="stat-summary-row">
+  <div class="stat-mini">
+    <div class="stat-mini-label">Current Fee</div>
+    <div class="stat-mini-val amber">{{ settings.transaction_fee_percent }}%</div>
+    <div class="stat-mini-sub">Per escrow order</div>
+  </div>
+  <div class="stat-mini">
+    <div class="stat-mini-label">Premium Price</div>
+    <div class="stat-mini-val">₦{{ settings.premium_monthly_price|floatformat:0 }}</div>
+    <div class="stat-mini-sub">Per month</div>
+  </div>
+  <div class="stat-mini">
+    <div class="stat-mini-label">Premium Sellers</div>
+    <div class="stat-mini-val">{{ premium_count }}</div>
+    <div class="stat-mini-sub">₦{{ monthly_revenue|floatformat:0 }}/mo revenue</div>
+  </div>
+  <div class="stat-mini">
+    <div class="stat-mini-label">Total Sellers</div>
+    <div class="stat-mini-val">{{ total_sellers }}</div>
+    <div class="stat-mini-sub">Active accounts</div>
+  </div>
+  <div class="stat-mini">
+    <div class="stat-mini-label">Last Updated</div>
+    <div class="stat-mini-val" style="font-size:14px;">{{ settings.updated_at|date:"M d" }}</div>
+    <div class="stat-mini-sub">{{ settings.updated_at|date:"H:i" }}</div>
+  </div>
+</div>
+
+<div class="settings-grid">
+
+  <!-- Transaction Fee -->
+  <div class="settings-section">
+    <div class="settings-section-head">
+      <div class="settings-section-icon" style="background:var(--amber-glow);">
+        <svg width="16" height="16" fill="none" stroke="var(--amber)" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      </div>
+      <div>
+        <div class="settings-section-title">Transaction Fee</div>
+        <div class="settings-section-desc">Platform cut from each escrow order</div>
+      </div>
+    </div>
+    <div class="settings-section-body">
+      <div class="setting-row">
+        <span class="setting-label">Current Rate</span>
+        <div class="current-val">{{ settings.transaction_fee_percent }}% per order</div>
+      </div>
+      <form method="POST" action="{% url 'admin_settings' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_fee">
+        <div class="setting-row">
+          <label class="setting-label" for="fee">New Fee Percentage</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="number" id="fee" name="transaction_fee_percent"
+              class="form-input" style="max-width:120px;"
+              value="{{ settings.transaction_fee_percent }}"
+              min="0" max="30" step="0.5" required>
+            <span class="mono muted">%</span>
+          </div>
+          <div class="setting-hint">
+            Example: if order is ₦10,000 and fee is 5%, platform earns ₦500, vendor receives ₦9,500.
+            Takes effect on all <strong>new</strong> orders immediately.
+          </div>
+        </div>
+        <button type="submit" class="btn btn-amber">Update Fee</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Premium Price -->
+  <div class="settings-section">
+    <div class="settings-section-head">
+      <div class="settings-section-icon" style="background:var(--amber-glow);">
+        <svg width="16" height="16" fill="none" stroke="var(--amber)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      </div>
+      <div>
+        <div class="settings-section-title">Premium Subscription</div>
+        <div class="settings-section-desc">Monthly price sellers pay to upgrade</div>
+      </div>
+    </div>
+    <div class="settings-section-body">
+      <div class="setting-row">
+        <span class="setting-label">Current Price</span>
+        <div class="current-val">₦{{ settings.premium_monthly_price|floatformat:0 }} / month</div>
+      </div>
+      <form method="POST" action="{% url 'admin_settings' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_premium_price">
+        <div class="setting-row">
+          <label class="setting-label" for="price">New Monthly Price (₦)</label>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span class="mono muted">₦</span>
+            <input type="number" id="price" name="premium_monthly_price"
+              class="form-input" style="max-width:140px;"
+              value="{{ settings.premium_monthly_price|floatformat:0 }}"
+              min="0" step="100" required>
+          </div>
+          <div class="setting-hint">
+            Takes effect on the next payment attempt. Existing subscriptions are not affected.
+          </div>
+        </div>
+        <button type="submit" class="btn btn-amber">Update Price</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- Danger Zone -->
+<div class="settings-section" style="border-color:rgba(239,68,68,.25);">
+  <div class="settings-section-head" style="border-bottom-color:rgba(239,68,68,.15);">
+    <div class="settings-section-icon" style="background:var(--red-dim);">
+      <svg width="16" height="16" fill="none" stroke="var(--red)" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div>
+      <div class="settings-section-title" style="color:var(--red);">Bulk Operations</div>
+      <div class="settings-section-desc">Platform-wide actions — use carefully</div>
+    </div>
+  </div>
+  <div class="settings-section-body">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;">
+
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;">
+        <div style="font-weight:700;font-size:13px;margin-bottom:5px;">Reset All Weekly Analytics</div>
+        <div class="setting-hint" style="margin-bottom:12px;">Clears weekly_page_views and weekly_whatsapp_clicks for every seller. Runs automatically every 7 days but you can force it here.</div>
+        <form method="POST" action="{% url 'admin_settings' %}" onsubmit="return confirm('Reset weekly analytics for ALL sellers?')">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="reset_all_analytics">
+          <button class="btn btn-danger btn-sm">Reset Weekly Stats</button>
+        </form>
+      </div>
+
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;">
+        <div style="font-weight:700;font-size:13px;margin-bottom:5px;">Release Expired Escrow Orders</div>
+        <div class="setting-hint" style="margin-bottom:12px;">Manually triggers auto-release for all shipped orders where 72 hours have passed. Normally runs on a cron job.</div>
+        <form method="POST" action="{% url 'admin_settings' %}" onsubmit="return confirm('Auto-release all expired escrow orders and trigger payouts?')">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="run_auto_release">
+          <button class="btn btn-danger btn-sm">Run Auto-Release</button>
+        </form>
+      </div>
+
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-md);padding:14px 16px;">
+        <div style="font-weight:700;font-size:13px;margin-bottom:5px;">Django Admin</div>
+        <div class="setting-hint" style="margin-bottom:12px;">Access the full Django admin for advanced DB operations, raw model editing, and user management.</div>
+        <a href="/admin/" target="_blank" class="btn btn-ghost btn-sm">Open Django Admin ↗</a>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

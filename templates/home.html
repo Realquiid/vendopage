@@ -2,460 +2,846 @@
 {% load static %}
 
 {% block title %}VendoPage — Upload Once. Sell Forever.{% endblock %}
-{% block meta_description %}Upload 50 products in one click. Get your own store link instantly. Built for WhatsApp vendors.{% endblock %}
+{% block meta_description %}Upload 50 products in one click. Get your permanent store link instantly. Built for WhatsApp vendors across Nigeria.{% endblock %}
 {% block og_title %}VendoPage — Your Permanent WhatsApp Store{% endblock %}
 {% block og_description %}Upload once. Sell forever. Your products, your link, your store.{% endblock %}
 
+{% block footer %}{% include 'includes/footer.html' %}{% endblock %}
+
 {% block extra_css %}
 <style>
-
-/* ── DARK MODE FIX: homepage body ── */
-[data-theme="dark"] .hp-hero,
-[data-theme="dark"] .hp-section,
-[data-theme="dark"] .hp-faq-section { background: #141414; }
-[data-theme="dark"] .hp-section-alt,
-[data-theme="dark"] .hp-steps-carousel-wrap { background: #1a1a1a; }
-[data-theme="dark"] .hp-hero h1,
-[data-theme="dark"] .hp-section-title,
-[data-theme="dark"] .hp-step-new h3,
-[data-theme="dark"] .hp-benefit-card h3,
-[data-theme="dark"] .hp-faq-question,
-[data-theme="dark"] .hp-seller-name,
-[data-theme="dark"] .hp-phone-name-txt { color: #f0f0f0; }
-[data-theme="dark"] .hp-hero-sub,
-[data-theme="dark"] .hp-section-sub,
-[data-theme="dark"] .hp-step-new p,
-[data-theme="dark"] .hp-benefit-card p,
-[data-theme="dark"] .hp-faq-sub,
-[data-theme="dark"] .hp-seller-cat { color: #a0a0a0; }
-[data-theme="dark"] .hp-proof { background: #1a1a1a; border-color: #2e2e2e; }
-[data-theme="dark"] .hp-proof-num { color: #f0f0f0; }
-[data-theme="dark"] .hp-proof-label { color: #666; }
-[data-theme="dark"] .hp-proof-divider { background: #2e2e2e; }
-[data-theme="dark"] .hp-benefit-card { background: #1e1e1e; border-color: #2e2e2e; }
-[data-theme="dark"] .hp-benefit-card:hover { border-color: var(--green); }
-[data-theme="dark"] .hp-seller-card { background: #1e1e1e; border-color: #2e2e2e; }
-[data-theme="dark"] .hp-seller-count { background: #2a2a2a; color: #888; }
-[data-theme="dark"] .hp-faq-list { border-color: #2e2e2e; }
-[data-theme="dark"] .hp-faq-item { border-color: #2e2e2e; }
-[data-theme="dark"] .hp-faq-question:hover,
-[data-theme="dark"] .hp-faq-item.open .hp-faq-question { background: #1e1e1e; }
-[data-theme="dark"] .hp-faq-answer { background: #1e1e1e; }
-[data-theme="dark"] .hp-faq-answer p { color: #a0a0a0; }
-[data-theme="dark"] .hp-phone { border-color: #2e2e2e; background: #1e1e1e; }
-[data-theme="dark"] .hp-phone-products { background: #141414; }
-[data-theme="dark"] .hp-phone-product { background: #1e1e1e; }
-[data-theme="dark"] .hp-step-new { background: #1e1e1e; }
-[data-theme="dark"] .hp-step-new:hover { background: #252525; }
-[data-theme="dark"] .hp-steps-new { border-color: #2e2e2e; }
-[data-theme="dark"] .hp-step-new { border-right-color: #2e2e2e; }
-[data-theme="dark"] .hp-step-tag-dot { background: #252525; border-color: #3a3a3a; color: #666; }
-[data-theme="dark"] .hp-step-arrow { background: #1e1e1e; border-color: #3a3a3a; }
-[data-theme="dark"] .carousel-dot { background: #3a3a3a; }
-[data-theme="dark"] .carousel-dot.active { background: var(--green); }
-[data-theme="dark"] .carousel-btn { background: #1e1e1e; border-color: #3a3a3a; }
-[data-theme="dark"] .hp-carousel-slide { background: #1e1e1e; border-color: #2e2e2e; }
-[data-theme="dark"] .hp-seller-fallback { background: #333; }
-[data-theme="dark"] .hp-ghost-btn { border-color: #3a3a3a; color: #888; }
-[data-theme="dark"] .hp-ghost-btn:hover { color: #f0f0f0; border-color: #888; background: #1e1e1e; }
-[data-theme="dark"] .hero-cta { background: #f0f0f0; border: 1.5px solid #3a3a3a; color: #000; }
-[data-theme="dark"] .em-submit { background: #f0f0f0;  color: #000; }
-[data-theme="dark"] .em-submit:hover { background: #fff; }
-
-/* ── ENTRY MODAL ── */
-.entry-overlay {
-  position: fixed; inset: 0; z-index: 800;
-  background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  opacity: 0; pointer-events: none; transition: opacity .25s;
-}
-.entry-overlay.open { opacity: 1; pointer-events: auto; }
-.entry-modal {
-  background: var(--white); border-radius: 20px;
-  width: 100%; max-width: 380px;
-  padding: 36px 28px 28px;
-  box-shadow: 0 32px 80px rgba(0,0,0,.22);
-  transform: translateY(16px) scale(.97);
-  transition: transform .3s cubic-bezier(.22,1,.36,1);
-}
-[data-theme="dark"] .entry-modal { background: #1e1e1e; }
-.entry-overlay.open .entry-modal { transform: translateY(0) scale(1); }
-.entry-logo {
-  font-family: var(--font-d); font-weight: 800; font-size: 15px;
-  color: var(--dark); text-decoration: none; display: inline-block; margin-bottom: 20px;
-}
-.entry-logo span { color: var(--green); }
-.entry-modal h2 {
-  font-family: var(--font-d); font-weight: 800; font-size: 20px;
-  letter-spacing: -.4px; color: var(--dark); margin-bottom: 4px;
-}
-[data-theme="dark"] .entry-modal h2 { color: #f0f0f0; }
-.entry-modal > p { font-size: 13px; color: var(--gray); margin-bottom: 22px; line-height: 1.5; }
-.em-group { margin-bottom: 13px; }
-.em-label {
-  display: block; font-size: 11px; font-weight: 700;
-  color: var(--gray); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 5px;
-}
-.em-input {
-  width: 100%; padding: 11px 13px;
-  border: 1.5px solid var(--border); border-radius: 10px;
-  font-family: var(--font-b); font-size: 14px; color: var(--dark);
-  outline: none; transition: border-color .2s, box-shadow .2s;
-  background: var(--white);
-}
-[data-theme="dark"] .em-input { background: #252525; border-color: #3a3a3a; color: #f0f0f0; }
-.em-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,200,83,.09); }
-.em-input::placeholder { color: var(--gray-lt); }
-.em-input.error { border-color: #f87171; }
-.slug-row {
-  display: flex; align-items: center;
-  border: 1.5px solid var(--border); border-radius: 10px;
-  overflow: hidden; transition: border-color .2s, box-shadow .2s;
-}
-[data-theme="dark"] .slug-row { border-color: #3a3a3a; }
-.slug-row:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,200,83,.09); }
-.slug-prefix {
-  padding: 11px 8px 11px 13px;
-  font-size: 12px; color: var(--gray-lt); font-weight: 500;
-  background: var(--light); white-space: nowrap; flex-shrink: 0;
-  border-right: 1px solid var(--border);
-}
-[data-theme="dark"] .slug-prefix { background: #252525; border-color: #3a3a3a; }
-.slug-input {
-  flex: 1; padding: 11px 13px 11px 8px;
-  border: none; outline: none;
-  font-family: var(--font-b); font-size: 14px; color: var(--dark);
-  background: transparent; min-width: 0;
-}
-[data-theme="dark"] .slug-input { color: #f0f0f0; }
-.slug-input::placeholder { color: var(--gray-lt); }
-.em-hint { font-size: 11px; color: var(--gray-lt); margin-top: 4px; }
-.em-hint.taken { color: #ef4444; }
-.em-hint.available { color: var(--green); }
-.em-submit {
-  width: 100%; padding: 13px; margin-top: 6px;
-  background: var(--dark); color: #fff; border: none; border-radius: 10px;
-  font-family: var(--font-b); font-size: 14px; font-weight: 600;
-  cursor: pointer; transition: background .18s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.em-submit:hover { background: #222; }
-.em-submit:disabled { background: var(--gray-lt); cursor: not-allowed; }
-.em-spin {
-  width: 15px; height: 15px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
-  animation: spin .7s linear infinite; display: none;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.em-signin { text-align: center; font-size: 12px; color: var(--gray-lt); margin-top: 14px; }
-.em-signin a { color: var(--green); font-weight: 600; text-decoration: none; }
-
-/* ── ROOT & HERO ── */
+/* ─────────────────────────────────────────────
+   HP ROOT VARS
+───────────────────────────────────────────── */
 :root {
-  --primary:#00C853; --primary-dark:#00a844; --primary-lt:#e8fff0;
-  --bg:#ffffff; --bg-alt:#F7F7F5; --text:#0A0A0A; --text-muted:#6B6B6B;
-  --border-c:#E8E8E4; --radius:12px; --radius-lg:20px;
+  --hp-green:     #00C853;
+  --hp-green-dk:  #00a844;
+  --hp-green-lt:  rgba(0,200,83,.08);
+  --hp-green-brd: rgba(0,200,83,.2);
+  --hp-bg:        #ffffff;
+  --hp-bg-alt:    #F7F7F5;
+  --hp-text:      #0A0A0A;
+  --hp-muted:     #6B6B6B;
+  --hp-lt:        #A8A8A8;
+  --hp-bord:      #E8E8E4;
+  --hp-bord2:     rgba(0,0,0,.1);
+  --hp-r:         12px;
+  --hp-rlg:       20px;
+  --hp-pill:      100px;
 }
+
+/* ─── DARK MODE ─────────────────────────────── */
+[data-theme="dark"] {
+  --hp-bg:      #141414;
+  --hp-bg-alt:  #1a1a1a;
+  --hp-text:    #f0f0f0;
+  --hp-muted:   #a0a0a0;
+  --hp-lt:      #606060;
+  --hp-bord:    #2e2e2e;
+  --hp-bord2:   rgba(255,255,255,.08);
+}
+
+/* ─── HERO ──────────────────────────────────── */
 .hp-hero {
-  padding: 100px 40px 80px; background: var(--bg);
-  position: relative; overflow: hidden;
+  padding: 100px 40px 88px;
+  background: var(--hp-bg);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 .hp-hero::before {
-  content:''; position:absolute; top:-200px; right:-200px;
-  width:600px; height:600px;
-  background:radial-gradient(circle,rgba(0,200,83,.07) 0%,transparent 65%);
-  border-radius:50%; pointer-events:none;
+  content: '';
+  position: absolute;
+  top: -280px; left: 50%;
+  transform: translateX(-50%);
+  width: 820px; height: 820px;
+  background: radial-gradient(circle, rgba(0,200,83,.065) 0%, transparent 62%);
+  border-radius: 50%;
+  pointer-events: none;
 }
-.hp-hero-inner { max-width:860px; margin:0 auto; text-align:center; position:relative; z-index:1; }
+.hp-hero-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+/* Badge */
+.hp-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 8px;
+  background: var(--hp-green-lt);
+  border: 1px solid var(--hp-green-brd);
+  border-radius: var(--hp-pill);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hp-green-dk);
+  margin-bottom: 30px;
+}
+.hp-hero-badge-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--hp-green);
+}
+
 .hp-hero h1 {
-  font-family:'Syne',sans-serif; font-weight:800;
-  font-size:clamp(40px,6.5vw,78px); line-height:1.0;
-  letter-spacing:-2px; color:var(--text); margin-bottom:24px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(42px, 6.5vw, 76px);
+  line-height: 1.0;
+  letter-spacing: -2.5px;
+  color: var(--hp-text);
+  margin-bottom: 22px;
 }
-.hp-accent { color:var(--primary); }
+.hp-accent { color: var(--hp-green); }
+
 .hp-hero-sub {
-  font-size:clamp(16px,2.2vw,20px); color:var(--text-muted);
-  max-width:520px; margin:0 auto 48px; line-height:1.7;
+  font-size: clamp(16px, 2vw, 19px);
+  color: var(--hp-muted);
+  max-width: 480px;
+  margin: 0 auto 44px;
+  line-height: 1.75;
 }
-.hp-hero-actions { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
 
-/* ── NEW BUTTON STYLE ── */
+.hp-hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+
+/* Primary CTA */
 .hero-cta {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 14px 28px; background: var(--dark); color: #ffffff;
-  border: none; border-radius: 100px;
-  font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 600;
-  cursor: pointer; transition: all .22s; text-decoration: none;
-}
-.hero-cta:hover { background: #222; transform: translateY(-2px); }
-.hero-cta-arrow {
-  width: 26px; height: 26px; background: var(--green);
-  border-radius: 50%; display: inline-flex;
-  align-items: center; justify-content: center; flex-shrink: 0;
-}
-.hp-ghost-btn {
-  display:inline-flex; align-items:center; gap:6px;
-  padding:14px 24px; color:var(--text-muted); font-size:15px; font-weight:500;
-  text-decoration:none; border:1.5px solid var(--border-c); border-radius:100px; transition:all .22s;
-}
-.hp-ghost-btn:hover { color:var(--text); border-color:var(--text); background:var(--bg-alt); }
-
-/* ── PROOF BAR ── */
-.hp-proof { border-top:1px solid var(--border-c); border-bottom:1px solid var(--border-c); padding:24px 40px; background:var(--bg-alt); overflow:hidden; }
-.hp-proof-track { display:flex; gap:64px; animation:proofScroll 22s linear infinite; width:max-content; }
-.hp-proof:hover .hp-proof-track { animation-play-state:paused; }
-@keyframes proofScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.hp-proof-item { display:flex; align-items:center; gap:14px; flex-shrink:0; }
-.hp-proof-num { font-family:'Syne',sans-serif; font-weight:800; font-size:30px; letter-spacing:-1px; color:var(--text); }
-.hp-proof-label { font-size:12px; color:var(--text-muted); line-height:1.4; font-weight:500; }
-.hp-proof-divider { width:1px; height:32px; background:var(--border-c); flex-shrink:0; }
-
-/* ── SHARED ── */
-.hp-section { padding:90px 40px; background:var(--bg); }
-.hp-section-alt { padding:90px 40px; background:var(--bg-alt); }
-.hp-container { max-width:1080px; margin:0 auto; }
-.hp-container-sm { max-width:780px; margin:0 auto; }
-.hp-section-label { display:block; font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--primary); margin-bottom:14px; }
-.hp-section-title { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(26px,4vw,46px); letter-spacing:-1.5px; color:var(--text); margin-bottom:16px; line-height:1.1; }
-.hp-section-sub { font-size:17px; color:var(--text-muted); line-height:1.6; max-width:560px; }
-.hp-section-head { margin-bottom:48px; }
-.hp-section-head.center { text-align:center; }
-.hp-section-head.center .hp-section-sub { margin:0 auto; }
-
-/* ── HOW IT WORKS ── */
-.hp-steps-carousel-wrap { padding:80px 40px; background:var(--bg-alt); }
-.hp-steps-carousel-inner { max-width:1080px; margin:0 auto; }
-
-/* Desktop 3-col grid */
-.hp-steps-new {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  gap: 0; border: 1.5px solid var(--border-c);
-  border-radius: var(--radius-lg); overflow: hidden;
-}
-.hp-step-new {
-  background: var(--bg); padding: 32px 28px; position: relative;
-  transition: background .22s; border-right: 1px solid var(--border-c);
-}
-.hp-step-new:last-child { border-right: none; }
-.hp-step-new:hover { background: var(--bg-alt); }
-.hp-step-new:hover .hp-step-icon-new { background: var(--primary); }
-.hp-step-tag-dot {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--bg-alt); border: 1.5px solid var(--border-c);
-  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 10px;
-  color: var(--text-muted); margin-bottom: 18px;
-  transition: background .22s, border-color .22s, color .22s;
-}
-.hp-step-new:hover .hp-step-tag-dot {
-  background: var(--primary-lt); border-color: var(--primary); color: var(--primary-dark);
-}
-.hp-step-icon-new {
-  width: 42px; height: 42px; background: var(--text);
-  border-radius: 11px; display: flex; align-items: center; justify-content: center;
-  margin-bottom: 16px; transition: background .22s;
-}
-.hp-step-new h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:var(--text); margin-bottom:8px; }
-.hp-step-new p { font-size:13px; color:var(--text-muted); line-height:1.75; }
-.hp-step-arrow {
-  position: absolute; top: 32px; right: -13px; z-index: 2;
-  width: 24px; height: 24px; background: var(--bg);
-  border: 1.5px solid var(--border-c); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 26px;
+  background: var(--hp-text);
+  color: #fff;
+  border: none;
+  border-radius: var(--hp-pill);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
   transition: all .22s;
 }
-.hp-step-new:last-child .hp-step-arrow { display: none; }
-.hp-step-new:hover .hp-step-arrow { background: var(--primary-lt); border-color: var(--primary); }
-.hp-step-new:hover .hp-step-arrow svg { stroke: var(--primary); }
+.hero-cta:hover {
+  background: #1a1a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0,0,0,.18);
+}
+.hero-cta-arrow {
+  width: 26px; height: 26px;
+  background: var(--hp-green);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+[data-theme="dark"] .hero-cta {
+  background: #f0f0f0;
+  color: #000;
+}
 
-/* Progress line (desktop) */
+/* Ghost btn */
+.hp-ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 22px;
+  color: var(--hp-muted);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1.5px solid var(--hp-bord);
+  border-radius: var(--hp-pill);
+  transition: all .22s;
+}
+.hp-ghost-btn:hover {
+  color: var(--hp-text);
+  border-color: var(--hp-text);
+  background: var(--hp-bg-alt);
+}
+
+/* Trust row */
+.hp-hero-trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.hp-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--hp-lt);
+}
+.hp-trust-item svg { color: var(--hp-green); flex-shrink: 0; }
+
+/* ─── PROOF TICKER ────────────────────────── */
+.hp-proof {
+  overflow: hidden;
+  border-top: 1px solid var(--hp-bord);
+  border-bottom: 1px solid var(--hp-bord);
+  background: var(--hp-bg-alt);
+}
+.hp-proof-track {
+  display: flex;
+  animation: proofScroll 26s linear infinite;
+  width: max-content;
+}
+.hp-proof:hover .hp-proof-track { animation-play-state: paused; }
+@keyframes proofScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.hp-proof-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 44px;
+  border-right: 1px solid var(--hp-bord);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.hp-proof-num {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 26px;
+  letter-spacing: -1px;
+  color: var(--hp-text);
+}
+.hp-proof-label {
+  font-size: 12px;
+  color: var(--hp-muted);
+  line-height: 1.35;
+  font-weight: 500;
+}
+
+/* ─── SHARED SECTION UTILITIES ────────────── */
+.hp-section     { padding: 90px 40px; background: var(--hp-bg); }
+.hp-section-alt { padding: 90px 40px; background: var(--hp-bg-alt); }
+.hp-container   { max-width: 1100px; margin: 0 auto; }
+.hp-container-sm{ max-width: 760px;  margin: 0 auto; }
+
+.hp-section-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--hp-green);
+  margin-bottom: 12px;
+}
+.hp-section-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(26px, 3.8vw, 44px);
+  letter-spacing: -1.5px;
+  color: var(--hp-text);
+  margin-bottom: 14px;
+  line-height: 1.08;
+}
+.hp-section-sub {
+  font-size: 16px;
+  color: var(--hp-muted);
+  line-height: 1.65;
+  max-width: 520px;
+}
+.hp-section-head { margin-bottom: 44px; }
+.hp-section-head.center { text-align: center; }
+.hp-section-head.center .hp-section-sub { margin: 0 auto; }
+
+/* Header with right-side button */
+.hp-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+.hp-see-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border: 1.5px solid var(--hp-bord);
+  border-radius: var(--hp-pill);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hp-muted);
+  text-decoration: none;
+  transition: all .2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.hp-see-all:hover {
+  border-color: var(--hp-text);
+  color: var(--hp-text);
+  background: var(--hp-bg-alt);
+}
+.hp-see-all svg { transition: transform .2s; }
+.hp-see-all:hover svg { transform: translateX(3px); }
+
+/* ─── FEATURED VENDOR CARDS ───────────────── */
+.hp-featured-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+.hp-seller-card {
+  background: var(--hp-bg);
+  border: 1.5px solid var(--hp-bord);
+  border-radius: var(--hp-rlg);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: all .22s;
+  position: relative;
+}
+.hp-seller-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0,0,0,.1);
+  border-color: rgba(0,200,83,.35);
+}
+[data-theme="dark"] .hp-seller-card { background: #1e1e1e; border-color: #2e2e2e; }
+[data-theme="dark"] .hp-seller-card:hover { border-color: rgba(0,200,83,.4); }
+
+.hp-seller-img {
+  height: 116px;
+  position: relative;
+  overflow: hidden;
+  background: var(--hp-bg-alt);
+}
+.hp-seller-img img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .4s;
+}
+.hp-seller-card:hover .hp-seller-img img { transform: scale(1.05); }
+
+.hp-seller-fallback {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 42px;
+  color: #fff;
+}
+/* Gradient fallbacks */
+.hp-fc-0 { background: linear-gradient(135deg,#667eea,#764ba2); }
+.hp-fc-1 { background: linear-gradient(135deg,#f093fb,#f5576c); }
+.hp-fc-2 { background: linear-gradient(135deg,#4facfe,#00f2fe); }
+.hp-fc-3 { background: linear-gradient(135deg,#43e97b,#38f9d7); }
+
+.hp-seller-badge-ft {
+  position: absolute;
+  top: 10px; left: 10px;
+  background: var(--hp-text);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--hp-pill);
+}
+.hp-seller-body { padding: 16px; }
+.hp-seller-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--hp-text);
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hp-seller-cat { font-size: 11px; color: var(--hp-lt); margin-bottom: 12px; }
+.hp-seller-footer { display: flex; align-items: center; justify-content: space-between; }
+.hp-seller-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--hp-bg-alt);
+  border-radius: var(--hp-pill);
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--hp-muted);
+}
+[data-theme="dark"] .hp-seller-count { background: #252525; color: #888; }
+.hp-seller-wa {
+  width: 28px; height: 28px;
+  background: rgba(37,211,102,.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .18s;
+}
+.hp-seller-card:hover .hp-seller-wa { background: rgba(37,211,102,.22); }
+
+/* ─── HOW IT WORKS ────────────────────────── */
+.hp-steps-carousel-wrap {
+  padding: 88px 40px;
+  background: var(--hp-bg-alt);
+}
+.hp-steps-carousel-inner { max-width: 1100px; margin: 0 auto; }
+
 .hp-steps-progress {
-  display: flex; align-items: center; margin-bottom: 28px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 24px;
 }
 .hp-steps-progress-item { display: flex; align-items: center; flex: 1; }
 .hp-progress-dot {
-  width: 9px; height: 9px; border-radius: 50%;
-  background: var(--primary); flex-shrink: 0; position: relative;
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: var(--hp-green);
+  flex-shrink: 0;
+  position: relative;
 }
 .hp-progress-dot::after {
-  content:''; position:absolute; top:50%; left:50%;
-  transform:translate(-50%,-50%);
-  width:17px; height:17px; border-radius:50%;
-  border:1.5px solid var(--primary); opacity:0;
-  animation:ripple 2s ease-out infinite;
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 17px; height: 17px;
+  border-radius: 50%;
+  border: 1.5px solid var(--hp-green);
+  opacity: 0;
+  animation: ripple 2s ease-out infinite;
 }
-.hp-steps-progress-item:nth-child(2) .hp-progress-dot::after { animation-delay:.7s; }
-.hp-steps-progress-item:nth-child(3) .hp-progress-dot::after { animation-delay:1.4s; }
-@keyframes ripple{0%{opacity:.6;transform:translate(-50%,-50%) scale(1);}100%{opacity:0;transform:translate(-50%,-50%) scale(2.4);}}
+.hp-steps-progress-item:nth-child(2) .hp-progress-dot::after { animation-delay: .7s; }
+.hp-steps-progress-item:nth-child(3) .hp-progress-dot::after { animation-delay: 1.4s; }
+@keyframes ripple {
+  0%   { opacity: .6; transform: translate(-50%,-50%) scale(1); }
+  100% { opacity: 0;  transform: translate(-50%,-50%) scale(2.4); }
+}
 .hp-progress-line {
-  flex:1; height:2px;
-  background:linear-gradient(to right, var(--primary), var(--border-c));
-  position:relative; overflow:hidden;
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(to right, var(--hp-green), var(--hp-bord));
+  position: relative;
+  overflow: hidden;
 }
 .hp-progress-line::after {
-  content:''; position:absolute; top:0; left:-100%; width:100%; height:100%;
-  background:linear-gradient(to right,transparent,rgba(0,200,83,.6),transparent);
-  animation:shimmer 2.4s ease-in-out infinite;
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(to right, transparent, rgba(0,200,83,.6), transparent);
+  animation: shimmer 2.4s ease-in-out infinite;
 }
-.hp-steps-progress-item:nth-child(2) .hp-progress-line::after { animation-delay:.7s; }
-@keyframes shimmer{0%{left:-100%;}100%{left:100%;}}
-.hp-steps-progress-item:last-child .hp-progress-line { display:none; }
+.hp-steps-progress-item:nth-child(2) .hp-progress-line::after { animation-delay: .7s; }
+@keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
+.hp-steps-progress-item:last-child .hp-progress-line { display: none; }
+
+.hp-steps-new {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  border: 1.5px solid var(--hp-bord);
+  border-radius: var(--hp-rlg);
+  overflow: hidden;
+}
+[data-theme="dark"] .hp-steps-new { border-color: #2e2e2e; }
+
+.hp-step-new {
+  background: var(--hp-bg);
+  padding: 34px 28px;
+  position: relative;
+  transition: background .22s;
+  border-right: 1px solid var(--hp-bord);
+}
+.hp-step-new:last-child { border-right: none; }
+.hp-step-new:hover { background: var(--hp-bg-alt); }
+.hp-step-new:hover .hp-step-icon-new { background: var(--hp-green); }
+[data-theme="dark"] .hp-step-new { background: #1e1e1e; border-right-color: #2e2e2e; }
+[data-theme="dark"] .hp-step-new:hover { background: #252525; }
+
+.hp-step-tag-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--hp-bg-alt);
+  border: 1.5px solid var(--hp-bord);
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 10px;
+  color: var(--hp-lt);
+  margin-bottom: 18px;
+  transition: all .22s;
+}
+.hp-step-new:hover .hp-step-tag-dot {
+  background: var(--hp-green-lt);
+  border-color: var(--hp-green);
+  color: var(--hp-green-dk);
+}
+[data-theme="dark"] .hp-step-tag-dot { background: #252525; border-color: #3a3a3a; color: #666; }
+
+.hp-step-icon-new {
+  width: 44px; height: 44px;
+  background: var(--hp-text);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+  transition: background .22s;
+}
+.hp-step-new h3 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--hp-text);
+  margin-bottom: 10px;
+}
+.hp-step-new p { font-size: 13px; color: var(--hp-muted); line-height: 1.8; }
+
+.hp-step-arrow {
+  position: absolute;
+  top: 34px; right: -13px;
+  z-index: 2;
+  width: 24px; height: 24px;
+  background: var(--hp-bg);
+  border: 1.5px solid var(--hp-bord);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all .22s;
+}
+.hp-step-new:last-child .hp-step-arrow { display: none; }
+.hp-step-new:hover .hp-step-arrow { background: var(--hp-green-lt); border-color: var(--hp-green); }
+.hp-step-new:hover .hp-step-arrow svg { stroke: var(--hp-green); }
+[data-theme="dark"] .hp-step-arrow { background: #1e1e1e; border-color: #3a3a3a; }
 
 /* Mobile carousel */
 .hp-carousel-mobile { display: none; }
 .hp-carousel-track-wrap { overflow: hidden; }
 .hp-carousel-track { display: flex; transition: transform .38s cubic-bezier(.4,0,.2,1); }
 .hp-carousel-slide {
-  flex: 0 0 100%; padding: 28px 24px;
-  background: var(--bg); border: 1.5px solid var(--border-c);
-  border-radius: var(--radius-lg); min-height: 220px;
+  flex: 0 0 100%;
+  padding: 28px 24px;
+  background: var(--hp-bg);
+  border: 1.5px solid var(--hp-bord);
+  border-radius: var(--hp-rlg);
+  min-height: 220px;
 }
+[data-theme="dark"] .hp-carousel-slide { background: #1e1e1e; border-color: #2e2e2e; }
 .carousel-controls {
-  display: flex; align-items: center; justify-content: center; gap: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
   margin-top: 18px;
 }
 .carousel-dots { display: flex; gap: 6px; align-items: center; }
 .carousel-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--border-c); transition: background .22s, transform .22s;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--hp-bord);
+  transition: background .22s, transform .22s;
   cursor: pointer;
 }
-.carousel-dot.active { background: var(--primary); transform: scale(1.3); }
+.carousel-dot.active { background: var(--hp-green); transform: scale(1.3); }
 .carousel-btn {
-  width: 32px; height: 32px; border-radius: 50%;
-  border: 1.5px solid var(--border-c); background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all .18s; flex-shrink: 0;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--hp-bord);
+  background: var(--hp-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .18s;
+  flex-shrink: 0;
 }
-.carousel-btn:hover { border-color: var(--primary); background: var(--primary-lt); }
-.carousel-btn svg { stroke: var(--text-muted); transition: stroke .18s; }
-.carousel-btn:hover svg { stroke: var(--primary); }
+.carousel-btn:hover { border-color: var(--hp-green); background: var(--hp-green-lt); }
+.carousel-btn svg { stroke: var(--hp-muted); transition: stroke .18s; }
+.carousel-btn:hover svg { stroke: var(--hp-green); }
+[data-theme="dark"] .carousel-dot { background: #3a3a3a; }
+[data-theme="dark"] .carousel-btn { background: #1e1e1e; border-color: #3a3a3a; }
 
-/* ── BENEFITS ── */
-.hp-benefits { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:16px; }
-.hp-benefit-card { padding:28px 24px; border:1.5px solid var(--border-c); border-radius:var(--radius-lg); background:var(--bg); transition:border-color .22s,transform .22s,box-shadow .22s; }
-.hp-benefit-card:hover { border-color:var(--primary); transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,200,83,.1); }
-.hp-benefit-icon { width:44px; height:44px; background:var(--primary-lt); border-radius:11px; display:flex; align-items:center; justify-content:center; margin-bottom:16px; }
-.hp-benefit-card h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:var(--text); margin-bottom:8px; }
-.hp-benefit-card p { font-size:13px; color:var(--text-muted); line-height:1.7; }
+/* ─── BENEFITS ────────────────────────────── */
+.hp-benefits {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.hp-benefit-card {
+  padding: 28px 24px;
+  border: 1.5px solid var(--hp-bord);
+  border-radius: var(--hp-rlg);
+  background: var(--hp-bg);
+  transition: border-color .22s, transform .22s, box-shadow .22s;
+  cursor: default;
+}
+.hp-benefit-card:hover {
+  border-color: rgba(0,200,83,.4);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,200,83,.09);
+}
+[data-theme="dark"] .hp-benefit-card { background: #1e1e1e; border-color: #2e2e2e; }
+[data-theme="dark"] .hp-benefit-card:hover { border-color: var(--hp-green); }
+.hp-benefit-icon {
+  width: 44px; height: 44px;
+  background: var(--hp-green-lt);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.hp-benefit-card h3 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--hp-text);
+  margin-bottom: 8px;
+}
+.hp-benefit-card p { font-size: 13px; color: var(--hp-muted); line-height: 1.75; }
 
-/* ── SELLERS ── */
-.hp-sellers-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:16px; }
-.hp-seller-card { background:var(--bg); border:1.5px solid var(--border-c); border-radius:var(--radius); overflow:hidden; text-decoration:none; color:inherit; display:block; transition:transform .2s,box-shadow .2s,border-color .2s; }
-.hp-seller-card:hover { transform:translateY(-3px); box-shadow:0 8px 32px rgba(0,0,0,.08); border-color:#bbb; }
-.hp-seller-img { height:100px; position:relative; overflow:hidden; background:var(--bg-alt); }
-.hp-seller-img img { width:100%; height:100%; object-fit:cover; display:block; }
-.hp-seller-fallback { width:100%; height:100%; background:var(--text); display:flex; align-items:center; justify-content:center; font-family:'Syne',sans-serif; font-weight:800; font-size:36px; color:#fff; }
-.hp-seller-badge-ft { position:absolute; top:8px; left:8px; background:var(--primary); color:#fff; font-size:10px; font-weight:700; padding:2px 8px; border-radius:100px; }
-.hp-seller-body { padding:14px 16px 16px; }
-.hp-seller-name { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; color:var(--text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.hp-seller-cat { font-size:11px; color:var(--text-muted); margin-bottom:10px; }
-.hp-seller-count { display:inline-flex; align-items:center; gap:4px; background:var(--bg-alt); border-radius:100px; padding:3px 10px; font-size:11px; font-weight:600; color:var(--text-muted); }
-.hp-sellers-sublabel { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text-muted); margin-bottom:16px; opacity:.7; }
+/* ─── PHONE MOCKUP (2-col layout) ─────────── */
+.hp-mockup-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.hp-mockup-text .hp-section-label { margin-bottom: 12px; }
+.hp-mockup-text h2 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(24px, 3.2vw, 38px);
+  letter-spacing: -1.2px;
+  color: var(--hp-text);
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+.hp-mockup-text p { font-size: 15px; color: var(--hp-muted); line-height: 1.75; margin-bottom: 26px; }
+.hp-mockup-features { display: flex; flex-direction: column; gap: 13px; }
+.hp-mf-item { display: flex; align-items: flex-start; gap: 11px; }
+.hp-mf-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--hp-green);
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+.hp-mf-text { font-size: 13px; color: var(--hp-muted); line-height: 1.7; }
+.hp-mf-text strong { color: var(--hp-text); font-weight: 600; }
+.hp-phone-wrap { display: flex; justify-content: center; }
+.hp-phone {
+  width: 250px;
+  background: var(--hp-bg);
+  border-radius: 28px;
+  box-shadow: 0 40px 80px rgba(0,0,0,.15);
+  overflow: hidden;
+  border: 2px solid var(--hp-bord);
+  animation: phoneFloat 5s ease-in-out infinite;
+}
+@keyframes phoneFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+[data-theme="dark"] .hp-phone { background: #1e1e1e; border-color: #2e2e2e; }
+.hp-phone-header { background: var(--hp-green); padding: 16px 16px 12px; color: #fff; }
+.hp-phone-top { display: flex; align-items: center; gap: 10px; }
+.hp-phone-avatar { width: 30px; height: 30px; background: rgba(255,255,255,.25); border-radius: 50%; }
+.hp-phone-name { font-weight: 600; font-size: 13px; }
+.hp-phone-url { font-size: 10px; opacity: .75; margin-top: 1px; }
+.hp-phone-products {
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  background: var(--hp-bg-alt);
+}
+[data-theme="dark"] .hp-phone-products { background: #141414; }
+.hp-phone-product { background: var(--hp-bg); border-radius: 8px; overflow: hidden; }
+[data-theme="dark"] .hp-phone-product { background: #1e1e1e; }
+.hp-phone-img {
+  height: 68px;
+  background: linear-gradient(135deg, #e8e8e8, #d0d0d0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.hp-phone-info { padding: 7px 8px; }
+.hp-phone-name-txt { font-size: 9px; font-weight: 600; color: var(--hp-text); }
+.hp-phone-price { font-size: 10px; color: var(--hp-green); font-weight: 700; margin-top: 1px; }
+.hp-phone-cta {
+  margin: 0 12px 12px;
+  background: var(--hp-green);
+  color: #fff;
+  padding: 9px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+}
 
-/* ── PHONE ── */
-.hp-phone-wrap { display:flex; justify-content:center; margin-top:48px; }
-.hp-phone { width:260px; background:var(--bg); border-radius:28px; box-shadow:0 40px 80px rgba(0,0,0,.14); overflow:hidden; border:2px solid var(--border-c); animation:phoneFloat 5s ease-in-out infinite; }
-@keyframes phoneFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-.hp-phone-header { background:var(--primary); padding:18px 18px 14px; color:#fff; }
-.hp-phone-top { display:flex; align-items:center; gap:10px; }
-.hp-phone-avatar { width:34px; height:34px; background:rgba(255,255,255,.25); border-radius:50%; }
-.hp-phone-name { font-weight:600; font-size:14px; }
-.hp-phone-url { font-size:11px; opacity:.75; margin-top:1px; }
-.hp-phone-products { padding:14px; display:grid; grid-template-columns:1fr 1fr; gap:8px; background:var(--bg-alt); }
-.hp-phone-product { background:var(--bg); border-radius:8px; overflow:hidden; }
-.hp-phone-img { height:72px; background:linear-gradient(135deg,#e8e8e8,#d0d0d0); display:flex; align-items:center; justify-content:center; font-size:24px; }
-.hp-phone-info { padding:7px 8px; }
-.hp-phone-name-txt { font-size:10px; font-weight:600; color:var(--text); }
-.hp-phone-price { font-size:10px; color:var(--primary); font-weight:700; margin-top:1px; }
-.hp-phone-cta { margin:0 14px 14px; background:var(--primary); color:#fff; padding:9px; border-radius:7px; text-align:center; font-size:12px; font-weight:600; }
-
-/* ── CTA ── */
-.hp-cta { padding:100px 40px; background:var(--text); color:#fff; text-align:center; position:relative; overflow:hidden; }
-.hp-cta::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px); background-size:52px 52px; }
-.hp-cta>*{position:relative;z-index:1;}
-.hp-cta .hp-section-label { color:var(--primary); }
-.hp-cta h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(30px,5.5vw,58px); letter-spacing:-2px; margin-bottom:16px; color:#fff; }
-.hp-cta p { font-size:17px; color:rgba(255,255,255,.5); margin-bottom:44px; }
+/* ─── CTA BANNER ──────────────────────────── */
+.hp-cta {
+  padding: 100px 40px;
+  background: var(--hp-text);
+  color: #fff;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hp-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.hp-cta > * { position: relative; z-index: 1; }
+.hp-cta .hp-section-label { color: var(--hp-green); margin-bottom: 16px; }
+.hp-cta h2 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: clamp(30px, 5.5vw, 58px);
+  letter-spacing: -2px;
+  margin-bottom: 14px;
+  color: #fff;
+  line-height: 1.05;
+}
+.hp-cta p { font-size: 17px; color: rgba(255,255,255,.45); margin-bottom: 44px; }
 .hp-cta-btn {
-  display:inline-flex; align-items:center; gap:10px;
-  padding:14px 28px; background:var(--primary); color:#fff;
-  border-radius:100px; font-family:'DM Sans',sans-serif; font-size:15px; font-weight:600;
-  text-decoration:none; transition:all .22s; cursor:pointer; border:none;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 28px;
+  background: var(--hp-green);
+  color: #fff;
+  border-radius: var(--hp-pill);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all .22s;
+  cursor: pointer;
+  border: none;
 }
-.hp-cta-btn:hover { background:var(--primary-dark); transform:translateY(-2px); }
+.hp-cta-btn:hover { background: var(--hp-green-dk); transform: translateY(-2px); }
 .hp-cta-btn .hero-cta-arrow { background: rgba(255,255,255,.2); }
 
-/* ── FAQ ── */
-.hp-faq-section { padding:90px 40px; background:var(--bg); }
-.hp-faq-sub { font-size:15px; color:var(--text-muted); margin-bottom:40px; }
-.hp-faq-list { border:1.5px solid var(--border-c); border-radius:var(--radius-lg); overflow:hidden; }
-.hp-faq-item { border-bottom:1px solid var(--border-c); }
-.hp-faq-item:last-child { border-bottom:none; }
-.hp-faq-question { width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; background:none; border:none; text-align:left; font-family:'Syne',sans-serif; font-size:15px; font-weight:600; color:var(--text); cursor:pointer; transition:background .18s,color .18s; }
-.hp-faq-question:hover { background:var(--bg-alt); color:var(--primary); }
-.hp-faq-icon { flex-shrink:0; color:var(--text-muted); transition:transform .3s,color .18s; }
-.hp-faq-item.open .hp-faq-question { background:var(--bg-alt); color:var(--primary); }
-.hp-faq-item.open .hp-faq-icon { transform:rotate(180deg); color:var(--primary); }
-.hp-faq-answer { max-height:0; overflow:hidden; transition:max-height .38s ease; background:var(--bg-alt); }
-.hp-faq-item.open .hp-faq-answer { max-height:400px; }
-.hp-faq-answer p { padding:0 24px 20px; font-size:14px; color:var(--text-muted); line-height:1.8; }
-
-.hp-fade { opacity:0; transform:translateY(22px); transition:opacity .6s ease,transform .6s ease; }
-.hp-fade.visible { opacity:1; transform:translateY(0); }
-
-/* ── RESPONSIVE ── */
-@media(max-width:768px){
-  .hp-hero{padding:72px 20px 60px;}
-  .hp-section,.hp-section-alt,.hp-faq-section,.hp-cta,.hp-steps-carousel-wrap{padding:60px 20px;}
-  .hp-sellers-grid{grid-template-columns:repeat(2,1fr);gap:12px;}
-  .hp-steps-new,.hp-steps-progress{display:none;}
-  .hp-carousel-mobile{display:block;}
+/* ─── FAQ ─────────────────────────────────── */
+.hp-faq-section { padding: 90px 40px; background: var(--hp-bg); }
+.hp-faq-sub { font-size: 15px; color: var(--hp-muted); margin-bottom: 40px; }
+.hp-faq-list {
+  border: 1.5px solid var(--hp-bord);
+  border-radius: var(--hp-rlg);
+  overflow: hidden;
 }
-@media(max-width:560px){
-  .hp-hero-actions{flex-direction:column;align-items:stretch;}
-  .hero-cta,.hp-ghost-btn{width:100%;justify-content:center;}
+[data-theme="dark"] .hp-faq-list { border-color: #2e2e2e; }
+.hp-faq-item { border-bottom: 1px solid var(--hp-bord); }
+[data-theme="dark"] .hp-faq-item { border-color: #2e2e2e; }
+.hp-faq-item:last-child { border-bottom: none; }
+.hp-faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--hp-text);
+  cursor: pointer;
+  transition: background .18s, color .18s;
 }
+.hp-faq-question:hover { background: var(--hp-bg-alt); color: var(--hp-green); }
+[data-theme="dark"] .hp-faq-question:hover { background: #1e1e1e; }
+.hp-faq-icon { flex-shrink: 0; color: var(--hp-lt); transition: transform .3s, color .18s; }
+.hp-faq-item.open .hp-faq-question { background: var(--hp-bg-alt); color: var(--hp-green); }
+[data-theme="dark"] .hp-faq-item.open .hp-faq-question { background: #1e1e1e; }
+.hp-faq-item.open .hp-faq-icon { transform: rotate(180deg); color: var(--hp-green); }
+.hp-faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .38s ease;
+  background: var(--hp-bg-alt);
+}
+[data-theme="dark"] .hp-faq-answer { background: #1e1e1e; }
+.hp-faq-item.open .hp-faq-answer { max-height: 400px; }
+.hp-faq-answer p { padding: 0 24px 20px; font-size: 13px; color: var(--hp-muted); line-height: 1.8; }
+
+/* ─── SCROLL FADE ─────────────────────────── */
+.hp-fade { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+.hp-fade.visible { opacity: 1; transform: translateY(0); }
+
+/* ─── RESPONSIVE ──────────────────────────── */
+@media (max-width: 960px) {
+  .hp-featured-grid { grid-template-columns: repeat(2, 1fr); }
+  .hp-benefits      { grid-template-columns: repeat(2, 1fr); }
+  .hp-mockup-inner  { grid-template-columns: 1fr; gap: 48px; }
+}
+@media (max-width: 768px) {
+  .hp-hero            { padding: 72px 20px 60px; }
+  .hp-section,
+  .hp-section-alt,
+  .hp-faq-section,
+  .hp-cta,
+  .hp-steps-carousel-wrap { padding: 64px 20px; }
+  .hp-steps-new,
+  .hp-steps-progress  { display: none; }
+  .hp-carousel-mobile { display: block; }
+  .hp-benefits        { grid-template-columns: 1fr; }
+  .hp-section-header  { flex-direction: column; align-items: flex-start; }
+}
+@media (max-width: 560px) {
+  .hp-hero-actions { flex-direction: column; align-items: stretch; }
+  .hero-cta, .hp-ghost-btn { width: 100%; justify-content: center; }
+  .hp-featured-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .hp-hero-trust { gap: 16px; }
+}
+
 </style>
 {% endblock %}
 
 {% block content %}
 
-<!-- ENTRY MODAL -->
-<div class="entry-overlay" id="entryOverlay">
-  <div class="entry-modal">
-
-    <h2>Set up your store</h2>
-    <p>Enter your details — you'll upload products right after.</p>
-
-    <div class="em-group">
-      <label class="em-label">Business Name</label>
-      <input type="text" class="em-input" id="emBizName" placeholder="e.g. Chioma Fashion" autocomplete="off">
-    </div>
-
-    <div class="em-group">
-      <label class="em-label">Your Store URL</label>
-      <div class="slug-row">
-        <span class="slug-prefix">vendopage.com/</span>
-        <input type="text" class="slug-input" id="emUsername" placeholder="chioma" maxlength="30" autocomplete="off">
-      </div>
-      <div class="em-hint" id="emHint">This will be your permanent store link</div>
-    </div>
-
-    <button class="em-submit" id="emSubmit" onclick="startUpload()">
-      <span class="em-spin" id="emSpin"></span>
-      <span id="emBtnTxt">Continue to Upload</span>
-    </button>
-    <p class="em-signin">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
-  </div>
-</div>
-
-<!-- HERO -->
+<!-- ── HERO ───────────────────────────────── -->
 <section class="hp-hero">
   <div class="hp-hero-inner">
-    <h1>Upload 50 Products<br><span class="hp-accent">in 1 Click.</span></h1>
-    <p class="hp-hero-sub">Turn your WhatsApp catalogue into a permanent store link. Share it everywhere. Sell instantly.</p>
+
+    <div class="hp-hero-badge">
+      <div class="hp-hero-badge-dot"></div>
+      Free forever · No credit card needed
+    </div>
+
+    <h1>Upload 50 Products.<br><span class="hp-accent">Sell Instantly.</span></h1>
+    <p class="hp-hero-sub">Turn your WhatsApp catalogue into a permanent store link. Share it everywhere. Your buyers come to you.</p>
+
     <div class="hp-hero-actions">
       {% if user.is_authenticated %}
         <a href="{% url 'upload_product' %}" class="hero-cta">
@@ -466,80 +852,112 @@
         </a>
         <a href="/{{ user.slug }}" target="_blank" class="hp-ghost-btn">View my store</a>
       {% else %}
-        <button class="hero-cta" onclick="openEntryModal()">
-          Upload Your Products
+        <a href="{% url 'register' %}" class="hero-cta">
+          Create Your Free Store
           <span class="hero-cta-arrow">
             <svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </span>
-        </button>
-        <a href="#how" class="hp-ghost-btn">See how it works</a>
+        </a>
+        <a href="#how" class="hp-ghost-btn">
+          See how it works
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+        </a>
       {% endif %}
     </div>
+
+    <div class="hp-hero-trust">
+      <div class="hp-trust-item">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        No coding required
+      </div>
+      <div class="hp-trust-item">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Live in under 30 seconds
+      </div>
+      <div class="hp-trust-item">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        WhatsApp-native ordering
+      </div>
+    </div>
+
   </div>
 </section>
 
-<!-- PROOF BAR -->
+<!-- ── PROOF TICKER ───────────────────────── -->
 <div class="hp-proof">
   <div class="hp-proof-track" id="proofTrack">
     <div class="hp-proof-item"><span class="hp-proof-num">50+</span><span class="hp-proof-label">Products<br>per upload</span></div>
-    <div class="hp-proof-divider"></div>
-    <div class="hp-proof-item"><span class="hp-proof-num">0</span><span class="hp-proof-label">Coding<br>required</span></div>
-    <div class="hp-proof-divider"></div>
+    <div class="hp-proof-item"><span class="hp-proof-num">0</span><span class="hp-proof-label">Lines of<br>code needed</span></div>
     <div class="hp-proof-item"><span class="hp-proof-num">30s</span><span class="hp-proof-label">Store live<br>in seconds</span></div>
-    <div class="hp-proof-divider"></div>
     <div class="hp-proof-item"><span class="hp-proof-num">100%</span><span class="hp-proof-label">WhatsApp<br>friendly</span></div>
-    <div class="hp-proof-divider"></div>
     <div class="hp-proof-item"><span class="hp-proof-num">Free</span><span class="hp-proof-label">Always<br>forever</span></div>
+    <div class="hp-proof-item"><span class="hp-proof-num">🇳🇬</span><span class="hp-proof-label">Built for<br>Nigerian vendors</span></div>
   </div>
 </div>
 
-<!-- LIVE SELLERS — right after proof bar -->
-{% if featured_sellers or sellers %}
+<!-- ── FEATURED VENDORS ───────────────────── -->
+{% if featured_sellers %}
 <section class="hp-section" id="stores">
   <div class="hp-container">
-    <div class="hp-section-head hp-fade">
-      <span class="hp-section-label">Live Stores</span>
-      <h2 class="hp-section-title">Vendors already selling<br>on Vendopage</h2>
+
+    <div class="hp-section-header hp-fade">
+      <div>
+        <span class="hp-section-label">Live Stores</span>
+        <h2 class="hp-section-title">Vendors already selling<br>on Vendopage</h2>
+        <p class="hp-section-sub" style="margin-top:8px">Real stores. Real products. Real sales.</p>
+      </div>
+      <a href="{% url 'home' %}#stores" class="hp-see-all">
+        See all vendors
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
     </div>
-    {% if featured_sellers %}
-      <p class="hp-sellers-sublabel" style="margin-bottom:16px;">Featured</p>
-      <div class="hp-sellers-grid" style="margin-bottom:36px;">
-        {% for seller in featured_sellers %}
-        <a href="{% url 'seller_page' seller.slug %}" class="hp-seller-card">
-          <div class="hp-seller-img">
-            {% if seller.profile_picture %}<img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">{% else %}<div class="hp-seller-fallback">{{ seller.business_name|first }}</div>{% endif %}
-            <span class="hp-seller-badge-ft">Featured</span>
+
+    <!-- 4 featured only -->
+    <div class="hp-featured-grid">
+      {% for seller in featured_sellers %}
+      <a href="{% url 'seller_page' seller.slug %}" class="hp-seller-card hp-fade">
+        <div class="hp-seller-img">
+          {% if seller.profile_picture %}
+            <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
+          {% else %}
+            <div class="hp-seller-fallback hp-fc-{{ forloop.counter0|divisibleby:4|yesno:'0,1,2,3' }}{% if forloop.counter0 == 0 %} hp-fc-0{% elif forloop.counter0 == 1 %} hp-fc-1{% elif forloop.counter0 == 2 %} hp-fc-2{% else %} hp-fc-3{% endif %}">
+              {{ seller.business_name|first|upper }}
+            </div>
+          {% endif %}
+          <span class="hp-seller-badge-ft">Featured</span>
+        </div>
+        <div class="hp-seller-body">
+          <div class="hp-seller-name">{{ seller.business_name }}</div>
+          <div class="hp-seller-cat">{{ seller.get_category_display }}</div>
+          <div class="hp-seller-footer">
+            <span class="hp-seller-count">
+              <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+              {{ seller.product_count }} products
+            </span>
+            <div class="hp-seller-wa">
+              <svg width="13" height="13" fill="#25D366" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+            </div>
           </div>
-          <div class="hp-seller-body"><div class="hp-seller-name">{{ seller.business_name }}</div><div class="hp-seller-cat">{{ seller.get_category_display }}</div><span class="hp-seller-count">{{ seller.product_count }} products</span></div>
-        </a>
-        {% endfor %}
-      </div>
-    {% endif %}
-    {% if sellers %}
-      {% if featured_sellers %}<p class="hp-sellers-sublabel" style="margin-bottom:16px;">All Vendors</p>{% endif %}
-      <div class="hp-sellers-grid">
-        {% for seller in sellers %}
-        <a href="{% url 'seller_page' seller.slug %}" class="hp-seller-card">
-          <div class="hp-seller-img">{% if seller.profile_picture %}<img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">{% else %}<div class="hp-seller-fallback">{{ seller.business_name|first }}</div>{% endif %}</div>
-          <div class="hp-seller-body"><div class="hp-seller-name">{{ seller.business_name }}</div><div class="hp-seller-cat">{{ seller.get_category_display }}</div><span class="hp-seller-count">{{ seller.product_count }} products</span></div>
-        </a>
-        {% endfor %}
-      </div>
-    {% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
   </div>
 </section>
 {% endif %}
 
-<!-- HOW IT WORKS -->
+<!-- ── HOW IT WORKS ───────────────────────── -->
 <div class="hp-steps-carousel-wrap" id="how">
   <div class="hp-steps-carousel-inner">
+
     <div class="hp-section-head hp-fade">
       <span class="hp-section-label">The Flow</span>
       <h2 class="hp-section-title">3 steps to your store</h2>
       <p class="hp-section-sub">No technical skills needed. If you can send a WhatsApp message, you can build your store.</p>
     </div>
 
-    <!-- Desktop: progress line -->
+    <!-- Desktop progress line -->
     <div class="hp-steps-progress">
       <div class="hp-steps-progress-item"><div class="hp-progress-dot"></div><div class="hp-progress-line"></div></div>
       <div class="hp-steps-progress-item"><div class="hp-progress-dot"></div><div class="hp-progress-line"></div></div>
@@ -552,21 +970,21 @@
         <div class="hp-step-tag-dot">01</div>
         <div class="hp-step-icon-new"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
         <h3>Upload your photos</h3>
-        <p>Drop all your product photos at once. WhatsApp screenshots, camera shots — anything works.</p>
-        <div class="hp-step-arrow"><svg width="10" height="10" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <p>Drop all your product photos at once — up to 50. WhatsApp screenshots, camera shots, anything works.</p>
+        <div class="hp-step-arrow"><svg width="10" height="10" fill="none" stroke="var(--hp-muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
       <div class="hp-step-new hp-fade">
         <div class="hp-step-tag-dot">02</div>
         <div class="hp-step-icon-new"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
         <h3>Add descriptions &amp; prices</h3>
-        <p>Type naturally — name, price, size. Just like a WhatsApp message. No complicated forms.</p>
-        <div class="hp-step-arrow"><svg width="10" height="10" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+        <p>Type naturally — name, price, size. Just like a WhatsApp message. No complicated forms, ever.</p>
+        <div class="hp-step-arrow"><svg width="10" height="10" fill="none" stroke="var(--hp-muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
       <div class="hp-step-new hp-fade">
         <div class="hp-step-tag-dot">03</div>
         <div class="hp-step-icon-new"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
         <h3>Share your link</h3>
-        <p>Get <strong>vendopage.com/yourname</strong>. Post it on WhatsApp status, Instagram bio, anywhere.</p>
+        <p>Get <strong>vendopage.com/yourname</strong>. Post it on WhatsApp status, Instagram bio, TikTok — anywhere.</p>
       </div>
     </div>
 
@@ -576,26 +994,26 @@
         <div class="hp-carousel-track" id="carouselTrack">
           <div class="hp-carousel-slide">
             <div class="hp-step-tag-dot">01</div>
-            <div class="hp-step-icon-new" style="margin-top:12px;"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
-            <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text);margin:14px 0 8px;">Upload your photos</h3>
-            <p style="font-size:14px;color:var(--text-muted);line-height:1.75;">Drop all your product photos at once. WhatsApp screenshots, camera shots — anything works. Up to 50 at a time.</p>
+            <div class="hp-step-icon-new" style="margin-top:12px"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+            <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--hp-text);margin:14px 0 8px">Upload your photos</h3>
+            <p style="font-size:14px;color:var(--hp-muted);line-height:1.75">Drop all your product photos at once. WhatsApp screenshots, camera shots — anything works. Up to 50 at a time.</p>
           </div>
           <div class="hp-carousel-slide">
             <div class="hp-step-tag-dot">02</div>
-            <div class="hp-step-icon-new" style="margin-top:12px;"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
-            <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text);margin:14px 0 8px;">Add descriptions &amp; prices</h3>
-            <p style="font-size:14px;color:var(--text-muted);line-height:1.75;">Type naturally — name, price, size. Just like you would in a WhatsApp message. No complicated forms.</p>
+            <div class="hp-step-icon-new" style="margin-top:12px"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+            <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--hp-text);margin:14px 0 8px">Add descriptions &amp; prices</h3>
+            <p style="font-size:14px;color:var(--hp-muted);line-height:1.75">Type naturally — name, price, size. Just like you would in a WhatsApp message. No complicated forms.</p>
           </div>
           <div class="hp-carousel-slide">
             <div class="hp-step-tag-dot">03</div>
-            <div class="hp-step-icon-new" style="margin-top:12px;"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
-            <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--text);margin:14px 0 8px;">Share your link</h3>
-            <p style="font-size:14px;color:var(--text-muted);line-height:1.75;">Get your permanent store link — <strong>vendopage.com/yourname</strong>. Post it on WhatsApp status, Instagram bio, anywhere.</p>
+            <div class="hp-step-icon-new" style="margin-top:12px"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
+            <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;color:var(--hp-text);margin:14px 0 8px">Share your link</h3>
+            <p style="font-size:14px;color:var(--hp-muted);line-height:1.75">Get your permanent store link — <strong>vendopage.com/yourname</strong>. Post it on WhatsApp status, Instagram bio, anywhere.</p>
           </div>
         </div>
       </div>
       <div class="carousel-controls">
-        <button class="carousel-btn" id="carouselPrev">
+        <button class="carousel-btn" id="carouselPrev" aria-label="Previous">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
         </button>
         <div class="carousel-dots">
@@ -603,7 +1021,7 @@
           <div class="carousel-dot" data-idx="1"></div>
           <div class="carousel-dot" data-idx="2"></div>
         </div>
-        <button class="carousel-btn" id="carouselNext">
+        <button class="carousel-btn" id="carouselNext" aria-label="Next">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </div>
@@ -612,7 +1030,7 @@
   </div>
 </div>
 
-<!-- BENEFITS -->
+<!-- ── BENEFITS ───────────────────────────── -->
 <section class="hp-section">
   <div class="hp-container">
     <div class="hp-section-head hp-fade">
@@ -620,40 +1038,83 @@
       <h2 class="hp-section-title">Built for how vendors<br>actually work</h2>
     </div>
     <div class="hp-benefits">
-      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div><h3>Bulk Upload</h3><p>Stop posting one product at a time. Upload your whole catalogue in one go — 50 products in under a minute.</p></div>
-      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div><h3>Permanent Link</h3><p>Your store lives forever at your personal link. No expiry. No disappearing statuses. Always accessible.</p></div>
-      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><h3>WhatsApp Orders</h3><p>Buyers click "Order on WhatsApp" and a pre-typed message opens instantly on their phone. Zero friction.</p></div>
-      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div><h3>Mobile-First</h3><p>Designed for phone vendors. Upload, manage, and share entirely from your phone. No laptop needed.</p></div>
-      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><h3>Instant Setup</h3><p>No forms, no payment integration, no technical skills. Your store is live in under 30 seconds.</p></div>
-      <div class="hp-benefit-card hp-fade"><div class="hp-benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div><h3>Inventory Control</h3><p>Mark items sold out, archive old products, or delete them entirely — all from your dashboard in one tap.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- PHONE MOCKUP -->
-<section class="hp-section-alt">
-  <div class="hp-container">
-    <div class="hp-section-head center hp-fade">
-      <span class="hp-section-label">Live Preview</span>
-      <h2 class="hp-section-title">What your buyers see</h2>
-      <p class="hp-section-sub">A clean, fast store they can browse and order from instantly — no app needed.</p>
-    </div>
-    <div class="hp-phone-wrap">
-      <div class="hp-phone">
-        <div class="hp-phone-header"><div class="hp-phone-top"><div class="hp-phone-avatar"></div><div><div class="hp-phone-name">Chioma Fashion</div><div class="hp-phone-url">vendopage.com/chioma</div></div></div></div>
-        <div class="hp-phone-products">
-          <div class="hp-phone-product"><div class="hp-phone-img">👗</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Ankara Gown</div><div class="hp-phone-price">₦18,000</div></div></div>
-          <div class="hp-phone-product"><div class="hp-phone-img">👜</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Leather Bag</div><div class="hp-phone-price">₦12,500</div></div></div>
-          <div class="hp-phone-product"><div class="hp-phone-img">👠</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Block Heels</div><div class="hp-phone-price">₦9,000</div></div></div>
-          <div class="hp-phone-product"><div class="hp-phone-img">💍</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Gold Set</div><div class="hp-phone-price">₦7,000</div></div></div>
-        </div>
-        <div class="hp-phone-cta">Order on WhatsApp</div>
+      <div class="hp-benefit-card hp-fade">
+        <div class="hp-benefit-icon"><svg width="20" height="20" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
+        <h3>Bulk Upload</h3>
+        <p>Stop posting one product at a time. Upload your whole catalogue in one go — 50 products in under a minute.</p>
+      </div>
+      <div class="hp-benefit-card hp-fade">
+        <div class="hp-benefit-icon"><svg width="20" height="20" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
+        <h3>Permanent Link</h3>
+        <p>Your store lives forever at your personal link. No expiry. No disappearing statuses. Always accessible.</p>
+      </div>
+      <div class="hp-benefit-card hp-fade">
+        <div class="hp-benefit-icon"><svg width="20" height="20" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+        <h3>WhatsApp Orders</h3>
+        <p>Buyers click "Order on WhatsApp" and a pre-typed message opens instantly on their phone. Zero friction.</p>
+      </div>
+      <div class="hp-benefit-card hp-fade">
+        <div class="hp-benefit-icon"><svg width="20" height="20" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+        <h3>Mobile-First</h3>
+        <p>Designed for phone vendors. Upload, manage, and share entirely from your phone. No laptop needed.</p>
+      </div>
+      <div class="hp-benefit-card hp-fade">
+        <div class="hp-benefit-icon"><svg width="20" height="20" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <h3>Instant Setup</h3>
+        <p>No forms, no payment integration, no technical skills. Your store is live in under 30 seconds.</p>
+      </div>
+      <div class="hp-benefit-card hp-fade">
+        <div class="hp-benefit-icon"><svg width="20" height="20" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
+        <h3>Inventory Control</h3>
+        <p>Mark items sold out, archive old products, or delete them entirely — all from your dashboard in one tap.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
+<!-- ── PHONE MOCKUP ───────────────────────── -->
+<section class="hp-section-alt">
+  <div class="hp-container">
+    <div class="hp-mockup-inner">
+
+      <div class="hp-mockup-text hp-fade">
+        <span class="hp-section-label">Live Preview</span>
+        <h2>What your buyers see when they visit your store</h2>
+        <p>A clean, fast, professional storefront — no app needed. Buyers browse, pick, and order on WhatsApp.</p>
+        <div class="hp-mockup-features">
+          <div class="hp-mf-item"><div class="hp-mf-dot"></div><div class="hp-mf-text"><strong>Beautiful product gallery</strong> — photos load fast, even on 3G</div></div>
+          <div class="hp-mf-item"><div class="hp-mf-dot"></div><div class="hp-mf-text"><strong>One-tap ordering</strong> — pre-filled WhatsApp message sent instantly</div></div>
+          <div class="hp-mf-item"><div class="hp-mf-dot"></div><div class="hp-mf-text"><strong>Always online</strong> — your link works 24/7, even while you sleep</div></div>
+          <div class="hp-mf-item"><div class="hp-mf-dot"></div><div class="hp-mf-text"><strong>Your brand</strong> — your name, your photo, your products</div></div>
+        </div>
+      </div>
+
+      <div class="hp-phone-wrap hp-fade">
+        <div class="hp-phone">
+          <div class="hp-phone-header">
+            <div class="hp-phone-top">
+              <div class="hp-phone-avatar"></div>
+              <div>
+                <div class="hp-phone-name">Chioma Fashion</div>
+                <div class="hp-phone-url">vendopage.com/chioma</div>
+              </div>
+            </div>
+          </div>
+          <div class="hp-phone-products">
+            <div class="hp-phone-product"><div class="hp-phone-img">👗</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Ankara Gown</div><div class="hp-phone-price">₦18,000</div></div></div>
+            <div class="hp-phone-product"><div class="hp-phone-img">👜</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Leather Bag</div><div class="hp-phone-price">₦12,500</div></div></div>
+            <div class="hp-phone-product"><div class="hp-phone-img">👠</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Block Heels</div><div class="hp-phone-price">₦9,000</div></div></div>
+            <div class="hp-phone-product"><div class="hp-phone-img">💍</div><div class="hp-phone-info"><div class="hp-phone-name-txt">Gold Set</div><div class="hp-phone-price">₦7,000</div></div></div>
+          </div>
+          <div class="hp-phone-cta">Order on WhatsApp</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA BANNER ─────────────────────────── -->
 <section class="hp-cta">
   <span class="hp-section-label">Get Started Free</span>
   <h2>Your store.<br>Live in 30 seconds.</h2>
@@ -666,29 +1127,44 @@
       </span>
     </a>
   {% else %}
-    <button class="hp-cta-btn" onclick="openEntryModal()">
-      Upload Your Products
+    <a href="{% url 'register' %}" class="hp-cta-btn">
+      Create Your Free Store
       <span class="hero-cta-arrow">
         <svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </span>
-    </button>
+    </a>
   {% endif %}
 </section>
 
-<!-- FAQ -->
+<!-- ── FAQ ────────────────────────────────── -->
 <section class="hp-faq-section" id="faq">
   <div class="hp-container-sm">
-    <div class="hp-fade">
+    <div class="hp-fade" style="text-align:center">
       <span class="hp-section-label">Got Questions</span>
       <h2 class="hp-section-title">Frequently Asked Questions</h2>
       <p class="hp-faq-sub">Everything you need to know before you start selling.</p>
     </div>
     <div class="hp-faq-list">
-      <div class="hp-faq-item"><button class="hp-faq-question"><span>Is Vendopage really free?</span><svg class="hp-faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="hp-faq-answer"><p>Yes — free forever. Create your catalogue, add unlimited products, and start selling without paying anything. Premium plans available for extra features.</p></div></div>
-      <div class="hp-faq-item"><button class="hp-faq-question"><span>Do I need any technical skills?</span><svg class="hp-faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="hp-faq-answer"><p>None at all. If you can use WhatsApp, you can use Vendopage. Upload photos, add prices, and your store is live.</p></div></div>
-      <div class="hp-faq-item"><button class="hp-faq-question"><span>How do customers buy from me?</span><svg class="hp-faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="hp-faq-answer"><p>Customers browse your store and tap "Order on WhatsApp." A pre-typed message opens instantly on their phone and sends directly to you.</p></div></div>
-      <div class="hp-faq-item"><button class="hp-faq-question"><span>Will my store link ever expire?</span><svg class="hp-faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="hp-faq-answer"><p>Never. Unlike WhatsApp Status that disappears in 24 hours, your Vendopage link is permanent. Share it once and customers can always find your products.</p></div></div>
-      <div class="hp-faq-item"><button class="hp-faq-question"><span>Can I use Vendopage for any type of business?</span><svg class="hp-faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button><div class="hp-faq-answer"><p>Yes — fashion, food, electronics, beauty, handmade goods, services. If you sell it, Vendopage works for it.</p></div></div>
+      <div class="hp-faq-item">
+        <button class="hp-faq-question"><span>Is Vendopage really free?</span><svg class="hp-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="hp-faq-answer"><p>Yes — free forever. Create your catalogue, add unlimited products, and start selling without paying anything. Premium plans available for extra features like escrow payments and analytics.</p></div>
+      </div>
+      <div class="hp-faq-item">
+        <button class="hp-faq-question"><span>Do I need any technical skills?</span><svg class="hp-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="hp-faq-answer"><p>None at all. If you can use WhatsApp, you can use Vendopage. Upload photos, add prices, and your store is live — no coding, no hosting, no stress.</p></div>
+      </div>
+      <div class="hp-faq-item">
+        <button class="hp-faq-question"><span>How do customers buy from me?</span><svg class="hp-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="hp-faq-answer"><p>Customers browse your store and tap "Order on WhatsApp." A pre-typed message opens instantly on their phone and sends directly to you. You negotiate and close on WhatsApp as usual.</p></div>
+      </div>
+      <div class="hp-faq-item">
+        <button class="hp-faq-question"><span>Will my store link ever expire?</span><svg class="hp-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="hp-faq-answer"><p>Never. Unlike WhatsApp Status that disappears in 24 hours, your Vendopage link is permanent. Share it once and customers can always find your products.</p></div>
+      </div>
+      <div class="hp-faq-item">
+        <button class="hp-faq-question"><span>Can I use Vendopage for any type of business?</span><svg class="hp-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="hp-faq-answer"><p>Yes — fashion, food, electronics, beauty, handmade goods, services. If you sell it, Vendopage works for it.</p></div>
+      </div>
     </div>
   </div>
 </section>
@@ -697,13 +1173,13 @@
 
 {% block extra_js %}
 <script>
-/* PROOF BAR */
+/* ── PROOF TICKER ─────────────────────────── */
 (function() {
   const track = document.getElementById('proofTrack');
   if (track) track.innerHTML += track.innerHTML;
 })();
 
-/* FAQ */
+/* ── FAQ ACCORDION ────────────────────────── */
 document.querySelectorAll('.hp-faq-question').forEach(btn => {
   btn.addEventListener('click', () => {
     const item = btn.closest('.hp-faq-item');
@@ -713,112 +1189,56 @@ document.querySelectorAll('.hp-faq-question').forEach(btn => {
   });
 });
 
-/* SCROLL FADE */
+/* ── SCROLL FADE ──────────────────────────── */
 const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
 }, { threshold: 0.12 });
 document.querySelectorAll('.hp-fade').forEach(el => observer.observe(el));
 
-/* SMOOTH SCROLL */
+/* ── SMOOTH SCROLL ────────────────────────── */
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     const id = a.getAttribute('href').slice(1);
     const el = document.getElementById(id);
-    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    if (el) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   });
 });
 
-/* CAROUSEL */
+/* ── MOBILE CAROUSEL ──────────────────────── */
 (function() {
   const track = document.getElementById('carouselTrack');
   if (!track) return;
   const dots = document.querySelectorAll('.carousel-dot');
   let current = 0;
   const total = 3;
+
   function goTo(idx) {
     current = (idx + total) % total;
     track.style.transform = `translateX(-${current * 100}%)`;
     dots.forEach((d, i) => d.classList.toggle('active', i === current));
   }
+
   document.getElementById('carouselNext')?.addEventListener('click', () => goTo(current + 1));
   document.getElementById('carouselPrev')?.addEventListener('click', () => goTo(current - 1));
   dots.forEach(d => d.addEventListener('click', () => goTo(Number(d.dataset.idx))));
+
   let startX = 0;
   track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
   track.addEventListener('touchend', e => {
     const diff = startX - e.changedTouches[0].clientX;
     if (Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1);
   }, { passive: true });
+
   let timer = setInterval(() => goTo(current + 1), 4000);
   track.addEventListener('touchstart', () => clearInterval(timer), { passive: true });
 })();
-
-/* ENTRY MODAL */
-let usernameCheckTimer = null;
-let usernameAvailable  = false;
-
-function openEntryModal() {
-  document.getElementById('entryOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => document.getElementById('emBizName').focus(), 100);
-}
-function closeEntryModal() {
-  document.getElementById('entryOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-document.getElementById('emBizName').addEventListener('input', function() {
-  const slug = this.value.toLowerCase().replace(/[^a-z0-9\s]/g, '').trim().replace(/\s+/g, '_').substring(0, 30);
-  const uInp = document.getElementById('emUsername');
-  if (!uInp._manuallyEdited) uInp.value = slug;
-  if (slug) checkUsername(slug);
-});
-document.getElementById('emUsername').addEventListener('input', function() {
-  this._manuallyEdited = true;
-  this.value = this.value.toLowerCase().replace(/[^a-z0-9_]/g, '').substring(0, 30);
-  checkUsername(this.value);
-});
-
-function checkUsername(val) {
-  const hint = document.getElementById('emHint');
-  if (!val || val.length < 2) { hint.textContent = 'Min. 2 characters'; hint.className = 'em-hint'; usernameAvailable = false; return; }
-  hint.textContent = 'Checking...'; hint.className = 'em-hint';
-  clearTimeout(usernameCheckTimer);
-  usernameCheckTimer = setTimeout(async () => {
-    try {
-      const res = await fetch(`/api/check-username/?u=${encodeURIComponent(val)}`);
-      const data = await res.json();
-      if (data.available) { hint.textContent = `vendopage.com/${val} is available`; hint.className = 'em-hint available'; usernameAvailable = true; }
-      else { hint.textContent = `${val} is already taken — try another`; hint.className = 'em-hint taken'; usernameAvailable = false; }
-    } catch(e) { hint.textContent = 'Could not check — you can still continue'; hint.className = 'em-hint'; usernameAvailable = true; }
-  }, 500);
-}
-
-async function startUpload() {
-  const bizName = document.getElementById('emBizName').value.trim();
-  const username = document.getElementById('emUsername').value.trim();
-  const btn = document.getElementById('emSubmit');
-  const spin = document.getElementById('emSpin');
-  const txt = document.getElementById('emBtnTxt');
-  if (!bizName) { document.getElementById('emBizName').classList.add('error'); document.getElementById('emBizName').focus(); return; }
-  if (!username || username.length < 2) { document.getElementById('emUsername').focus(); return; }
-  btn.disabled = true; spin.style.display = 'block'; txt.textContent = 'Setting up...';
-  try {
-    const res = await fetch('/api/guest-init/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-      body: JSON.stringify({ business_name: bizName, username: username }),
-    });
-    const data = await res.json();
-    if (data.success) { window.location.href = '/upload/'; }
-    else { document.getElementById('emHint').textContent = data.error || 'Username is taken. Try another.'; document.getElementById('emHint').className = 'em-hint taken'; btn.disabled = false; spin.style.display = 'none'; txt.textContent = 'Continue to Upload'; }
-  } catch(e) { btn.disabled = false; spin.style.display = 'none'; txt.textContent = 'Continue to Upload'; }
-}
-
-document.getElementById('entryOverlay').addEventListener('click', function(e) { if (e.target === this) closeEntryModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEntryModal(); });
-['emBizName', 'emUsername'].forEach(id => {
-  document.getElementById(id)?.addEventListener('keydown', e => { if (e.key === 'Enter') startUpload(); });
-});
 </script>
 {% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Payment Failed — Vendopage{% endblock %}
+{% block content %}
+<div style="min-height:calc(100vh - 64px);background:var(--light);display:flex;align-items:center;justify-content:center;padding:40px 20px;">
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:24px;padding:48px 40px;max-width:440px;width:100%;text-align:center;">
+    <div style="font-size:64px;margin-bottom:20px;">😔</div>
+    <h1 style="font-family:var(--font-d);font-weight:800;font-size:26px;letter-spacing:-1px;margin-bottom:10px;">Payment Unsuccessful</h1>
+    <p style="font-size:14px;color:var(--gray);line-height:1.7;margin-bottom:28px;">
+      Your payment could not be completed. No money has been charged.<br>
+      Please try again or use a different payment method.
+    </p>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:16px;margin-bottom:24px;font-size:13px;color:#b91c1c;line-height:1.6;">
+      If you believe this is an error, please contact the seller or reach out to us at <strong>support@vendopage.com</strong>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <a href="javascript:history.back()" class="btn btn-primary">
+        ← Try Again
+      </a>
+      <a href="/" class="btn btn-secondary">
+        Back to Home
+      </a>
+    </div>
+  </div>
+</div>
+{% block footer %}{% endblock %}
+{% endblock %}

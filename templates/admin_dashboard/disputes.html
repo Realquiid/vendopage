@@ -1,0 +1,284 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Disputes — VendoPage Admin{% endblock %}
+{% block breadcrumb %}Disputes{% endblock %}
+{% block nav_disputes %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+.dispute-row {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: var(--transition);
+}
+.dispute-row:hover { border-color: var(--border2); }
+.dispute-row.open-dispute { border-left: 3px solid var(--red); }
+.dispute-row.under-review { border-left: 3px solid var(--amber); }
+.dispute-row.resolved { border-left: 3px solid var(--green); opacity: .8; }
+
+.dr-header {
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr 140px 140px 40px;
+  gap: 16px;
+  padding: 16px 20px;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+.dr-expand {
+  transition: transform .2s;
+  color: var(--text3);
+  display: flex; align-items: center; justify-content: center;
+}
+.dr-expand.open { transform: rotate(180deg); }
+
+.dr-body {
+  display: none;
+  padding: 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.dr-body.open { display: block; }
+
+.dr-evidence-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.evidence-block {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+}
+.evidence-block label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text3);
+  display: block;
+  margin-bottom: 8px;
+}
+.evidence-block p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.resolve-panel {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: 18px 20px;
+}
+.resolve-panel h4 {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.resolve-btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.filter-tabs-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.ftab {
+  padding: 7px 16px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--border2);
+  background: transparent;
+  color: var(--text2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-decoration: none;
+  transition: var(--transition);
+  letter-spacing: .3px;
+}
+.ftab:hover { color: var(--text); border-color: var(--text3); }
+.ftab.active { background: var(--amber); color: #000; border-color: var(--amber); font-weight: 600; }
+.ftab.danger.active { background: var(--red); color: #fff; border-color: var(--red); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Disputes</div>
+    <div class="page-subtitle">Review and resolve buyer–seller disputes</div>
+  </div>
+</div>
+
+<!-- Filter tabs -->
+<div class="filter-tabs-bar">
+  <a href="?status="               class="ftab {% if not status_filter %}active{% endif %}">All</a>
+  <a href="?status=open"           class="ftab danger {% if status_filter == 'open' %}active{% endif %}">🔴 Open ({{ open_count|default:"0" }})</a>
+  <a href="?status=vendor_replied" class="ftab {% if status_filter == 'vendor_replied' %}active{% endif %}">🔵 Awaiting Review</a>
+  <a href="?status=under_review"   class="ftab {% if status_filter == 'under_review' %}active{% endif %}">⏳ Under Review</a>
+  <a href="?status=resolved_buyer" class="ftab {% if status_filter == 'resolved_buyer' %}active{% endif %}">✅ Refunded</a>
+  <a href="?status=resolved_vendor" class="ftab {% if status_filter == 'resolved_vendor' %}active{% endif %}">✅ Paid Vendor</a>
+</div>
+
+{% if disputes %}
+  {% for dispute in disputes %}
+  <div class="dispute-row {% if dispute.status == 'open' %}open-dispute{% elif dispute.status == 'vendor_replied' or dispute.status == 'under_review' %}under-review{% elif 'resolved' in dispute.status %}resolved{% endif %}"
+       id="dr-{{ dispute.id }}">
+
+    <div class="dr-header" onclick="toggleDispute({{ dispute.id }})">
+      <!-- Ref + amount -->
+      <div>
+        <div class="mono amber" style="font-size:12px;font-weight:600;">#{{ dispute.order.order_ref|slice:":8"|upper }}</div>
+        <div class="mono muted" style="font-size:11px;">{{ dispute.order.currency }} {{ dispute.order.subtotal|floatformat:0 }}</div>
+      </div>
+
+      <!-- Buyer / Seller -->
+      <div>
+        <div style="font-size:13px;font-weight:600;">{{ dispute.order.buyer_name }}</div>
+        <div class="muted" style="font-size:11px;">vs {{ dispute.order.seller.business_name }}</div>
+      </div>
+
+      <!-- Reason -->
+      <div>
+        <div style="font-size:12px;font-weight:600;background:var(--bg4);display:inline-block;padding:3px 10px;border-radius:var(--r-pill);">
+          {{ dispute.get_reason_display|default:dispute.reason }}
+        </div>
+        <div class="muted" style="font-size:11px;margin-top:3px;">{{ dispute.created_at|date:"M d, Y" }}</div>
+      </div>
+
+      <!-- Raised by -->
+      <div>
+        <span class="badge badge-gray">by {{ dispute.raised_by }}</span>
+      </div>
+
+      <!-- Status -->
+      <div>
+        {% if dispute.status == 'open' %}
+          <span class="badge badge-red"><span class="badge-dot"></span>Open</span>
+        {% elif dispute.status == 'vendor_replied' %}
+          <span class="badge badge-blue">Vendor Replied</span>
+        {% elif dispute.status == 'under_review' %}
+          <span class="badge badge-amber">Under Review</span>
+        {% elif dispute.status == 'resolved_buyer' %}
+          <span class="badge badge-green">Refunded Buyer</span>
+        {% elif dispute.status == 'resolved_vendor' %}
+          <span class="badge badge-green">Paid Vendor</span>
+        {% else %}
+          <span class="badge badge-gray">{{ dispute.get_status_display }}</span>
+        {% endif %}
+      </div>
+
+      <div class="dr-expand" id="icon-{{ dispute.id }}">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>
+
+    <!-- Expanded Body -->
+    <div class="dr-body" id="body-{{ dispute.id }}">
+      <div class="dr-evidence-grid">
+        <div class="evidence-block">
+          <label>Buyer's Complaint</label>
+          <p>{{ dispute.buyer_message }}</p>
+          {% if dispute.buyer_evidence %}
+          <a href="{{ dispute.buyer_evidence }}" target="_blank" style="display:inline-block;margin-top:10px;font-size:12px;color:var(--amber);">View Evidence ↗</a>
+          {% endif %}
+        </div>
+
+        <div class="evidence-block">
+          <label>Seller's Response</label>
+          {% if dispute.vendor_reply %}
+            <p>{{ dispute.vendor_reply }}</p>
+            {% if dispute.vendor_evidence %}
+            <a href="{{ dispute.vendor_evidence }}" target="_blank" style="display:inline-block;margin-top:10px;font-size:12px;color:var(--amber);">View Evidence ↗</a>
+            {% endif %}
+          {% else %}
+            <p style="color:var(--text3);font-style:italic;">No response yet.</p>
+          {% endif %}
+        </div>
+
+        {% if dispute.admin_note %}
+        <div class="evidence-block" style="grid-column:1/-1;border-color:var(--amber);background:var(--amber-faint);">
+          <label style="color:var(--amber);">Admin Note</label>
+          <p>{{ dispute.admin_note }}</p>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if dispute.status not in 'resolved_buyer,resolved_vendor,closed' %}
+      <div class="resolve-panel">
+        <h4>Resolve this Dispute</h4>
+        <form method="POST" action="{% url 'resolve_dispute' dispute.id %}">
+          {% csrf_token %}
+          <textarea name="admin_note" class="form-textarea" placeholder="Add a resolution note visible to both parties…">{% if dispute.admin_note %}{{ dispute.admin_note }}{% endif %}</textarea>
+          <div class="resolve-btns">
+            <button type="submit" name="action" value="refund_buyer" class="btn btn-danger"
+              onclick="return confirm('Refund the buyer? This will mark the order as refunded.')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 00-4-4H4"/></svg>
+              Refund Buyer
+            </button>
+            <button type="submit" name="action" value="pay_vendor" class="btn btn-green"
+              onclick="return confirm('Release payment to the seller? This triggers a payout.')">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/></svg>
+              Pay Vendor
+            </button>
+            <button type="submit" name="action" value="under_review" class="btn btn-ghost">
+              Mark Under Review
+            </button>
+          </div>
+        </form>
+      </div>
+      {% else %}
+      <div style="background:var(--green-dim);border:1px solid rgba(16,185,129,.25);border-radius:var(--r-md);padding:14px 16px;font-size:13px;color:var(--green);">
+        ✅ Resolved · {{ dispute.get_status_display }}
+        {% if dispute.resolved_at %} · {{ dispute.resolved_at|date:"M d, Y" }}{% endif %}
+        {% if dispute.admin_note %}<div style="margin-top:6px;color:var(--green);opacity:.8;">Note: {{ dispute.admin_note }}</div>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">
+    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  </div>
+  <div class="empty-title">No disputes found</div>
+  <div class="empty-sub">{% if status_filter %}No disputes match this filter.{% else %}All transactions are running smoothly 🎉{% endif %}</div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleDispute(id) {
+  const body = document.getElementById('body-' + id);
+  const icon = document.getElementById('icon-' + id);
+  const isOpen = body.classList.contains('open');
+
+  // Close all
+  document.querySelectorAll('.dr-body').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('.dr-expand').forEach(el => el.classList.remove('open'));
+
+  if (!isOpen) {
+    body.classList.add('open');
+    icon.classList.add('open');
+    body.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+</script>
+{% endblock %}

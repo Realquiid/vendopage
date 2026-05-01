@@ -1,0 +1,104 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Bank Accounts — VendoPage Admin{% endblock %}
+{% block breadcrumb %}Bank Accounts{% endblock %}
+{% block nav_banks %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Bank Accounts</div>
+    <div class="page-subtitle">Vendor payout accounts · verify before first payout</div>
+  </div>
+  <div class="page-actions">
+    <div style="background:var(--red-dim);border:1px solid rgba(239,68,68,.25);border-radius:var(--r-sm);padding:10px 16px;font-family:var(--font-mono);font-size:12px;color:var(--red);">
+      {{ unverified_count|default:"0" }} unverified
+    </div>
+  </div>
+</div>
+
+<!-- Filter -->
+<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px;">
+  <form method="GET" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+    <input type="text" name="search" value="{{ request.GET.search }}"
+      placeholder="Search seller, account name, bank…"
+      class="form-input" style="max-width:280px;">
+    <select name="verified" class="form-select" style="max-width:160px;">
+      <option value="">All Accounts</option>
+      <option value="0" {% if request.GET.verified == '0' %}selected{% endif %}>Unverified Only</option>
+      <option value="1" {% if request.GET.verified == '1' %}selected{% endif %}>Verified Only</option>
+    </select>
+    <button type="submit" class="btn btn-amber btn-sm">Apply</button>
+    <a href="{% url 'admin_bank_accounts' %}" class="btn btn-ghost btn-sm">Clear</a>
+  </form>
+</div>
+
+<div class="data-table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Seller</th>
+        <th>Account Name</th>
+        <th>Account No.</th>
+        <th>Bank</th>
+        <th>Status</th>
+        <th>Added</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account in accounts %}
+      <tr>
+        <td>
+          <a href="{% url 'admin_seller_detail' account.seller.id %}" style="font-weight:600;text-decoration:none;color:var(--text);">
+            {{ account.seller.business_name }}
+          </a>
+          <div class="mono muted" style="font-size:11px;">@{{ account.seller.username }}</div>
+        </td>
+        <td style="font-weight:600;">{{ account.account_name }}</td>
+        <td class="mono" style="font-size:13px;">
+          ****{{ account.account_number|slice:"-4:" }}
+          <span class="muted" style="font-size:10px;">({{ account.account_number|length }} digits)</span>
+        </td>
+        <td style="font-size:13px;">{{ account.bank_name }}</td>
+        <td>
+          {% if account.is_verified %}
+            <span class="badge badge-green">✓ Verified</span>
+          {% else %}
+            <span class="badge badge-red">⚠ Unverified</span>
+          {% endif %}
+        </td>
+        <td class="mono muted" style="font-size:12px;">{{ account.created_at|date:"M d, Y" }}</td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            {% if not account.is_verified %}
+            <form method="POST" action="{% url 'admin_verify_bank_account' account.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="verify">
+              <button class="btn btn-green btn-sm">✓ Verify</button>
+            </form>
+            {% else %}
+            <form method="POST" action="{% url 'admin_verify_bank_account' account.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="unverify">
+              <button class="btn btn-ghost btn-sm">Unverify</button>
+            </form>
+            {% endif %}
+          </div>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="empty-title">No bank accounts found</div>
+          <div class="empty-sub">Sellers must add a payout account to enable Store Mode</div>
+        </div>
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

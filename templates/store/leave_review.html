@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leave a Review — Vendopage{% endblock %}
+
+{% block extra_css %}
+<style>
+.review-page { background:var(--light); min-height:calc(100vh - 64px); padding:40px 20px 80px; display:flex; align-items:flex-start; justify-content:center; }
+.review-card { background:var(--white); border:1px solid var(--border); border-radius:24px; width:100%; max-width:540px; overflow:hidden; }
+
+.review-header { padding:32px 32px 24px; text-align:center; background:linear-gradient(135deg,#fff9ed,#fff5d6); border-bottom:1px solid var(--border); }
+.review-header .store-avatar { width:72px; height:72px; border-radius:50%; object-fit:cover; margin:0 auto 14px; border:3px solid #fde68a; display:block; }
+.review-header .store-avatar-ph { width:72px; height:72px; border-radius:50%; background:var(--dark); color:#fff; font-family:var(--font-d); font-weight:800; font-size:28px; display:flex; align-items:center; justify-content:center; margin:0 auto 14px; border:3px solid #fde68a; }
+.review-header h1 { font-family:var(--font-d); font-weight:800; font-size:22px; letter-spacing:-0.5px; margin-bottom:6px; }
+.review-header p { font-size:13px; color:var(--gray); }
+.order-ref-sm { display:inline-block; font-family:monospace; font-size:11px; font-weight:700; background:var(--dark); color:#fff; padding:2px 10px; border-radius:100px; margin-top:6px; letter-spacing:1px; }
+
+.review-body { padding:28px 32px; }
+
+/* Star rating */
+.star-rating-wrap { margin-bottom:28px; }
+.star-rating-label { font-size:13px; font-weight:700; color:var(--gray); margin-bottom:12px; display:block; text-align:center; }
+.star-input { display:flex; flex-direction:row-reverse; justify-content:center; gap:6px; }
+.star-input input[type="radio"] { display:none; }
+.star-input label { font-size:40px; cursor:pointer; transition:transform .15s; color:#d1d5db; line-height:1; }
+.star-input label:hover,
+.star-input label:hover ~ label,
+.star-input input:checked ~ label { color:#fbbf24; transform:scale(1.1); }
+.star-input label:hover { transform:scale(1.2); }
+.rating-text { text-align:center; font-size:13px; color:var(--gray-lt); margin-top:8px; min-height:18px; }
+
+.form-group { margin-bottom:20px; }
+.form-label { font-size:13px; font-weight:700; color:var(--gray); margin-bottom:8px; display:block; }
+.form-textarea { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:var(--r-md); font-family:var(--font-b); font-size:14px; outline:none; transition:border-color .18s; box-sizing:border-box; resize:vertical; min-height:110px; line-height:1.6; background:var(--white); color:var(--dark); }
+.form-textarea:focus { border-color:#fbbf24; box-shadow:0 0 0 3px rgba(251,191,36,.1); }
+.form-textarea::placeholder { color:var(--gray-lt); }
+
+.review-footer { padding:20px 32px; border-top:1px solid var(--border); display:flex; gap:10px; }
+.btn-cancel { flex:1; padding:12px; border-radius:var(--r-pill); border:1px solid var(--border); background:var(--light); font-family:var(--font-b); font-size:14px; font-weight:600; cursor:pointer; transition:all .18s; color:var(--dark); text-decoration:none; text-align:center; }
+.btn-cancel:hover { border-color:var(--dark); }
+.btn-submit-review { flex:2; padding:12px; border-radius:var(--r-pill); border:none; background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#fff; font-family:var(--font-b); font-size:14px; font-weight:700; cursor:pointer; transition:all .2s; box-shadow:0 4px 12px rgba(245,158,11,.3); }
+.btn-submit-review:hover { transform:translateY(-1px); box-shadow:0 6px 16px rgba(245,158,11,.4); }
+.btn-submit-review:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+
+[data-theme="dark"] .review-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .review-header { background:linear-gradient(135deg,#2a2219,#221e12); border-color:#2e2e2e; }
+[data-theme="dark"] .review-footer { border-color:#2e2e2e; }
+[data-theme="dark"] .form-textarea { background:#2a2a2a; border-color:#3a3a3a; color:#f0f0f0; }
+
+@media(max-width:500px) {
+  .review-header, .review-body, .review-footer { padding:20px; }
+  .review-footer { flex-direction:column; }
+  .star-input label { font-size:34px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="review-page">
+<div class="review-card">
+
+  <div class="review-header">
+    {% if order.seller.profile_picture %}
+      <img src="{{ order.seller.profile_picture.url }}" class="store-avatar" alt="{{ order.seller.business_name }}">
+    {% else %}
+      <div class="store-avatar-ph">{{ order.seller.business_name|first }}</div>
+    {% endif %}
+    <h1>How was your experience?</h1>
+    <p>Share your honest feedback about <strong>{{ order.seller.business_name }}</strong></p>
+    <span class="order-ref-sm">#{{ order.order_ref|slice:":8"|upper }}</span>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="review-body">
+
+      <div class="star-rating-wrap">
+        <label class="star-rating-label">Tap to rate your experience</label>
+        <div class="star-input">
+          <input type="radio" name="rating" id="star5" value="5">
+          <label for="star5" title="Excellent">★</label>
+          <input type="radio" name="rating" id="star4" value="4">
+          <label for="star4" title="Good">★</label>
+          <input type="radio" name="rating" id="star3" value="3">
+          <label for="star3" title="Average">★</label>
+          <input type="radio" name="rating" id="star2" value="2">
+          <label for="star2" title="Poor">★</label>
+          <input type="radio" name="rating" id="star1" value="1">
+          <label for="star1" title="Terrible">★</label>
+        </div>
+        <div class="rating-text" id="ratingText">Select your rating</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="review-comment">Tell us more (optional)</label>
+        <textarea id="review-comment" name="comment" class="form-textarea" placeholder="What did you love? What could be better? Your honest feedback helps other buyers..."></textarea>
+      </div>
+
+    </div>
+
+    <div class="review-footer">
+      <a href="/order/{{ order.order_ref }}/" class="btn-cancel">Skip</a>
+      <button type="submit" class="btn-submit-review" id="submitReviewBtn" disabled>⭐ Submit Review</button>
+    </div>
+  </form>
+
+</div>
+</div>
+
+<script>
+const ratings = {
+  1: "😞 Terrible — really disappointed",
+  2: "😐 Poor — didn't meet expectations",
+  3: "🙂 Average — it was okay",
+  4: "😊 Good — happy with my purchase",
+  5: "🤩 Excellent — absolutely loved it!"
+};
+
+document.querySelectorAll('.star-input input').forEach(input => {
+  input.addEventListener('change', function() {
+    document.getElementById('ratingText').textContent = ratings[this.value] || '';
+    document.getElementById('submitReviewBtn').disabled = false;
+  });
+});
+</script>
+{% block footer %}{% endblock %}
+{% endblock %}
