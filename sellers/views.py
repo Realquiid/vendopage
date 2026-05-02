@@ -10,13 +10,14 @@ from django.utils import timezone
 from datetime import timedelta, datetime
 import urllib.parse
 from django.db import IntegrityError
-from sellers.models import Seller
+from sellers.models import (
+    Seller, PlatformSettings,
+    VendorBankAccount, Order, OrderItem, Dispute, Review,
+)
 from products.models import Product, ProductImage
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from PIL import Image
-import os
 from sellers.geo_currency import detect_currency
 from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal, InvalidOperation
@@ -27,11 +28,19 @@ from sellers.email import (
     send_welcome_email,
     send_first_product_email,
     send_first_whatsapp_click_email,
+    send_order_confirmed_buyer,
+    send_new_order_vendor,
+    send_order_shipped_buyer,
+    send_payment_sent_vendor,
+    send_dispute_opened,
 )
 import random
 import string
 import logging
 import traceback
+import requests as req
+from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +49,6 @@ logger = logging.getLogger(__name__)
 # HELPERS
 # ─────────────────────────────────────────────
 def reset_weekly_analytics_if_needed(seller):
-    """Reset weekly stats every 7 days"""
     now = timezone.now()
     if (now - seller.last_analytics_reset).days >= 7:
         seller.weekly_page_views = 0
@@ -71,25 +79,18 @@ def contact(request):
 
 def home(request):
     featured_sellers = Seller.objects.filter(
-        is_featured=True,
-        is_active=True,
-        is_staff=False,
-        is_superuser=False
+        is_featured=True, is_active=True, is_staff=False, is_superuser=False
     ).annotate(
         product_count=Count('products', filter=Q(
-            products__is_archived=False,
-            products__is_sold_out=False
+            products__is_archived=False, products__is_sold_out=False
         ))
     ).filter(product_count__gte=5).order_by('-product_count')[:4]
 
     sellers = Seller.objects.filter(
-        is_active=True,
-        is_staff=False,
-        is_superuser=False
+        is_active=True, is_staff=False, is_superuser=False
     ).annotate(
         product_count=Count('products', filter=Q(
-            products__is_archived=False,
-            products__is_sold_out=False
+            products__is_archived=False, products__is_sold_out=False
         ))
     ).filter(product_count__gte=5).exclude(
         id__in=featured_sellers.values_list('id', flat=True)
@@ -109,11 +110,12 @@ def seller_page(request, slug):
         seller.weekly_page_views += 1
         seller.save(update_fields=['total_page_views', 'weekly_page_views'])
 
-    thirty_days_ago = timezone.now() - timedelta(days=30)
+    # FIX: Removed 30-day filter — show ALL non-archived products
+    # The old filter meant products older than 30 days were invisible
+    # on the store page AND couldn't be added to cart.
     products = Product.objects.filter(
         seller=seller,
         is_archived=False,
-        created_at__gte=thirty_days_ago
     ).prefetch_related('images').order_by('-created_at')
 
     return render(request, 'seller_page.html', {
@@ -132,7 +134,6 @@ def login_view(request):
         password = request.POST.get('password', '')
 
         user = authenticate(request, username=identifier, password=password)
-
         if not user:
             try:
                 seller = Seller.objects.get(email__iexact=identifier)
@@ -159,10 +160,8 @@ def logout_view(request):
     return redirect('home')
 
 
-
-
 # ─────────────────────────────────────────────
-# UPLOAD PRODUCT (single)
+# UPLOAD PRODUCT
 # ─────────────────────────────────────────────
 @require_http_methods(["GET", "POST"])
 def upload_product(request):
@@ -179,7 +178,6 @@ def upload_product(request):
             return JsonResponse({'success': False, 'error': 'No images provided'}, status=400)
         if len(image_urls) > 10:
             return JsonResponse({'success': False, 'error': 'Maximum 10 images per product'}, status=400)
-
         for url in image_urls:
             if not url.startswith('https://res.cloudinary.com/'):
                 return JsonResponse({'success': False, 'error': 'Invalid image URL'}, status=400)
@@ -197,7 +195,6 @@ def upload_product(request):
         for index, url in enumerate(image_urls):
             ProductImage.objects.create(product=product, image_url=url, order=index)
 
-        logger.info(f"✅ Product {product.id} created with {len(image_urls)} images")
         return JsonResponse({'success': True, 'product_id': product.id, 'redirect_url': '/dashboard/'})
 
     except Exception as e:
@@ -255,10 +252,6 @@ def delete_product(request, product_id):
 
 @require_http_methods(["POST"])
 def track_whatsapp_click(request, product_id):
-    """
-    Track WhatsApp click.
-    Sends 'first click' email when seller's total lifetime clicks hit exactly 1.
-    """
     try:
         product = get_object_or_404(Product, id=product_id)
         product.whatsapp_clicks += 1
@@ -269,7 +262,6 @@ def track_whatsapp_click(request, product_id):
         seller.weekly_whatsapp_clicks += 1
         seller.save(update_fields=['weekly_whatsapp_clicks'])
 
-        # Fire first-click email on the very first ever WhatsApp click
         total_clicks = Product.objects.filter(seller=seller).aggregate(
             total=Sum('whatsapp_clicks')
         )['total'] or 0
@@ -288,30 +280,29 @@ def track_whatsapp_click(request, product_id):
         return JsonResponse({'success': False}, status=400)
 
 
+# ─────────────────────────────────────────────
+# SETTINGS
+# ─────────────────────────────────────────────
 @login_required
 def dashboard_settings(request):
-    from sellers.models import PlatformSettings
     platform = PlatformSettings.get()
- 
     transaction_fee_percent = platform.transaction_fee_percent
-    premium_price           = platform.premium_monthly_price
- 
-    # Pre-compute earn example (same logic as subscription view)
-    example_order  = 10000
-    example_fee    = (example_order * transaction_fee_percent) / 100
+    premium_price = platform.premium_monthly_price
+    example_order = 10000
+    example_fee = (example_order * transaction_fee_percent) / 100
     example_payout = example_order - example_fee
- 
+
     return render(request, 'dashboard/settings.html', {
-        'platform_fee_percent':  transaction_fee_percent,
-        'transaction_fee':       transaction_fee_percent,   # used in Plan tab
-        'premium_price':         premium_price,             # used in Plan tab
-        'example_order':         example_order,
-        'example_fee':           example_fee,
-        'example_payout':        example_payout,
-        # subscription status for Plan tab buttons
-        'current_subscription':  request.user.subscription_type,
-        'subscription_expires':  request.user.subscription_expires,
+        'platform_fee_percent': transaction_fee_percent,
+        'transaction_fee':      transaction_fee_percent,
+        'premium_price':        premium_price,
+        'example_order':        example_order,
+        'example_fee':          example_fee,
+        'example_payout':       example_payout,
+        'current_subscription': request.user.subscription_type,
+        'subscription_expires': request.user.subscription_expires,
     })
+
 
 @login_required
 @require_http_methods(["POST"])
@@ -354,7 +345,6 @@ def update_profile_picture(request):
                 public_id = '/'.join(path_parts).rsplit('.', 1)[0]
             else:
                 public_id = url
-
             seller.profile_picture = public_id
             seller.save(update_fields=['profile_picture'])
             return JsonResponse({'success': True})
@@ -447,7 +437,7 @@ def change_password(request):
 
 
 # ─────────────────────────────────────────────
-# PASSWORD RESET FLOW
+# PASSWORD RESET
 # ─────────────────────────────────────────────
 def forgot_password(request):
     if request.method == 'POST':
@@ -455,32 +445,26 @@ def forgot_password(request):
         try:
             seller = Seller.objects.get(email__iexact=email)
             reset_code = ''.join(random.choices(string.digits, k=5))
-
             request.session['reset_code'] = reset_code
             request.session['reset_email'] = email
             request.session['reset_code_expires'] = (
                 timezone.now() + timedelta(minutes=10)
             ).isoformat()
-
             email_sent = send_password_reset_email(
                 to_email=email,
                 business_name=seller.business_name,
                 reset_code=reset_code
             )
-
             if not email_sent:
                 messages.error(request, 'Failed to send reset email. Please try again.')
                 return render(request, 'auth/forgot_password.html')
-
         except Seller.DoesNotExist:
             pass
         except Exception as e:
             logger.error(f"Password reset failed: {str(e)}")
             messages.error(request, 'Something went wrong. Please try again.')
             return render(request, 'auth/forgot_password.html')
-
         return redirect('verify_reset_code')
-
     return render(request, 'auth/forgot_password.html')
 
 
@@ -489,18 +473,15 @@ def verify_reset_code(request):
         code = request.POST.get('code', '').strip()
         stored_code = request.session.get('reset_code')
         expires = request.session.get('reset_code_expires')
-
         if not stored_code or not expires:
             messages.error(request, 'No reset code found. Please request a new one.')
             return redirect('forgot_password')
-
         expires_dt = datetime.fromisoformat(expires)
         if timezone.now() > expires_dt:
             del request.session['reset_code']
             del request.session['reset_code_expires']
             messages.error(request, 'Code expired. Please request a new one.')
             return redirect('forgot_password')
-
         if code == stored_code:
             reset_token = uuid.uuid4().hex
             request.session['reset_token'] = reset_token
@@ -508,7 +489,6 @@ def verify_reset_code(request):
             return redirect('reset_password', token=reset_token)
         else:
             messages.error(request, 'Invalid code. Please try again.')
-
     return render(request, 'auth/verify_code.html')
 
 
@@ -529,22 +509,18 @@ def reset_password(request, token):
     if request.method == 'POST':
         new_password = request.POST.get('new_password')
         confirm_password = request.POST.get('confirm_password')
-
         if new_password != confirm_password:
             messages.error(request, 'Passwords do not match')
             return render(request, 'auth/reset_password.html')
         if len(new_password) < 6:
             messages.error(request, 'Password must be at least 6 characters')
             return render(request, 'auth/reset_password.html')
-
         try:
             seller = Seller.objects.get(email__iexact=email)
             seller.set_password(new_password)
             seller.save()
-
             for key in ['reset_code', 'reset_email', 'reset_code_expires', 'reset_token', 'reset_token_expires']:
                 request.session.pop(key, None)
-
             messages.success(request, '✓ Password reset successful! Please login.')
             return redirect('login')
         except Seller.DoesNotExist:
@@ -555,259 +531,28 @@ def reset_password(request, token):
 
 
 # ─────────────────────────────────────────────
-# ADMIN VIEWS
+# SUBSCRIPTION / PAYMENT
 # ─────────────────────────────────────────────
-from django.contrib.admin.views.decorators import staff_member_required
-
-
-
-
-@staff_member_required
-def admin_dashboard(request):
-    """
-    Drop-in replacement for admin_dashboard.
-    Wire this to the 'admin_dashboard' URL name in urls.py.
-    """
-    from sellers.models import PlatformSettings
-    from django.db.models import Sum, Count, Q
- 
-    total_sellers     = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).count()
-    total_products    = Product.objects.filter(is_archived=False).count()
-    total_page_views  = Seller.objects.filter(is_staff=False, is_superuser=False).aggregate(
-        t=Sum('total_page_views')
-    )['t'] or 0
-    premium_count     = Seller.objects.filter(
-        subscription_type='premium', is_staff=False, is_superuser=False
-    ).count()
- 
-    # 7/30 day growth
-    last_7d  = timezone.now() - timedelta(days=7)
-    last_30d = timezone.now() - timedelta(days=30)
-    new_sellers_7d   = Seller.objects.filter(created_at__gte=last_7d).count()
-    new_sellers_30d  = Seller.objects.filter(created_at__gte=last_30d).count()
-    new_products_7d  = Product.objects.filter(created_at__gte=last_7d).count()
- 
-    recent_sellers       = Seller.objects.filter(
-        is_active=True, is_staff=False, is_superuser=False
-    ).order_by('-created_at')[:8]
- 
-    top_sellers_by_views = Seller.objects.filter(
-        is_active=True, is_staff=False, is_superuser=False
-    ).order_by('-weekly_page_views')[:10]
- 
-    subscription_stats = Seller.objects.filter(
-        is_staff=False, is_superuser=False
-    ).values('subscription_type').annotate(count=Count('id'))
- 
-    # Sidebar badge counts
-    open_disputes_count   = Dispute.objects.filter(
-        status__in=['open', 'vendor_replied', 'under_review']
-    ).count()
-    pending_payouts_count = Order.objects.filter(
-        payout_triggered=False,
-        status__in=['delivered', 'completed']
-    ).count()
-    open_disputes         = open_disputes_count     # for stat card
-    pending_payouts       = pending_payouts_count   # for stat card
- 
-    platform = PlatformSettings.get()
- 
-    return render(request, 'admin_dashboard/dashboard.html', {
-        'total_sellers':          total_sellers,
-        'total_products':         total_products,
-        'total_page_views':       total_page_views,
-        'premium_count':          premium_count,
-        'new_sellers_7d':         new_sellers_7d,
-        'new_sellers_30d':        new_sellers_30d,
-        'new_products_7d':        new_products_7d,
-        'recent_sellers':         recent_sellers,
-        'top_sellers_by_views':   top_sellers_by_views,
-        'subscription_stats':     subscription_stats,
-        'monthly_revenue':        premium_count * platform.premium_monthly_price,
-        'open_disputes':          open_disputes,
-        'pending_payouts':        pending_payouts,
-        'open_disputes_count':    open_disputes_count,
-        'pending_payouts_count':  pending_payouts_count,
-    })
-
-
-
-@staff_member_required
-def admin_sellers(request):
-    sellers = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).annotate(
-        product_count=Count('products', filter=Q(products__is_archived=False))
-    ).order_by('-created_at')
-
-    subscription_filter = request.GET.get('subscription')
-    if subscription_filter:
-        sellers = sellers.filter(subscription_type=subscription_filter)
-
-    search = request.GET.get('search')
-    if search:
-        sellers = sellers.filter(
-            Q(business_name__icontains=search) | Q(username__icontains=search) | Q(email__icontains=search)
-        )
-
-    return render(request, 'admin_dashboard/sellers.html', {'sellers': sellers})
-
-
-@staff_member_required
-def admin_seller_detail(request, seller_id):
-    seller   = get_object_or_404(Seller, id=seller_id)
-    products = Product.objects.filter(seller=seller).prefetch_related('images').order_by('-created_at')
- 
-    # Revenue paid out to this seller
-    total_revenue = Order.objects.filter(
-        seller=seller,
-        status__in=['delivered', 'completed'],
-        payout_triggered=True,
-    ).aggregate(t=Sum('vendor_payout'))['t'] or Decimal('0')
- 
-    orders_count = Order.objects.filter(
-        seller=seller,
-        status__in=['paid', 'shipped', 'delivered', 'completed', 'disputed']
-    ).count()
- 
-    orders = Order.objects.filter(seller=seller).order_by('-created_at')[:8]
- 
-    if not seller.slug:
-        seller.save()
- 
-    if request.method == 'POST':
-        action = request.POST.get('action')
- 
-        if action == 'change_subscription':
-            new_type = request.POST.get('subscription_type')
-            expires  = request.POST.get('subscription_expires', '').strip()
-            seller.subscription_type = new_type
-            if expires:
-                from datetime import datetime
-                try:
-                    seller.subscription_expires = datetime.strptime(expires, '%Y-%m-%d').replace(
-                        tzinfo=timezone.get_current_timezone()
-                    )
-                except ValueError:
-                    pass
-            elif new_type == 'premium' and not seller.subscription_expires:
-                seller.subscription_expires = timezone.now() + timedelta(days=30)
-            seller.save()
-            messages.success(request, f'Subscription updated to {new_type}.')
- 
-        elif action == 'toggle_featured':
-            seller.is_featured = not seller.is_featured
-            seller.save(update_fields=['is_featured'])
-            messages.success(request, f'{"Featured ⭐" if seller.is_featured else "Removed from featured"}.')
- 
-        elif action == 'toggle_store_mode':
-            seller.store_mode = not seller.store_mode
-            if seller.store_mode and not seller.store_mode_enabled_at:
-                seller.store_mode_enabled_at = timezone.now()
-            seller.save(update_fields=['store_mode', 'store_mode_enabled_at'])
-            messages.success(request, f'Store Mode {"enabled" if seller.store_mode else "disabled"}.')
- 
-        elif action == 'deactivate':
-            seller.is_active = False
-            seller.save(update_fields=['is_active'])
-            messages.warning(request, f'{seller.business_name} has been banned.')
- 
-        elif action == 'activate':
-            seller.is_active = True
-            seller.save(update_fields=['is_active'])
-            messages.success(request, f'{seller.business_name} account restored.')
- 
-        elif action == 'reset_analytics':
-            seller.weekly_page_views       = 0
-            seller.weekly_whatsapp_clicks  = 0
-            seller.last_analytics_reset    = timezone.now()
-            seller.save(update_fields=['weekly_page_views', 'weekly_whatsapp_clicks', 'last_analytics_reset'])
-            messages.success(request, 'Weekly analytics reset.')
- 
-        # Bank account actions — OneToOne so use seller.bank_account
-        elif action == 'verify_bank':
-            try:
-                seller.bank_account.is_verified = True
-                seller.bank_account.save(update_fields=['is_verified'])
-                messages.success(request, '✅ Bank account verified.')
-            except VendorBankAccount.DoesNotExist:
-                messages.error(request, 'No bank account found.')
- 
-        elif action == 'unverify_bank':
-            try:
-                seller.bank_account.is_verified = False
-                seller.bank_account.save(update_fields=['is_verified'])
-                messages.warning(request, '⚠️ Bank account marked unverified.')
-            except VendorBankAccount.DoesNotExist:
-                messages.error(request, 'No bank account found.')
- 
-        return redirect('admin_seller_detail', seller_id=seller_id)
- 
-    # Badge counts for sidebar
-    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
-    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
- 
-    return render(request, 'admin_dashboard/seller_detail.html', {
-        'seller':               seller,
-        'products':             products,
-        'total_revenue':        total_revenue,
-        'orders_count':         orders_count,
-        'orders':               orders,
-        'open_disputes_count':  open_disputes_count,
-        'pending_payouts_count': pending_payouts_count,
-    })
-
-@staff_member_required
-def admin_products(request):
-    products = Product.objects.select_related('seller').order_by('-created_at')
-    status = request.GET.get('status')
-    if status == 'sold_out':
-        products = products.filter(is_sold_out=True)
-    elif status == 'archived':
-        products = products.filter(is_archived=True)
-    elif status == 'active':
-        products = products.filter(is_archived=False, is_sold_out=False)
-    return render(request, 'admin_dashboard/products.html', {'products': products[:100]})
-
-
-@staff_member_required
-def admin_analytics(request):
-    last_7_days = timezone.now() - timedelta(days=7)
-    last_30_days = timezone.now() - timedelta(days=30)
-    return render(request, 'admin_dashboard/analytics.html', {
-        'new_sellers_7d': Seller.objects.filter(created_at__gte=last_7_days).count(),
-        'new_sellers_30d': Seller.objects.filter(created_at__gte=last_30_days).count(),
-        'new_products_7d': Product.objects.filter(created_at__gte=last_7_days).count(),
-        'new_products_30d': Product.objects.filter(created_at__gte=last_30_days).count(),
-        'category_stats': Seller.objects.values('category').annotate(count=Count('id')).order_by('-count'),
-    })
-
-
 from .flutterwave import FlutterwavePayment
+
 
 @login_required
 def subscription(request):
-    from sellers.models import PlatformSettings
     platform = PlatformSettings.get()
- 
-    # These are Decimal objects — templates handle formatting
-    transaction_fee_percent = platform.transaction_fee_percent   # e.g. Decimal('5.00')
-    premium_price           = platform.premium_monthly_price     # e.g. Decimal('2000.00')
- 
-    # Pre-calculate the earn example so the template does zero math
-    example_order    = 1000000          # ₦10,000 shown as 1000000 kobo? No — ₦10,000 integer
-    example_order    = 10000            # buyer pays ₦10,000
-    example_fee      = (example_order * transaction_fee_percent) / 100
-    example_payout   = example_order - example_fee
- 
+    transaction_fee_percent = platform.transaction_fee_percent
+    premium_price = platform.premium_monthly_price
+    example_order = 10000
+    example_fee = (example_order * transaction_fee_percent) / 100
+    example_payout = example_order - example_fee
+
     return render(request, 'dashboard/subscription.html', {
-        'current_subscription':  request.user.subscription_type,
-        'subscription_expires':  request.user.subscription_expires,
-        # Fee & price — used in cards, banner, earn example, FAQ
-        'transaction_fee':       transaction_fee_percent,         # e.g. 5.00
-        'premium_price':         premium_price,                   # e.g. 2000.00
-        # Earn example (pre-computed — no template math needed)
-        'example_order':         example_order,                   # 10000
-        'example_fee':           example_fee,                     # 500
-        'example_payout':        example_payout,                  # 9500
+        'current_subscription': request.user.subscription_type,
+        'subscription_expires': request.user.subscription_expires,
+        'transaction_fee':      transaction_fee_percent,
+        'premium_price':        premium_price,
+        'example_order':        example_order,
+        'example_fee':          example_fee,
+        'example_payout':       example_payout,
     })
 
 
@@ -815,8 +560,9 @@ def subscription(request):
 def upgrade_to_premium(request):
     if request.method == 'POST':
         seller = request.user
+        platform = PlatformSettings.get()
+        amount = platform.premium_monthly_price
         tx_ref = f"VDP-{seller.id}-{uuid.uuid4().hex[:8]}"
-        amount = Decimal('2000.00')
 
         flw = FlutterwavePayment()
         redirect_url = request.build_absolute_uri('/payment/verify/')
@@ -824,7 +570,6 @@ def upgrade_to_premium(request):
             email=seller.email, amount=amount, tx_ref=tx_ref,
             redirect_url=redirect_url, customer_name=seller.business_name
         )
-
         if result.get('status') == 'success':
             request.session['tx_ref'] = tx_ref
             request.session['upgrading_to_premium'] = True
@@ -832,7 +577,6 @@ def upgrade_to_premium(request):
         else:
             messages.error(request, 'Payment initialization failed. Please try again.')
             return redirect('subscription')
-
     return redirect('subscription')
 
 
@@ -883,7 +627,10 @@ def flutterwave_webhook(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
-# upload_products_batch — replace the whole function with this clean version:
+
+# ─────────────────────────────────────────────
+# UPLOAD BATCH
+# ─────────────────────────────────────────────
 @require_http_methods(["POST"])
 def upload_products_batch(request):
     if not request.user.is_authenticated:
@@ -891,15 +638,12 @@ def upload_products_batch(request):
 
     try:
         products_data = json.loads(request.POST.get('products', '[]'))
-
         if not products_data:
             return JsonResponse({'success': False, 'error': 'No products provided'}, status=400)
         if len(products_data) > 50:
             return JsonResponse({'success': False, 'error': 'Maximum 50 products per batch'}, status=400)
 
-        # Check if this is seller's first ever upload (before creating)
         is_first_upload = Product.objects.filter(seller=request.user).count() == 0
-
         created = []
 
         for item in products_data:
@@ -909,7 +653,6 @@ def upload_products_batch(request):
             ]
             if not valid_urls:
                 continue
-
             price_value = None
             raw_price = str(item.get('price', '')).strip()
             if raw_price:
@@ -925,10 +668,8 @@ def upload_products_batch(request):
                 description=str(item.get('description', '')).strip(),
                 price=price_value,
             )
-
             for index, url in enumerate(valid_urls[:10]):
                 ProductImage.objects.create(product=product, image_url=url, order=index)
-
             created.append(product.id)
 
         if not created:
@@ -952,6 +693,10 @@ def upload_products_batch(request):
         logger.error(f"Batch upload error: {str(e)}\n{traceback.format_exc()}")
         return JsonResponse({'success': False, 'error': 'Failed to save. Please try again.'}, status=500)
 
+
+# ─────────────────────────────────────────────
+# REGISTER
+# ─────────────────────────────────────────────
 def register_view(request):
     if request.method == 'POST':
         username = (
@@ -972,15 +717,14 @@ def register_view(request):
             if not request.session.get('guest_username'):
                 username = f"{username[:25]}_{random.randint(10, 99)}"
 
-        email = request.POST.get('email', '').strip().lower()
-        password = request.POST.get('password', '')
+        email           = request.POST.get('email', '').strip().lower()
+        password        = request.POST.get('password', '')
         whatsapp_number = request.POST.get('whatsapp_number', '').strip()
-        country_code = request.POST.get('country_code', '+234').strip()
-        currency_code = request.POST.get('currency_code', 'NGN').strip()
+        country_code    = request.POST.get('country_code', '+234').strip()
+        currency_code   = request.POST.get('currency_code', 'NGN').strip()
         currency_symbol = request.POST.get('currency_symbol', '₦').strip()
-        category = request.POST.get('category', 'other')
-
-        full_whatsapp = (country_code + whatsapp_number) if (country_code and not whatsapp_number.startswith('+')) else whatsapp_number
+        category        = request.POST.get('category', 'other')
+        full_whatsapp   = (country_code + whatsapp_number) if (country_code and not whatsapp_number.startswith('+')) else whatsapp_number
 
         errors = []
         if not all([username, email, password, business_name, whatsapp_number]):
@@ -1012,12 +756,7 @@ def register_view(request):
                 currency_code=currency_code, currency_symbol=currency_symbol,
                 subscription_type='free',
             )
-
-  
-
             login(request, seller)
-
-            # Send welcome email (non-blocking — failure won't break registration)
             try:
                 send_welcome_email(
                     to_email=seller.email,
@@ -1026,7 +765,6 @@ def register_view(request):
                 )
             except Exception as e:
                 logger.error(f"Welcome email failed: {e}")
-
             return redirect('dashboard')
 
         except IntegrityError as e:
@@ -1050,27 +788,68 @@ def register_view(request):
     return render(request, 'register.html', {'active_tab': 'register'})
 
 
+# ─────────────────────────────────────────────
+# DASHBOARD
+# ─────────────────────────────────────────────
+@login_required
+def dashboard(request):
+    seller = request.user
+    reset_weekly_analytics_if_needed(seller)
+
+    active_products   = Product.objects.filter(seller=seller, is_archived=False, is_sold_out=False).prefetch_related('images')
+    sold_out_products = Product.objects.filter(seller=seller, is_archived=False, is_sold_out=True).prefetch_related('images')
+    archived_products = Product.objects.filter(seller=seller, is_archived=True).prefetch_related('images')
+    most_viewed       = Product.objects.filter(seller=seller, is_archived=False).order_by('-views').first()
+    all_products      = Product.objects.filter(seller=seller).prefetch_related('images').order_by('-created_at')[:50]
+
+    catalog_url        = request.build_absolute_uri(f'/{seller.slug}')
+    share_message      = f"🛍️ Check out my product catalog!\n\n{seller.business_name}\n\n{catalog_url}\n\n✨ Browse all my products anytime!"
+    whatsapp_share_url = f"https://wa.me/?text={urllib.parse.quote(share_message)}"
+
+    recent_orders    = []
+    total_orders     = 0
+    pending_orders   = 0
+    total_earnings   = Decimal('0')
+    pending_earnings = Decimal('0')
+
+    if getattr(seller, 'store_mode', False):
+        active_statuses = ['paid', 'shipped', 'delivered', 'disputed', 'completed']
+        recent_orders = Order.objects.filter(seller=seller, status__in=active_statuses).order_by('-created_at')[:5]
+        total_orders  = Order.objects.filter(seller=seller, status__in=active_statuses).count()
+        pending_orders = Order.objects.filter(seller=seller, status='paid').count()
+        total_earnings = Order.objects.filter(
+            seller=seller, status__in=['delivered', 'completed'], payout_triggered=True,
+        ).aggregate(total=Sum('vendor_payout'))['total'] or Decimal('0')
+        pending_earnings = Order.objects.filter(
+            seller=seller, status__in=['paid', 'shipped'],
+        ).aggregate(total=Sum('vendor_payout'))['total'] or Decimal('0')
+
+    platform_settings = PlatformSettings.get()
+
+    return render(request, 'dashboard/dashboard.html', {
+        'products':             all_products,
+        'active_count':         active_products.count(),
+        'sold_out_count':       sold_out_products.count(),
+        'archived_count':       archived_products.count(),
+        'total_views':          seller.weekly_page_views,
+        'whatsapp_clicks':      seller.weekly_whatsapp_clicks,
+        'most_viewed':          most_viewed,
+        'product_limit':        None,
+        'whatsapp_share_url':   whatsapp_share_url,
+        'catalog_url':          catalog_url,
+        'recent_orders':        recent_orders,
+        'total_orders':         total_orders,
+        'pending_orders':       pending_orders,
+        'total_earnings':       total_earnings,
+        'pending_earnings':     pending_earnings,
+        'platform_fee_percent': platform_settings.transaction_fee_percent,
+        'premium_price':        platform_settings.premium_monthly_price,
+    })
 
 
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# ESCROW VIEWS
-# Append everything below to the bottom of sellers/views.py
-# Nothing above is changed.
-# ─────────────────────────────────────────────────────────────────────────────
-
-from sellers.models import VendorBankAccount, Order, OrderItem, Dispute, Review
-from sellers.email import (
-    send_order_confirmed_buyer,
-    send_new_order_vendor,
-    send_order_shipped_buyer,
-    send_payment_sent_vendor,
-    send_dispute_opened,
-)
-
-
-
+# ─────────────────────────────────────────────
+# STORE MODE — TOGGLE + PAYOUT ACCOUNT
+# ─────────────────────────────────────────────
 @login_required
 @require_http_methods(["POST"])
 def toggle_store_mode(request):
@@ -1092,12 +871,10 @@ def toggle_store_mode(request):
     else:
         messages.info(request, 'Store Mode has been disabled.')
 
-    # Only allow safe redirect targets
     allowed = {'dashboard', 'settings'}
     return redirect(next_url if next_url in allowed else 'dashboard')
 
 
-# ── Settings: Payout account ──────────────────────────────────────────────────
 @login_required
 @require_http_methods(["POST"])
 def update_payout_account(request):
@@ -1116,120 +893,130 @@ def update_payout_account(request):
             'account_number': account_number,
             'bank_name':      bank_name,
             'account_name':   account_name,
-            'is_verified':    False,   # reset on any change
+            'is_verified':    False,
         }
     )
     messages.success(request, 'Payout account saved.')
     return redirect('settings')
 
 
- 
+# ─────────────────────────────────────────────
+# CART + CHECKOUT
+# ─────────────────────────────────────────────
 def cart_view(request, slug):
-    """
-    Renders the cart page for a specific vendor store.
-    Detects buyer currency from IP — falls back to seller currency → USD.
-    """
     seller = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)
- 
+
+    # FIX: Load ALL non-archived products (no 30-day filter)
+    # so items added from seller page always appear in cart page PRODUCTS JSON
     products = Product.objects.filter(
-        seller=seller, is_archived=False
+        seller=seller,
+        is_archived=False,
     ).prefetch_related('images')
- 
+
     product_map = {str(p.id): p for p in products}
- 
-    # ── Geo-detect buyer currency ─────────────────────────────────────────
-    from sellers.geo_currency import detect_currency
+
     currency_info = detect_currency(request, seller)
- 
-    # Store in session so checkout_view and initiate_payment use same value
     request.session['buyer_currency_code']   = currency_info['code']
     request.session['buyer_currency_symbol'] = currency_info['symbol']
- 
+
     return render(request, 'store/cart.html', {
-        'seller':          seller,
-        'product_map':     product_map,
-        'currency':        currency_info['symbol'],
-        'currency_code':   currency_info['code'],
-        'currency_name':   currency_info['name'],
+        'seller':        seller,
+        'product_map':   product_map,
+        'currency':      currency_info['symbol'],
+        'currency_code': currency_info['code'],
+        'currency_name': currency_info['name'],
     })
- 
- 
+
+
 def checkout_view(request, slug):
-    """
-    Renders the checkout form.
-    Reads currency from session (set by cart_view) so symbol is consistent.
-    """
     seller = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)
- 
-    # Pull from session — cart_view already set this
+
     currency_symbol = request.session.get('buyer_currency_symbol', seller.currency_symbol or '₦')
     currency_code   = request.session.get('buyer_currency_code',   seller.currency_code   or 'NGN')
- 
-    # Fallback: if buyer lands on checkout directly (no cart session), detect again
+
     if not request.session.get('buyer_currency_code'):
-        from sellers.geo_currency import detect_currency
         currency_info   = detect_currency(request, seller)
         currency_symbol = currency_info['symbol']
         currency_code   = currency_info['code']
         request.session['buyer_currency_code']   = currency_code
         request.session['buyer_currency_symbol'] = currency_symbol
- 
+
+    products = Product.objects.filter(
+        seller=seller, is_archived=False
+    ).prefetch_related('images')
+    product_map = {str(p.id): p for p in products}
+
     return render(request, 'store/checkout.html', {
         'seller':        seller,
         'currency':      currency_symbol,
         'currency_code': currency_code,
+        'product_map':   product_map,
     })
- 
+
 
 @require_http_methods(["POST"])
 def initiate_payment(request, slug):
-    """
-    Receives checkout form + cart JSON.
-    Saves cart to SESSION only — does NOT create an Order yet.
-    Redirects buyer to Flutterwave.
-    Order is created only after payment is verified.
-    """
     seller = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)
- 
+
     buyer_name       = request.POST.get('buyer_name', '').strip()
     buyer_email      = request.POST.get('buyer_email', '').strip().lower()
     buyer_phone      = request.POST.get('buyer_phone', '').strip()
     delivery_address = request.POST.get('delivery_address', '').strip()
     delivery_city    = request.POST.get('delivery_city', '').strip()
     cart_json        = request.POST.get('cart_json', '{}')
- 
+    payment_type     = request.POST.get('payment_type', 'escrow')  # 'escrow' or 'direct'
+    delivery_required = request.POST.get('delivery_required', '1') == '1'
+
     if not all([buyer_name, buyer_email, buyer_phone, delivery_address]):
         messages.error(request, 'Please fill in all required fields.')
         return redirect('checkout', slug=slug)
- 
+
     try:
         cart = json.loads(cart_json)
     except Exception:
         messages.error(request, 'Invalid cart data. Please go back and try again.')
         return redirect('cart', slug=slug)
- 
+
     if not cart:
         messages.error(request, 'Your cart is empty.')
         return redirect('cart', slug=slug)
- 
-    # ── Resolve prices from DB (never trust client-side) ──────────────────
-    product_ids = [int(k) for k in cart.keys()]
+
+    # Resolve prices from DB — never trust client-side prices
+    product_ids = []
+    for k in cart.keys():
+        try:
+            product_ids.append(int(k))
+        except (ValueError, TypeError):
+            pass
+
     db_products = {
         str(p.id): p
         for p in Product.objects.filter(
             id__in=product_ids, seller=seller, is_archived=False
         )
     }
- 
+
     subtotal   = Decimal('0')
     line_items = []
- 
+    item_names = []  # for the payment page description
+
     for pid, item in cart.items():
         product = db_products.get(str(pid))
         if not product or not product.price:
             continue
-        qty = max(1, int(item.get('qty', 1)))
+
+        # Handle both cart formats:
+        # New format: cart[id] = qty (plain number)
+        # Old format: cart[id] = {qty: N, name: "...", price: ..., imageUrl: "..."}
+        if isinstance(item, dict):
+            qty = max(1, int(item.get('qty', 1)))
+        else:
+            qty = max(1, int(item))
+
         img = product.images.first()
+        short_name = (product.description or 'Product')[:40]
+        item_names.append(f"{short_name} x{qty}")
+
         line_items.append({
             'product_id':    product.id,
             'product_name':  product.description or 'Product',
@@ -1238,71 +1025,78 @@ def initiate_payment(request, slug):
             'qty':           qty,
         })
         subtotal += product.price * qty
- 
+
     if not line_items or subtotal <= 0:
         messages.error(request, 'No valid items in cart.')
         return redirect('cart', slug=slug)
- 
-    # ── Generate tx_ref and store EVERYTHING in session ───────────────────
+
+    # Build a human-readable description for the Flutterwave payment page
+    item_count = len(line_items)
+    payment_label = 'Protected Pay' if payment_type == 'escrow' else 'Direct Pay'
+
+    if item_count == 1:
+        pay_title = f"Order: {item_names[0]}"
+        pay_description = f"{payment_label} — {seller.business_name}"
+    elif item_count <= 3:
+        pay_title = f"Order from {seller.business_name}"
+        pay_description = f"{payment_label} — {', '.join(item_names)}"
+    else:
+        pay_title = f"Order from {seller.business_name}"
+        pay_description = f"{payment_label} — {item_count} items"
+
     tx_ref = f"VDP-ORD-{uuid.uuid4().hex[:12].upper()}"
- 
+
     request.session['pending_order'] = {
-        'tx_ref':           tx_ref,
-        'seller_id':        seller.id,
-        'buyer_name':       buyer_name,
-        'buyer_email':      buyer_email,
-        'buyer_phone':      buyer_phone,
-        'delivery_address': delivery_address,
-        'delivery_city':    delivery_city,
-        'line_items':       line_items,
-        'subtotal':         str(subtotal),
-        'currency':         request.session.get('buyer_currency_code', seller.currency_code or 'NGN'),
+        'tx_ref':            tx_ref,
+        'seller_id':         seller.id,
+        'buyer_name':        buyer_name,
+        'buyer_email':       buyer_email,
+        'buyer_phone':       buyer_phone,
+        'delivery_address':  delivery_address,
+        'delivery_city':     delivery_city,
+        'line_items':        line_items,
+        'subtotal':          str(subtotal),
+        'currency':          request.session.get('buyer_currency_code', seller.currency_code or 'NGN'),
+        'payment_type':      payment_type,
+        'delivery_required': delivery_required,
     }
     request.session.modified = True
- 
-    # ── Kick off Flutterwave payment ──────────────────────────────────────
-    flw          = FlutterwavePayment()
+
+    flw = FlutterwavePayment()
     redirect_url = request.build_absolute_uri('/order/confirm/')
- 
+
     result = flw.initialize_payment(
         email=buyer_email,
         amount=subtotal,
         tx_ref=tx_ref,
         redirect_url=redirect_url,
         customer_name=buyer_name,
-        currency=request.session.get('buyer_currency_code', seller.currency_code or 'NGN'), 
+        currency=request.session.get('buyer_currency_code', seller.currency_code or 'NGN'),
+        # ── These fix the "VendoPage Premium Subscription" label ──
+        title=pay_title,
+        description=pay_description,
     )
- 
+
     if result.get('status') == 'success':
         return redirect(result['data']['link'])
- 
-    # Flutterwave couldn't start — clear session, show error
+
     request.session.pop('pending_order', None)
     messages.error(request, 'Payment could not be started. Please try again.')
     return redirect('checkout', slug=slug)
- 
- 
+
+
+# Also fix order_confirmation to use payment_type from session:
 def order_confirmation(request):
-    """
-    Flutterwave redirects here after payment attempt.
-    Only creates the Order if payment is genuinely successful.
-    Abandoned / failed payments → session cleared, no Order created.
-    """
     tx_ref         = request.GET.get('tx_ref', '')
     transaction_id = request.GET.get('transaction_id', '')
     status         = request.GET.get('status', '')
- 
-    # ── Reject immediately if Flutterwave says it failed ─────────────────
+
     if status != 'successful' or not tx_ref or not transaction_id:
         request.session.pop('pending_order', None)
-        return render(request, 'store/order_failed.html', {
-            'reason': 'Payment was not completed.'
-        })
- 
-    # ── Check session has matching pending order ───────────────────────
+        return render(request, 'store/order_failed.html', {'reason': 'Payment was not completed.'})
+
     pending = request.session.get('pending_order')
     if not pending or pending.get('tx_ref') != tx_ref:
-        # Could be a duplicate redirect — check if Order already created
         try:
             existing = Order.objects.get(flutterwave_tx_ref=tx_ref)
             return redirect('order_detail', order_ref=str(existing.order_ref))
@@ -1310,240 +1104,194 @@ def order_confirmation(request):
             return render(request, 'store/order_failed.html', {
                 'reason': 'Session expired. If you were charged, contact support.'
             })
- 
-    # ── Verify with Flutterwave API ───────────────────────────────────────
+
     flw    = FlutterwavePayment()
     result = flw.verify_payment(transaction_id)
     data   = result.get('data', {})
- 
+
     if not (result.get('status') == 'success'
             and data.get('status') == 'successful'
             and data.get('tx_ref') == tx_ref):
-        # Verification failed — payment was NOT made
         request.session.pop('pending_order', None)
         return render(request, 'store/order_failed.html', {
             'reason': 'Payment verification failed. If you were charged, contact support.'
         })
- 
-    # ── Payment confirmed — now create the Order ──────────────────────────
+
     try:
         seller = Seller.objects.get(id=pending['seller_id'])
     except Seller.DoesNotExist:
         request.session.pop('pending_order', None)
-        return render(request, 'store/order_failed.html', {
-            'reason': 'Store not found.'
-        })
- 
+        return render(request, 'store/order_failed.html', {'reason': 'Store not found.'})
+
     subtotal = Decimal(pending['subtotal'])
- 
+
+    # ── Read payment_type from session (saved by initiate_payment) ──
+    payment_type = pending.get('payment_type', 'escrow')
+
     order = Order(
-        seller           = seller,
+        seller             = seller,
         flutterwave_tx_ref = tx_ref,
         flutterwave_tx_id  = str(transaction_id),
-        buyer_name       = pending['buyer_name'],
-        buyer_email      = pending['buyer_email'],
-        buyer_phone      = pending['buyer_phone'],
-        delivery_address = pending['delivery_address'],
-        delivery_city    = pending.get('delivery_city', ''),
-        subtotal         = subtotal,
-        currency         = pending.get('currency', 'NGN'),
-        status           = 'paid',
-        payment_verified = True,
-        paid_at          = timezone.now(),
+        buyer_name         = pending['buyer_name'],
+        buyer_email        = pending['buyer_email'],
+        buyer_phone        = pending['buyer_phone'],
+        delivery_address   = pending['delivery_address'],
+        delivery_city      = pending.get('delivery_city', ''),
+        subtotal           = subtotal,
+        currency           = pending.get('currency', 'NGN'),
+        status             = 'paid',
+        payment_verified   = True,
+        paid_at            = timezone.now(),
+        payment_type       = payment_type,  # ← stores 'escrow' or 'direct' on the order
     )
     order.calculate_fees()
     order.save()
- 
+
     for li in pending['line_items']:
         OrderItem.objects.create(
-            order            = order,
-            product_id       = li['product_id'],
-            product_name     = li['product_name'],
-            product_image_url= li['product_image'],
-            price            = Decimal(li['price']),
-            quantity         = li['qty'],
+            order             = order,
+            product_id        = li['product_id'],
+            product_name      = li['product_name'],
+            product_image_url = li['product_image'],
+            price             = Decimal(li['price']),
+            quantity          = li['qty'],
         )
- 
-    # ── Clear session ─────────────────────────────────────────────────────
+
     request.session.pop('pending_order', None)
- 
-    # ── Send emails ───────────────────────────────────────────────────────
+
+    # If direct pay — trigger payout immediately, don't wait for buyer confirmation
+    if payment_type == 'direct':
+        try:
+            _trigger_payout(order)
+        except Exception as e:
+            logger.error(f"Direct pay payout failed for order {order.order_ref}: {e}")
+
     try:
         send_order_confirmed_buyer(
-            to_email    = order.buyer_email,
-            buyer_name  = order.buyer_name,
-            order_ref   = str(order.order_ref)[:8].upper(),
-            seller_name = seller.business_name,
-            items       = list(order.items.all()),
-            subtotal    = order.subtotal,
-            currency    = order.currency,
+            to_email=order.buyer_email, buyer_name=order.buyer_name,
+            order_ref=str(order.order_ref)[:8].upper(), seller_name=seller.business_name,
+            items=list(order.items.all()), subtotal=order.subtotal, currency=order.currency,
         )
     except Exception as e:
         logger.error(f"Buyer confirmation email failed: {e}")
- 
+
     try:
         send_new_order_vendor(
-            to_email       = seller.email,
-            business_name  = seller.business_name,
-            buyer_name     = order.buyer_name,
-            order_ref      = str(order.order_ref)[:8].upper(),
-            items          = list(order.items.all()),
-            subtotal       = order.subtotal,
-            currency       = order.currency,
-            dashboard_url  = f"https://vendopage.com/dashboard/orders/{order.order_ref}/",
+            to_email=seller.email, business_name=seller.business_name,
+            buyer_name=order.buyer_name, order_ref=str(order.order_ref)[:8].upper(),
+            items=list(order.items.all()), subtotal=order.subtotal, currency=order.currency,
+            dashboard_url=f"https://vendopage.com/dashboard/orders/{order.order_ref}/",
         )
     except Exception as e:
         logger.error(f"Vendor new order email failed: {e}")
- 
+
     return redirect('order_detail', order_ref=str(order.order_ref))
- 
- 
-# ── Buyer: Order detail / tracking ───────────────────────────────────────────
+
+# ─────────────────────────────────────────────
+# BUYER VIEWS
+# ─────────────────────────────────────────────
 def order_detail(request, order_ref):
-    order = get_object_or_404(Order, order_ref=order_ref)
+    order   = get_object_or_404(Order, order_ref=order_ref)
     dispute = getattr(order, 'dispute', None)
     review  = getattr(order, 'review', None)
-    return render(request, 'store/order_detail.html', {
-        'order':   order,
-        'dispute': dispute,
-        'review':  review,
-    })
+    return render(request, 'store/order_detail.html', {'order': order, 'dispute': dispute, 'review': review})
 
 
-# ── Buyer: Confirm receipt ────────────────────────────────────────────────────
 @require_http_methods(["POST"])
 def confirm_receipt(request, order_ref):
     order = get_object_or_404(Order, order_ref=order_ref)
-
     if order.status not in ('shipped',):
         messages.error(request, 'This order cannot be confirmed yet.')
         return redirect('order_detail', order_ref=order_ref)
-
-    order.status       = 'delivered'
+    order.status = 'delivered'
     order.delivered_at = timezone.now()
     order.save()
-
     _trigger_payout(order)
     return redirect('order_detail', order_ref=order_ref)
 
 
-# ── Buyer: Raise dispute ──────────────────────────────────────────────────────
 @require_http_methods(["GET", "POST"])
 def raise_dispute(request, order_ref):
     order = get_object_or_404(Order, order_ref=order_ref)
-
     if hasattr(order, 'dispute'):
         messages.info(request, 'A dispute already exists for this order.')
         return redirect('order_detail', order_ref=order_ref)
-
     if order.status not in ('shipped', 'paid'):
         messages.error(request, 'You can only dispute an active order.')
         return redirect('order_detail', order_ref=order_ref)
-
     if request.method == 'POST':
         reason        = request.POST.get('reason', 'other')
         buyer_message = request.POST.get('message', '').strip()
         evidence_url  = request.POST.get('evidence_url', '').strip()
-
         if not buyer_message:
             messages.error(request, 'Please describe the issue.')
             return render(request, 'store/dispute.html', {'order': order})
-
-        Dispute.objects.create(
-            order=order,
-            raised_by='buyer',
-            reason=reason,
-            buyer_message=buyer_message,
-            buyer_evidence=evidence_url,
-        )
+        Dispute.objects.create(order=order, raised_by='buyer', reason=reason,
+                               buyer_message=buyer_message, buyer_evidence=evidence_url)
         order.status = 'disputed'
         order.save()
-
         try:
             send_dispute_opened(
-                vendor_email=order.seller.email,
-                buyer_email=order.buyer_email,
-                order_ref=str(order.order_ref)[:8].upper(),
-                reason=reason,
+                vendor_email=order.seller.email, buyer_email=order.buyer_email,
+                order_ref=str(order.order_ref)[:8].upper(), reason=reason,
             )
         except Exception as e:
             logger.error(f"Dispute email failed: {e}")
-
         messages.success(request, 'Dispute raised. Our team will review it within 48 hours.')
         return redirect('order_detail', order_ref=order_ref)
-
     return render(request, 'store/dispute.html', {'order': order})
 
 
-# ── Buyer: Leave review ───────────────────────────────────────────────────────
 @require_http_methods(["GET", "POST"])
 def leave_review(request, order_ref):
     order = get_object_or_404(Order, order_ref=order_ref)
-
     if order.status not in ('delivered', 'completed'):
         messages.error(request, 'You can only review a completed order.')
         return redirect('order_detail', order_ref=order_ref)
-
     if hasattr(order, 'review'):
         messages.info(request, 'You have already reviewed this order.')
         return redirect('order_detail', order_ref=order_ref)
-
     if request.method == 'POST':
         try:
             rating = int(request.POST.get('rating', 0))
         except ValueError:
             rating = 0
-
         if rating < 1 or rating > 5:
             messages.error(request, 'Please select a rating between 1 and 5.')
             return render(request, 'store/leave_review.html', {'order': order})
-
         comment = request.POST.get('comment', '').strip()
-        Review.objects.create(
-            order=order,
-            seller=order.seller,
-            rating=rating,
-            comment=comment,
-        )
+        Review.objects.create(order=order, seller=order.seller, rating=rating, comment=comment)
         messages.success(request, 'Thank you for your review!')
         return redirect('order_detail', order_ref=order_ref)
-
     return render(request, 'store/leave_review.html', {'order': order})
 
 
-# ── Vendor: Orders list ───────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# VENDOR ORDERS
+# ─────────────────────────────────────────────
 @login_required
 def vendor_orders(request):
     seller = request.user
     status_filter = request.GET.get('status', '')
-
     orders = Order.objects.filter(seller=seller).order_by('-created_at')
     if status_filter:
         orders = orders.filter(status=status_filter)
-
-    # Counts for filter tabs
     counts = {
         'all':       Order.objects.filter(seller=seller).count(),
         'paid':      Order.objects.filter(seller=seller, status='paid').count(),
         'shipped':   Order.objects.filter(seller=seller, status='shipped').count(),
         'disputed':  Order.objects.filter(seller=seller, status='disputed').count(),
-        'completed': Order.objects.filter(seller=seller, status__in=['delivered','completed']).count(),
+        'completed': Order.objects.filter(seller=seller, status__in=['delivered', 'completed']).count(),
     }
-
     return render(request, 'dashboard/orders.html', {
-        'orders':        orders[:50],
-        'counts':        counts,
-        'status_filter': status_filter,
+        'orders': orders[:50], 'counts': counts, 'status_filter': status_filter,
     })
 
 
-# ── Vendor: Order detail ──────────────────────────────────────────────────────
 @login_required
 def vendor_order_detail(request, order_ref):
     order   = get_object_or_404(Order, order_ref=order_ref, seller=request.user)
     dispute = getattr(order, 'dispute', None)
-
-    # Vendor replies to dispute
     if request.method == 'POST' and dispute and request.POST.get('action') == 'reply_dispute':
         reply    = request.POST.get('vendor_reply', '').strip()
         evidence = request.POST.get('vendor_evidence', '').strip()
@@ -1554,70 +1302,50 @@ def vendor_order_detail(request, order_ref):
             dispute.save()
             messages.success(request, 'Your response has been submitted.')
         return redirect('vendor_order_detail', order_ref=order_ref)
-
-    return render(request, 'dashboard/order_detail.html', {
-        'order':   order,
-        'dispute': dispute,
-    })
+    return render(request, 'dashboard/order_detail.html', {'order': order, 'dispute': dispute})
 
 
-# ── Vendor: Mark shipped ──────────────────────────────────────────────────────
 @login_required
 @require_http_methods(["GET", "POST"])
 def mark_shipped(request, order_ref):
     order = get_object_or_404(Order, order_ref=order_ref, seller=request.user)
-
     if order.status != 'paid':
         messages.error(request, 'Only paid orders can be marked as shipped.')
         return redirect('vendor_order_detail', order_ref=order_ref)
-
     if request.method == 'POST':
         tracking_info = request.POST.get('tracking_info', '').strip()
         courier_name  = request.POST.get('courier_name', '').strip()
-
         order.status        = 'shipped'
         order.shipped_at    = timezone.now()
         order.tracking_info = tracking_info
         order.courier_name  = courier_name
         order.set_auto_release()
         order.save()
-
         try:
             send_order_shipped_buyer(
-                to_email=order.buyer_email,
-                buyer_name=order.buyer_name,
-                order_ref=str(order.order_ref)[:8].upper(),
-                seller_name=order.seller.business_name,
-                tracking_info=tracking_info,
-                courier_name=courier_name,
+                to_email=order.buyer_email, buyer_name=order.buyer_name,
+                order_ref=str(order.order_ref)[:8].upper(), seller_name=order.seller.business_name,
+                tracking_info=tracking_info, courier_name=courier_name,
                 order_url=f"https://vendopage.com/order/{order.order_ref}/",
             )
         except Exception as e:
             logger.error(f"Shipped email failed: {e}")
-
         messages.success(request, '✓ Order marked as shipped. Buyer has been notified.')
         return redirect('vendor_order_detail', order_ref=order_ref)
-
     return render(request, 'dashboard/mark_shipped.html', {'order': order})
 
 
-# ── Payout trigger ────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# PAYOUT
+# ─────────────────────────────────────────────
 def _trigger_payout(order):
-    """
-    Release funds to vendor via Flutterwave Transfer API.
-    Called after buyer confirms receipt OR after 72hr auto-release.
-    """
     if order.payout_triggered:
         return
-
     try:
         bank = order.seller.bank_account
     except VendorBankAccount.DoesNotExist:
         logger.error(f"No bank account for seller {order.seller.id} — payout skipped")
         return
-
-    import requests as req
-    from django.conf import settings
 
     headers = {
         'Authorization': f'Bearer {settings.FLUTTERWAVE_SECRET_KEY}',
@@ -1631,54 +1359,35 @@ def _trigger_payout(order):
         'narration':      f'Vendopage payout — Order {str(order.order_ref)[:8].upper()}',
         'reference':      f'VDP-PAY-{uuid.uuid4().hex[:10]}',
     }
-
     try:
-        r = req.post(
-            'https://api.flutterwave.com/v3/transfers',
-            json=payload, headers=headers, timeout=15
-        )
+        r = req.post('https://api.flutterwave.com/v3/transfers',
+                     json=payload, headers=headers, timeout=15)
         data = r.json()
-
         if data.get('status') == 'success':
-            order.payout_triggered      = True
-            order.payout_at             = timezone.now()
-            order.status                = 'completed'
+            order.payout_triggered        = True
+            order.payout_at               = timezone.now()
+            order.status                  = 'completed'
             order.flutterwave_transfer_id = str(data['data'].get('id', ''))
             order.save()
-
             try:
                 send_payment_sent_vendor(
-                    to_email=order.seller.email,
-                    business_name=order.seller.business_name,
-                    amount=order.vendor_payout,
-                    currency=order.currency,
+                    to_email=order.seller.email, business_name=order.seller.business_name,
+                    amount=order.vendor_payout, currency=order.currency,
                     order_ref=str(order.order_ref)[:8].upper(),
-                    bank_name=bank.bank_name,
-                    account_number=bank.account_number[-4:],
+                    bank_name=bank.bank_name, account_number=bank.account_number[-4:],
                 )
             except Exception as e:
                 logger.error(f"Payout email failed: {e}")
         else:
             logger.error(f"Flutterwave payout failed for order {order.order_ref}: {data}")
-
     except Exception as e:
         logger.error(f"Payout request exception for order {order.order_ref}: {e}")
 
 
-# ── Auto-release task (call from a cron / Celery beat) ───────────────────────
 def auto_release_expired_orders():
-    """
-    Run this every hour via cron or Celery.
-    Releases funds for orders where 72hrs have passed and buyer hasn't responded.
-
-    Example cron (Railway):
-        python manage.py shell -c "from sellers.views import auto_release_expired_orders; auto_release_expired_orders()"
-    """
     now = timezone.now()
     expired = Order.objects.filter(
-        status='shipped',
-        auto_release_at__lte=now,
-        payout_triggered=False,
+        status='shipped', auto_release_at__lte=now, payout_triggered=False,
     )
     for order in expired:
         logger.info(f"Auto-releasing order {order.order_ref}")
@@ -1688,255 +1397,74 @@ def auto_release_expired_orders():
         _trigger_payout(order)
 
 
-# ── Flutterwave webhook for orders ────────────────────────────────────────────
 @csrf_exempt
 @require_http_methods(["POST"])
 def flutterwave_order_webhook(request):
-    """
-    Webhook from Flutterwave for order payments.
- 
-    With the new session-based flow, Orders are created in order_confirmation
-    after the buyer returns from Flutterwave. This webhook now serves as a
-    safety net ONLY — it logs unmatched payments for manual review.
- 
-    It does NOT attempt to create Orders (no session data available here).
-    It DOES handle the case where an Order exists but wasn't marked paid
-    (edge case: order_confirmation ran but DB write failed).
-    """
     try:
         signature = request.headers.get('verif-hash')
         payload   = request.body.decode('utf-8')
- 
-        # Verify signature
         flw = FlutterwavePayment()
         if not signature or not flw.verify_webhook_signature(signature, payload):
             return JsonResponse({'status': 'error', 'message': 'Invalid signature'}, status=400)
- 
+
         data   = json.loads(payload)
         event  = data.get('event')
         charge = data.get('data', {})
- 
+
         if event != 'charge.completed' or charge.get('status') != 'successful':
             return JsonResponse({'status': 'received'})
- 
+
         tx_ref         = charge.get('tx_ref', '')
         transaction_id = str(charge.get('id', ''))
- 
-        # ── Only handle order payments (not subscription payments) ────────
+
         if not tx_ref.startswith('VDP-ORD-'):
             return JsonResponse({'status': 'skipped - not an order payment'})
- 
-        # ── Case 1: Order already exists and is paid — nothing to do ─────
+
         try:
-            order = Order.objects.get(flutterwave_tx_ref=tx_ref, payment_verified=True)
-            logger.info(f"Webhook: order {tx_ref} already verified — skipping")
+            Order.objects.get(flutterwave_tx_ref=tx_ref, payment_verified=True)
             return JsonResponse({'status': 'already_processed'})
         except Order.DoesNotExist:
             pass
- 
-        # ── Case 2: Order exists but payment_verified=False (rare edge case)
-        # This happens if order_confirmation saved the order but crashed before
-        # setting payment_verified=True
+
         try:
             order = Order.objects.get(flutterwave_tx_ref=tx_ref, payment_verified=False)
-            order.status            = 'paid'
-            order.payment_verified  = True
+            order.status           = 'paid'
+            order.payment_verified = True
             order.flutterwave_tx_id = transaction_id
-            order.paid_at           = timezone.now()
+            order.paid_at          = timezone.now()
             order.save()
-            logger.info(f"Webhook: fixed unverified order {tx_ref}")
- 
             try:
                 send_new_order_vendor(
-                    to_email       = order.seller.email,
-                    business_name  = order.seller.business_name,
-                    buyer_name     = order.buyer_name,
-                    order_ref      = str(order.order_ref)[:8].upper(),
-                    items          = list(order.items.all()),
-                    subtotal       = order.subtotal,
-                    currency       = order.currency,
-                    dashboard_url  = f"https://vendopage.com/dashboard/orders/{order.order_ref}/",
+                    to_email=order.seller.email, business_name=order.seller.business_name,
+                    buyer_name=order.buyer_name, order_ref=str(order.order_ref)[:8].upper(),
+                    items=list(order.items.all()), subtotal=order.subtotal, currency=order.currency,
+                    dashboard_url=f"https://vendopage.com/dashboard/orders/{order.order_ref}/",
                 )
             except Exception as e:
                 logger.error(f"Webhook vendor email failed: {e}")
- 
             return JsonResponse({'status': 'fixed_unverified_order'})
         except Order.DoesNotExist:
             pass
- 
-        # ── Case 3: No Order exists at all ───────────────────────────────
-        # The buyer paid but their session expired before order_confirmation ran.
-        # We cannot create the Order without session data.
-        # Log for manual review — support team will need to handle this.
+
         logger.error(
             f"WEBHOOK ALERT: Payment received but no Order found.\n"
-            f"tx_ref: {tx_ref}\n"
-            f"transaction_id: {transaction_id}\n"
+            f"tx_ref: {tx_ref}\ntransaction_id: {transaction_id}\n"
             f"amount: {charge.get('amount')} {charge.get('currency')}\n"
             f"customer: {charge.get('customer', {}).get('email')}\n"
             f"ACTION REQUIRED: Manual order creation or refund needed."
         )
-
-        
-        # TODO: When you have email alerting set up, send an alert to yourself here:
-        # send_email_via_brevo(
-        #     to_email='support@vendopage.com',
-        #     subject=f'⚠️ Unmatched payment: {tx_ref}',
-        #     html_content=f'<p>Payment received but no Order found for {tx_ref}. Manual review needed.</p>',
-        # )
- 
         return JsonResponse({'status': 'logged_for_review'})
- 
+
     except Exception as e:
         logger.error(f"Order webhook error: {e}")
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
- 
-
-# ── Admin: Disputes ───────────────────────────────────────────────────────────
-@staff_member_required
-def admin_disputes(request):
-    disputes = Dispute.objects.select_related('order', 'order__seller').order_by('-created_at')
-    status_filter = request.GET.get('status', '')
-    if status_filter:
-        disputes = disputes.filter(status=status_filter)
-    return render(request, 'admin_dashboard/disputes.html', {
-        'disputes':      disputes[:100],
-        'status_filter': status_filter,
-    })
 
 
-@staff_member_required
-@require_http_methods(["POST"])
-def resolve_dispute(request, dispute_id):
-    dispute = get_object_or_404(Dispute, id=dispute_id)
-    order   = dispute.order
-    action  = request.POST.get('action')  # 'refund_buyer' or 'pay_vendor'
-    note    = request.POST.get('admin_note', '').strip()
-
-    dispute.admin_note  = note
-    dispute.resolved_at = timezone.now()
-
-    if action == 'refund_buyer':
-        # Initiate refund via Flutterwave (manual step for now)
-        dispute.status = 'resolved_buyer'
-        order.status   = 'refunded'
-        order.save()
-        dispute.save()
-        messages.success(request, f'Dispute resolved — refund issued to buyer for order {str(order.order_ref)[:8].upper()}.')
-
-    elif action == 'pay_vendor':
-        dispute.status = 'resolved_vendor'
-        dispute.save()
-        order.status   = 'delivered'
-        order.save()
-        _trigger_payout(order)
-        messages.success(request, f'Dispute resolved — payment released to vendor for order {str(order.order_ref)[:8].upper()}.')
-
-    else:
-        messages.error(request, 'Invalid action.')
-
-    return redirect('admin_disputes')
-
-from sellers.models import PlatformSettings
-
-@login_required
-def dashboard(request):
-    seller = request.user
-    reset_weekly_analytics_if_needed(seller)
-
-    active_products   = Product.objects.filter(seller=seller, is_archived=False, is_sold_out=False).prefetch_related('images')
-    sold_out_products = Product.objects.filter(seller=seller, is_archived=False, is_sold_out=True).prefetch_related('images')
-    archived_products = Product.objects.filter(seller=seller, is_archived=True).prefetch_related('images')
-    most_viewed       = Product.objects.filter(seller=seller, is_archived=False).order_by('-views').first()
-    all_products      = Product.objects.filter(seller=seller).prefetch_related('images').order_by('-created_at')[:50]
-
-    catalog_url       = request.build_absolute_uri(f'/{seller.slug}')
-    share_message     = f"🛍️ Check out my product catalog!\n\n{seller.business_name}\n\n{catalog_url}\n\n✨ Browse all my products anytime!"
-    whatsapp_share_url = f"https://wa.me/?text={urllib.parse.quote(share_message)}"
-
-    # ── Escrow / store mode context ──────────────────────────────────────────
-    recent_orders   = []
-    total_orders    = 0
-    pending_orders  = 0
-    total_earnings  = Decimal('0')
-    pending_earnings = Decimal('0')
-
-    if getattr(seller, 'store_mode', False):
-        active_statuses = ['paid', 'shipped', 'delivered', 'disputed', 'completed']
-
-        recent_orders = Order.objects.filter(
-            seller=seller,
-            status__in=active_statuses
-        ).order_by('-created_at')[:5]
-
-        total_orders = Order.objects.filter(
-            seller=seller,
-            status__in=active_statuses
-        ).count()
-
-        pending_orders = Order.objects.filter(
-            seller=seller, status='paid'
-        ).count()
-
-        # Money already paid out to vendor
-        total_earnings = Order.objects.filter(
-            seller=seller,
-            status__in=['delivered', 'completed'],
-            payout_triggered=True,
-        ).aggregate(total=Sum('vendor_payout'))['total'] or Decimal('0')
-
-        # Money sitting in escrow (not yet released)
-        pending_earnings = Order.objects.filter(
-            seller=seller,
-            status__in=['paid', 'shipped'],
-        ).aggregate(total=Sum('vendor_payout'))['total'] or Decimal('0')
-
-    platform_settings = PlatformSettings.get()
-
-    return render(request, 'dashboard/dashboard.html', {
-        'products':               all_products,
-        'active_count':           active_products.count(),
-        'sold_out_count':         sold_out_products.count(),
-        'archived_count':         archived_products.count(),
-        'total_views':            seller.weekly_page_views,
-        'whatsapp_clicks':        seller.weekly_whatsapp_clicks,
-        'most_viewed':            most_viewed,
-        'product_limit':          None,
-        'whatsapp_share_url':     whatsapp_share_url,
-        'catalog_url':            catalog_url,
-        # Orders
-        'recent_orders':          recent_orders,
-        'total_orders':           total_orders,
-        'pending_orders':         pending_orders,
-        # Earnings
-        'total_earnings':         total_earnings,
-        'pending_earnings':       pending_earnings,
-        # Platform
-        'platform_fee_percent':   platform_settings.transaction_fee_percent,
-        'premium_price':          platform_settings.premium_monthly_price,
-    })
-
-
-
-
-
-
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# ADD THESE TWO VIEWS to sellers/views.py
-# They proxy Flutterwave API calls server-side so the secret key stays safe.
-# ─────────────────────────────────────────────────────────────────────────────
-
-import requests as req
-from django.conf import settings
-
+# ─────────────────────────────────────────────
+# BANK PROXY APIs
+# ─────────────────────────────────────────────
 @require_http_methods(["GET"])
 def get_banks(request):
-    """
-    Proxy: Fetches full Nigerian bank list from Flutterwave.
-    Returns JSON list of {code, name} objects.
-    """
     try:
         r = req.get(
             'https://api.flutterwave.com/v3/banks/NG',
@@ -1950,51 +1478,36 @@ def get_banks(request):
         raise Exception("Bad response from Flutterwave")
     except Exception as e:
         logger.error(f"get_banks error: {e}")
-        # Return a solid fallback list
         fallback = [
             {'code': '044', 'name': 'Access Bank'},
-            {'code': '023', 'name': 'Citibank Nigeria'},
-            {'code': '050', 'name': 'EcoBank Nigeria'},
             {'code': '011', 'name': 'First Bank of Nigeria'},
+            {'code': '058', 'name': 'Guaranty Trust Bank (GTB)'},
+            {'code': '057', 'name': 'Zenith Bank'},
+            {'code': '033', 'name': 'United Bank for Africa (UBA)'},
             {'code': '214', 'name': 'First City Monument Bank (FCMB)'},
             {'code': '070', 'name': 'Fidelity Bank'},
-            {'code': '058', 'name': 'Guaranty Trust Bank (GTB)'},
-            {'code': '030', 'name': 'Heritage Bank'},
-            {'code': '301', 'name': 'Jaiz Bank'},
-            {'code': '082', 'name': 'Keystone Bank'},
-            {'code': '526', 'name': 'Parallex Bank'},
-            {'code': '076', 'name': 'Polaris Bank'},
-            {'code': '101', 'name': 'Providus Bank'},
+            {'code': '050', 'name': 'EcoBank Nigeria'},
             {'code': '221', 'name': 'Stanbic IBTC Bank'},
-            {'code': '068', 'name': 'Standard Chartered Bank'},
             {'code': '232', 'name': 'Sterling Bank'},
-            {'code': '100', 'name': 'Suntrust Bank'},
             {'code': '032', 'name': 'Union Bank of Nigeria'},
-            {'code': '033', 'name': 'United Bank for Africa (UBA)'},
-            {'code': '215', 'name': 'Unity Bank'},
             {'code': '035', 'name': 'Wema Bank'},
-            {'code': '057', 'name': 'Zenith Bank'},
+            {'code': '076', 'name': 'Polaris Bank'},
+            {'code': '082', 'name': 'Keystone Bank'},
+            {'code': '101', 'name': 'Providus Bank'},
+            {'code': '215', 'name': 'Unity Bank'},
             {'code': '110', 'name': 'VFD Microfinance Bank'},
             {'code': '090267', 'name': 'Kuda Bank'},
             {'code': '090405', 'name': 'OPay'},
             {'code': '090175', 'name': 'PalmPay'},
             {'code': '090304', 'name': 'Moniepoint'},
-            {'code': '090003', 'name': 'Jubilee Life Mortgage Bank'},
-            {'code': '000014', 'name': 'Afribank'},
-            {'code': '000016', 'name': 'Fortis Microfinance Bank'},
         ]
         return JsonResponse({'success': True, 'banks': fallback, 'fallback': True})
 
 
 @require_http_methods(["POST"])
 def verify_bank_account(request):
-    """
-    Proxy: Resolves account name via Flutterwave.
-    Body: { account_number: "...", bank_code: "..." }
-    Returns: { success: bool, account_name: str } or { success: false, error: str }
-    """
     try:
-        body = json.loads(request.body)
+        body           = json.loads(request.body)
         account_number = body.get('account_number', '').strip()
         bank_code      = body.get('bank_code', '').strip()
 
@@ -2013,15 +1526,9 @@ def verify_bank_account(request):
             timeout=10,
         )
         data = r.json()
-
         if data.get('status') == 'success' and data.get('data', {}).get('account_name'):
-            return JsonResponse({
-                'success': True,
-                'account_name': data['data']['account_name'],
-            })
-        else:
-            msg = data.get('message', 'Account not found')
-            return JsonResponse({'success': False, 'error': msg})
+            return JsonResponse({'success': True, 'account_name': data['data']['account_name']})
+        return JsonResponse({'success': False, 'error': data.get('message', 'Account not found')})
 
     except req.exceptions.Timeout:
         return JsonResponse({'success': False, 'error': 'Verification timed out. Please try again.'})
@@ -2030,91 +1537,323 @@ def verify_bank_account(request):
         return JsonResponse({'success': False, 'error': 'Verification failed. Please try again.'}, status=500)
 
 
+# ─────────────────────────────────────────────
+# ADMIN VIEWS
+# ─────────────────────────────────────────────
+@staff_member_required
+def admin_dashboard(request):
+    total_sellers    = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).count()
+    total_products   = Product.objects.filter(is_archived=False).count()
+    total_page_views = Seller.objects.filter(is_staff=False, is_superuser=False).aggregate(
+        t=Sum('total_page_views'))['t'] or 0
+    premium_count    = Seller.objects.filter(subscription_type='premium', is_staff=False, is_superuser=False).count()
+
+    last_7d  = timezone.now() - timedelta(days=7)
+    last_30d = timezone.now() - timedelta(days=30)
+    new_sellers_7d  = Seller.objects.filter(created_at__gte=last_7d).count()
+    new_sellers_30d = Seller.objects.filter(created_at__gte=last_30d).count()
+    new_products_7d = Product.objects.filter(created_at__gte=last_7d).count()
+
+    recent_sellers       = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).order_by('-created_at')[:8]
+    top_sellers_by_views = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).order_by('-weekly_page_views')[:10]
+    subscription_stats   = Seller.objects.filter(is_staff=False, is_superuser=False).values('subscription_type').annotate(count=Count('id'))
+
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
+    platform              = PlatformSettings.get()
+
+    return render(request, 'admin_dashboard/dashboard.html', {
+        'total_sellers':          total_sellers,
+        'total_products':         total_products,
+        'total_page_views':       total_page_views,
+        'premium_count':          premium_count,
+        'new_sellers_7d':         new_sellers_7d,
+        'new_sellers_30d':        new_sellers_30d,
+        'new_products_7d':        new_products_7d,
+        'recent_sellers':         recent_sellers,
+        'top_sellers_by_views':   top_sellers_by_views,
+        'subscription_stats':     subscription_stats,
+        'monthly_revenue':        premium_count * platform.premium_monthly_price,
+        'open_disputes':          open_disputes_count,
+        'pending_payouts':        pending_payouts_count,
+        'open_disputes_count':    open_disputes_count,
+        'pending_payouts_count':  pending_payouts_count,
+    })
 
 
+@staff_member_required
+def admin_sellers(request):
+    sellers = Seller.objects.filter(is_staff=False, is_superuser=False).annotate(
+        product_count=Count('products', filter=Q(products__is_archived=False))
+    ).order_by('-created_at')
+
+    subscription_filter = request.GET.get('subscription')
+    store_mode_filter   = request.GET.get('store_mode')
+    active_filter       = request.GET.get('active')
+    search              = request.GET.get('search')
+
+    if subscription_filter:
+        sellers = sellers.filter(subscription_type=subscription_filter)
+    if store_mode_filter == 'on':
+        sellers = sellers.filter(store_mode=True)
+    elif store_mode_filter == 'off':
+        sellers = sellers.filter(store_mode=False)
+    if active_filter == '1':
+        sellers = sellers.filter(is_active=True)
+    elif active_filter == '0':
+        sellers = sellers.filter(is_active=False)
+    if search:
+        sellers = sellers.filter(
+            Q(business_name__icontains=search) | Q(username__icontains=search) | Q(email__icontains=search)
+        )
+
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
+
+    return render(request, 'admin_dashboard/sellers.html', {
+        'sellers':               sellers,
+        'open_disputes_count':   open_disputes_count,
+        'pending_payouts_count': pending_payouts_count,
+    })
 
 
-from sellers.models import VendorBankAccount, Order, OrderItem, Dispute, Review
- 
- 
-# ── Orders list (full admin view) ─────────────────────────────────────────────
+@staff_member_required
+def admin_seller_detail(request, seller_id):
+    seller   = get_object_or_404(Seller, id=seller_id)
+    products = Product.objects.filter(seller=seller).prefetch_related('images').order_by('-created_at')
+
+    total_revenue = Order.objects.filter(
+        seller=seller, status__in=['delivered', 'completed'], payout_triggered=True,
+    ).aggregate(t=Sum('vendor_payout'))['t'] or Decimal('0')
+
+    orders_count = Order.objects.filter(
+        seller=seller, status__in=['paid', 'shipped', 'delivered', 'completed', 'disputed']
+    ).count()
+
+    orders = Order.objects.filter(seller=seller).order_by('-created_at')[:8]
+
+    if not seller.slug:
+        seller.save()
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+
+        if action == 'change_subscription':
+            new_type = request.POST.get('subscription_type')
+            expires  = request.POST.get('subscription_expires', '').strip()
+            seller.subscription_type = new_type
+            if expires:
+                try:
+                    seller.subscription_expires = datetime.strptime(expires, '%Y-%m-%d').replace(
+                        tzinfo=timezone.get_current_timezone()
+                    )
+                except ValueError:
+                    pass
+            elif new_type == 'premium' and not seller.subscription_expires:
+                seller.subscription_expires = timezone.now() + timedelta(days=30)
+            seller.save()
+            messages.success(request, f'Subscription updated to {new_type}.')
+
+        elif action == 'toggle_featured':
+            seller.is_featured = not seller.is_featured
+            seller.save(update_fields=['is_featured'])
+            messages.success(request, f'{"Featured ⭐" if seller.is_featured else "Removed from featured"}.')
+
+        elif action == 'toggle_store_mode':
+            seller.store_mode = not seller.store_mode
+            if seller.store_mode and not seller.store_mode_enabled_at:
+                seller.store_mode_enabled_at = timezone.now()
+            seller.save(update_fields=['store_mode', 'store_mode_enabled_at'])
+            messages.success(request, f'Store Mode {"enabled" if seller.store_mode else "disabled"}.')
+
+        elif action == 'deactivate':
+            seller.is_active = False
+            seller.save(update_fields=['is_active'])
+            messages.warning(request, f'{seller.business_name} has been banned.')
+
+        elif action == 'activate':
+            seller.is_active = True
+            seller.save(update_fields=['is_active'])
+            messages.success(request, f'{seller.business_name} account restored.')
+
+        elif action == 'reset_analytics':
+            seller.weekly_page_views      = 0
+            seller.weekly_whatsapp_clicks = 0
+            seller.last_analytics_reset   = timezone.now()
+            seller.save(update_fields=['weekly_page_views', 'weekly_whatsapp_clicks', 'last_analytics_reset'])
+            messages.success(request, 'Weekly analytics reset.')
+
+        elif action == 'verify_bank':
+            try:
+                seller.bank_account.is_verified = True
+                seller.bank_account.save(update_fields=['is_verified'])
+                messages.success(request, '✅ Bank account verified.')
+            except VendorBankAccount.DoesNotExist:
+                messages.error(request, 'No bank account found.')
+
+        elif action == 'unverify_bank':
+            try:
+                seller.bank_account.is_verified = False
+                seller.bank_account.save(update_fields=['is_verified'])
+                messages.warning(request, '⚠️ Bank account marked unverified.')
+            except VendorBankAccount.DoesNotExist:
+                messages.error(request, 'No bank account found.')
+
+        return redirect('admin_seller_detail', seller_id=seller_id)
+
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
+
+    return render(request, 'admin_dashboard/seller_detail.html', {
+        'seller':               seller,
+        'products':             products,
+        'total_revenue':        total_revenue,
+        'orders_count':         orders_count,
+        'orders':               orders,
+        'open_disputes_count':  open_disputes_count,
+        'pending_payouts_count': pending_payouts_count,
+    })
+
+
+@staff_member_required
+def admin_products(request):
+    products = Product.objects.select_related('seller').order_by('-created_at')
+    status   = request.GET.get('status')
+    search   = request.GET.get('search', '').strip()
+    if status == 'sold_out':
+        products = products.filter(is_sold_out=True)
+    elif status == 'archived':
+        products = products.filter(is_archived=True)
+    elif status == 'active':
+        products = products.filter(is_archived=False, is_sold_out=False)
+    if search:
+        products = products.filter(
+            Q(description__icontains=search) | Q(seller__business_name__icontains=search)
+        )
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
+    return render(request, 'admin_dashboard/products.html', {
+        'products':              products[:100],
+        'open_disputes_count':   open_disputes_count,
+        'pending_payouts_count': pending_payouts_count,
+    })
+
+
+@staff_member_required
+def admin_analytics(request):
+    last_7d  = timezone.now() - timedelta(days=7)
+    last_30d = timezone.now() - timedelta(days=30)
+    platform = PlatformSettings.get()
+    premium_count = Seller.objects.filter(subscription_type='premium', is_staff=False, is_superuser=False).count()
+    total_sellers = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).count()
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
+    return render(request, 'admin_dashboard/analytics.html', {
+        'new_sellers_7d':        Seller.objects.filter(created_at__gte=last_7d).count(),
+        'new_sellers_30d':       Seller.objects.filter(created_at__gte=last_30d).count(),
+        'new_products_7d':       Product.objects.filter(created_at__gte=last_7d).count(),
+        'new_products_30d':      Product.objects.filter(created_at__gte=last_30d).count(),
+        'category_stats':        Seller.objects.values('category').annotate(count=Count('id')).order_by('-count'),
+        'premium_count':         premium_count,
+        'total_sellers':         total_sellers,
+        'monthly_revenue':       premium_count * platform.premium_monthly_price,
+        'open_disputes_count':   open_disputes_count,
+        'pending_payouts_count': pending_payouts_count,
+    })
+
+
+@staff_member_required
+def admin_disputes(request):
+    disputes      = Dispute.objects.select_related('order', 'order__seller').order_by('-created_at')
+    status_filter = request.GET.get('status', '')
+    if status_filter:
+        disputes = disputes.filter(status=status_filter)
+    open_count            = Dispute.objects.filter(status='open').count()
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
+    return render(request, 'admin_dashboard/disputes.html', {
+        'disputes':              disputes[:100],
+        'status_filter':         status_filter,
+        'open_count':            open_count,
+        'open_disputes_count':   open_disputes_count,
+        'pending_payouts_count': pending_payouts_count,
+    })
+
+
+@staff_member_required
+@require_http_methods(["POST"])
+def resolve_dispute(request, dispute_id):
+    dispute = get_object_or_404(Dispute, id=dispute_id)
+    order   = dispute.order
+    action  = request.POST.get('action')
+    note    = request.POST.get('admin_note', '').strip()
+
+    dispute.admin_note  = note
+    dispute.resolved_at = timezone.now()
+
+    if action == 'refund_buyer':
+        dispute.status = 'resolved_buyer'
+        order.status   = 'refunded'
+        order.save()
+        dispute.save()
+        messages.success(request, f'Dispute resolved — refund issued to buyer for order {str(order.order_ref)[:8].upper()}.')
+    elif action == 'pay_vendor':
+        dispute.status = 'resolved_vendor'
+        dispute.save()
+        order.status   = 'delivered'
+        order.save()
+        _trigger_payout(order)
+        messages.success(request, f'Dispute resolved — payment released to vendor for order {str(order.order_ref)[:8].upper()}.')
+    elif action == 'under_review':
+        dispute.status = 'under_review'
+        dispute.save()
+        messages.info(request, 'Dispute marked as under review.')
+    else:
+        messages.error(request, 'Invalid action.')
+
+    return redirect('admin_disputes')
+
+
 @staff_member_required
 def admin_orders(request):
-    """
-    Full order list for admin. Supports:
-      - ?status=paid|shipped|delivered|disputed|refunded
-      - ?payout=pending  →  orders where payout_triggered=False and status in delivered/completed
-      - ?search=<order_ref|buyer_name|buyer_email|flutterwave_ref>
-    """
-    orders = Order.objects.select_related('seller').prefetch_related('items').order_by('-created_at')
- 
+    orders        = Order.objects.select_related('seller').prefetch_related('items').order_by('-created_at')
     status_filter = request.GET.get('status', '')
     payout_filter = request.GET.get('payout', '')
     search        = request.GET.get('search', '').strip()
- 
+
     if status_filter:
         orders = orders.filter(status=status_filter)
- 
     if payout_filter == 'pending':
-        orders = orders.filter(
-            payout_triggered=False,
-            status__in=['delivered', 'completed']
-        )
- 
+        orders = orders.filter(payout_triggered=False, status__in=['delivered', 'completed'])
     if search:
         orders = orders.filter(
-            Q(order_ref__icontains=search)
-            | Q(buyer_name__icontains=search)
-            | Q(buyer_email__icontains=search)
-            | Q(flutterwave_tx_ref__icontains=search)
-            | Q(flutterwave_tx_id__icontains=search)
+            Q(order_ref__icontains=search) | Q(buyer_name__icontains=search)
+            | Q(buyer_email__icontains=search) | Q(flutterwave_tx_ref__icontains=search)
             | Q(seller__business_name__icontains=search)
         )
- 
-    # Counts for sidebar badges (used by base_admin.html context processor)
-    pending_payouts_count = Order.objects.filter(
-        payout_triggered=False,
-        status__in=['delivered', 'completed']
-    ).count()
- 
-    open_disputes_count = Dispute.objects.filter(
-        status__in=['open', 'vendor_replied', 'under_review']
-    ).count()
- 
+
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
+
     return render(request, 'admin_dashboard/orders.html', {
-        'orders':               orders[:200],
-        'status_filter':        status_filter,
+        'orders':                orders[:200],
+        'status_filter':         status_filter,
+        'open_disputes_count':   open_disputes_count,
         'pending_payouts_count': pending_payouts_count,
-        'open_disputes_count':  open_disputes_count,
     })
- 
- 
-# ── Payout queue ──────────────────────────────────────────────────────────────
+
+
 @staff_member_required
 def admin_payouts(request):
-    """
-    Orders that are delivered/completed but payout hasn't been triggered yet.
-    Also shows recently completed payouts.
-    """
     pending_orders = Order.objects.filter(
-        payout_triggered=False,
-        status__in=['delivered', 'completed']
+        payout_triggered=False, status__in=['delivered', 'completed']
     ).select_related('seller', 'seller__bank_account').order_by('delivered_at')
- 
-    recent_payouts = Order.objects.filter(
-        payout_triggered=True
-    ).select_related('seller').order_by('-payout_at')[:20]
- 
-    total_pending_amount = pending_orders.aggregate(
-        t=Sum('vendor_payout')
-    )['t'] or Decimal('0')
- 
+
+    recent_payouts       = Order.objects.filter(payout_triggered=True).select_related('seller').order_by('-payout_at')[:20]
+    total_pending_amount = pending_orders.aggregate(t=Sum('vendor_payout'))['t'] or Decimal('0')
     pending_payouts_count = pending_orders.count()
- 
-    open_disputes_count = Dispute.objects.filter(
-        status__in=['open', 'vendor_replied', 'under_review']
-    ).count()
- 
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+
     return render(request, 'admin_dashboard/payouts.html', {
         'pending_orders':        pending_orders,
         'recent_payouts':        recent_payouts,
@@ -2122,60 +1861,41 @@ def admin_payouts(request):
         'pending_payouts_count': pending_payouts_count,
         'open_disputes_count':   open_disputes_count,
     })
- 
- 
-# ── Trigger payout (single order) ────────────────────────────────────────────
+
+
 @staff_member_required
 @require_http_methods(["POST"])
 def admin_trigger_payout(request, order_id):
-    """
-    Manually trigger Flutterwave payout for a specific order.
-    Redirects back to the payout queue.
-    """
     order = get_object_or_404(Order, id=order_id)
- 
     if order.payout_triggered:
         messages.warning(request, f'Payout already sent for order #{str(order.order_ref)[:8].upper()}.')
         return redirect(request.META.get('HTTP_REFERER', 'admin_payouts'))
- 
     if order.status not in ('delivered', 'completed'):
         messages.error(request, 'Can only pay out delivered or completed orders.')
         return redirect(request.META.get('HTTP_REFERER', 'admin_payouts'))
- 
     _trigger_payout(order)
- 
     if order.payout_triggered:
         messages.success(request, f'✅ Payout sent for order #{str(order.order_ref)[:8].upper()} → {order.seller.business_name}')
     else:
         messages.error(request, f'❌ Payout failed for order #{str(order.order_ref)[:8].upper()}. Check logs.')
- 
     return redirect(request.META.get('HTTP_REFERER', 'admin_payouts'))
- 
- 
-# ── Mark order delivered (admin override) ────────────────────────────────────
+
+
 @staff_member_required
 @require_http_methods(["POST"])
 def admin_mark_delivered(request, order_id):
-    """
-    Admin override: mark a shipped order as delivered and trigger payout.
-    """
     order = get_object_or_404(Order, id=order_id)
- 
     if order.status not in ('shipped', 'paid'):
         messages.error(request, 'Only shipped or paid orders can be marked delivered.')
         return redirect(request.META.get('HTTP_REFERER', 'admin_orders'))
- 
     order.status       = 'delivered'
     order.delivered_at = timezone.now()
     order.save()
- 
     _trigger_payout(order)
- 
     messages.success(request, f'Order #{str(order.order_ref)[:8].upper()} marked as delivered. Payout triggered.')
     return redirect(request.META.get('HTTP_REFERER', 'admin_orders'))
- 
- 
-# ── Mark order refunded (admin override) ─────────────────────────────────────
+
+
 @staff_member_required
 @require_http_methods(["POST"])
 def admin_mark_refunded(request, order_id):
@@ -2187,73 +1907,48 @@ def admin_mark_refunded(request, order_id):
     order.save()
     messages.success(request, f'Order #{str(order.order_ref)[:8].upper()} marked as refunded.')
     return redirect(request.META.get('HTTP_REFERER', 'admin_orders'))
- 
- 
-# ── Product action (archive / restore / sold_out / available) ────────────────
+
+
 @staff_member_required
 @require_http_methods(["POST"])
 def admin_product_action(request, product_id):
-    """
-    Admin product quick-actions from the products grid.
-    action = archive | restore | sold_out | available
-    """
     product = get_object_or_404(Product, id=product_id)
     action  = request.POST.get('action', '')
- 
     if action == 'archive':
         product.is_archived = True
         product.save(update_fields=['is_archived'])
-        messages.success(request, f'Product archived.')
- 
+        messages.success(request, 'Product archived.')
     elif action == 'restore':
         product.is_archived = False
         product.is_sold_out = False
         product.save(update_fields=['is_archived', 'is_sold_out'])
-        messages.success(request, f'Product restored.')
- 
+        messages.success(request, 'Product restored.')
     elif action == 'sold_out':
         product.is_sold_out = True
         product.save(update_fields=['is_sold_out'])
-        messages.success(request, f'Product marked as sold out.')
- 
+        messages.success(request, 'Product marked as sold out.')
     elif action == 'available':
         product.is_sold_out = False
         product.save(update_fields=['is_sold_out'])
-        messages.success(request, f'Product marked as available.')
- 
+        messages.success(request, 'Product marked as available.')
     else:
         messages.error(request, 'Unknown action.')
- 
     return redirect(request.META.get('HTTP_REFERER', 'admin_products'))
- 
- 
-# ── Reviews ───────────────────────────────────────────────────────────────────
+
+
 @staff_member_required
 def admin_reviews(request):
-    """
-    All reviews across the platform. Filterable by rating and verified status.
-    """
-    reviews = Review.objects.select_related('order', 'seller').order_by('-created_at')
- 
+    reviews         = Review.objects.select_related('order', 'seller').order_by('-created_at')
     rating_filter   = request.GET.get('rating', '')
     verified_filter = request.GET.get('verified', '')
- 
     if rating_filter:
         reviews = reviews.filter(rating=int(rating_filter))
- 
     if verified_filter == '1':
         reviews = reviews.filter(is_verified=True)
     elif verified_filter == '0':
         reviews = reviews.filter(is_verified=False)
- 
-    open_disputes_count = Dispute.objects.filter(
-        status__in=['open', 'vendor_replied', 'under_review']
-    ).count()
-    pending_payouts_count = Order.objects.filter(
-        payout_triggered=False,
-        status__in=['delivered', 'completed']
-    ).count()
- 
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
     return render(request, 'admin_dashboard/reviews.html', {
         'reviews':               reviews[:200],
         'rating_filter':         rating_filter,
@@ -2261,67 +1956,48 @@ def admin_reviews(request):
         'open_disputes_count':   open_disputes_count,
         'pending_payouts_count': pending_payouts_count,
     })
- 
- 
-# ── Delete review ─────────────────────────────────────────────────────────────
+
+
 @staff_member_required
 @require_http_methods(["POST"])
 def admin_delete_review(request, review_id):
-    review = get_object_or_404(Review, id=review_id)
+    review      = get_object_or_404(Review, id=review_id)
     seller_name = review.seller.business_name
     review.delete()
     messages.success(request, f'Review deleted from {seller_name}.')
     return redirect('admin_reviews')
- 
- 
-# ── Bank accounts ─────────────────────────────────────────────────────────────
+
+
 @staff_member_required
 def admin_bank_accounts(request):
-    """
-    All vendor bank accounts. Filterable by verification status.
-    """
-    accounts = VendorBankAccount.objects.select_related('seller').order_by('-created_at')
- 
+    accounts        = VendorBankAccount.objects.select_related('seller').order_by('-created_at')
     search          = request.GET.get('search', '').strip()
     verified_filter = request.GET.get('verified', '')
- 
     if search:
         accounts = accounts.filter(
-            Q(seller__business_name__icontains=search)
-            | Q(account_name__icontains=search)
-            | Q(bank_name__icontains=search)
-            | Q(account_number__icontains=search)
+            Q(seller__business_name__icontains=search) | Q(account_name__icontains=search)
+            | Q(bank_name__icontains=search) | Q(account_number__icontains=search)
         )
- 
     if verified_filter == '1':
         accounts = accounts.filter(is_verified=True)
     elif verified_filter == '0':
         accounts = accounts.filter(is_verified=False)
- 
-    unverified_count = VendorBankAccount.objects.filter(is_verified=False).count()
- 
-    open_disputes_count = Dispute.objects.filter(
-        status__in=['open', 'vendor_replied', 'under_review']
-    ).count()
-    pending_payouts_count = Order.objects.filter(
-        payout_triggered=False,
-        status__in=['delivered', 'completed']
-    ).count()
- 
+    unverified_count      = VendorBankAccount.objects.filter(is_verified=False).count()
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
     return render(request, 'admin_dashboard/bank_accounts.html', {
         'accounts':              accounts,
         'unverified_count':      unverified_count,
         'open_disputes_count':   open_disputes_count,
         'pending_payouts_count': pending_payouts_count,
     })
- 
- 
+
+
 @staff_member_required
 @require_http_methods(["POST"])
 def admin_verify_bank_account(request, account_id):
     account = get_object_or_404(VendorBankAccount, id=account_id)
     action  = request.POST.get('action', 'verify')
- 
     if action == 'verify':
         account.is_verified = True
         account.save(update_fields=['is_verified'])
@@ -2330,30 +2006,16 @@ def admin_verify_bank_account(request, account_id):
         account.is_verified = False
         account.save(update_fields=['is_verified'])
         messages.warning(request, f'⚠️ Account unverified for {account.seller.business_name}.')
- 
     return redirect(request.META.get('HTTP_REFERER', 'admin_bank_accounts'))
-
 
 
 @staff_member_required
 def admin_settings(request):
-    """
-    Platform Settings page.
-    GET  → show current fee %, premium price, and platform stats.
-    POST → handle action:
-             'update_fee'           → change transaction_fee_percent
-             'update_premium_price' → change premium_monthly_price
-             'reset_all_analytics'  → zero weekly stats for all sellers
-             'run_auto_release'     → manually trigger auto-release of expired escrow
-    """
-    from sellers.models import PlatformSettings
-    from django.db.models import Sum, Count
- 
     settings_obj = PlatformSettings.get()
- 
+
     if request.method == 'POST':
         action = request.POST.get('action', '')
- 
+
         if action == 'update_fee':
             raw = request.POST.get('transaction_fee_percent', '').strip()
             try:
@@ -2363,10 +2025,10 @@ def admin_settings(request):
                 else:
                     settings_obj.transaction_fee_percent = new_fee
                     settings_obj.save()
-                    messages.success(request, f'✅ Transaction fee updated to {new_fee}%. Applies to all new orders.')
+                    messages.success(request, f'✅ Transaction fee updated to {new_fee}%.')
             except Exception:
-                messages.error(request, 'Invalid fee value. Enter a number like 5 or 7.5.')
- 
+                messages.error(request, 'Invalid fee value.')
+
         elif action == 'update_premium_price':
             raw = request.POST.get('premium_monthly_price', '').strip()
             try:
@@ -2378,58 +2040,34 @@ def admin_settings(request):
                     settings_obj.save()
                     messages.success(request, f'✅ Premium price updated to ₦{new_price:,.0f}/month.')
             except Exception:
-                messages.error(request, 'Invalid price value. Enter a number like 2000.')
- 
+                messages.error(request, 'Invalid price value.')
+
         elif action == 'reset_all_analytics':
-            updated = Seller.objects.filter(
-                is_staff=False, is_superuser=False
-            ).update(
-                weekly_page_views=0,
-                weekly_whatsapp_clicks=0,
+            updated = Seller.objects.filter(is_staff=False, is_superuser=False).update(
+                weekly_page_views=0, weekly_whatsapp_clicks=0,
                 last_analytics_reset=timezone.now()
             )
             messages.success(request, f'📊 Weekly analytics reset for {updated} seller(s).')
- 
+
         elif action == 'run_auto_release':
-            from sellers.views import auto_release_expired_orders
             auto_release_expired_orders()
-            messages.success(request, '💸 Auto-release complete. Check orders for triggered payouts.')
- 
+            messages.success(request, '💸 Auto-release complete.')
+
         else:
             messages.error(request, 'Unknown action.')
- 
+
         return redirect('admin_settings')
- 
-    # ── Context ────────────────────────────────────────────────────────
-    premium_count = Seller.objects.filter(
-        subscription_type='premium',
-        is_staff=False,
-        is_superuser=False
-    ).count()
- 
-    total_sellers = Seller.objects.filter(
-        is_active=True,
-        is_staff=False,
-        is_superuser=False
-    ).count()
- 
-    monthly_revenue = premium_count * settings_obj.premium_monthly_price
- 
-    # Sidebar badge counts (required by base_admin.html)
-    open_disputes_count   = Dispute.objects.filter(
-        status__in=['open', 'vendor_replied', 'under_review']
-    ).count()
-    pending_payouts_count = Order.objects.filter(
-        payout_triggered=False,
-        status__in=['delivered', 'completed']
-    ).count()
- 
+
+    premium_count = Seller.objects.filter(subscription_type='premium', is_staff=False, is_superuser=False).count()
+    total_sellers = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).count()
+    open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
+    pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
+
     return render(request, 'admin_dashboard/settings.html', {
         'settings':              settings_obj,
         'premium_count':         premium_count,
         'total_sellers':         total_sellers,
-        'monthly_revenue':       monthly_revenue,
+        'monthly_revenue':       premium_count * settings_obj.premium_monthly_price,
         'open_disputes_count':   open_disputes_count,
         'pending_payouts_count': pending_payouts_count,
     })
- 

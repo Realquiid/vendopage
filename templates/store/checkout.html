@@ -240,32 +240,51 @@
 </div>
 </div>
 {% block footer %}{% endblock %}
+<script id="productDataEl" type="application/json">
+{
+  {% for pid, product in product_map.items %}
+  "{{ product.id }}": {
+    "id":    "{{ product.id }}",
+    "name":  "{{ product.description|default:'Product'|escapejs }}",
+    "price": {% if product.price %}{{ product.price }}{% else %}null{% endif %},
+    "image": "{% with img=product.images.first %}{{ img.image_url|default:''|escapejs }}{% endwith %}"
+  }{% if not forloop.last %},{% endif %}
+  {% endfor %}
+}
+</script>
+
 <script>
 const CURRENCY = '{{ currency|escapejs }}';
 const SLUG = '{{ seller.slug|escapejs }}';
-
+ 
+/* Load server-side product data (for price verification) */
+let PRODUCTS = {};
+try {
+  const el = document.getElementById('productDataEl');
+  if (el) PRODUCTS = JSON.parse(el.textContent);
+} catch(e) {}
+ 
 function formatAmount(n) {
-  return CURRENCY + Number(n).toLocaleString('en-NG', {minimumFractionDigits:0, maximumFractionDigits:0});
+  const num = parseFloat(n);
+  if (isNaN(num)) return CURRENCY + '0';
+  return CURRENCY + num.toLocaleString('en-NG', {minimumFractionDigits: 0, maximumFractionDigits: 0});
 }
-
-/* ── Read payment preferences saved from cart modal ────── */
+ 
 function getPaymentPrefs() {
   return {
     paymentType:      sessionStorage.getItem('vp_payment_type_' + SLUG) || 'escrow',
     deliveryRequired: sessionStorage.getItem('vp_delivery_required_' + SLUG) !== '0',
   };
 }
-
+ 
 function applyPaymentPrefs() {
   const prefs = getPaymentPrefs();
   const isEscrow = prefs.paymentType === 'escrow';
   const needDelivery = prefs.deliveryRequired;
-
-  // Hidden form inputs
+ 
   document.getElementById('paymentTypeInput').value = prefs.paymentType;
   document.getElementById('deliveryRequiredInput').value = needDelivery ? '1' : '0';
-
-  // Banner
+ 
   const banner = document.getElementById('ptBanner');
   banner.style.display = 'flex';
   if (isEscrow) {
@@ -277,8 +296,7 @@ function applyPaymentPrefs() {
     document.getElementById('ptBannerIcon').textContent = '⚡';
     document.getElementById('ptBannerText').innerHTML = '<strong>Direct Pay</strong> — payment goes straight to vendor';
   }
-
-  // Pay button
+ 
   const btn = document.getElementById('placeOrderBtn');
   const label = document.getElementById('placeOrderLabel');
   if (isEscrow) {
@@ -288,16 +306,14 @@ function applyPaymentPrefs() {
     btn.classList.add('direct');
     label.textContent = 'Pay Now (Direct)';
   }
-
-  // Info boxes
+ 
   document.getElementById('payInfoEscrow').style.display = isEscrow ? '' : 'none';
   document.getElementById('payInfoDirect').style.display = isEscrow ? 'none' : '';
-
-  // Delivery section
+ 
   const deliverySection = document.getElementById('deliverySection');
   const skipSection = document.getElementById('deliverySkipSection');
   const addrInput = document.getElementById('deliveryAddressInput');
-
+ 
   if (needDelivery) {
     deliverySection.style.display = '';
     skipSection.style.display = 'none';
@@ -310,73 +326,180 @@ function applyPaymentPrefs() {
     document.getElementById('reviewDeliveryRow').textContent = 'Via WhatsApp';
   }
 }
-
+ 
 function goBackToCart() {
   window.location.href = '/order/{{ seller.slug }}/cart/';
 }
-
+ 
+/*
+  resolveCartItems — handles ALL three cart formats:
+ 
+  Format A (seller_page.html saves this):
+    cart[id] = { name: "...", price: 18000, qty: 2, imageUrl: "..." }
+ 
+  Format B (cart.html new format):
+    cart[id] = 3   (just a quantity number)
+ 
+  Format C (cart.html object format, same as A but possibly different keys):
+    cart[id] = { name: "...", price: 18000, qty: 1, imageUrl: "..." }
+ 
+  Priority: always use server-side PRODUCTS price if available (security).
+  Fallback: use client-side price from the cart object itself.
+  This means checkout works even when product_map has no items.
+*/
+function resolveCartItems(rawCart) {
+  const items = [];
+ 
+  Object.keys(rawCart).forEach(function(id) {
+    const val = rawCart[id];
+    let qty, price, name, imageUrl;
+ 
+    if (typeof val === 'number') {
+      /* Format B: value is just qty — MUST have PRODUCTS data */
+      qty = Math.max(1, parseInt(val, 10) || 1);
+      const p = PRODUCTS[id];
+      if (!p || p.price === null || p.price === undefined) {
+        /* No server data and no client data — skip */
+        return;
+      }
+      price    = parseFloat(p.price);
+      name     = p.name  || 'Product';
+      imageUrl = p.image || '';
+ 
+    } else if (val && typeof val === 'object') {
+      /* Formats A/C: full object — use client data as base */
+      qty      = Math.max(1, parseInt(val.qty, 10) || 1);
+      price    = parseFloat(val.price) || 0;
+      name     = val.name || val.desc || 'Product';
+      imageUrl = val.imageUrl || val.image || '';
+ 
+      /* Override with server price if we have it (prevents client-side tampering) */
+      const p = PRODUCTS[id];
+      if (p && p.price !== null && p.price !== undefined) {
+        price    = parseFloat(p.price);
+        name     = p.name  || name;
+        imageUrl = p.image || imageUrl;
+      }
+      /* If no server data, client price is fine — seller_page already set it correctly */
+ 
+    } else {
+      /* Unknown format — skip */
+      return;
+    }
+ 
+    /* Only skip if price is truly missing/zero */
+    if (qty < 1 || isNaN(price)) return;
+    /* Allow price = 0 only if it's genuinely free — but skip negative */
+    if (price < 0) return;
+ 
+    items.push({ id, name, price, qty, imageUrl });
+  });
+ 
+  return items;
+}
+ 
 function loadAndRender() {
-  let cart = {};
-  try { cart = JSON.parse(sessionStorage.getItem('vp_cart_' + SLUG) || '{}'); } catch(e) {}
-
-  const ids = Object.keys(cart);
+  let rawCart = {};
+  try {
+    const stored = sessionStorage.getItem('vp_cart_' + SLUG);
+    if (stored) rawCart = JSON.parse(stored);
+  } catch(e) {}
+ 
   const layout = document.getElementById('checkoutLayout');
   const notice = document.getElementById('emptyCartNotice');
-  const btn = document.getElementById('placeOrderBtn');
-
-  if (ids.length === 0) {
+  const btn    = document.getElementById('placeOrderBtn');
+ 
+  const items = resolveCartItems(rawCart);
+ 
+  if (items.length === 0) {
     layout.style.display = 'none';
     notice.style.display = 'block';
     return;
   }
-
-  document.getElementById('cartJsonInput').value = JSON.stringify(cart);
-
-  let subtotal = 0;
-  let html = '';
-  let count = 0;
-  ids.forEach(id => {
-    const item = cart[id];
-    subtotal += item.price * item.qty;
-    count += item.qty;
-    const imgHtml = item.imageUrl
-      ? `<img class="oi-img" src="${item.imageUrl}" alt="${item.name}">`
-      : `<div class="oi-img-ph">📦</div>`;
-    html += `<div class="order-item-row">
-      ${imgHtml}
-      <div class="oi-info">
-        <div class="oi-name">${item.name || 'Product'}</div>
-        <div class="oi-meta">Qty: ${item.qty}</div>
-      </div>
-      <div class="oi-price">${formatAmount(item.price * item.qty)}</div>
-    </div>`;
+ 
+  /* Build cart JSON for the backend
+     Backend initiate_payment() handles both formats,
+     but we send full objects to be safe */
+  const cartForBackend = {};
+  items.forEach(function(item) {
+    cartForBackend[item.id] = {
+      name:     item.name,
+      price:    item.price,
+      qty:      item.qty,
+      imageUrl: item.imageUrl,
+    };
   });
-
+  document.getElementById('cartJsonInput').value = JSON.stringify(cartForBackend);
+ 
+  /* Render order review */
+  let subtotal = 0;
+  let html     = '';
+  let count    = 0;
+ 
+  items.forEach(function(item) {
+    const lineTotal = item.price * item.qty;
+    subtotal += lineTotal;
+    count    += item.qty;
+ 
+    const imgHtml = item.imageUrl
+      ? `<img class="oi-img" src="${item.imageUrl}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const phHtml = `<div class="oi-img-ph" ${item.imageUrl ? 'style="display:none"' : ''}>📦</div>`;
+ 
+    html += `
+      <div class="order-item-row">
+        ${imgHtml}${phHtml}
+        <div class="oi-info">
+          <div class="oi-name">${item.name}</div>
+          <div class="oi-meta">Qty: ${item.qty} · ${formatAmount(item.price)} each</div>
+        </div>
+        <div class="oi-price">${formatAmount(lineTotal)}</div>
+      </div>`;
+  });
+ 
   document.getElementById('reviewItemsList').innerHTML = html;
-  document.getElementById('reviewCount').textContent = count;
+  document.getElementById('reviewCount').textContent    = count;
   document.getElementById('reviewSubtotal').textContent = formatAmount(subtotal);
-  document.getElementById('reviewTotal').textContent = formatAmount(subtotal);
+  document.getElementById('reviewTotal').textContent    = formatAmount(subtotal);
   btn.disabled = false;
 }
-
+ 
 function submitOrder() {
-  const form = document.getElementById('checkoutForm');
-  let cart = {};
-  try { cart = JSON.parse(sessionStorage.getItem('vp_cart_' + SLUG) || '{}'); } catch(e) {}
-  document.getElementById('cartJsonInput').value = JSON.stringify(cart);
-
+  /* Re-resolve on submit as a safety net */
+  let rawCart = {};
+  try {
+    const stored = sessionStorage.getItem('vp_cart_' + SLUG);
+    if (stored) rawCart = JSON.parse(stored);
+  } catch(e) {}
+ 
+  const items = resolveCartItems(rawCart);
+  if (items.length === 0) return;
+ 
+  const cartForBackend = {};
+  items.forEach(function(item) {
+    cartForBackend[item.id] = {
+      name:     item.name,
+      price:    item.price,
+      qty:      item.qty,
+      imageUrl: item.imageUrl,
+    };
+  });
+  document.getElementById('cartJsonInput').value = JSON.stringify(cartForBackend);
+ 
   const prefs = getPaymentPrefs();
-  document.getElementById('paymentTypeInput').value = prefs.paymentType;
+  document.getElementById('paymentTypeInput').value      = prefs.paymentType;
   document.getElementById('deliveryRequiredInput').value = prefs.deliveryRequired ? '1' : '0';
-
+ 
   const btn = document.getElementById('placeOrderBtn');
-  btn.querySelector('span').textContent = 'Redirecting to payment…';
+  document.getElementById('placeOrderLabel').textContent = 'Redirecting to payment…';
   btn.disabled = true;
-  form.submit();
+ 
+  document.getElementById('checkoutForm').submit();
 }
-
+ 
 loadAndRender();
 applyPaymentPrefs();
 </script>
+
 {% endblock %}
 
