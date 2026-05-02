@@ -168,7 +168,7 @@ class SellerAdmin(UserAdmin):
 
     def store_link(self, obj):
         if obj.slug:
-            url = f'https://vendopage.com/{obj.slug}'
+            url = f'https://www.vendopage.com/{obj.slug}'
             return format_html('<a href="{}" target="_blank">{}</a>', url, url)
         return '—'
     store_link.short_description = 'Public Store URL'

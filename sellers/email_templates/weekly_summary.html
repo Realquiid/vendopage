@@ -6,106 +6,137 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <title>Your Weekly Store Report — Vendopage</title>
 </head>
-<body style="margin:0;padding:0;background:#f4f4f0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
+<body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
 
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f0;padding:48px 20px;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;padding:48px 20px;">
   <tr><td align="center">
     <table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;width:100%;">
 
       <!-- Logo -->
       <tr>
-        <td align="center" style="padding-bottom:28px;">
-          <img src="https://res.cloudinary.com/dqxlkie1i/image/upload/f_auto,q_auto,w_160/logoo_vh97yf.png"
-               alt="Vendopage" height="100" style="display:block;height:100px;width:auto;">
+        <td align="center" style="padding-bottom:40px;">
+          <img src="https://res.cloudinary.com/dqxlkie1i/image/upload/f_auto,q_auto,w_200/logoo_vh97yf.png"
+               alt="Vendopage" height="60" style="display:block;height:60px;width:auto;">
         </td>
       </tr>
 
-      <!-- Card -->
+      <!-- Heading -->
       <tr>
-        <td style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e8e8e4;">
+        <td align="center" style="padding-bottom:24px;">
+          <h1 style="margin:0;font-size:28px;font-weight:800;color:#0A0A0A;letter-spacing:-0.5px;line-height:1.3;">Your store this week</h1>
+        </td>
+      </tr>
 
-          <div style="height:3px;background:#0A0A0A;"></div>
+      <!-- Body -->
+      <tr>
+        <td align="center" style="padding-bottom:32px;">
+          <p style="margin:0;font-size:15px;color:#444444;line-height:1.8;text-align:center;max-width:440px;">
+            Hi <strong style="color:#0A0A0A;">{{business_name}}</strong>, here's how your Vendopage store performed over the past 7 days.
+          </p>
+        </td>
+      </tr>
 
+      <!-- Stats grid -->
+      <tr>
+        <td style="padding-bottom:16px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td style="padding:40px 44px 36px;">
+              <td width="48%" align="center" style="background:#f7f7f7;border-radius:10px;padding:24px 16px;vertical-align:top;">
+                <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#999999;text-transform:uppercase;letter-spacing:1px;">Page Views</p>
+                <p style="margin:0 0 6px;font-size:40px;font-weight:800;color:#0A0A0A;letter-spacing:-2px;line-height:1;">{{page_views}}</p>
+                <p style="margin:0;font-size:12px;color:{{trend_color}};">{{trend}}</p>
+              </td>
+              <td width="4%"></td>
+              <td width="48%" align="center" style="background:#f7f7f7;border-radius:10px;padding:24px 16px;vertical-align:top;">
+                <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#999999;text-transform:uppercase;letter-spacing:1px;">WhatsApp Clicks</p>
+                <p style="margin:0 0 6px;font-size:40px;font-weight:800;color:#0A0A0A;letter-spacing:-2px;line-height:1;">{{whatsapp_clicks}}</p>
+                <p style="margin:0;font-size:12px;color:#999999;">orders started</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
-                <p style="margin:0 0 6px;font-size:12px;font-weight:600;color:#9b9b9b;text-transform:uppercase;letter-spacing:1.2px;">Weekly report</p>
-                <h1 style="margin:0 0 20px;font-size:24px;font-weight:700;color:#0A0A0A;letter-spacing:-0.5px;line-height:1.3;">Your store this week</h1>
-
-                <p style="margin:0 0 28px;font-size:15px;color:#6b6b6b;line-height:1.7;">
-                  Hi <strong style="color:#0A0A0A;">{{business_name}}</strong>, here's how your Vendopage store performed over the past 7 days.
-                </p>
-
-                <!-- Stats grid -->
-                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-                  <tr>
-                    <td width="48%" style="background:#f7f7f5;border:1.5px solid #e8e8e4;border-radius:12px;padding:22px 20px;text-align:center;vertical-align:top;">
-                      <p style="margin:0 0 6px;font-size:11px;font-weight:600;color:#9b9b9b;text-transform:uppercase;letter-spacing:1px;">Page Views</p>
-                      <p style="margin:0 0 4px;font-size:36px;font-weight:800;color:#0A0A0A;letter-spacing:-1.5px;line-height:1;">{{page_views}}</p>
-                      <p style="margin:0;font-size:12px;color:{{trend_color}};">{{trend}}</p>
-                    </td>
-                    <td width="4%"></td>
-                    <td width="48%" style="background:#f7f7f5;border:1.5px solid #e8e8e4;border-radius:12px;padding:22px 20px;text-align:center;vertical-align:top;">
-                      <p style="margin:0 0 6px;font-size:11px;font-weight:600;color:#9b9b9b;text-transform:uppercase;letter-spacing:1px;">WhatsApp Clicks</p>
-                      <p style="margin:0 0 4px;font-size:36px;font-weight:800;color:#0A0A0A;letter-spacing:-1.5px;line-height:1;">{{whatsapp_clicks}}</p>
-                      <p style="margin:0;font-size:12px;color:#9b9b9b;">orders started</p>
-                    </td>
-                  </tr>
-                </table>
-
-                <!-- Active products stat -->
-                <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
-                  <tr>
-                    <td style="background:#f7f7f5;border:1.5px solid #e8e8e4;border-radius:12px;padding:18px 22px;">
-                      <table width="100%" cellpadding="0" cellspacing="0">
-                        <tr>
-                          <td>
-                            <p style="margin:0 0 2px;font-size:13px;font-weight:600;color:#0A0A0A;">{{active_products}} live products</p>
-                            <p style="margin:0;font-size:13px;color:#9b9b9b;">currently in your catalog</p>
-                          </td>
-                          <td align="right">
-                            <a href="https://vendopage.com/upload/"
-                               style="font-size:13px;font-weight:600;color:#0A0A0A;text-decoration:none;border-bottom:1.5px solid #0A0A0A;">
-                              Add more →
-                            </a>
-                          </td>
-                        </tr>
-                      </table>
-                    </td>
-                  </tr>
-                </table>
-
-                <!-- Conditional tip (shown when views are low) -->
-                {{low_views_tip}}
-
-                <!-- CTA -->
-                <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:4px;">
+      <!-- Active products row -->
+      <tr>
+        <td style="padding-bottom:32px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td style="background:#f7f7f7;border-radius:10px;padding:18px 22px;">
+                <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
                     <td>
-                      <a href="https://vendopage.com/dashboard/"
-                         style="display:inline-block;background:#0A0A0A;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:13px 24px;border-radius:100px;">
-                        Go to dashboard →
+                      <p style="margin:0 0 2px;font-size:13px;font-weight:700;color:#0A0A0A;">{{active_products}} live products</p>
+                      <p style="margin:0;font-size:13px;color:#999999;">currently in your catalog</p>
+                    </td>
+                    <td align="right">
+                      <a href="https://www.vendopage.com/upload/"
+                         style="font-size:13px;font-weight:700;color:#0A0A0A;text-decoration:none;border-bottom:1.5px solid #0A0A0A;">
+                        Add more →
                       </a>
                     </td>
                   </tr>
                 </table>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
 
+      <!-- Low views tip (conditional) -->
+      {{low_views_tip}}
+
+      <!-- CTA -->
+      <tr>
+        <td align="center" style="padding-bottom:48px;">
+          <a href="https://www.vendopage.com/dashboard/"
+             style="display:inline-block;background:#0A0A0A;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:15px 36px;border-radius:100px;">
+            Go to dashboard →
+          </a>
+        </td>
+      </tr>
+
+      <!-- Divider -->
+      <tr>
+        <td style="border-top:1px solid #eeeeee;padding-top:32px;">
+
+          <!-- Social Icons -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">
+            <tr>
+              <td align="center">
+                <a href="https://instagram.com/vendopage" style="display:inline-block;margin:0 6px;">
+                  <img src="https://cdn-icons-png.flaticon.com/32/2111/2111463.png" alt="Instagram" width="28" height="28" style="display:block;border-radius:6px;opacity:0.55;">
+                </a>
+                <a href="https://x.com/vendopage" style="display:inline-block;margin:0 6px;">
+                  <img src="https://cdn-icons-png.flaticon.com/32/5968/5968958.png" alt="X" width="28" height="28" style="display:block;border-radius:6px;opacity:0.55;">
+                </a>
+                <a href="https://tiktok.com/@vendopage" style="display:inline-block;margin:0 6px;">
+                  <img src="https://cdn-icons-png.flaticon.com/32/3046/3046121.png" alt="TikTok" width="28" height="28" style="display:block;border-radius:6px;opacity:0.55;">
+                </a>
+                <a href="https://wa.me/vendopage" style="display:inline-block;margin:0 6px;">
+                  <img src="https://cdn-icons-png.flaticon.com/32/3670/3670051.png" alt="WhatsApp" width="28" height="28" style="display:block;border-radius:6px;opacity:0.55;">
+                </a>
+                <a href="https://facebook.com/vendopage" style="display:inline-block;margin:0 6px;">
+                  <img src="https://cdn-icons-png.flaticon.com/32/733/733547.png" alt="Facebook" width="28" height="28" style="display:block;border-radius:6px;opacity:0.55;">
+                </a>
               </td>
             </tr>
           </table>
 
-        </td>
-      </tr>
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td align="center">
+                <p style="margin:0 0 6px;font-size:12px;color:#aaaaaa;line-height:1.8;">
+                  © 2026 Vendopage &nbsp;·&nbsp;
+                  <a href="mailto:support@vendopage.com" style="color:#aaaaaa;text-decoration:none;">support@vendopage.com</a>
+                </p>
+                <p style="margin:0;font-size:11px;">
+                  <a href="https://www.vendopage.com/unsubscribe/" style="color:#bbbbbb;text-decoration:none;">Unsubscribe from weekly reports</a>
+                </p>
+              </td>
+            </tr>
+          </table>
 
-      <!-- Footer -->
-      <tr>
-        <td align="center" style="padding-top:28px;">
-          <p style="margin:0;font-size:12px;color:#b0b0a8;line-height:1.8;">
-            © 2026 Vendopage &nbsp;·&nbsp;
-            <a href="mailto:support@vendopage.com" style="color:#b0b0a8;text-decoration:none;">support@vendopage.com</a><br>
-            <a href="https://vendopage.com/unsubscribe/" style="color:#c8c8c0;font-size:11px;text-decoration:none;">Unsubscribe from weekly reports</a>
-          </p>
         </td>
       </tr>
 
@@ -115,18 +146,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

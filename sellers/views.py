@@ -58,7 +58,7 @@ def reset_weekly_analytics_if_needed(seller):
 
 
 def _store_url(seller):
-    return f'https://vendopage.com/{seller.slug}'
+    return f'https://www.vendopage.com/{seller.slug}'
 
 
 # ─────────────────────────────────────────────
@@ -1180,7 +1180,7 @@ def order_confirmation(request):
             to_email=seller.email, business_name=seller.business_name,
             buyer_name=order.buyer_name, order_ref=str(order.order_ref)[:8].upper(),
             items=list(order.items.all()), subtotal=order.subtotal, currency=order.currency,
-            dashboard_url=f"https://vendopage.com/dashboard/orders/{order.order_ref}/",
+            dashboard_url=f"https://www.vendopage.com/dashboard/orders/{order.order_ref}/",
         )
     except Exception as e:
         logger.error(f"Vendor new order email failed: {e}")
@@ -1326,7 +1326,7 @@ def mark_shipped(request, order_ref):
                 to_email=order.buyer_email, buyer_name=order.buyer_name,
                 order_ref=str(order.order_ref)[:8].upper(), seller_name=order.seller.business_name,
                 tracking_info=tracking_info, courier_name=courier_name,
-                order_url=f"https://vendopage.com/order/{order.order_ref}/",
+                order_url=f"https://www.vendopage.com/order/{order.order_ref}/",
             )
         except Exception as e:
             logger.error(f"Shipped email failed: {e}")
@@ -1438,7 +1438,7 @@ def flutterwave_order_webhook(request):
                     to_email=order.seller.email, business_name=order.seller.business_name,
                     buyer_name=order.buyer_name, order_ref=str(order.order_ref)[:8].upper(),
                     items=list(order.items.all()), subtotal=order.subtotal, currency=order.currency,
-                    dashboard_url=f"https://vendopage.com/dashboard/orders/{order.order_ref}/",
+                    dashboard_url=f"https://www.vendopage.com/dashboard/orders/{order.order_ref}/",
                 )
             except Exception as e:
                 logger.error(f"Webhook vendor email failed: {e}")

@@ -4,7 +4,7 @@ import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from django.conf import settings
 
-SITE_URL = 'https://vendopage.com'
+SITE_URL = 'https://www.vendopage.com'
 SUPPORT_EMAIL = 'support@vendopage.com'
 
 # Templates directory — sits next to this file: sellers/email_templates/
@@ -213,7 +213,7 @@ Total: {currency}{subtotal:,.0f}
 
 Your funds are held safely in escrow. The seller will ship your order soon.
 Once you receive your items, confirm delivery at:
-https://vendopage.com/order/{order_ref}/
+https://www.vendopage.com/order/{order_ref}/
 
 If anything goes wrong, you can raise a dispute from that same page.
 
@@ -305,7 +305,7 @@ A buyer has raised a dispute on order #{order_ref}.
 Reason: {reason}
 
 Please log in to your dashboard to view the dispute and submit your response within 48 hours:
-https://vendopage.com/dashboard/orders/{order_ref}/
+https://www.vendopage.com/dashboard/orders/{order_ref}/
 
 Our team will review both sides and make a final decision.
 
@@ -320,7 +320,7 @@ Reason: {reason}
 Our team will review your case within 48 hours. The vendor has been notified and given 48 hours to respond.
 
 You can track your dispute status here:
-https://vendopage.com/order/{order_ref}/
+https://www.vendopage.com/order/{order_ref}/
 
 — Vendopage
 """
