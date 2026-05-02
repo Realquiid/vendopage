@@ -616,40 +616,7 @@ img { display: block; max-width: 100%; }
 
 {% block content %}
 
-<!-- ═══════════════════════════════════════
-     ENTRY MODAL
-════════════════════════════════════════ -->
-<div class="overlay" id="entryOverlay">
-  <div class="modal">
-    <h2>Set up your store</h2>
-    <p>Enter your details — you'll upload products right after.</p>
 
-    <div class="em-group">
-      <label class="em-label">Business Name</label>
-      <input type="text" class="em-input" id="emBizName" placeholder="e.g. Chioma Fashion" autocomplete="off">
-    </div>
-
-    <div class="em-group">
-      <label class="em-label">Your Store URL</label>
-      <div class="slug-row">
-        <span class="slug-prefix">vendopage.com/</span>
-        <input type="text" class="slug-input" id="emUsername" placeholder="chioma" maxlength="30" autocomplete="off">
-      </div>
-      <div class="em-hint" id="emHint">This will be your permanent store link</div>
-    </div>
-
-    <button class="em-submit" id="emSubmit" onclick="startUpload()">
-      <span class="em-spin" id="emSpin"></span>
-      <span id="emBtnTxt">Continue to Upload</span>
-    </button>
-    <p class="em-signin">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
-  </div>
-</div>
-
-
-<!-- ═══════════════════════════════════════
-     HERO
-════════════════════════════════════════ -->
 <section class="hero">
   <div class="hero-inner">
     <h1>Upload 50 Products<br><span class="accent">in 1 Click.</span></h1>
@@ -662,10 +629,10 @@ img { display: block; max-width: 100%; }
         </a>
         <a href="/{{ user.slug }}" target="_blank" class="btn-ghost">View my store</a>
       {% else %}
-        <button class="btn-primary" onclick="openEntryModal()">
-          Upload Your Products
+       <a href="{% url 'register' %}" class="btn-primary">
+          Create your free store
           <span class="btn-arrow"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-        </button>
+        </a>
         <a href="#how" class="btn-ghost">See how it works</a>
       {% endif %}
     </div>
@@ -1113,10 +1080,10 @@ img { display: block; max-width: 100%; }
       <span class="btn-arrow"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
     </a>
   {% else %}
-    <button class="btn-cta" onclick="openEntryModal()">
-      Upload Your Products
+    <a href="{% url 'register' %}" class="btn-cta">
+      Create your free store
       <span class="btn-arrow"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-    </button>
+    </a>
   {% endif %}
 </section>
 
@@ -1241,94 +1208,5 @@ function switchCurrency(el) {
   });
 }
 
-/* ─── Entry modal ─── */
-let usernameCheckTimer = null;
-let usernameAvailable  = false;
-
-function openEntryModal() {
-  document.getElementById('entryOverlay').classList.add('open');
-  document.body.style.overflow = 'hidden';
-  setTimeout(() => document.getElementById('emBizName').focus(), 100);
-}
-function closeEntryModal() {
-  document.getElementById('entryOverlay').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-document.getElementById('emBizName').addEventListener('input', function() {
-  const slug = this.value.toLowerCase().replace(/[^a-z0-9\s]/g,'').trim().replace(/\s+/g,'_').substring(0,30);
-  const u = document.getElementById('emUsername');
-  if (!u._manuallyEdited) u.value = slug;
-  if (slug) checkUsername(slug);
-});
-
-document.getElementById('emUsername').addEventListener('input', function() {
-  this._manuallyEdited = true;
-  this.value = this.value.toLowerCase().replace(/[^a-z0-9_]/g,'').substring(0,30);
-  checkUsername(this.value);
-});
-
-function checkUsername(val) {
-  const hint = document.getElementById('emHint');
-  if (!val || val.length < 2) { hint.textContent = 'Min. 2 characters'; hint.className = 'em-hint'; usernameAvailable = false; return; }
-  hint.textContent = 'Checking...'; hint.className = 'em-hint';
-  clearTimeout(usernameCheckTimer);
-  usernameCheckTimer = setTimeout(async () => {
-    try {
-      const res  = await fetch(`/api/check-username/?u=${encodeURIComponent(val)}`);
-      const data = await res.json();
-      if (data.available) {
-        hint.textContent = `vendopage.com/${val} is available`;
-        hint.className   = 'em-hint available';
-        usernameAvailable = true;
-      } else {
-        hint.textContent = `${val} is already taken — try another`;
-        hint.className   = 'em-hint taken';
-        usernameAvailable = false;
-      }
-    } catch(e) {
-      hint.textContent  = 'Could not check — you can still continue';
-      hint.className    = 'em-hint';
-      usernameAvailable = true;
-    }
-  }, 500);
-}
-
-async function startUpload() {
-  const bizName  = document.getElementById('emBizName').value.trim();
-  const username = document.getElementById('emUsername').value.trim();
-  const btn = document.getElementById('emSubmit');
-  const spin = document.getElementById('emSpin');
-  const txt  = document.getElementById('emBtnTxt');
-
-  if (!bizName)  { document.getElementById('emBizName').classList.add('error'); document.getElementById('emBizName').focus(); return; }
-  if (!username || username.length < 2) { document.getElementById('emUsername').focus(); return; }
-
-  btn.disabled = true; spin.style.display = 'block'; txt.textContent = 'Setting up...';
-
-  try {
-    const res  = await fetch('/api/guest-init/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
-      body: JSON.stringify({ business_name: bizName, username }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      window.location.href = '/upload/';
-    } else {
-      document.getElementById('emHint').textContent = data.error || 'Username is taken. Try another.';
-      document.getElementById('emHint').className   = 'em-hint taken';
-      btn.disabled = false; spin.style.display = 'none'; txt.textContent = 'Continue to Upload';
-    }
-  } catch(e) {
-    btn.disabled = false; spin.style.display = 'none'; txt.textContent = 'Continue to Upload';
-  }
-}
-
-document.getElementById('entryOverlay').addEventListener('click', function(e) { if (e.target === this) closeEntryModal(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEntryModal(); });
-['emBizName','emUsername'].forEach(id => {
-  document.getElementById(id)?.addEventListener('keydown', e => { if (e.key === 'Enter') startUpload(); });
-});
 </script>
 {% endblock %}
