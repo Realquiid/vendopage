@@ -71,6 +71,7 @@ urlpatterns = [
     path('admin-dashboard/orders/<int:order_id>/mark-delivered/', views.admin_mark_delivered, name='admin_mark_delivered'),
     path('admin-dashboard/orders/<int:order_id>/mark-refunded/', views.admin_mark_refunded, name='admin_mark_refunded'),
     path('admin-dashboard/payouts/', views.admin_payouts, name='admin_payouts'),
+    path('admin-dashboard/settings/', views.admin_settings, name='admin_settings'),
 
     # ── Admin — products actions ──────────────────────────────
     path('admin-dashboard/products/<int:product_id>/action/', views.admin_product_action, name='admin_product_action'),

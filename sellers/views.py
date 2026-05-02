@@ -288,17 +288,30 @@ def track_whatsapp_click(request, product_id):
         return JsonResponse({'success': False}, status=400)
 
 
-# ─────────────────────────────────────────────
-# SETTINGS
-# ─────────────────────────────────────────────
 @login_required
 def dashboard_settings(request):
-    from sellers.models import PlatformSettings                          
-    return render(request, 'dashboard/settings.html', {                  
-           'platform_fee_percent': PlatformSettings.get().transaction_fee_percent, 
-       })     
-
-
+    from sellers.models import PlatformSettings
+    platform = PlatformSettings.get()
+ 
+    transaction_fee_percent = platform.transaction_fee_percent
+    premium_price           = platform.premium_monthly_price
+ 
+    # Pre-compute earn example (same logic as subscription view)
+    example_order  = 10000
+    example_fee    = (example_order * transaction_fee_percent) / 100
+    example_payout = example_order - example_fee
+ 
+    return render(request, 'dashboard/settings.html', {
+        'platform_fee_percent':  transaction_fee_percent,
+        'transaction_fee':       transaction_fee_percent,   # used in Plan tab
+        'premium_price':         premium_price,             # used in Plan tab
+        'example_order':         example_order,
+        'example_fee':           example_fee,
+        'example_payout':        example_payout,
+        # subscription status for Plan tab buttons
+        'current_subscription':  request.user.subscription_type,
+        'subscription_expires':  request.user.subscription_expires,
+    })
 
 @login_required
 @require_http_methods(["POST"])
@@ -768,17 +781,33 @@ def admin_analytics(request):
     })
 
 
-# ─────────────────────────────────────────────
-# SUBSCRIPTION / PAYMENT
-# ─────────────────────────────────────────────
 from .flutterwave import FlutterwavePayment
-
 
 @login_required
 def subscription(request):
+    from sellers.models import PlatformSettings
+    platform = PlatformSettings.get()
+ 
+    # These are Decimal objects — templates handle formatting
+    transaction_fee_percent = platform.transaction_fee_percent   # e.g. Decimal('5.00')
+    premium_price           = platform.premium_monthly_price     # e.g. Decimal('2000.00')
+ 
+    # Pre-calculate the earn example so the template does zero math
+    example_order    = 1000000          # ₦10,000 shown as 1000000 kobo? No — ₦10,000 integer
+    example_order    = 10000            # buyer pays ₦10,000
+    example_fee      = (example_order * transaction_fee_percent) / 100
+    example_payout   = example_order - example_fee
+ 
     return render(request, 'dashboard/subscription.html', {
-        'current_subscription': request.user.subscription_type,
-        'subscription_expires': request.user.subscription_expires,
+        'current_subscription':  request.user.subscription_type,
+        'subscription_expires':  request.user.subscription_expires,
+        # Fee & price — used in cards, banner, earn example, FAQ
+        'transaction_fee':       transaction_fee_percent,         # e.g. 5.00
+        'premium_price':         premium_price,                   # e.g. 2000.00
+        # Earn example (pre-computed — no template math needed)
+        'example_order':         example_order,                   # 10000
+        'example_fee':           example_fee,                     # 500
+        'example_payout':        example_payout,                  # 9500
     })
 
 
@@ -2303,4 +2332,104 @@ def admin_verify_bank_account(request, account_id):
         messages.warning(request, f'⚠️ Account unverified for {account.seller.business_name}.')
  
     return redirect(request.META.get('HTTP_REFERER', 'admin_bank_accounts'))
+
+
+
+@staff_member_required
+def admin_settings(request):
+    """
+    Platform Settings page.
+    GET  → show current fee %, premium price, and platform stats.
+    POST → handle action:
+             'update_fee'           → change transaction_fee_percent
+             'update_premium_price' → change premium_monthly_price
+             'reset_all_analytics'  → zero weekly stats for all sellers
+             'run_auto_release'     → manually trigger auto-release of expired escrow
+    """
+    from sellers.models import PlatformSettings
+    from django.db.models import Sum, Count
+ 
+    settings_obj = PlatformSettings.get()
+ 
+    if request.method == 'POST':
+        action = request.POST.get('action', '')
+ 
+        if action == 'update_fee':
+            raw = request.POST.get('transaction_fee_percent', '').strip()
+            try:
+                new_fee = Decimal(raw)
+                if new_fee < 0 or new_fee > 30:
+                    messages.error(request, 'Fee must be between 0% and 30%.')
+                else:
+                    settings_obj.transaction_fee_percent = new_fee
+                    settings_obj.save()
+                    messages.success(request, f'✅ Transaction fee updated to {new_fee}%. Applies to all new orders.')
+            except Exception:
+                messages.error(request, 'Invalid fee value. Enter a number like 5 or 7.5.')
+ 
+        elif action == 'update_premium_price':
+            raw = request.POST.get('premium_monthly_price', '').strip()
+            try:
+                new_price = Decimal(raw)
+                if new_price < 0:
+                    messages.error(request, 'Price cannot be negative.')
+                else:
+                    settings_obj.premium_monthly_price = new_price
+                    settings_obj.save()
+                    messages.success(request, f'✅ Premium price updated to ₦{new_price:,.0f}/month.')
+            except Exception:
+                messages.error(request, 'Invalid price value. Enter a number like 2000.')
+ 
+        elif action == 'reset_all_analytics':
+            updated = Seller.objects.filter(
+                is_staff=False, is_superuser=False
+            ).update(
+                weekly_page_views=0,
+                weekly_whatsapp_clicks=0,
+                last_analytics_reset=timezone.now()
+            )
+            messages.success(request, f'📊 Weekly analytics reset for {updated} seller(s).')
+ 
+        elif action == 'run_auto_release':
+            from sellers.views import auto_release_expired_orders
+            auto_release_expired_orders()
+            messages.success(request, '💸 Auto-release complete. Check orders for triggered payouts.')
+ 
+        else:
+            messages.error(request, 'Unknown action.')
+ 
+        return redirect('admin_settings')
+ 
+    # ── Context ────────────────────────────────────────────────────────
+    premium_count = Seller.objects.filter(
+        subscription_type='premium',
+        is_staff=False,
+        is_superuser=False
+    ).count()
+ 
+    total_sellers = Seller.objects.filter(
+        is_active=True,
+        is_staff=False,
+        is_superuser=False
+    ).count()
+ 
+    monthly_revenue = premium_count * settings_obj.premium_monthly_price
+ 
+    # Sidebar badge counts (required by base_admin.html)
+    open_disputes_count   = Dispute.objects.filter(
+        status__in=['open', 'vendor_replied', 'under_review']
+    ).count()
+    pending_payouts_count = Order.objects.filter(
+        payout_triggered=False,
+        status__in=['delivered', 'completed']
+    ).count()
+ 
+    return render(request, 'admin_dashboard/settings.html', {
+        'settings':              settings_obj,
+        'premium_count':         premium_count,
+        'total_sellers':         total_sellers,
+        'monthly_revenue':       monthly_revenue,
+        'open_disputes_count':   open_disputes_count,
+        'pending_payouts_count': pending_payouts_count,
+    })
  

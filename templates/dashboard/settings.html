@@ -921,38 +921,131 @@
           </div>
         </div>
       </div>
+
     </div><!-- /tab-appearance -->
 
-
-    <!-- ══════════════════════════════════════════════════════
-         PLAN TAB
-    ══════════════════════════════════════════════════════ -->
     <div class="tab-panel" id="tab-plan">
-      <div class="s-card">
-        <div class="s-card-head"><h2>Subscription</h2><p>Your current plan and features.</p></div>
-        <div class="s-card-body">
-          <div style="margin-bottom:14px;">
-            {% if user.subscription_type == 'premium' %}
-              <span class="plan-badge plan-premium">⭐ Premium</span>
-            {% else %}
-              <span class="plan-badge plan-free">Free Plan</span>
-            {% endif %}
-          </div>
-          <div class="features-list">
-            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited Products</div>
-            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom Store URL</div>
-            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>WhatsApp Integration</div>
-            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Store Mode (Escrow Payments)</div>
-            {% if user.subscription_type == 'premium' %}
-            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Disable Product Watermarks</div>
-            <div class="feature-item"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>No "Powered by" Badge</div>
-            {% endif %}
-          </div>
-          {% if user.subscription_type == 'free' %}
-          <a href="{% url 'subscription' %}" class="btn-primary" style="margin-top:8px;">Upgrade to Premium</a>
-          {% endif %}
+ 
+      <!-- Fee banner -->
+      <div style="background:var(--dark);color:#fff;border-radius:16px;padding:22px 24px;margin-bottom:20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <span style="font-size:28px;flex-shrink:0;">🤝</span>
+        <div style="flex:1;">
+          <div style="font-family:var(--font-d);font-weight:700;font-size:15px;margin-bottom:3px;">We only earn when you make a sale</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.5);line-height:1.5;">Store Mode is free to enable. We take a small % from each sale only.</div>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff;font-family:var(--font-d);font-weight:800;font-size:16px;padding:7px 16px;border-radius:100px;white-space:nowrap;flex-shrink:0;">
+          {{ transaction_fee|floatformat:"-2" }}% <span style="font-size:10px;font-weight:500;opacity:.85;">per sale</span>
         </div>
       </div>
+ 
+      <!-- Pricing cards side by side -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+ 
+        <!-- Free -->
+        <div class="s-card {% if current_subscription == 'free' %}{% endif %}" style="{% if current_subscription == 'free' %}border-color:var(--green);{% endif %}">
+          <div class="s-card-head">
+            <h2 style="display:flex;align-items:center;gap:8px;">
+              Free Forever
+              {% if current_subscription == 'free' %}
+              <span style="font-size:10px;font-weight:700;background:var(--green);color:#fff;padding:2px 8px;border-radius:100px;letter-spacing:.5px;">CURRENT</span>
+              {% endif %}
+            </h2>
+            <p style="font-family:var(--font-d);font-weight:800;font-size:32px;color:var(--dark);margin-top:8px;letter-spacing:-1px;">₦0<span style="font-size:14px;font-weight:400;color:var(--gray);letter-spacing:0;">/mo</span></p>
+          </div>
+          <div class="s-card-body">
+            <div class="features-list" style="margin-bottom:16px;">
+              <div class="feature-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited products</div>
+              <div class="feature-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom store URL</div>
+              <div class="feature-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>WhatsApp integration</div>
+              <div class="feature-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Store Mode (escrow)</div>
+              <div style="display:flex;align-items:flex-start;gap:9px;font-size:14px;color:var(--gray-lt);">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-top:2px;flex-shrink:0;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                "Powered by" badge shown
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:9px;font-size:14px;color:var(--gray-lt);">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-top:2px;flex-shrink:0;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Product watermarks on
+              </div>
+            </div>
+            <button class="btn-secondary" disabled style="width:100%;justify-content:center;opacity:.6;cursor:default;">
+              {% if current_subscription == 'free' %}Current plan{% else %}Free{% endif %}
+            </button>
+          </div>
+        </div>
+ 
+        <!-- Premium -->
+        <div class="s-card" style="border-color:{% if current_subscription == 'premium' %}var(--green){% else %}var(--dark){% endif %};">
+          <div class="s-card-head">
+            <h2 style="display:flex;align-items:center;gap:8px;">
+              ⭐ Premium
+              {% if current_subscription == 'premium' %}
+              <span style="font-size:10px;font-weight:700;background:var(--green);color:#fff;padding:2px 8px;border-radius:100px;letter-spacing:.5px;">ACTIVE</span>
+              {% endif %}
+            </h2>
+            <p style="font-family:var(--font-d);font-weight:800;font-size:32px;color:var(--dark);margin-top:8px;letter-spacing:-1px;">
+              ₦{{ premium_price|floatformat:"0" }}<span style="font-size:14px;font-weight:400;color:var(--gray);letter-spacing:0;">/mo</span>
+            </p>
+          </div>
+          <div class="s-card-body">
+            <div class="features-list" style="margin-bottom:16px;">
+              <div class="feature-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Free</div>
+              <div class="feature-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Remove "Powered by" badge</div>
+              <div class="feature-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Disable watermarks</div>
+              <div class="feature-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Featured on homepage</div>
+              <div class="feature-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verified badge</div>
+              <div class="feature-item"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority support</div>
+            </div>
+            {% if current_subscription == 'premium' %}
+              <button class="btn-primary" disabled style="width:100%;justify-content:center;opacity:.7;cursor:default;">
+                ✓ Active · expires {{ subscription_expires|date:"M d, Y" }}
+              </button>
+            {% else %}
+              <form method="POST" action="{% url 'upgrade_to_premium' %}" id="plan-tab-upgrade-form">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary" style="width:100%;justify-content:center;" id="plan-tab-upgrade-btn">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                  Upgrade — ₦{{ premium_price|floatformat:"0" }}/month
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+ 
+      </div><!-- /pricing grid -->
+ 
+      <!-- Earn example -->
+      <div class="s-card">
+        <div class="s-card-head"><h2>What you keep on every ₦{{ example_order|floatformat:"0" }} sale</h2></div>
+        <div class="s-card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;background:var(--light);border-radius:12px;overflow:hidden;">
+            <div style="padding:16px;border-right:1px solid var(--border);">
+              <div style="font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Buyer pays</div>
+              <div style="font-family:var(--font-d);font-weight:800;font-size:20px;color:var(--dark);">₦{{ example_order|floatformat:"0" }}</div>
+              <div style="font-size:11px;color:var(--gray-lt);margin-top:3px;">Held in escrow</div>
+            </div>
+            <div style="padding:16px;border-right:1px solid var(--border);">
+              <div style="font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">Our fee ({{ transaction_fee|floatformat:"-2" }}%)</div>
+              <div style="font-family:var(--font-d);font-weight:800;font-size:20px;color:#c2410c;">₦{{ example_fee|floatformat:"0" }}</div>
+              <div style="font-size:11px;color:var(--gray-lt);margin-top:3px;">Platform cut</div>
+            </div>
+            <div style="padding:16px;">
+              <div style="font-size:10px;font-weight:600;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">You receive</div>
+              <div style="font-family:var(--font-d);font-weight:800;font-size:20px;color:var(--green);">₦{{ example_payout|floatformat:"0" }}</div>
+              <div style="font-size:11px;color:var(--gray-lt);margin-top:3px;">To your bank</div>
+            </div>
+          </div>
+          <p style="font-size:11px;color:var(--gray-lt);margin-top:10px;">Flutterwave's payment processing fees apply separately.</p>
+        </div>
+      </div>
+ 
+      <!-- View full pricing page link -->
+      <div style="text-align:center;padding:16px 0 4px;">
+        <a href="{% url 'subscription' %}" class="btn-secondary btn-sm" style="display:inline-flex;">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          View full pricing page
+        </a>
+      </div>
+ 
     </div><!-- /tab-plan -->
 
   </div><!-- /tab-panels -->
