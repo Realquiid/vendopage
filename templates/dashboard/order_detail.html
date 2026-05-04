@@ -1,244 +1,352 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Order #{{ order.order_ref|slice:":8"|upper }} — Vendopage{% endblock %}
+{% block title %}Order #{{ order.order_ref|slice:":8"|upper }} — Dashboard{% endblock %}
 
 {% block extra_css %}
 <style>
-.order-page { background:var(--light); min-height:calc(100vh - 64px); padding:40px 20px 80px; }
-.order-inner { max-width:760px; margin:0 auto; }
+.vod-page { background:var(--light); min-height:calc(100vh - 64px); padding:40px 20px 80px; }
+.vod-inner { max-width:900px; margin:0 auto; }
 
-.order-page-header { margin-bottom:32px; }
-.order-page-header h1 { font-family:var(--font-d); font-weight:800; font-size:26px; letter-spacing:-1px; margin-bottom:4px; }
-.order-ref-badge { display:inline-flex; align-items:center; gap:6px; background:var(--dark); color:var(--white); font-family:monospace; font-size:13px; font-weight:700; padding:4px 12px; border-radius:100px; letter-spacing:1px; }
-.order-page-sub { font-size:13px; color:var(--gray); margin-top:8px; }
+/* Header */
+.vod-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
+.vod-header-left h1 { font-family:var(--font-d); font-weight:800; font-size:24px; letter-spacing:-1px; margin-bottom:6px; }
+.vod-ref-badge { display:inline-flex; align-items:center; gap:6px; background:var(--dark); color:var(--white); font-family:monospace; font-size:12px; font-weight:700; padding:3px 10px; border-radius:100px; letter-spacing:1px; }
+.vod-sub { font-size:13px; color:var(--gray); margin-top:6px; }
 
-/* ── Status tracker ─────────────────────────────────────── */
-.status-track { background:var(--white); border:1px solid var(--border); border-radius:20px; padding:28px 32px; margin-bottom:20px; }
-.track-steps { display:flex; align-items:flex-start; gap:0; position:relative; margin-bottom:8px; }
-.track-step { flex:1; display:flex; flex-direction:column; align-items:center; position:relative; z-index:1; }
-.track-step:not(:last-child)::after { content:''; position:absolute; top:16px; left:50%; width:100%; height:2px; background:var(--border); z-index:0; }
-.track-step.done:not(:last-child)::after { background:var(--green); }
-.track-dot { width:32px; height:32px; border-radius:50%; border:2px solid var(--border); background:var(--white); display:flex; align-items:center; justify-content:center; font-size:14px; z-index:1; transition:all .3s; }
-.track-step.done .track-dot { border-color:var(--green); background:var(--green); color:#fff; }
-.track-step.current .track-dot { border-color:var(--dark); background:var(--dark); color:#fff; box-shadow:0 0 0 4px rgba(0,0,0,.1); }
-.track-label { font-size:11px; font-weight:600; color:var(--gray); margin-top:8px; text-align:center; }
-.track-step.done .track-label,
-.track-step.current .track-label { color:var(--dark); font-weight:700; }
+/* Status badge */
+.vod-status { display:inline-flex; align-items:center; gap:5px; padding:5px 14px; border-radius:100px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+.vs-paid      { background:#fff7ed; color:#c2410c; }
+.vs-shipped   { background:#eff6ff; color:#1d4ed8; }
+.vs-delivered,
+.vs-completed { background:#f0fdf4; color:#15803d; }
+.vs-disputed  { background:#fef2f2; color:#b91c1c; }
+.vs-refunded  { background:#faf5ff; color:#7c3aed; }
+.vs-dot { width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.7; }
 
-.status-message { text-align:center; margin-top:20px; padding:16px 20px; border-radius:12px; font-size:14px; line-height:1.6; }
-.status-message.paid { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
-.status-message.shipped { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
-.status-message.delivered,
-.status-message.completed { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
-.status-message.disputed { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; }
+/* Layout */
+.vod-layout { display:grid; grid-template-columns:1fr 280px; gap:20px; align-items:start; }
+.vod-sidebar { position:sticky; top:80px; display:flex; flex-direction:column; gap:16px; }
 
-/* ── Cards ──────────────────────────────────────────────── */
-.info-card { background:var(--white); border:1px solid var(--border); border-radius:20px; overflow:hidden; margin-bottom:20px; }
-.info-card-head { padding:16px 24px; border-bottom:1px solid var(--border); font-family:var(--font-d); font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:space-between; }
-.info-card-body { padding:20px 24px; }
-.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px 24px; }
-.info-item label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray-lt); display:block; margin-bottom:3px; }
-.info-item span { font-size:14px; font-weight:600; color:var(--dark); }
+/* Cards */
+.vod-card { background:var(--white); border:1px solid var(--border); border-radius:20px; overflow:hidden; margin-bottom:16px; }
+.vod-card-head { padding:16px 22px; border-bottom:1px solid var(--border); font-family:var(--font-d); font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.vod-card-body { padding:20px 22px; }
 
-/* ── Order items ────────────────────────────────────────── */
-.oi-row { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
-.oi-row:last-child { border-bottom:none; }
-.oi-thumb { width:60px; height:60px; border-radius:10px; object-fit:cover; background:var(--light); flex-shrink:0; }
-.oi-thumb-ph { width:60px; height:60px; border-radius:10px; background:var(--light); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
-.oi-details { flex:1; }
-.oi-pname { font-size:14px; font-weight:600; margin-bottom:3px; }
-.oi-qty { font-size:12px; color:var(--gray-lt); }
-.oi-ptotal { font-size:15px; font-weight:700; }
+/* Info grid */
+.vod-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px 20px; }
+.vod-info-item label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray-lt); display:block; margin-bottom:3px; }
+.vod-info-item span { font-size:14px; font-weight:600; color:var(--dark); line-height:1.5; }
 
-.order-total-row { display:flex; justify-content:space-between; padding:16px 24px; border-top:1px solid var(--border); font-weight:800; font-size:16px; }
+/* Order items */
+.vod-oi-row { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+.vod-oi-row:last-child { border-bottom:none; }
+.vod-oi-img { width:56px; height:56px; border-radius:10px; object-fit:cover; background:var(--light); flex-shrink:0; }
+.vod-oi-ph  { width:56px; height:56px; border-radius:10px; background:var(--light); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
+.vod-oi-info { flex:1; }
+.vod-oi-name { font-size:14px; font-weight:600; margin-bottom:3px; }
+.vod-oi-qty  { font-size:12px; color:var(--gray-lt); }
+.vod-oi-price { font-size:15px; font-weight:700; flex-shrink:0; }
+.vod-total-row { display:flex; justify-content:space-between; padding:14px 22px; border-top:1px solid var(--border); font-weight:800; font-size:15px; }
 
-/* ── Action buttons ─────────────────────────────────────── */
-.action-strip { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
-.action-strip .btn { flex:1; min-width:140px; justify-content:center; display:flex; align-items:center; gap:6px; padding:12px 20px; border-radius:var(--r-pill); font-family:var(--font-b); font-size:14px; font-weight:600; cursor:pointer; text-decoration:none; border:none; transition:all .2s; }
-.btn-confirm-receipt { background:var(--green); color:#fff; }
-.btn-confirm-receipt:hover { background:var(--green-dk); }
-.btn-raise-dispute { background:var(--light); color:var(--dark); border:1px solid var(--border); }
-.btn-raise-dispute:hover { border-color:var(--red); color:var(--red); }
-.btn-leave-review { background:var(--dark); color:#fff; }
-.btn-leave-review:hover { background:#222; }
+/* Pay type badge */
+.pay-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:700; }
+.pay-escrow { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+.pay-direct { background:#fefce8; color:#92400e; border:1px solid #fde68a; }
 
-/* ── Dispute / Review panels ────────────────────────────── */
-.panel { background:var(--white); border:1px solid var(--border); border-radius:20px; padding:24px; margin-bottom:20px; }
-.panel-title { font-family:var(--font-d); font-weight:700; font-size:16px; margin-bottom:16px; display:flex; align-items:center; gap:8px; }
-.panel p { font-size:14px; color:var(--gray); line-height:1.7; margin-bottom:12px; }
-.panel p:last-child { margin-bottom:0; }
-.dispute-status-tag { padding:3px 10px; border-radius:100px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
-.dispute-open { background:#fef2f2; color:#b91c1c; }
-.dispute-replied { background:#eff6ff; color:#1d4ed8; }
-.dispute-resolved { background:#f0fdf4; color:#15803d; }
-.stars-display { display:flex; gap:3px; font-size:20px; margin-bottom:8px; }
+/* Action buttons in sidebar */
+.vod-actions { display:flex; flex-direction:column; gap:8px; }
+.vod-btn { width:100%; padding:12px; border-radius:var(--r-pill); border:none; font-family:var(--font-b); font-size:13px; font-weight:700; cursor:pointer; transition:all .2s; display:flex; align-items:center; justify-content:center; gap:7px; text-decoration:none; }
+.vbtn-ship    { background:var(--dark); color:#fff; }
+.vbtn-ship:hover    { background:#222; transform:translateY(-1px); }
+.vbtn-view    { background:var(--light); color:var(--dark); border:1px solid var(--border); }
+.vbtn-view:hover    { border-color:var(--dark); }
+.vbtn-back    { background:var(--light); color:var(--gray); border:1px solid var(--border); }
+.vbtn-back:hover    { color:var(--dark); border-color:var(--dark); }
 
-[data-theme="dark"] .status-track,
-[data-theme="dark"] .info-card,
-[data-theme="dark"] .panel { background:#1e1e1e; border-color:#2e2e2e; }
-[data-theme="dark"] .info-card-head,
-[data-theme="dark"] .oi-row,
-[data-theme="dark"] .order-total-row { border-color:#2a2a2a; }
-[data-theme="dark"] .info-item span { color:#f0f0f0; }
-[data-theme="dark"] .track-step:not(:last-child)::after { background:#2e2e2e; }
-[data-theme="dark"] .track-dot { background:#1e1e1e; border-color:#3a3a3a; }
+/* Escrow info box */
+.escrow-box { background:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:14px 16px; font-size:13px; color:#15803d; line-height:1.7; }
+.escrow-box strong { font-weight:700; }
+.direct-box { background:#fefce8; border:1px solid #fde68a; border-radius:12px; padding:14px 16px; font-size:13px; color:#92400e; line-height:1.7; }
+.direct-box strong { font-weight:700; }
 
-@media(max-width:600px) {
-  .info-grid { grid-template-columns:1fr; }
-  .track-label { font-size:10px; }
-  .action-strip { flex-direction:column; }
-  .action-strip .btn { min-width:unset; }
-  .status-track { padding:20px 16px; }
+/* Payout row */
+.payout-row { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); font-size:13px; }
+.payout-row:last-child { border-bottom:none; }
+.payout-label { color:var(--gray); }
+.payout-value { font-weight:700; color:var(--dark); }
+.payout-value.green { color:var(--green); font-size:16px; }
+
+/* Dispute panel */
+.dispute-panel { background:#fef2f2; border:1px solid #fecaca; border-radius:16px; padding:20px 22px; margin-bottom:16px; }
+.dispute-panel h3 { font-family:var(--font-d); font-weight:700; font-size:16px; color:#b91c1c; margin-bottom:14px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.dispute-tag { padding:3px 10px; border-radius:100px; font-size:11px; font-weight:700; text-transform:uppercase; }
+.dtag-open     { background:#fecaca; color:#7f1d1d; }
+.dtag-replied  { background:#bfdbfe; color:#1e3a5f; }
+.dtag-resolved { background:#bbf7d0; color:#14532d; }
+.dispute-msg-box { background:#fff; border:1px solid #fecaca; border-radius:10px; padding:14px; font-size:13px; color:#374151; line-height:1.7; margin-bottom:14px; }
+.dispute-msg-box strong { font-weight:700; color:#b91c1c; display:block; margin-bottom:4px; font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+
+/* Reply form */
+.reply-form { margin-top:14px; padding-top:14px; border-top:1px solid #fecaca; }
+.reply-form label { font-size:12px; font-weight:700; color:#b91c1c; text-transform:uppercase; letter-spacing:.4px; display:block; margin-bottom:6px; }
+.reply-form textarea,
+.reply-form input[type="text"] { width:100%; padding:10px 14px; border:1.5px solid #fecaca; border-radius:10px; font-family:var(--font-b); font-size:13px; outline:none; transition:border-color .18s; box-sizing:border-box; background:#fff; color:var(--dark); margin-bottom:10px; }
+.reply-form textarea { resize:vertical; min-height:90px; }
+.reply-form textarea:focus,
+.reply-form input:focus { border-color:#b91c1c; }
+.reply-submit-btn { background:#b91c1c; color:#fff; border:none; padding:10px 20px; border-radius:var(--r-pill); font-family:var(--font-b); font-size:13px; font-weight:700; cursor:pointer; transition:background .18s; }
+.reply-submit-btn:hover { background:#991b1b; }
+.vendor-reply-box { background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; padding:14px; font-size:13px; color:#1e40af; line-height:1.7; margin-top:10px; }
+.vendor-reply-box strong { font-weight:700; display:block; margin-bottom:4px; font-size:11px; text-transform:uppercase; letter-spacing:.5px; }
+
+/* Shipping info box */
+.ship-box { background:var(--light); border-radius:12px; padding:14px 16px; font-size:13px; line-height:1.9; }
+.ship-box strong { font-weight:700; color:var(--dark); }
+
+/* Dark mode */
+[data-theme="dark"] .vod-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .vod-card-head { border-color:#2a2a2a; }
+[data-theme="dark"] .vod-oi-row { border-color:#2a2a2a; }
+[data-theme="dark"] .vod-total-row { border-color:#2a2a2a; }
+[data-theme="dark"] .vod-info-item span { color:#f0f0f0; }
+[data-theme="dark"] .ship-box { background:#2a2a2a; }
+[data-theme="dark"] .payout-row { border-color:#2a2a2a; }
+[data-theme="dark"] .vbtn-view,
+[data-theme="dark"] .vbtn-back { background:#2a2a2a; color:#f0f0f0; border-color:#3a3a3a; }
+
+@media(max-width:768px) {
+  .vod-layout { grid-template-columns:1fr; }
+  .vod-sidebar { position:static; }
+  .vod-info-grid { grid-template-columns:1fr; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="order-page">
-<div class="order-inner">
+<div class="vod-page">
+<div class="vod-inner">
 
-  <div class="order-page-header">
-    <div class="order-ref-badge">#{{ order.order_ref|slice:":8"|upper }}</div>
-    <h1 style="margin-top:12px;">Order Details</h1>
-    <p class="order-page-sub">Placed on {{ order.created_at|date:"F d, Y \a\t H:i" }} · {{ order.seller.business_name }}</p>
-  </div>
-
-  <!-- Status Tracker -->
-  <div class="status-track">
-    {% with status=order.status %}
-    <div class="track-steps">
-      <div class="track-step {% if status in 'paid,shipped,delivered,completed' %}done{% endif %}">
-        <div class="track-dot">✓</div>
-        <div class="track-label">Paid</div>
+  <!-- Header -->
+  <div class="vod-header">
+    <div class="vod-header-left">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
+        <div class="vod-ref-badge">#{{ order.order_ref|slice:":8"|upper }}</div>
+        <span class="vod-status vs-{{ order.status }}">
+          <span class="vs-dot"></span>{{ order.get_status_display }}
+        </span>
       </div>
-      <div class="track-step {% if status in 'shipped,delivered,completed' %}done{% elif status == 'paid' %}current{% endif %}">
-        <div class="track-dot">📦</div>
-        <div class="track-label">Shipped</div>
-      </div>
-      <div class="track-step {% if status in 'delivered,completed' %}done{% elif status == 'shipped' %}current{% endif %}">
-        <div class="track-dot">🚚</div>
-        <div class="track-label">Delivered</div>
-      </div>
-      <div class="track-step {% if status == 'completed' %}done{% elif status in 'delivered' %}current{% endif %}">
-        <div class="track-dot">✅</div>
-        <div class="track-label">Complete</div>
-      </div>
+      <h1>Order Details</h1>
+      <p class="vod-sub">{{ order.buyer_name }} · Placed {{ order.created_at|date:"F d, Y \a\t H:i" }}</p>
     </div>
-
-    {% if status == 'paid' %}
-    <div class="status-message paid">⏳ Your order has been paid and is waiting to be shipped by {{ order.seller.business_name }}. You'll get an email when it ships.</div>
-    {% elif status == 'shipped' %}
-    <div class="status-message shipped">🚚 Your order is on its way!{% if order.tracking_info %} Tracking: <strong>{{ order.tracking_info }}</strong>{% if order.courier_name %} via {{ order.courier_name }}{% endif %}.{% endif %} Please confirm receipt once it arrives.</div>
-    {% elif status == 'delivered' %}
-    <div class="status-message delivered">📬 Delivery confirmed. Payment is being released to the seller.</div>
-    {% elif status == 'completed' %}
-    <div class="status-message completed">🎉 This order is complete. Funds have been sent to the seller.</div>
-    {% elif status == 'disputed' %}
-    <div class="status-message disputed">⚠️ A dispute has been raised on this order. Our team will review it within 48 hours.</div>
-    {% endif %}
-    {% endwith %}
-  </div>
-
-  <!-- Action Buttons -->
-  <div class="action-strip">
-    {% if order.status == 'shipped' and not dispute %}
-    <form method="POST" action="/order/{{ order.order_ref }}/confirm/" style="flex:1;">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-confirm-receipt" style="width:100%;">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        Confirm Receipt
-      </button>
-    </form>
-    {% endif %}
-    {% if order.status in 'paid,shipped' and not dispute %}
-    <a href="/order/{{ order.order_ref }}/dispute/" class="btn btn-raise-dispute">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      Raise Dispute
+    <a href="{% url 'vendor_orders' %}" class="vod-btn vbtn-back" style="width:auto;padding:10px 18px;">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      All Orders
     </a>
-    {% endif %}
-    {% if order.status in 'delivered,completed' and not review %}
-    <a href="/order/{{ order.order_ref }}/review/" class="btn btn-leave-review">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      Leave a Review
-    </a>
-    {% endif %}
   </div>
 
-  <!-- Order Items -->
-  <div class="info-card">
-    <div class="info-card-head">Items Ordered</div>
-    <div class="info-card-body" style="padding:0 24px;">
-      {% for item in order.items.all %}
-      <div class="oi-row">
-        {% if item.product_image_url %}
-          <img class="oi-thumb" src="{{ item.product_image_url }}" alt="{{ item.product_name }}">
-        {% else %}
-          <div class="oi-thumb-ph">📦</div>
-        {% endif %}
-        <div class="oi-details">
-          <div class="oi-pname">{{ item.product_name }}</div>
-          <div class="oi-qty">Qty: {{ item.quantity }} × {{ order.currency }} {{ item.price|floatformat:0 }}</div>
-        </div>
-        <div class="oi-ptotal">{{ order.currency }} {{ item.line_total|floatformat:0 }}</div>
-      </div>
-      {% endfor %}
-    </div>
-    <div class="order-total-row">
-      <span>Total Paid</span>
-      <span>{{ order.currency }} {{ order.subtotal|floatformat:0 }}</span>
-    </div>
+  {% if messages %}
+  {% for message in messages %}
+  <div style="padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:14px;font-weight:500;
+    {% if message.tags == 'success' %}background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;
+    {% else %}background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;{% endif %}">
+    {{ message }}
   </div>
+  {% endfor %}
+  {% endif %}
 
-  <!-- Delivery Info -->
-  <div class="info-card">
-    <div class="info-card-head">Delivery Details</div>
-    <div class="info-card-body">
-      <div class="info-grid">
-        <div class="info-item"><label>Buyer Name</label><span>{{ order.buyer_name }}</span></div>
-        <div class="info-item"><label>Phone</label><span>{{ order.buyer_phone }}</span></div>
-        <div class="info-item"><label>Email</label><span>{{ order.buyer_email }}</span></div>
-        <div class="info-item"><label>City</label><span>{{ order.delivery_city|default:"—" }}</span></div>
-        <div class="info-item" style="grid-column:1/-1;"><label>Address</label><span>{{ order.delivery_address }}</span></div>
-        {% if order.tracking_info %}
-        <div class="info-item"><label>Tracking</label><span>{{ order.tracking_info }}</span></div>
-        <div class="info-item"><label>Courier</label><span>{{ order.courier_name|default:"—" }}</span></div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- Dispute Panel -->
+  <!-- Dispute Panel — shown prominently at top if active -->
   {% if dispute %}
-  <div class="panel">
-    <div class="panel-title">
-      ⚠️ Dispute
-      <span class="dispute-status-tag {% if dispute.status == 'open' %}dispute-open{% elif dispute.status == 'vendor_replied' %}dispute-replied{% else %}dispute-resolved{% endif %}">
+  <div class="dispute-panel">
+    <h3>
+      ⚠️ Dispute Raised
+      <span class="dispute-tag
+        {% if dispute.status == 'open' %}dtag-open
+        {% elif dispute.status == 'vendor_replied' %}dtag-replied
+        {% else %}dtag-resolved{% endif %}">
         {{ dispute.get_status_display }}
       </span>
+    </h3>
+
+    <!-- Buyer's message -->
+    <div class="dispute-msg-box">
+      <strong>Buyer's report</strong>
+      {{ dispute.buyer_message }}
     </div>
-    <p><strong>Your report:</strong> {{ dispute.buyer_message }}</p>
-    {% if dispute.vendor_reply %}
-    <p><strong>Seller's response:</strong> {{ dispute.vendor_reply }}</p>
+    {% if dispute.buyer_evidence %}
+    <div class="dispute-msg-box">
+      <strong>Buyer's evidence</strong>
+      <a href="{{ dispute.buyer_evidence }}" target="_blank" style="color:#b91c1c;">View evidence →</a>
+    </div>
     {% endif %}
+
+    <!-- Vendor's existing reply -->
+    {% if dispute.vendor_reply %}
+    <div class="vendor-reply-box">
+      <strong>Your response</strong>
+      {{ dispute.vendor_reply }}
+    </div>
+    {% endif %}
+
+    <!-- Admin resolution note -->
     {% if dispute.admin_note %}
-    <p><strong>Resolution note:</strong> {{ dispute.admin_note }}</p>
+    <div class="dispute-msg-box" style="margin-top:10px;">
+      <strong>Admin resolution</strong>
+      {{ dispute.admin_note }}
+    </div>
+    {% endif %}
+
+    <!-- Reply form — show if not yet resolved -->
+    {% if dispute.status in 'open,vendor_replied' %}
+    <div class="reply-form">
+      <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reply_dispute">
+        <label>{% if dispute.vendor_reply %}Update your response{% else %}Your response to this dispute{% endif %}</label>
+        <textarea name="vendor_reply" placeholder="Explain your side clearly. Include any relevant details about the order, shipping, or delivery…" required>{{ dispute.vendor_reply|default:'' }}</textarea>
+        <label style="margin-top:4px;">Evidence link (optional)</label>
+        <input type="text" name="vendor_evidence" placeholder="e.g. tracking URL, photo link" value="{{ dispute.vendor_evidence|default:'' }}">
+        <button type="submit" class="reply-submit-btn">
+          {% if dispute.vendor_reply %}Update Response{% else %}Submit Response{% endif %}
+        </button>
+      </form>
+    </div>
     {% endif %}
   </div>
   {% endif %}
 
-  <!-- Review Panel -->
-  {% if review %}
-  <div class="panel">
-    <div class="panel-title">⭐ Your Review</div>
-    <div class="stars-display">
-      {% for i in "12345" %}
-        {% if forloop.counter <= review.rating %}⭐{% else %}☆{% endif %}
-      {% endfor %}
+  <div class="vod-layout">
+
+    <!-- LEFT: Main content -->
+    <div>
+
+      <!-- Order Items -->
+      <div class="vod-card">
+        <div class="vod-card-head">
+          Items Ordered
+          <span class="pay-badge {% if order.payment_type == 'escrow' %}pay-escrow{% else %}pay-direct{% endif %}">
+            {% if order.payment_type == 'escrow' %}🔒 Protected Pay{% else %}⚡ Direct Pay{% endif %}
+          </span>
+        </div>
+        <div class="vod-card-body" style="padding:0 22px;">
+          {% for item in order.items.all %}
+          <div class="vod-oi-row">
+            {% if item.product_image_url %}
+              <img class="vod-oi-img" src="{{ item.product_image_url }}" alt="{{ item.product_name }}"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+              <div class="vod-oi-ph" style="display:none;">📦</div>
+            {% else %}
+              <div class="vod-oi-ph">📦</div>
+            {% endif %}
+            <div class="vod-oi-info">
+              <div class="vod-oi-name">{{ item.product_name }}</div>
+              <div class="vod-oi-qty">Qty: {{ item.quantity }} × {{ order.currency }} {{ item.price|floatformat:0 }}</div>
+            </div>
+            <div class="vod-oi-price">{{ order.currency }} {{ item.price|floatformat:0 }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="vod-total-row">
+          <span>Order Total</span>
+          <span>{{ order.currency }} {{ order.subtotal|floatformat:0 }}</span>
+        </div>
+      </div>
+
+      <!-- Buyer & Delivery Info -->
+      <div class="vod-card">
+        <div class="vod-card-head">Buyer & Delivery</div>
+        <div class="vod-card-body">
+          <div class="vod-info-grid">
+            <div class="vod-info-item"><label>Name</label><span>{{ order.buyer_name }}</span></div>
+            <div class="vod-info-item"><label>Phone</label><span>{{ order.buyer_phone }}</span></div>
+            <div class="vod-info-item"><label>Email</label><span style="word-break:break-all;">{{ order.buyer_email }}</span></div>
+            <div class="vod-info-item"><label>City</label><span>{{ order.delivery_city|default:"—" }}</span></div>
+            <div class="vod-info-item" style="grid-column:1/-1;"><label>Delivery Address</label><span>{{ order.delivery_address }}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Info (if shipped) -->
+      {% if order.tracking_info %}
+      <div class="vod-card">
+        <div class="vod-card-head">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          Shipment Details
+        </div>
+        <div class="vod-card-body">
+          <div class="ship-box">
+            {% if order.courier_name %}<div><strong>Courier:</strong> {{ order.courier_name }}</div>{% endif %}
+            <div><strong>Tracking:</strong> {{ order.tracking_info }}</div>
+            {% if order.shipped_at %}<div><strong>Shipped:</strong> {{ order.shipped_at|date:"F d, Y \a\t H:i" }}</div>{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
     </div>
-    {% if review.comment %}<p>{{ review.comment }}</p>{% endif %}
+
+    <!-- RIGHT: Sidebar -->
+    <div class="vod-sidebar">
+
+      <!-- Actions -->
+      <div class="vod-card">
+        <div class="vod-card-head">Actions</div>
+        <div class="vod-card-body">
+          <div class="vod-actions">
+            {% if order.status == 'paid' or order.status == 'disputed' %}
+            <a href="{% url 'mark_shipped' order_ref=order.order_ref %}" class="vod-btn vbtn-ship">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              Mark as Shipped
+            </a>
+            {% endif %}
+            <a href="/{{ order.seller.slug }}" target="_blank" class="vod-btn vbtn-view">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              View Your Store
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payout Info -->
+      <div class="vod-card">
+        <div class="vod-card-head">Payout Breakdown</div>
+        <div class="vod-card-body">
+          <div class="payout-row">
+            <span class="payout-label">Order Total</span>
+            <span class="payout-value">{{ order.currency }} {{ order.subtotal|floatformat:0 }}</span>
+          </div>
+          <div class="payout-row">
+            <span class="payout-label">Platform Fee</span>
+            <span class="payout-value" style="color:var(--red);">− {{ order.currency }} {{ order.platform_fee|floatformat:0 }}</span>
+          </div>
+          <div class="payout-row">
+            <span class="payout-label">Your Payout</span>
+            <span class="payout-value green">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</span>
+          </div>
+          <div class="payout-row">
+            <span class="payout-label">Payout Status</span>
+            <span class="payout-value">
+              {% if order.payout_triggered %}✅ Sent{% else %}⏳ Pending{% endif %}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Escrow / Direct info -->
+      {% if order.payment_type == 'escrow' %}
+      <div class="escrow-box">
+        🔒 <strong>Escrow Active</strong><br>
+        Funds are held until the buyer confirms receipt or 72 hours after shipping — whichever comes first.
+      </div>
+      {% else %}
+      <div class="direct-box">
+        ⚡ <strong>Direct Payment</strong><br>
+        Payment was sent directly to your account after the order was confirmed.
+      </div>
+      {% endif %}
+
+    </div>
   </div>
-  {% endif %}
 
 </div>
 </div>

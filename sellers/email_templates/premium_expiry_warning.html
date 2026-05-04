@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>Order Confirmed — Vendopage</title>
+<title>Your Premium Expires Soon — Vendopage</title>
 </head>
 <body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
 
@@ -23,7 +23,7 @@
       <!-- Heading -->
       <tr>
         <td align="center" style="padding-bottom:24px;">
-          <h1 style="margin:0;font-size:28px;font-weight:800;color:#0A0A0A;letter-spacing:-0.5px;line-height:1.3;">Order confirmed 🎉</h1>
+          <h1 style="margin:0;font-size:28px;font-weight:800;color:#0A0A0A;letter-spacing:-0.5px;line-height:1.3;">Your Premium expires in {{days_left}} days ⏳</h1>
         </td>
       </tr>
 
@@ -31,26 +31,37 @@
       <tr>
         <td align="center" style="padding-bottom:32px;">
           <p style="margin:0;font-size:15px;color:#444444;line-height:1.8;text-align:center;max-width:440px;">
-            Hi <strong style="color:#0A0A0A;">{{buyer_name}}</strong>, your payment has been received and your order is confirmed. <strong style="color:#0A0A0A;">{{seller_name}}</strong> will ship it soon.
+            Hi <strong style="color:#0A0A0A;">{{business_name}}</strong>, your Vendopage Premium subscription expires on <strong style="color:#0A0A0A;">{{expires_date}}</strong>. Renew now to keep all your benefits without interruption.
           </p>
         </td>
       </tr>
 
-      <!-- Order ref box -->
+      <!-- What you'll lose box -->
       <tr>
-        <td style="padding-bottom:24px;">
+        <td style="padding-bottom:32px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td style="background:#f7f7f7;border-radius:10px;padding:20px 24px;">
+              <td style="background:#f7f7f7;border-radius:10px;padding:22px 26px;">
+                <p style="margin:0 0 16px;font-size:12px;font-weight:700;color:#0A0A0A;text-transform:uppercase;letter-spacing:.8px;">What you keep with Premium</p>
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td>
-                      <p style="margin:0 0 3px;font-size:11px;font-weight:700;color:#999999;text-transform:uppercase;letter-spacing:1.2px;">Order reference</p>
-                      <p style="margin:0;font-size:18px;font-weight:800;color:#0A0A0A;letter-spacing:1px;">#{{order_ref}}</p>
+                    <td style="padding:5px 0;font-size:14px;color:#555555;line-height:1.6;">
+                      ⭐ &nbsp;Verified badge on your store
                     </td>
-                    <td align="right">
-                      <p style="margin:0 0 3px;font-size:11px;font-weight:700;color:#999999;text-transform:uppercase;letter-spacing:1.2px;">Total</p>
-                      <p style="margin:0;font-size:18px;font-weight:800;color:#0A0A0A;">{{currency}}{{subtotal}}</p>
+                  </tr>
+                  <tr>
+                    <td style="padding:5px 0;font-size:14px;color:#555555;line-height:1.6;">
+                      🚫 &nbsp;No "Powered by Vendopage" badge
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:5px 0;font-size:14px;color:#555555;line-height:1.6;">
+                      🖼️ &nbsp;Watermark-free product images
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:5px 0;font-size:14px;color:#555555;line-height:1.6;">
+                      💸 &nbsp;Lower transaction fee on escrow orders
                     </td>
                   </tr>
                 </table>
@@ -60,34 +71,17 @@
         </td>
       </tr>
 
-      <!-- Items -->
-      <tr>
-        <td style="padding-bottom:32px;">
-          <table width="100%" cellpadding="0" cellspacing="0">
-            <tr>
-              <td style="padding-bottom:10px;">
-                <p style="margin:0;font-size:11px;font-weight:700;color:#999999;text-transform:uppercase;letter-spacing:1.2px;">Items ordered</p>
-              </td>
-            </tr>
-            {{order_items_html}}
-          </table>
-        </td>
-      </tr>
-
-      <!-- Escrow notice -->
-      {{payment_notice}}
-
       <!-- CTA -->
       <tr>
         <td align="center" style="padding-bottom:48px;">
-          <a href="https://www.vendopage.com/order/{{order_ref}}/"
+          <a href="https://www.vendopage.com/dashboard/subscription/"
              style="display:inline-block;background:#0A0A0A;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:15px 36px;border-radius:100px;">
-            Track my order →
+            Renew Premium →
           </a>
         </td>
       </tr>
 
-      <!-- Divider -->
+      <!-- Divider + Footer -->
       <tr>
         <td style="border-top:1px solid #eeeeee;padding-top:32px;">
           <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">

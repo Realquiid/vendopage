@@ -58,6 +58,33 @@ def send_email_via_brevo(to_email, subject, html_content, text_content=None):
         return False
 
 
+def _build_order_items_html(items, currency=''):
+    """Render order items as clean inline HTML rows for email templates."""
+    rows = ''
+    for item in items:
+        try:
+            line_total = f"{currency}{float(item.price) * item.quantity:,.0f}"
+        except Exception:
+            line_total = ''
+        rows += f'''
+            <tr>
+              <td style="padding:10px 0;border-bottom:1px solid #eeeeee;">
+                <table width="100%" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td>
+                      <p style="margin:0;font-size:14px;font-weight:600;color:#0A0A0A;">{item.product_name}</p>
+                      <p style="margin:2px 0 0;font-size:12px;color:#999999;">Qty: {item.quantity}</p>
+                    </td>
+                    <td align="right">
+                      <p style="margin:0;font-size:14px;font-weight:700;color:#0A0A0A;">{line_total}</p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>'''
+    return rows
+
+
 # ─────────────────────────────────────────────
 # 1. PASSWORD RESET
 # ─────────────────────────────────────────────
@@ -135,28 +162,34 @@ def send_weekly_summary_email(to_email, business_name, store_url,
         trend = 'same as last week'
         trend_color = '#888888'
 
-    # Only inject the tip row when views are low
     if page_views < 20:
         low_views_tip = '''
   <tr>
-    <td style="padding:16px 48px 0;">
-      <p style="margin:0;font-size:15px;color:#444444;line-height:1.7;">
-        <strong style="color:#111111;">Tip:</strong> Sellers who share their store link on WhatsApp Status every week see 2x more visitors. Try it today — it takes 30 seconds.
-      </p>
+    <td style="padding:0 0 32px;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td style="background:#f7f7f7;border-left:3px solid #0A0A0A;border-radius:0 8px 8px 0;padding:18px 22px;">
+            <p style="margin:0 0 5px;font-size:11px;font-weight:700;color:#0A0A0A;text-transform:uppercase;letter-spacing:.8px;">Tip</p>
+            <p style="margin:0;font-size:14px;color:#555555;line-height:1.6;">
+              Sellers who share their store link on WhatsApp Status every week see 2x more visitors. Try it today — it takes 30 seconds.
+            </p>
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>'''
     else:
         low_views_tip = ''
 
     html = _render('weekly_summary.html', {
-        'business_name': business_name,
-        'store_url': store_url,
-        'page_views': page_views,
+        'business_name':   business_name,
+        'store_url':       store_url,
+        'page_views':      page_views,
         'whatsapp_clicks': whatsapp_clicks,
         'active_products': active_products,
-        'trend': trend,
-        'trend_color': trend_color,
-        'low_views_tip': low_views_tip,
+        'trend':           trend,
+        'trend_color':     trend_color,
+        'low_views_tip':   low_views_tip,
     })
     return send_email_via_brevo(
         to_email=to_email,
@@ -166,12 +199,12 @@ def send_weekly_summary_email(to_email, business_name, store_url,
 
 
 # ─────────────────────────────────────────────
-# 6. RE-ENGAGEMENT (5 days inactive)
+# 6. RE-ENGAGEMENT
 # ─────────────────────────────────────────────
 def send_reengagement_email(to_email, business_name, store_url, days_inactive=5):
     html = _render('reengagement.html', {
         'business_name': business_name,
-        'store_url': store_url,
+        'store_url':     store_url,
         'days_inactive': days_inactive,
     })
     return send_email_via_brevo(
@@ -181,174 +214,255 @@ def send_reengagement_email(to_email, business_name, store_url, days_inactive=5)
     )
 
 
-
-def _send(to_email, subject, body):
-    return send_email_via_brevo(
-        to_email=to_email,
-        subject=subject,
-        html_content=f"<pre style='font-family:sans-serif;white-space:pre-wrap;'>{body}</pre>",
-        text_content=body,
-    )
-
+# ─────────────────────────────────────────────
+# 7. ORDER CONFIRMED — BUYER
+# ─────────────────────────────────────────────
 
 def send_order_confirmed_buyer(to_email, buyer_name, order_ref, seller_name,
-                                items, subtotal, currency):
-    """Sent to buyer immediately after payment is verified."""
-    item_lines = '\n'.join(
-        f"  • {item.product_name} × {item.quantity}  —  {currency}{item.price:,.0f}"
-        for item in items
+                                items, subtotal, currency, payment_type='escrow'):
+    order_items_html = _build_order_items_html(items, currency)
+
+    if payment_type == 'direct':
+        payment_notice = '''
+        <tr>
+          <td style="padding-bottom:36px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background:#fefce8;border-left:3px solid #f59e0b;border-radius:0 8px 8px 0;padding:18px 22px;">
+                  <p style="margin:0 0 5px;font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:.8px;">⚡ Direct Payment</p>
+                  <p style="margin:0;font-size:14px;color:#555555;line-height:1.6;">
+                    Your payment has gone directly to the seller. They will contact you shortly to arrange delivery.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>'''
+    else:
+        payment_notice = '''
+        <tr>
+          <td style="padding-bottom:36px;">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="background:#f7f7f7;border-left:3px solid #0A0A0A;border-radius:0 8px 8px 0;padding:18px 22px;">
+                  <p style="margin:0 0 5px;font-size:11px;font-weight:700;color:#0A0A0A;text-transform:uppercase;letter-spacing:.8px;">Your money is safe</p>
+                  <p style="margin:0;font-size:14px;color:#555555;line-height:1.6;">
+                    Your funds are held in escrow. They are only released to the seller after you confirm delivery. If anything goes wrong, you can raise a dispute.
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>'''
+
+    html = _render('order_confirmed_buyer.html', {
+        'buyer_name':       buyer_name,
+        'order_ref':        order_ref,
+        'seller_name':      seller_name,
+        'currency':         currency,
+        'subtotal':         f'{float(subtotal):,.0f}',
+        'order_items_html': order_items_html,
+        'payment_notice':   payment_notice,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'Order #{order_ref} confirmed — {seller_name}',
+        html_content=html,
     )
-    subject = f"Your order #{order_ref} is confirmed — {seller_name}"
-    body = f"""Hi {buyer_name},
 
-Your payment has been received and your order is confirmed. 🎉
-
-Order #{order_ref}
-{seller_name}
-
-Items:
-{item_lines}
-
-Total: {currency}{subtotal:,.0f}
-
-Your funds are held safely in escrow. The seller will ship your order soon.
-Once you receive your items, confirm delivery at:
-https://www.vendopage.com/order/{order_ref}/
-
-If anything goes wrong, you can raise a dispute from that same page.
-
-— Vendopage
-"""
-    return _send(to_email, subject, body)
-
-
+# ─────────────────────────────────────────────
+# 8. NEW ORDER — VENDOR
+# ─────────────────────────────────────────────
 def send_new_order_vendor(to_email, business_name, buyer_name, order_ref,
                            items, subtotal, currency, dashboard_url):
-    """Sent to vendor when a new order comes in."""
-    item_lines = '\n'.join(
-        f"  • {item.product_name} × {item.quantity}"
-        for item in items
+    """Sent to vendor when a new paid order comes in."""
+    order_items_html = _build_order_items_html(items, currency)
+    html = _render('new_order_vendor.html', {
+        'business_name':    business_name,
+        'buyer_name':       buyer_name,
+        'order_ref':        order_ref,
+        'currency':         currency,
+        'subtotal':         f'{float(subtotal):,.0f}',
+        'order_items_html': order_items_html,
+        'dashboard_url':    dashboard_url,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'New order #{order_ref} — {currency}{float(subtotal):,.0f}',
+        html_content=html,
     )
-    subject = f"New order #{order_ref} — {currency}{subtotal:,.0f}"
-    body = f"""Hi {business_name},
-
-You have a new order! 🛒
-
-Order #{order_ref}
-Buyer: {buyer_name}
-Amount: {currency}{subtotal:,.0f}
-
-Items:
-{item_lines}
-
-The buyer's payment is held in escrow. Please ship the order and mark it as shipped in your dashboard:
-{dashboard_url}
-
-You will receive your payout as soon as the buyer confirms receipt (or automatically after 72 hours).
-
-— Vendopage
-"""
-    return _send(to_email, subject, body)
 
 
+# ─────────────────────────────────────────────
+# 9. ORDER SHIPPED — BUYER
+# ─────────────────────────────────────────────
 def send_order_shipped_buyer(to_email, buyer_name, order_ref, seller_name,
                               tracking_info, courier_name, order_url):
     """Sent to buyer when vendor marks order as shipped."""
-    tracking_line = ''
-    if courier_name or tracking_info:
-        tracking_line = f"\nCourier: {courier_name or '—'}\nTracking: {tracking_info or '—'}\n"
-
-    subject = f"Your order #{order_ref} has been shipped"
-    body = f"""Hi {buyer_name},
-
-Good news! {seller_name} has shipped your order. 📦
-{tracking_line}
-Once you receive your items, please confirm delivery here:
-{order_url}
-
-You have 72 hours to confirm. If we don't hear from you, the funds will be released to the seller automatically.
-
-If you have any problems with your order, you can raise a dispute from the order page before confirming.
-
-— Vendopage
-"""
-    return _send(to_email, subject, body)
+    html = _render('order_shipped_buyer.html', {
+        'buyer_name':    buyer_name,
+        'order_ref':     order_ref,
+        'seller_name':   seller_name,
+        'tracking_info': tracking_info or '—',
+        'courier_name':  courier_name or '—',
+        'order_url':     order_url,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'Your order #{order_ref} has been shipped',
+        html_content=html,
+    )
 
 
+# ─────────────────────────────────────────────
+# 10. PAYOUT SENT — VENDOR
+# ─────────────────────────────────────────────
 def send_payment_sent_vendor(to_email, business_name, amount, currency,
                               order_ref, bank_name, account_number):
     """Sent to vendor when payout is triggered."""
-    subject = f"Payment sent — {currency}{amount:,.0f} for order #{order_ref}"
-    body = f"""Hi {business_name},
-
-Your payout has been processed. 💰
-
-Order: #{order_ref}
-Amount: {currency}{amount:,.0f}
-Bank: {bank_name}
-Account: ****{account_number}
-
-Funds are on their way to your account. Transfer times depend on your bank (usually within a few hours).
-
-— Vendopage
-"""
-    return _send(to_email, subject, body)
+    html = _render('payout_sent_vendor.html', {
+        'business_name': business_name,
+        'order_ref':     order_ref,
+        'currency':      currency,
+        'amount':        f'{float(amount):,.0f}',
+        'bank_name':     bank_name,
+        'account_last4': str(account_number)[-4:],
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'Payment sent — {currency}{float(amount):,.0f} for order #{order_ref}',
+        html_content=html,
+    )
 
 
-def send_dispute_opened(vendor_email, buyer_email, order_ref, reason):
+# ─────────────────────────────────────────────
+# 11 & 12. DISPUTE OPENED — VENDOR + BUYER
+# ─────────────────────────────────────────────
+def send_dispute_opened(vendor_email, buyer_email, order_ref, reason,
+                         buyer_name='there'):
     """Sent to both parties when a dispute is raised."""
-    subject = f"Dispute opened on order #{order_ref}"
-    vendor_body = f"""Hi,
+    vendor_html = _render('dispute_opened_vendor.html', {
+        'order_ref': order_ref,
+        'reason':    reason,
+    })
+    send_email_via_brevo(
+        to_email=vendor_email,
+        subject=f'Dispute opened on order #{order_ref}',
+        html_content=vendor_html,
+    )
 
-A buyer has raised a dispute on order #{order_ref}.
-
-Reason: {reason}
-
-Please log in to your dashboard to view the dispute and submit your response within 48 hours:
-https://www.vendopage.com/dashboard/orders/{order_ref}/
-
-Our team will review both sides and make a final decision.
-
-— Vendopage
-"""
-    buyer_body = f"""Hi,
-
-Your dispute on order #{order_ref} has been received.
-
-Reason: {reason}
-
-Our team will review your case within 48 hours. The vendor has been notified and given 48 hours to respond.
-
-You can track your dispute status here:
-https://www.vendopage.com/order/{order_ref}/
-
-— Vendopage
-"""
-    _send(vendor_email, subject, vendor_body)
-    _send(buyer_email,  subject, buyer_body)
+    buyer_html = _render('dispute_opened_buyer.html', {
+        'buyer_name': buyer_name,
+        'order_ref':  order_ref,
+        'reason':     reason,
+    })
+    send_email_via_brevo(
+        to_email=buyer_email,
+        subject=f'Your dispute on order #{order_ref} has been received',
+        html_content=buyer_html,
+    )
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# INTERNAL: _send helper
-# This should already exist in your email.py. If not, add it:
-#
-# import sib_api_v3_sdk
-# from django.conf import settings
-#
-# def _send(to_email, subject, body):
-#     try:
-#         configuration = sib_api_v3_sdk.Configuration()
-#         configuration.api_key['api-key'] = settings.BREVO_API_KEY
-#         api = sib_api_v3_sdk.TransactionalEmailsApi(sib_api_v3_sdk.ApiClient(configuration))
-#         email = sib_api_v3_sdk.SendSmtpEmail(
-#             to=[{'email': to_email}],
-#             sender={'name': 'Vendopage', 'email': 'noreply@vendopage.com'},
-#             subject=subject,
-#             text_content=body,
-#         )
-#         api.send_transac_email(email)
-#         return True
-#     except Exception as e:
-#         logger.error(f"Email send failed: {e}")
-#         return False
-# ─────────────────────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# 13. DISPUTE RESOLVED — BUYER (refund)
+# ─────────────────────────────────────────────
+def send_dispute_resolved_buyer(to_email, buyer_name, order_ref, admin_note=''):
+    """Sent to buyer when admin resolves dispute in their favour."""
+    html = _render('dispute_resolved_buyer.html', {
+        'buyer_name': buyer_name,
+        'order_ref':  order_ref,
+        'admin_note': admin_note or 'Our team reviewed the case and resolved it in your favour.',
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'Dispute resolved — refund issued for order #{order_ref}',
+        html_content=html,
+    )
+
+
+# ─────────────────────────────────────────────
+# 14. DISPUTE RESOLVED — VENDOR (paid out)
+# ─────────────────────────────────────────────
+def send_dispute_resolved_vendor(to_email, business_name, order_ref, admin_note=''):
+    """Sent to vendor when admin resolves dispute in their favour."""
+    html = _render('dispute_resolved_vendor.html', {
+        'business_name': business_name,
+        'order_ref':     order_ref,
+        'admin_note':    admin_note or 'Our team reviewed the case and resolved it in your favour.',
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'Dispute resolved — payment released for order #{order_ref}',
+        html_content=html,
+    )
+
+
+# ─────────────────────────────────────────────
+# 15. PREMIUM UPGRADE CONFIRMED
+# ─────────────────────────────────────────────
+def send_premium_upgrade_email(to_email, business_name, expires_date):
+    """Sent to seller immediately after successful premium payment."""
+    html = _render('premium_upgrade.html', {
+        'business_name': business_name,
+        'expires_date':  expires_date,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'{business_name}, you are now Premium ⭐',
+        html_content=html,
+    )
+
+
+# ─────────────────────────────────────────────
+# 16. PREMIUM EXPIRY WARNING
+# ─────────────────────────────────────────────
+def send_premium_expiry_warning(to_email, business_name, expires_date, days_left):
+    """Sent 3 days before premium subscription expires. Call from a management command."""
+    html = _render('premium_expiry_warning.html', {
+        'business_name': business_name,
+        'expires_date':  expires_date,
+        'days_left':     days_left,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'Your Vendopage Premium expires in {days_left} days',
+        html_content=html,
+    )
+
+
+# ─────────────────────────────────────────────
+# 17. ORDER AUTO-RELEASED — BUYER
+# ─────────────────────────────────────────────
+def send_order_auto_released_buyer(to_email, buyer_name, order_ref, seller_name):
+    """Sent to buyer when 72-hour window passes and funds auto-release to vendor."""
+    html = _render('order_auto_released_buyer.html', {
+        'buyer_name':  buyer_name,
+        'order_ref':   order_ref,
+        'seller_name': seller_name,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'Your order #{order_ref} has been completed',
+        html_content=html,
+    )
+
+
+# ─────────────────────────────────────────────
+# 18. REVIEW RECEIVED — VENDOR
+# ─────────────────────────────────────────────
+def send_review_received_vendor(to_email, business_name, order_ref,
+                                 rating, comment):
+    """Sent to vendor when a buyer submits a review."""
+    stars_display = ('★' * rating) + ('☆' * (5 - rating))
+    html = _render('review_received_vendor.html', {
+        'business_name': business_name,
+        'order_ref':     order_ref,
+        'rating':        rating,
+        'stars_display': stars_display,
+        'comment':       comment or 'No comment left.',
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject=f'New {rating}★ review on your store',
+        html_content=html,
+    )

@@ -33,6 +33,11 @@ from sellers.email import (
     send_order_shipped_buyer,
     send_payment_sent_vendor,
     send_dispute_opened,
+    send_dispute_resolved_buyer,    # NEW
+    send_dispute_resolved_vendor,   # NEW
+    send_premium_upgrade_email,     # NEW
+    send_order_auto_released_buyer, # NEW
+    send_review_received_vendor,    # NEW
 )
 import random
 import string
@@ -110,9 +115,6 @@ def seller_page(request, slug):
         seller.weekly_page_views += 1
         seller.save(update_fields=['total_page_views', 'weekly_page_views'])
 
-    # FIX: Removed 30-day filter — show ALL non-archived products
-    # The old filter meant products older than 30 days were invisible
-    # on the store page AND couldn't be added to cart.
     products = Product.objects.filter(
         seller=seller,
         is_archived=False,
@@ -601,6 +603,17 @@ def verify_payment(request):
             seller.save()
             request.session.pop('upgrading_to_premium', None)
             request.session.pop('tx_ref', None)
+
+            # ── NEW: send premium upgrade confirmation email ──
+            try:
+                send_premium_upgrade_email(
+                    to_email=seller.email,
+                    business_name=seller.business_name,
+                    expires_date=seller.subscription_expires.strftime('%B %d, %Y'),
+                )
+            except Exception as e:
+                logger.error(f"Premium upgrade email failed: {e}")
+
             messages.success(request, '🎉 Welcome to Premium! Your subscription is now active.')
             return redirect('dashboard')
         else:
@@ -816,12 +829,12 @@ def dashboard(request):
         active_statuses = ['paid', 'shipped', 'delivered', 'disputed', 'completed']
         recent_orders = Order.objects.filter(seller=seller, status__in=active_statuses).order_by('-created_at')[:5]
         total_orders  = Order.objects.filter(seller=seller, status__in=active_statuses).count()
-        pending_orders = Order.objects.filter(seller=seller, status='paid').count()
+        pending_orders = Order.objects.filter(seller=seller, status__in=['paid', 'disputed']).count()
         total_earnings = Order.objects.filter(
             seller=seller, status__in=['delivered', 'completed'], payout_triggered=True,
         ).aggregate(total=Sum('vendor_payout'))['total'] or Decimal('0')
         pending_earnings = Order.objects.filter(
-            seller=seller, status__in=['paid', 'shipped'],
+            seller=seller, status__in=['paid', 'shipped', 'disputed'], payment_type='escrow',
         ).aggregate(total=Sum('vendor_payout'))['total'] or Decimal('0')
 
     platform_settings = PlatformSettings.get()
@@ -905,20 +918,13 @@ def update_payout_account(request):
 # ─────────────────────────────────────────────
 def cart_view(request, slug):
     seller = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)
-
-    # FIX: Load ALL non-archived products (no 30-day filter)
-    # so items added from seller page always appear in cart page PRODUCTS JSON
     products = Product.objects.filter(
-        seller=seller,
-        is_archived=False,
+        seller=seller, is_archived=False,
     ).prefetch_related('images')
-
     product_map = {str(p.id): p for p in products}
-
     currency_info = detect_currency(request, seller)
     request.session['buyer_currency_code']   = currency_info['code']
     request.session['buyer_currency_symbol'] = currency_info['symbol']
-
     return render(request, 'store/cart.html', {
         'seller':        seller,
         'product_map':   product_map,
@@ -930,22 +936,16 @@ def cart_view(request, slug):
 
 def checkout_view(request, slug):
     seller = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)
-
     currency_symbol = request.session.get('buyer_currency_symbol', seller.currency_symbol or '₦')
     currency_code   = request.session.get('buyer_currency_code',   seller.currency_code   or 'NGN')
-
     if not request.session.get('buyer_currency_code'):
         currency_info   = detect_currency(request, seller)
         currency_symbol = currency_info['symbol']
         currency_code   = currency_info['code']
         request.session['buyer_currency_code']   = currency_code
         request.session['buyer_currency_symbol'] = currency_symbol
-
-    products = Product.objects.filter(
-        seller=seller, is_archived=False
-    ).prefetch_related('images')
+    products = Product.objects.filter(seller=seller, is_archived=False).prefetch_related('images')
     product_map = {str(p.id): p for p in products}
-
     return render(request, 'store/checkout.html', {
         'seller':        seller,
         'currency':      currency_symbol,
@@ -958,13 +958,13 @@ def checkout_view(request, slug):
 def initiate_payment(request, slug):
     seller = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)
 
-    buyer_name       = request.POST.get('buyer_name', '').strip()
-    buyer_email      = request.POST.get('buyer_email', '').strip().lower()
-    buyer_phone      = request.POST.get('buyer_phone', '').strip()
-    delivery_address = request.POST.get('delivery_address', '').strip()
-    delivery_city    = request.POST.get('delivery_city', '').strip()
-    cart_json        = request.POST.get('cart_json', '{}')
-    payment_type     = request.POST.get('payment_type', 'escrow')  # 'escrow' or 'direct'
+    buyer_name        = request.POST.get('buyer_name', '').strip()
+    buyer_email       = request.POST.get('buyer_email', '').strip().lower()
+    buyer_phone       = request.POST.get('buyer_phone', '').strip()
+    delivery_address  = request.POST.get('delivery_address', '').strip()
+    delivery_city     = request.POST.get('delivery_city', '').strip()
+    cart_json         = request.POST.get('cart_json', '{}')
+    payment_type      = request.POST.get('payment_type', 'escrow')
     delivery_required = request.POST.get('delivery_required', '1') == '1'
 
     if not all([buyer_name, buyer_email, buyer_phone, delivery_address]):
@@ -981,7 +981,6 @@ def initiate_payment(request, slug):
         messages.error(request, 'Your cart is empty.')
         return redirect('cart', slug=slug)
 
-    # Resolve prices from DB — never trust client-side prices
     product_ids = []
     for k in cart.keys():
         try:
@@ -991,32 +990,21 @@ def initiate_payment(request, slug):
 
     db_products = {
         str(p.id): p
-        for p in Product.objects.filter(
-            id__in=product_ids, seller=seller, is_archived=False
-        )
+        for p in Product.objects.filter(id__in=product_ids, seller=seller, is_archived=False)
     }
 
     subtotal   = Decimal('0')
     line_items = []
-    item_names = []  # for the payment page description
+    item_names = []
 
     for pid, item in cart.items():
         product = db_products.get(str(pid))
         if not product or not product.price:
             continue
-
-        # Handle both cart formats:
-        # New format: cart[id] = qty (plain number)
-        # Old format: cart[id] = {qty: N, name: "...", price: ..., imageUrl: "..."}
-        if isinstance(item, dict):
-            qty = max(1, int(item.get('qty', 1)))
-        else:
-            qty = max(1, int(item))
-
+        qty = max(1, int(item.get('qty', 1))) if isinstance(item, dict) else max(1, int(item))
         img = product.images.first()
         short_name = (product.description or 'Product')[:40]
         item_names.append(f"{short_name} x{qty}")
-
         line_items.append({
             'product_id':    product.id,
             'product_name':  product.description or 'Product',
@@ -1030,18 +1018,16 @@ def initiate_payment(request, slug):
         messages.error(request, 'No valid items in cart.')
         return redirect('cart', slug=slug)
 
-    # Build a human-readable description for the Flutterwave payment page
-    item_count = len(line_items)
+    item_count    = len(line_items)
     payment_label = 'Protected Pay' if payment_type == 'escrow' else 'Direct Pay'
-
     if item_count == 1:
-        pay_title = f"Order: {item_names[0]}"
+        pay_title       = f"Order: {item_names[0]}"
         pay_description = f"{payment_label} — {seller.business_name}"
     elif item_count <= 3:
-        pay_title = f"Order from {seller.business_name}"
+        pay_title       = f"Order from {seller.business_name}"
         pay_description = f"{payment_label} — {', '.join(item_names)}"
     else:
-        pay_title = f"Order from {seller.business_name}"
+        pay_title       = f"Order from {seller.business_name}"
         pay_description = f"{payment_label} — {item_count} items"
 
     tx_ref = f"VDP-ORD-{uuid.uuid4().hex[:12].upper()}"
@@ -1063,18 +1049,12 @@ def initiate_payment(request, slug):
     request.session.modified = True
 
     flw = FlutterwavePayment()
-    redirect_url = request.build_absolute_uri('/order/confirm/')
-
     result = flw.initialize_payment(
-        email=buyer_email,
-        amount=subtotal,
-        tx_ref=tx_ref,
-        redirect_url=redirect_url,
+        email=buyer_email, amount=subtotal, tx_ref=tx_ref,
+        redirect_url=request.build_absolute_uri('/order/confirm/'),
         customer_name=buyer_name,
         currency=request.session.get('buyer_currency_code', seller.currency_code or 'NGN'),
-        # ── These fix the "VendoPage Premium Subscription" label ──
-        title=pay_title,
-        description=pay_description,
+        title=pay_title, description=pay_description,
     )
 
     if result.get('status') == 'success':
@@ -1085,7 +1065,6 @@ def initiate_payment(request, slug):
     return redirect('checkout', slug=slug)
 
 
-# Also fix order_confirmation to use payment_type from session:
 def order_confirmation(request):
     tx_ref         = request.GET.get('tx_ref', '')
     transaction_id = request.GET.get('transaction_id', '')
@@ -1123,9 +1102,7 @@ def order_confirmation(request):
         request.session.pop('pending_order', None)
         return render(request, 'store/order_failed.html', {'reason': 'Store not found.'})
 
-    subtotal = Decimal(pending['subtotal'])
-
-    # ── Read payment_type from session (saved by initiate_payment) ──
+    subtotal     = Decimal(pending['subtotal'])
     payment_type = pending.get('payment_type', 'escrow')
 
     order = Order(
@@ -1142,7 +1119,7 @@ def order_confirmation(request):
         status             = 'paid',
         payment_verified   = True,
         paid_at            = timezone.now(),
-        payment_type       = payment_type,  # ← stores 'escrow' or 'direct' on the order
+        payment_type       = payment_type,
     )
     order.calculate_fees()
     order.save()
@@ -1159,7 +1136,6 @@ def order_confirmation(request):
 
     request.session.pop('pending_order', None)
 
-    # If direct pay — trigger payout immediately, don't wait for buyer confirmation
     if payment_type == 'direct':
         try:
             _trigger_payout(order)
@@ -1171,6 +1147,7 @@ def order_confirmation(request):
             to_email=order.buyer_email, buyer_name=order.buyer_name,
             order_ref=str(order.order_ref)[:8].upper(), seller_name=seller.business_name,
             items=list(order.items.all()), subtotal=order.subtotal, currency=order.currency,
+            payment_type=payment_type,
         )
     except Exception as e:
         logger.error(f"Buyer confirmation email failed: {e}")
@@ -1181,11 +1158,19 @@ def order_confirmation(request):
             buyer_name=order.buyer_name, order_ref=str(order.order_ref)[:8].upper(),
             items=list(order.items.all()), subtotal=order.subtotal, currency=order.currency,
             dashboard_url=f"https://www.vendopage.com/dashboard/orders/{order.order_ref}/",
+            payment_type=payment_type,
         )
     except Exception as e:
         logger.error(f"Vendor new order email failed: {e}")
 
     return redirect('order_detail', order_ref=str(order.order_ref))
+
+def get_my_ip(request):
+    from django.http import HttpResponse
+    import requests as req
+    ip = req.get('https://api.ipify.org').text
+    return HttpResponse(f'Your server IP is: {ip}')
+
 
 # ─────────────────────────────────────────────
 # BUYER VIEWS
@@ -1203,7 +1188,7 @@ def confirm_receipt(request, order_ref):
     if order.status not in ('shipped',):
         messages.error(request, 'This order cannot be confirmed yet.')
         return redirect('order_detail', order_ref=order_ref)
-    order.status = 'delivered'
+    order.status       = 'delivered'
     order.delivered_at = timezone.now()
     order.save()
     _trigger_payout(order)
@@ -1232,8 +1217,11 @@ def raise_dispute(request, order_ref):
         order.save()
         try:
             send_dispute_opened(
-                vendor_email=order.seller.email, buyer_email=order.buyer_email,
-                order_ref=str(order.order_ref)[:8].upper(), reason=reason,
+                vendor_email=order.seller.email,
+                buyer_email=order.buyer_email,
+                order_ref=str(order.order_ref)[:8].upper(),
+                reason=reason,
+                buyer_name=order.buyer_name,  # ← now passed so buyer email is personalised
             )
         except Exception as e:
             logger.error(f"Dispute email failed: {e}")
@@ -1261,6 +1249,19 @@ def leave_review(request, order_ref):
             return render(request, 'store/leave_review.html', {'order': order})
         comment = request.POST.get('comment', '').strip()
         Review.objects.create(order=order, seller=order.seller, rating=rating, comment=comment)
+
+        # ── NEW: notify vendor of new review ──
+        try:
+            send_review_received_vendor(
+                to_email=order.seller.email,
+                business_name=order.seller.business_name,
+                order_ref=str(order.order_ref)[:8].upper(),
+                rating=rating,
+                comment=comment,
+            )
+        except Exception as e:
+            logger.error(f"Review notification email failed: {e}")
+
         messages.success(request, 'Thank you for your review!')
         return redirect('order_detail', order_ref=order_ref)
     return render(request, 'store/leave_review.html', {'order': order})
@@ -1271,10 +1272,13 @@ def leave_review(request, order_ref):
 # ─────────────────────────────────────────────
 @login_required
 def vendor_orders(request):
-    seller = request.user
+    seller        = request.user
     status_filter = request.GET.get('status', '')
-    orders = Order.objects.filter(seller=seller).order_by('-created_at')
-    if status_filter:
+    orders        = Order.objects.filter(seller=seller).order_by('-created_at')
+    
+    if status_filter == 'completed':
+        orders = orders.filter(status__in=['delivered', 'completed'])
+    elif status_filter:
         orders = orders.filter(status=status_filter)
     counts = {
         'all':       Order.objects.filter(seller=seller).count(),
@@ -1309,8 +1313,8 @@ def vendor_order_detail(request, order_ref):
 @require_http_methods(["GET", "POST"])
 def mark_shipped(request, order_ref):
     order = get_object_or_404(Order, order_ref=order_ref, seller=request.user)
-    if order.status != 'paid':
-        messages.error(request, 'Only paid orders can be marked as shipped.')
+    if order.status not in ('paid', 'disputed'):
+        messages.error(request, 'Only paid or disputed orders can be marked as shipped.')
         return redirect('vendor_order_detail', order_ref=order_ref)
     if request.method == 'POST':
         tracking_info = request.POST.get('tracking_info', '').strip()
@@ -1385,7 +1389,11 @@ def _trigger_payout(order):
 
 
 def auto_release_expired_orders():
-    now = timezone.now()
+    """
+    Releases all shipped orders whose 72-hour window has passed.
+    Called by the management command and admin settings panel.
+    """
+    now     = timezone.now()
     expired = Order.objects.filter(
         status='shipped', auto_release_at__lte=now, payout_triggered=False,
     )
@@ -1395,6 +1403,17 @@ def auto_release_expired_orders():
         order.delivered_at = now
         order.save()
         _trigger_payout(order)
+
+        # ── NEW: notify buyer that order was auto-completed ──
+        try:
+            send_order_auto_released_buyer(
+                to_email=order.buyer_email,
+                buyer_name=order.buyer_name,
+                order_ref=str(order.order_ref)[:8].upper(),
+                seller_name=order.seller.business_name,
+            )
+        except Exception as e:
+            logger.error(f"Auto-release buyer email failed for order {order.order_ref}: {e}")
 
 
 @csrf_exempt
@@ -1428,10 +1447,10 @@ def flutterwave_order_webhook(request):
 
         try:
             order = Order.objects.get(flutterwave_tx_ref=tx_ref, payment_verified=False)
-            order.status           = 'paid'
-            order.payment_verified = True
+            order.status            = 'paid'
+            order.payment_verified  = True
             order.flutterwave_tx_id = transaction_id
-            order.paid_at          = timezone.now()
+            order.paid_at           = timezone.now()
             order.save()
             try:
                 send_new_order_vendor(
@@ -1547,37 +1566,26 @@ def admin_dashboard(request):
     total_page_views = Seller.objects.filter(is_staff=False, is_superuser=False).aggregate(
         t=Sum('total_page_views'))['t'] or 0
     premium_count    = Seller.objects.filter(subscription_type='premium', is_staff=False, is_superuser=False).count()
-
-    last_7d  = timezone.now() - timedelta(days=7)
-    last_30d = timezone.now() - timedelta(days=30)
-    new_sellers_7d  = Seller.objects.filter(created_at__gte=last_7d).count()
-    new_sellers_30d = Seller.objects.filter(created_at__gte=last_30d).count()
-    new_products_7d = Product.objects.filter(created_at__gte=last_7d).count()
-
+    last_7d          = timezone.now() - timedelta(days=7)
+    last_30d         = timezone.now() - timedelta(days=30)
+    new_sellers_7d   = Seller.objects.filter(created_at__gte=last_7d).count()
+    new_sellers_30d  = Seller.objects.filter(created_at__gte=last_30d).count()
+    new_products_7d  = Product.objects.filter(created_at__gte=last_7d).count()
     recent_sellers       = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).order_by('-created_at')[:8]
     top_sellers_by_views = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).order_by('-weekly_page_views')[:10]
     subscription_stats   = Seller.objects.filter(is_staff=False, is_superuser=False).values('subscription_type').annotate(count=Count('id'))
-
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
     pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
     platform              = PlatformSettings.get()
-
     return render(request, 'admin_dashboard/dashboard.html', {
-        'total_sellers':          total_sellers,
-        'total_products':         total_products,
-        'total_page_views':       total_page_views,
-        'premium_count':          premium_count,
-        'new_sellers_7d':         new_sellers_7d,
-        'new_sellers_30d':        new_sellers_30d,
-        'new_products_7d':        new_products_7d,
-        'recent_sellers':         recent_sellers,
-        'top_sellers_by_views':   top_sellers_by_views,
-        'subscription_stats':     subscription_stats,
-        'monthly_revenue':        premium_count * platform.premium_monthly_price,
-        'open_disputes':          open_disputes_count,
-        'pending_payouts':        pending_payouts_count,
-        'open_disputes_count':    open_disputes_count,
-        'pending_payouts_count':  pending_payouts_count,
+        'total_sellers': total_sellers, 'total_products': total_products,
+        'total_page_views': total_page_views, 'premium_count': premium_count,
+        'new_sellers_7d': new_sellers_7d, 'new_sellers_30d': new_sellers_30d,
+        'new_products_7d': new_products_7d, 'recent_sellers': recent_sellers,
+        'top_sellers_by_views': top_sellers_by_views, 'subscription_stats': subscription_stats,
+        'monthly_revenue': premium_count * platform.premium_monthly_price,
+        'open_disputes': open_disputes_count, 'pending_payouts': pending_payouts_count,
+        'open_disputes_count': open_disputes_count, 'pending_payouts_count': pending_payouts_count,
     })
 
 
@@ -1586,12 +1594,10 @@ def admin_sellers(request):
     sellers = Seller.objects.filter(is_staff=False, is_superuser=False).annotate(
         product_count=Count('products', filter=Q(products__is_archived=False))
     ).order_by('-created_at')
-
     subscription_filter = request.GET.get('subscription')
     store_mode_filter   = request.GET.get('store_mode')
     active_filter       = request.GET.get('active')
     search              = request.GET.get('search')
-
     if subscription_filter:
         sellers = sellers.filter(subscription_type=subscription_filter)
     if store_mode_filter == 'on':
@@ -1606,32 +1612,25 @@ def admin_sellers(request):
         sellers = sellers.filter(
             Q(business_name__icontains=search) | Q(username__icontains=search) | Q(email__icontains=search)
         )
-
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
     pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
-
     return render(request, 'admin_dashboard/sellers.html', {
-        'sellers':               sellers,
-        'open_disputes_count':   open_disputes_count,
+        'sellers': sellers, 'open_disputes_count': open_disputes_count,
         'pending_payouts_count': pending_payouts_count,
     })
 
 
 @staff_member_required
 def admin_seller_detail(request, seller_id):
-    seller   = get_object_or_404(Seller, id=seller_id)
-    products = Product.objects.filter(seller=seller).prefetch_related('images').order_by('-created_at')
-
+    seller        = get_object_or_404(Seller, id=seller_id)
+    products      = Product.objects.filter(seller=seller).prefetch_related('images').order_by('-created_at')
     total_revenue = Order.objects.filter(
         seller=seller, status__in=['delivered', 'completed'], payout_triggered=True,
     ).aggregate(t=Sum('vendor_payout'))['t'] or Decimal('0')
-
-    orders_count = Order.objects.filter(
+    orders_count  = Order.objects.filter(
         seller=seller, status__in=['paid', 'shipped', 'delivered', 'completed', 'disputed']
     ).count()
-
     orders = Order.objects.filter(seller=seller).order_by('-created_at')[:8]
-
     if not seller.slug:
         seller.save()
 
@@ -1652,6 +1651,16 @@ def admin_seller_detail(request, seller_id):
             elif new_type == 'premium' and not seller.subscription_expires:
                 seller.subscription_expires = timezone.now() + timedelta(days=30)
             seller.save()
+            # ── NEW: notify seller of admin-granted premium upgrade ──
+            if new_type == 'premium':
+                try:
+                    send_premium_upgrade_email(
+                        to_email=seller.email,
+                        business_name=seller.business_name,
+                        expires_date=seller.subscription_expires.strftime('%B %d, %Y'),
+                    )
+                except Exception as e:
+                    logger.error(f"Admin premium upgrade email failed: {e}")
             messages.success(request, f'Subscription updated to {new_type}.')
 
         elif action == 'toggle_featured':
@@ -1703,15 +1712,10 @@ def admin_seller_detail(request, seller_id):
 
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
     pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
-
     return render(request, 'admin_dashboard/seller_detail.html', {
-        'seller':               seller,
-        'products':             products,
-        'total_revenue':        total_revenue,
-        'orders_count':         orders_count,
-        'orders':               orders,
-        'open_disputes_count':  open_disputes_count,
-        'pending_payouts_count': pending_payouts_count,
+        'seller': seller, 'products': products, 'total_revenue': total_revenue,
+        'orders_count': orders_count, 'orders': orders,
+        'open_disputes_count': open_disputes_count, 'pending_payouts_count': pending_payouts_count,
     })
 
 
@@ -1733,32 +1737,29 @@ def admin_products(request):
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
     pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
     return render(request, 'admin_dashboard/products.html', {
-        'products':              products[:100],
-        'open_disputes_count':   open_disputes_count,
+        'products': products[:100], 'open_disputes_count': open_disputes_count,
         'pending_payouts_count': pending_payouts_count,
     })
 
 
 @staff_member_required
 def admin_analytics(request):
-    last_7d  = timezone.now() - timedelta(days=7)
-    last_30d = timezone.now() - timedelta(days=30)
-    platform = PlatformSettings.get()
-    premium_count = Seller.objects.filter(subscription_type='premium', is_staff=False, is_superuser=False).count()
-    total_sellers = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).count()
+    last_7d   = timezone.now() - timedelta(days=7)
+    last_30d  = timezone.now() - timedelta(days=30)
+    platform  = PlatformSettings.get()
+    premium_count         = Seller.objects.filter(subscription_type='premium', is_staff=False, is_superuser=False).count()
+    total_sellers         = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).count()
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
     pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
     return render(request, 'admin_dashboard/analytics.html', {
-        'new_sellers_7d':        Seller.objects.filter(created_at__gte=last_7d).count(),
-        'new_sellers_30d':       Seller.objects.filter(created_at__gte=last_30d).count(),
-        'new_products_7d':       Product.objects.filter(created_at__gte=last_7d).count(),
-        'new_products_30d':      Product.objects.filter(created_at__gte=last_30d).count(),
-        'category_stats':        Seller.objects.values('category').annotate(count=Count('id')).order_by('-count'),
-        'premium_count':         premium_count,
-        'total_sellers':         total_sellers,
-        'monthly_revenue':       premium_count * platform.premium_monthly_price,
-        'open_disputes_count':   open_disputes_count,
-        'pending_payouts_count': pending_payouts_count,
+        'new_sellers_7d':  Seller.objects.filter(created_at__gte=last_7d).count(),
+        'new_sellers_30d': Seller.objects.filter(created_at__gte=last_30d).count(),
+        'new_products_7d': Product.objects.filter(created_at__gte=last_7d).count(),
+        'new_products_30d': Product.objects.filter(created_at__gte=last_30d).count(),
+        'category_stats':  Seller.objects.values('category').annotate(count=Count('id')).order_by('-count'),
+        'premium_count': premium_count, 'total_sellers': total_sellers,
+        'monthly_revenue': premium_count * platform.premium_monthly_price,
+        'open_disputes_count': open_disputes_count, 'pending_payouts_count': pending_payouts_count,
     })
 
 
@@ -1772,11 +1773,8 @@ def admin_disputes(request):
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
     pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
     return render(request, 'admin_dashboard/disputes.html', {
-        'disputes':              disputes[:100],
-        'status_filter':         status_filter,
-        'open_count':            open_count,
-        'open_disputes_count':   open_disputes_count,
-        'pending_payouts_count': pending_payouts_count,
+        'disputes': disputes[:100], 'status_filter': status_filter, 'open_count': open_count,
+        'open_disputes_count': open_disputes_count, 'pending_payouts_count': pending_payouts_count,
     })
 
 
@@ -1796,18 +1794,41 @@ def resolve_dispute(request, dispute_id):
         order.status   = 'refunded'
         order.save()
         dispute.save()
+        # ── NEW: notify buyer of refund decision ──
+        try:
+            send_dispute_resolved_buyer(
+                to_email=order.buyer_email,
+                buyer_name=order.buyer_name,
+                order_ref=str(order.order_ref)[:8].upper(),
+                admin_note=note,
+            )
+        except Exception as e:
+            logger.error(f"Dispute resolved buyer email failed: {e}")
         messages.success(request, f'Dispute resolved — refund issued to buyer for order {str(order.order_ref)[:8].upper()}.')
+
     elif action == 'pay_vendor':
         dispute.status = 'resolved_vendor'
         dispute.save()
         order.status   = 'delivered'
         order.save()
         _trigger_payout(order)
+        # ── NEW: notify vendor of payout decision ──
+        try:
+            send_dispute_resolved_vendor(
+                to_email=order.seller.email,
+                business_name=order.seller.business_name,
+                order_ref=str(order.order_ref)[:8].upper(),
+                admin_note=note,
+            )
+        except Exception as e:
+            logger.error(f"Dispute resolved vendor email failed: {e}")
         messages.success(request, f'Dispute resolved — payment released to vendor for order {str(order.order_ref)[:8].upper()}.')
+
     elif action == 'under_review':
         dispute.status = 'under_review'
         dispute.save()
         messages.info(request, 'Dispute marked as under review.')
+
     else:
         messages.error(request, 'Invalid action.')
 
@@ -1820,7 +1841,6 @@ def admin_orders(request):
     status_filter = request.GET.get('status', '')
     payout_filter = request.GET.get('payout', '')
     search        = request.GET.get('search', '').strip()
-
     if status_filter:
         orders = orders.filter(status=status_filter)
     if payout_filter == 'pending':
@@ -1831,35 +1851,27 @@ def admin_orders(request):
             | Q(buyer_email__icontains=search) | Q(flutterwave_tx_ref__icontains=search)
             | Q(seller__business_name__icontains=search)
         )
-
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
     pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
-
     return render(request, 'admin_dashboard/orders.html', {
-        'orders':                orders[:200],
-        'status_filter':         status_filter,
-        'open_disputes_count':   open_disputes_count,
-        'pending_payouts_count': pending_payouts_count,
+        'orders': orders[:200], 'status_filter': status_filter,
+        'open_disputes_count': open_disputes_count, 'pending_payouts_count': pending_payouts_count,
     })
 
 
 @staff_member_required
 def admin_payouts(request):
-    pending_orders = Order.objects.filter(
+    pending_orders        = Order.objects.filter(
         payout_triggered=False, status__in=['delivered', 'completed']
     ).select_related('seller', 'seller__bank_account').order_by('delivered_at')
-
-    recent_payouts       = Order.objects.filter(payout_triggered=True).select_related('seller').order_by('-payout_at')[:20]
-    total_pending_amount = pending_orders.aggregate(t=Sum('vendor_payout'))['t'] or Decimal('0')
+    recent_payouts        = Order.objects.filter(payout_triggered=True).select_related('seller').order_by('-payout_at')[:20]
+    total_pending_amount  = pending_orders.aggregate(t=Sum('vendor_payout'))['t'] or Decimal('0')
     pending_payouts_count = pending_orders.count()
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
-
     return render(request, 'admin_dashboard/payouts.html', {
-        'pending_orders':        pending_orders,
-        'recent_payouts':        recent_payouts,
-        'total_pending_amount':  total_pending_amount,
-        'pending_payouts_count': pending_payouts_count,
-        'open_disputes_count':   open_disputes_count,
+        'pending_orders': pending_orders, 'recent_payouts': recent_payouts,
+        'total_pending_amount': total_pending_amount,
+        'pending_payouts_count': pending_payouts_count, 'open_disputes_count': open_disputes_count,
     })
 
 
@@ -1950,11 +1962,9 @@ def admin_reviews(request):
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
     pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
     return render(request, 'admin_dashboard/reviews.html', {
-        'reviews':               reviews[:200],
-        'rating_filter':         rating_filter,
-        'verified_filter':       verified_filter,
-        'open_disputes_count':   open_disputes_count,
-        'pending_payouts_count': pending_payouts_count,
+        'reviews': reviews[:200], 'rating_filter': rating_filter,
+        'verified_filter': verified_filter,
+        'open_disputes_count': open_disputes_count, 'pending_payouts_count': pending_payouts_count,
     })
 
 
@@ -1986,10 +1996,8 @@ def admin_bank_accounts(request):
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
     pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
     return render(request, 'admin_dashboard/bank_accounts.html', {
-        'accounts':              accounts,
-        'unverified_count':      unverified_count,
-        'open_disputes_count':   open_disputes_count,
-        'pending_payouts_count': pending_payouts_count,
+        'accounts': accounts, 'unverified_count': unverified_count,
+        'open_disputes_count': open_disputes_count, 'pending_payouts_count': pending_payouts_count,
     })
 
 
@@ -2058,16 +2066,12 @@ def admin_settings(request):
 
         return redirect('admin_settings')
 
-    premium_count = Seller.objects.filter(subscription_type='premium', is_staff=False, is_superuser=False).count()
-    total_sellers = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).count()
+    premium_count         = Seller.objects.filter(subscription_type='premium', is_staff=False, is_superuser=False).count()
+    total_sellers         = Seller.objects.filter(is_active=True, is_staff=False, is_superuser=False).count()
     open_disputes_count   = Dispute.objects.filter(status__in=['open', 'vendor_replied', 'under_review']).count()
     pending_payouts_count = Order.objects.filter(payout_triggered=False, status__in=['delivered', 'completed']).count()
-
     return render(request, 'admin_dashboard/settings.html', {
-        'settings':              settings_obj,
-        'premium_count':         premium_count,
-        'total_sellers':         total_sellers,
-        'monthly_revenue':       premium_count * settings_obj.premium_monthly_price,
-        'open_disputes_count':   open_disputes_count,
-        'pending_payouts_count': pending_payouts_count,
+        'settings': settings_obj, 'premium_count': premium_count, 'total_sellers': total_sellers,
+        'monthly_revenue': premium_count * settings_obj.premium_monthly_price,
+        'open_disputes_count': open_disputes_count, 'pending_payouts_count': pending_payouts_count,
     })

@@ -79,6 +79,8 @@ urlpatterns = [
     # ── Admin — reviews ───────────────────────────────────────
     path('admin-dashboard/reviews/', views.admin_reviews, name='admin_reviews'),
     path('admin-dashboard/reviews/<int:review_id>/delete/', views.admin_delete_review, name='admin_delete_review'),
+    path('get-my-ip/', views.get_my_ip, name='get_my_ip'),
+
 
     # ── Admin — bank accounts ─────────────────────────────────
     path('admin-dashboard/bank-accounts/', views.admin_bank_accounts, name='admin_bank_accounts'),

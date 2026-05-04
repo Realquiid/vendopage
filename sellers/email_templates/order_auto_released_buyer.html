@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>Order Confirmed — Vendopage</title>
+<title>Order Completed — Vendopage</title>
 </head>
 <body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;-webkit-font-smoothing:antialiased;">
 
@@ -23,7 +23,7 @@
       <!-- Heading -->
       <tr>
         <td align="center" style="padding-bottom:24px;">
-          <h1 style="margin:0;font-size:28px;font-weight:800;color:#0A0A0A;letter-spacing:-0.5px;line-height:1.3;">Order confirmed 🎉</h1>
+          <h1 style="margin:0;font-size:28px;font-weight:800;color:#0A0A0A;letter-spacing:-0.5px;line-height:1.3;">Your order has been completed</h1>
         </td>
       </tr>
 
@@ -31,26 +31,26 @@
       <tr>
         <td align="center" style="padding-bottom:32px;">
           <p style="margin:0;font-size:15px;color:#444444;line-height:1.8;text-align:center;max-width:440px;">
-            Hi <strong style="color:#0A0A0A;">{{buyer_name}}</strong>, your payment has been received and your order is confirmed. <strong style="color:#0A0A0A;">{{seller_name}}</strong> will ship it soon.
+            Hi <strong style="color:#0A0A0A;">{{buyer_name}}</strong>, your 72-hour confirmation window for order <strong style="color:#0A0A0A;">#{{order_ref}}</strong> has passed. The funds have been automatically released to the seller.
           </p>
         </td>
       </tr>
 
-      <!-- Order ref box -->
+      <!-- Order info box -->
       <tr>
-        <td style="padding-bottom:24px;">
+        <td style="padding-bottom:32px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td style="background:#f7f7f7;border-radius:10px;padding:20px 24px;">
+              <td style="background:#f7f7f7;border-radius:10px;padding:22px 24px;">
                 <table width="100%" cellpadding="0" cellspacing="0">
                   <tr>
-                    <td>
-                      <p style="margin:0 0 3px;font-size:11px;font-weight:700;color:#999999;text-transform:uppercase;letter-spacing:1.2px;">Order reference</p>
-                      <p style="margin:0;font-size:18px;font-weight:800;color:#0A0A0A;letter-spacing:1px;">#{{order_ref}}</p>
+                    <td width="50%" valign="top">
+                      <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#999999;text-transform:uppercase;letter-spacing:1.2px;">Order</p>
+                      <p style="margin:0;font-size:15px;font-weight:700;color:#0A0A0A;">#{{order_ref}}</p>
                     </td>
-                    <td align="right">
-                      <p style="margin:0 0 3px;font-size:11px;font-weight:700;color:#999999;text-transform:uppercase;letter-spacing:1.2px;">Total</p>
-                      <p style="margin:0;font-size:18px;font-weight:800;color:#0A0A0A;">{{currency}}{{subtotal}}</p>
+                    <td width="50%" valign="top">
+                      <p style="margin:0 0 4px;font-size:11px;font-weight:700;color:#999999;text-transform:uppercase;letter-spacing:1.2px;">Seller</p>
+                      <p style="margin:0;font-size:15px;font-weight:700;color:#0A0A0A;">{{seller_name}}</p>
                     </td>
                   </tr>
                 </table>
@@ -60,34 +60,33 @@
         </td>
       </tr>
 
-      <!-- Items -->
+      <!-- Notice -->
       <tr>
-        <td style="padding-bottom:32px;">
+        <td style="padding-bottom:36px;">
           <table width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td style="padding-bottom:10px;">
-                <p style="margin:0;font-size:11px;font-weight:700;color:#999999;text-transform:uppercase;letter-spacing:1.2px;">Items ordered</p>
+              <td style="background:#f7f7f7;border-left:3px solid #0A0A0A;border-radius:0 8px 8px 0;padding:18px 22px;">
+                <p style="margin:0 0 5px;font-size:11px;font-weight:700;color:#0A0A0A;text-transform:uppercase;letter-spacing:.8px;">Did something go wrong?</p>
+                <p style="margin:0;font-size:14px;color:#555555;line-height:1.6;">
+                  If you didn't receive your order or had an issue, please contact us at <a href="mailto:support@vendopage.com" style="color:#0A0A0A;font-weight:600;">support@vendopage.com</a> as soon as possible. We will do our best to help.
+                </p>
               </td>
             </tr>
-            {{order_items_html}}
           </table>
         </td>
       </tr>
-
-      <!-- Escrow notice -->
-      {{payment_notice}}
 
       <!-- CTA -->
       <tr>
         <td align="center" style="padding-bottom:48px;">
           <a href="https://www.vendopage.com/order/{{order_ref}}/"
              style="display:inline-block;background:#0A0A0A;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:15px 36px;border-radius:100px;">
-            Track my order →
+            View order →
           </a>
         </td>
       </tr>
 
-      <!-- Divider -->
+      <!-- Divider + Footer -->
       <tr>
         <td style="border-top:1px solid #eeeeee;padding-top:32px;">
           <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">

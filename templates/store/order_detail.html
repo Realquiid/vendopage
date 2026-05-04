@@ -1,0 +1,292 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.order_ref|slice:":8"|upper }} — Vendopage{% endblock %}
+
+{% block extra_css %}
+<style>
+.order-page { background:var(--light); min-height:calc(100vh - 64px); padding:40px 20px 80px; }
+.order-inner { max-width:820px; margin:0 auto; }
+
+.order-page-header { margin-bottom:32px; }
+.order-page-header h1 { font-family:var(--font-d); font-weight:800; font-size:26px; letter-spacing:-1px; margin-bottom:4px; }
+.order-ref-badge { display:inline-flex; align-items:center; gap:6px; background:var(--dark); color:var(--white); font-family:monospace; font-size:13px; font-weight:700; padding:4px 12px; border-radius:100px; letter-spacing:1px; }
+.order-page-sub { font-size:13px; color:var(--gray); margin-top:8px; }
+
+/* Status tracker */
+.status-track { background:var(--white); border:1px solid var(--border); border-radius:20px; padding:28px 32px; margin-bottom:20px; }
+.track-steps { display:flex; align-items:flex-start; position:relative; margin-bottom:8px; }
+.track-step { flex:1; display:flex; flex-direction:column; align-items:center; position:relative; z-index:1; }
+.track-step:not(:last-child)::after { content:''; position:absolute; top:16px; left:50%; width:100%; height:2px; background:var(--border); z-index:0; }
+.track-step.done:not(:last-child)::after { background:var(--green); }
+.track-dot { width:32px; height:32px; border-radius:50%; border:2px solid var(--border); background:var(--white); display:flex; align-items:center; justify-content:center; font-size:14px; z-index:1; transition:all .3s; }
+.track-step.done .track-dot { border-color:var(--green); background:var(--green); color:#fff; }
+.track-step.current .track-dot { border-color:var(--dark); background:var(--dark); color:#fff; box-shadow:0 0 0 4px rgba(0,0,0,.1); }
+.track-label { font-size:11px; font-weight:600; color:var(--gray); margin-top:8px; text-align:center; }
+.track-step.done .track-label,
+.track-step.current .track-label { color:var(--dark); font-weight:700; }
+.status-message { text-align:center; margin-top:20px; padding:16px 20px; border-radius:12px; font-size:14px; line-height:1.6; }
+.status-message.paid     { background:#fff7ed; color:#c2410c; border:1px solid #fed7aa; }
+.status-message.shipped  { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+.status-message.delivered,
+.status-message.completed{ background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+.status-message.disputed { background:#fef2f2; color:#b91c1c; border:1px solid #fecaca; }
+.status-message.refunded { background:#faf5ff; color:#7c3aed; border:1px solid #e9d5ff; }
+
+/* Cards */
+.info-card { background:var(--white); border:1px solid var(--border); border-radius:20px; overflow:hidden; margin-bottom:20px; }
+.info-card-head { padding:16px 24px; border-bottom:1px solid var(--border); font-family:var(--font-d); font-weight:700; font-size:15px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.info-card-body { padding:20px 24px; }
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px 24px; }
+.info-item label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray-lt); display:block; margin-bottom:3px; }
+.info-item span { font-size:14px; font-weight:600; color:var(--dark); }
+
+/* Order items */
+.oi-row { display:flex; align-items:center; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+.oi-row:last-child { border-bottom:none; }
+.oi-thumb { width:60px; height:60px; border-radius:10px; object-fit:cover; background:var(--light); flex-shrink:0; }
+.oi-thumb-ph { width:60px; height:60px; border-radius:10px; background:var(--light); display:flex; align-items:center; justify-content:center; font-size:24px; flex-shrink:0; }
+.oi-details { flex:1; }
+.oi-pname { font-size:14px; font-weight:600; margin-bottom:3px; }
+.oi-qty { font-size:12px; color:var(--gray-lt); }
+.oi-ptotal { font-size:15px; font-weight:700; flex-shrink:0; }
+.order-total-row { display:flex; justify-content:space-between; padding:16px 24px; border-top:1px solid var(--border); font-weight:800; font-size:16px; }
+
+/* Payment type badge */
+.pay-type-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:700; }
+.pay-type-escrow { background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0; }
+.pay-type-direct { background:#fefce8; color:#92400e; border:1px solid #fde68a; }
+
+/* Action strip */
+.action-strip { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
+.action-strip .abtn { flex:1; min-width:140px; justify-content:center; display:flex; align-items:center; gap:6px; padding:13px 20px; border-radius:var(--r-pill); font-family:var(--font-b); font-size:14px; font-weight:700; cursor:pointer; text-decoration:none; border:none; transition:all .2s; }
+.abtn-confirm  { background:var(--green); color:#fff; }
+.abtn-confirm:hover  { background:var(--green-dk); transform:translateY(-1px); }
+.abtn-dispute  { background:var(--light); color:var(--dark); border:1px solid var(--border); }
+.abtn-dispute:hover  { border-color:var(--red); color:var(--red); }
+.abtn-review   { background:var(--dark); color:#fff; }
+.abtn-review:hover   { background:#222; }
+
+/* Panels */
+.panel { background:var(--white); border:1px solid var(--border); border-radius:20px; padding:24px; margin-bottom:20px; }
+.panel-title { font-family:var(--font-d); font-weight:700; font-size:16px; margin-bottom:16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.panel p { font-size:14px; color:var(--gray); line-height:1.7; margin-bottom:10px; }
+.panel p:last-child { margin-bottom:0; }
+.dispute-tag { padding:3px 10px; border-radius:100px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; }
+.dtag-open     { background:#fef2f2; color:#b91c1c; }
+.dtag-replied  { background:#eff6ff; color:#1d4ed8; }
+.dtag-resolved { background:#f0fdf4; color:#15803d; }
+.stars-display { font-size:20px; letter-spacing:2px; margin-bottom:8px; }
+
+/* Shipping box */
+.ship-box { background:var(--light); border-radius:12px; padding:14px 16px; font-size:13px; line-height:1.9; }
+.ship-box strong { font-weight:700; color:var(--dark); }
+
+/* Dark mode */
+[data-theme="dark"] .status-track,
+[data-theme="dark"] .info-card,
+[data-theme="dark"] .panel { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .info-card-head,
+[data-theme="dark"] .oi-row,
+[data-theme="dark"] .order-total-row { border-color:#2a2a2a; }
+[data-theme="dark"] .info-item span { color:#f0f0f0; }
+[data-theme="dark"] .track-dot { background:#1e1e1e; border-color:#3a3a3a; }
+[data-theme="dark"] .track-step:not(:last-child)::after { background:#2e2e2e; }
+[data-theme="dark"] .ship-box { background:#2a2a2a; }
+
+@media(max-width:600px) {
+  .info-grid { grid-template-columns:1fr; }
+  .track-label { font-size:10px; }
+  .action-strip { flex-direction:column; }
+  .action-strip .abtn { min-width:unset; }
+  .status-track { padding:20px 16px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="order-page">
+<div class="order-inner">
+
+  <div class="order-page-header">
+    <div class="order-ref-badge">#{{ order.order_ref|slice:":8"|upper }}</div>
+    <h1 style="margin-top:12px;">Order Details</h1>
+    <p class="order-page-sub">Placed on {{ order.created_at|date:"F d, Y \a\t H:i" }} · {{ order.seller.business_name }}</p>
+  </div>
+
+  <!-- Status Tracker -->
+  <div class="status-track">
+    {% with status=order.status %}
+    <div class="track-steps">
+      <div class="track-step {% if status in 'paid,shipped,delivered,completed' %}done{% endif %}">
+        <div class="track-dot">✓</div>
+        <div class="track-label">Paid</div>
+      </div>
+      <div class="track-step {% if status in 'shipped,delivered,completed' %}done{% elif status == 'paid' %}current{% endif %}">
+        <div class="track-dot">📦</div>
+        <div class="track-label">Shipped</div>
+      </div>
+      <div class="track-step {% if status in 'delivered,completed' %}done{% elif status == 'shipped' %}current{% endif %}">
+        <div class="track-dot">🚚</div>
+        <div class="track-label">Delivered</div>
+      </div>
+      <div class="track-step {% if status == 'completed' %}done{% elif status == 'delivered' %}current{% endif %}">
+        <div class="track-dot">✅</div>
+        <div class="track-label">Complete</div>
+      </div>
+    </div>
+
+    {% if status == 'paid' %}
+      <div class="status-message paid">⏳ Payment confirmed — waiting for <strong>{{ order.seller.business_name }}</strong> to ship your order. You'll get an email when it ships.</div>
+    {% elif status == 'shipped' %}
+      <div class="status-message shipped">🚚 Your order is on its way!{% if order.tracking_info %} Tracking: <strong>{{ order.tracking_info }}</strong>{% if order.courier_name %} via {{ order.courier_name }}{% endif %}.{% endif %} Confirm receipt once it arrives to release payment to the seller.</div>
+    {% elif status == 'delivered' %}
+      <div class="status-message delivered">📬 Delivery confirmed. Payment is being released to the seller. Thank you!</div>
+    {% elif status == 'completed' %}
+      <div class="status-message completed">🎉 This order is complete. Funds have been sent to the seller.</div>
+    {% elif status == 'disputed' %}
+      <div class="status-message disputed">⚠️ A dispute has been raised on this order. Our team will review it within 48 hours.</div>
+    {% elif status == 'refunded' %}
+      <div class="status-message refunded">💜 This order has been refunded. Please allow 3–5 business days.</div>
+    {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="action-strip">
+    {% if order.status == 'shipped' %}
+    <form method="POST" action="{% url 'confirm_receipt' order_ref=order.order_ref %}" style="flex:1;min-width:140px;">
+      {% csrf_token %}
+      <button type="submit" class="abtn abtn-confirm" style="width:100%;"
+              onclick="return confirm('Confirm you have received this order? This will release payment to the seller.')">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Confirm Receipt
+      </button>
+    </form>
+    {% endif %}
+
+    {% if order.status in 'paid,shipped' and not dispute %}
+    <a href="{% url 'raise_dispute' order_ref=order.order_ref %}" class="abtn abtn-dispute">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Raise Dispute
+    </a>
+    {% endif %}
+
+    {% if order.status in 'delivered,completed' and not review %}
+    <a href="{% url 'leave_review' order_ref=order.order_ref %}" class="abtn abtn-review">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      Leave a Review
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Order Items -->
+  <div class="info-card">
+    <div class="info-card-head">
+      Items Ordered
+      <span class="pay-type-badge {% if order.payment_type == 'escrow' %}pay-type-escrow{% else %}pay-type-direct{% endif %}">
+        {% if order.payment_type == 'escrow' %}🔒 Protected Pay{% else %}⚡ Direct Pay{% endif %}
+      </span>
+    </div>
+    <div class="info-card-body" style="padding:0 24px;">
+      {% for item in order.items.all %}
+      <div class="oi-row">
+        {% if item.product_image_url %}
+          <img class="oi-thumb" src="{{ item.product_image_url }}" alt="{{ item.product_name }}"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+          <div class="oi-thumb-ph" style="display:none;">📦</div>
+        {% else %}
+          <div class="oi-thumb-ph">📦</div>
+        {% endif %}
+        <div class="oi-details">
+          <div class="oi-pname">{{ item.product_name }}</div>
+          <div class="oi-qty">Qty: {{ item.quantity }} × {{ order.currency }} {{ item.price|floatformat:0 }}</div>
+        </div>
+        <div class="oi-ptotal">{{ order.currency }} {{ item.price|floatformat:0 }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="order-total-row">
+      <span>Total Paid</span>
+      <span>{{ order.currency }} {{ order.subtotal|floatformat:0 }}</span>
+    </div>
+  </div>
+
+  <!-- Shipping Info (once shipped) -->
+  {% if order.status in 'shipped,delivered,completed' and order.tracking_info %}
+  <div class="info-card">
+    <div class="info-card-head">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      Shipping Info
+    </div>
+    <div class="info-card-body">
+      <div class="ship-box">
+        {% if order.courier_name %}<div><strong>Courier:</strong> {{ order.courier_name }}</div>{% endif %}
+        <div><strong>Tracking:</strong> {{ order.tracking_info }}</div>
+        {% if order.shipped_at %}<div><strong>Shipped:</strong> {{ order.shipped_at|date:"F d, Y \a\t H:i" }}</div>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Delivery Details -->
+  <div class="info-card">
+    <div class="info-card-head">Delivery Details</div>
+    <div class="info-card-body">
+      <div class="info-grid">
+        <div class="info-item"><label>Name</label><span>{{ order.buyer_name }}</span></div>
+        <div class="info-item"><label>Phone</label><span>{{ order.buyer_phone }}</span></div>
+        <div class="info-item"><label>Email</label><span style="word-break:break-all;">{{ order.buyer_email }}</span></div>
+        <div class="info-item"><label>City</label><span>{{ order.delivery_city|default:"—" }}</span></div>
+        <div class="info-item" style="grid-column:1/-1;"><label>Address</label><span>{{ order.delivery_address }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Meta -->
+  <div class="info-card">
+    <div class="info-card-head">Order Info</div>
+    <div class="info-card-body">
+      <div class="info-grid">
+        <div class="info-item"><label>Order Ref</label><span style="font-family:monospace;">#{{ order.order_ref|slice:":8"|upper }}</span></div>
+        <div class="info-item"><label>Date</label><span>{{ order.created_at|date:"M d, Y" }}</span></div>
+        <div class="info-item"><label>Seller</label><span>{{ order.seller.business_name }}</span></div>
+        <div class="info-item"><label>Payment</label><span>{% if order.payment_type == 'escrow' %}🔒 Protected Pay{% else %}⚡ Direct Pay{% endif %}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dispute Panel -->
+  {% if dispute %}
+  <div class="panel">
+    <div class="panel-title">
+      ⚠️ Dispute
+      <span class="dispute-tag {% if dispute.status == 'open' %}dtag-open{% elif dispute.status == 'vendor_replied' %}dtag-replied{% else %}dtag-resolved{% endif %}">
+        {{ dispute.get_status_display }}
+      </span>
+    </div>
+    <p><strong>Your report:</strong> {{ dispute.buyer_message }}</p>
+    {% if dispute.vendor_reply %}
+    <p><strong>Seller's response:</strong> {{ dispute.vendor_reply }}</p>
+    {% endif %}
+    {% if dispute.admin_note %}
+    <p><strong>Resolution note:</strong> {{ dispute.admin_note }}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Review Panel -->
+  {% if review %}
+  <div class="panel">
+    <div class="panel-title">⭐ Your Review</div>
+    <div class="stars-display">
+      {% for i in "12345" %}{% if forloop.counter <= review.rating %}⭐{% else %}☆{% endif %}{% endfor %}
+    </div>
+    {% if review.comment %}<p>{{ review.comment }}</p>{% endif %}
+  </div>
+  {% endif %}
+
+</div>
+</div>
+{% block footer %}{% endblock %}
+{% endblock %}

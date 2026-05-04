@@ -17,6 +17,15 @@
 [data-theme="dark"] .order-ref { color:#666; }
 [data-theme="dark"] .empty-orders { color:#555; }
 [data-theme="dark"] .stat-card .stat-value[style*="f59e0b"] { color: #fbbf24 !important; }
+[data-theme="dark"] .order-amount { color:#f0f0f0; }
+[data-theme="dark"] .order-buyer { color:#f0f0f0; }
+[data-theme="dark"] .ship-btn.view-btn { background:#2a2a2a; color:#f0f0f0; border-color:#3a3a3a; }
+[data-theme="dark"] .ship-btn.view-btn:hover { background:var(--dark); border-color:var(--dark); color:#fff; }
+[data-theme="dark"] .stat-card.store-mode-stat {
+  background:#111 !important;
+  border-color:#222 !important;
+}
+/* */
 
 /* Layout */
 .dashboard { background:var(--light); min-height:calc(100vh - 64px); }
@@ -397,7 +406,7 @@
 
     {% if recent_orders %}
       {% for order in recent_orders %}
-      <a href="{% url 'vendor_order_detail' order.order_ref %}" class="order-row">
+      <div class="order-row" style="cursor:pointer;" onclick="window.location='{% url 'vendor_order_detail' order.order_ref %}'">
         <div>
           <div class="order-buyer">{{ order.buyer_name }}</div>
           <div class="order-ref">#{{ order.order_ref|slice:":8"|upper }}</div>
@@ -415,23 +424,19 @@
           </span>
         </div>
         <div class="order-date order-col-date">{{ order.created_at|date:"M d, H:i" }}</div>
-        <div style="display:flex;gap:6px;justify-content:flex-end;">
-          {% if order.status == 'paid' %}
-            <a href="{% url 'mark_shipped' order.order_ref %}"
-               onclick="event.stopPropagation();"
-               class="ship-btn">
+        <div style="display:flex;gap:6px;justify-content:flex-end;align-items:center;" onclick="event.stopPropagation()">
+          {% if order.status == 'paid' or order.status == 'disputed' %}
+            <a href="{% url 'mark_shipped' order.order_ref %}" class="ship-btn">
               <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
               Ship
             </a>
           {% else %}
-            <a href="{% url 'vendor_order_detail' order.order_ref %}"
-               onclick="event.stopPropagation();"
-               class="ship-btn view-btn">
+            <a href="{% url 'vendor_order_detail' order.order_ref %}" class="ship-btn view-btn">
               View
             </a>
           {% endif %}
         </div>
-      </a>
+      </div>
       {% endfor %}
     {% else %}
       <div class="empty-orders">
@@ -441,7 +446,6 @@
       </div>
     {% endif %}
   </div>
-
 
   {% else %}
   <div class="store-mode-notice">
