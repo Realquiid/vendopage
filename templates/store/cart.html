@@ -5,7 +5,6 @@
 
 {% block extra_css %}
 <style>
-/* ── Layout ─────────────────────────────────────────────── */
 .cart-page { background:var(--light); min-height:calc(100vh - 64px); padding:40px 20px 80px; }
 .cart-inner { max-width:960px; margin:0 auto; }
 
@@ -15,48 +14,43 @@
 
 .cart-layout { display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start; }
 
-/* ── Cart items ─────────────────────────────────────────── */
+/* Cart items */
 .cart-items-wrap { background:var(--white); border:1px solid var(--border); border-radius:20px; overflow:hidden; }
 .cart-items-head { padding:16px 24px; border-bottom:1px solid var(--border); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray); }
 
-/* Empty state lives OUTSIDE the rendered list so it never gets wiped */
 .cart-empty-state { padding:80px 40px; text-align:center; }
 .cart-empty-state .empty-icon { font-size:56px; display:block; margin-bottom:16px; }
-.cart-empty-state h3 { font-family:var(--font-d); font-weight:700; font-size:20px; margin-bottom:8px; }
+.cart-empty-state h3 { font-family:var(--font-d); font-weight:700; font-size:20px; margin-bottom:8px; color:var(--dark); }
 .cart-empty-state p { font-size:14px; color:var(--gray-lt); }
 
-/* Cart item rows injected by JS */
 .cart-item { display:flex; align-items:center; gap:16px; padding:18px 24px; border-bottom:1px solid var(--border); transition:background .15s; }
 .cart-item:last-child { border-bottom:none; }
 .cart-item:hover { background:var(--light); }
 .ci-img { width:68px; height:68px; border-radius:12px; object-fit:cover; flex-shrink:0; background:var(--light); display:block; }
 .ci-img-ph { width:68px; height:68px; border-radius:12px; background:var(--light); display:flex; align-items:center; justify-content:center; font-size:26px; flex-shrink:0; }
 .cart-item-info { flex:1; min-width:0; }
-.cart-item-name { font-weight:600; font-size:14px; margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.cart-item-name { font-weight:600; font-size:14px; margin-bottom:4px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; color:var(--dark); }
 .cart-item-unit { font-size:12px; color:var(--gray-lt); margin-bottom:3px; }
 .cart-item-price { font-size:15px; font-weight:700; color:var(--green); }
 .cart-item-controls { display:flex; align-items:center; gap:8px; flex-shrink:0; }
-.qty-btn { width:30px; height:30px; border-radius:50%; border:1px solid var(--border); background:var(--light); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; font-weight:700; transition:all .15s; line-height:1; padding:0; }
+.qty-btn { width:30px; height:30px; border-radius:50%; border:1px solid var(--border); background:var(--light); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; font-weight:700; transition:all .15s; line-height:1; padding:0; color:var(--dark); }
 .qty-btn:hover { background:var(--dark); color:var(--white); border-color:var(--dark); }
-.qty-val { font-weight:700; font-size:15px; min-width:22px; text-align:center; }
+.qty-val { font-weight:700; font-size:15px; min-width:22px; text-align:center; color:var(--dark); }
 .remove-btn { width:30px; height:30px; border-radius:50%; border:1px solid transparent; background:none; cursor:pointer; color:var(--gray-lt); display:flex; align-items:center; justify-content:center; transition:all .15s; padding:0; }
 .remove-btn:hover { color:var(--red); border-color:#fecaca; background:#fff5f5; }
 
-/* ── Order summary ──────────────────────────────────────── */
+/* Order summary */
 .order-summary { background:var(--white); border:1px solid var(--border); border-radius:20px; overflow:hidden; position:sticky; top:80px; }
-.os-head { padding:16px 20px; border-bottom:1px solid var(--border); font-family:var(--font-d); font-weight:700; font-size:16px; }
-
-/* Summary item rows — image + name + line total */
+.os-head { padding:16px 20px; border-bottom:1px solid var(--border); font-family:var(--font-d); font-weight:700; font-size:16px; color:var(--dark); }
 .os-items { padding:12px 20px 0; display:flex; flex-direction:column; gap:10px; }
 .os-item { display:flex; align-items:center; gap:10px; }
 .os-item-img { width:40px; height:40px; border-radius:8px; object-fit:cover; flex-shrink:0; background:var(--light); display:block; }
 .os-item-img-ph { width:40px; height:40px; border-radius:8px; background:var(--light); display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
 .os-item-info { flex:1; min-width:0; }
 .os-item-name { font-size:12px; font-weight:600; color:var(--dark); display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden; }
-.os-item-qty  { font-size:11px; color:var(--gray-lt); margin-top:1px; }
+.os-item-qty { font-size:11px; color:var(--gray-lt); margin-top:1px; }
 .os-item-price { font-size:13px; font-weight:700; color:var(--dark); white-space:nowrap; flex-shrink:0; }
 
-/* Totals section */
 .os-totals { padding:14px 20px 20px; }
 .summary-row { display:flex; justify-content:space-between; font-size:14px; margin-bottom:10px; color:var(--gray); }
 .summary-row.total { font-weight:800; font-size:17px; color:var(--dark); border-top:1px solid var(--border); padding-top:12px; margin-top:4px; margin-bottom:0; }
@@ -66,25 +60,9 @@
 .secure-note { display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; color:var(--gray-lt); margin-top:10px; }
 .escrow-badge { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:1px solid #bbf7d0; border-radius:12px; padding:12px 14px; margin-top:14px; }
 .escrow-badge h4 { font-size:12px; font-weight:700; color:#15803d; margin-bottom:3px; display:flex; align-items:center; gap:5px; }
-.escrow-badge p { font-size:11px; color:#166534; line-height:1.5; }
+.escrow-badge p { font-size:11px; color:#166534; line-height:1.5; margin:0; }
 
-/* ── Browse grid ────────────────────────────────────────── */
-.browse-section { margin-top:32px; }
-.browse-section h2 { font-family:var(--font-d); font-weight:700; font-size:18px; margin-bottom:14px; }
-.browse-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(155px,1fr)); gap:12px; }
-.browse-card { border:1px solid var(--border); border-radius:14px; overflow:hidden; background:var(--white); transition:all .2s; }
-.browse-card:hover { transform:translateY(-2px); box-shadow:var(--sh-sm,0 4px 12px rgba(0,0,0,.08)); border-color:#bbb; }
-.browse-img { aspect-ratio:1; background:var(--light); overflow:hidden; }
-.browse-img img { width:100%; height:100%; object-fit:cover; display:block; }
-.browse-img-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:36px; }
-.browse-info { padding:10px 12px 8px; }
-.browse-name { font-size:12px; font-weight:600; margin-bottom:3px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.4; }
-.browse-price { font-size:13px; font-weight:700; color:var(--green); margin-bottom:8px; }
-.browse-add-btn { width:100%; padding:8px; border:none; background:var(--dark); color:var(--white); font-family:var(--font-b); font-size:12px; font-weight:600; cursor:pointer; transition:background .15s; display:flex; align-items:center; justify-content:center; gap:4px; }
-.browse-add-btn:hover:not(:disabled) { background:#333; }
-.browse-add-btn:disabled { background:var(--gray-lt); cursor:default; }
-
-/* ── PAYMENT MODAL ──────────────────────────────────────── */
+/* Payment modal */
 .pm-overlay {
   position:fixed; inset:0; background:rgba(0,0,0,.55);
   backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
@@ -97,11 +75,11 @@
   box-shadow:0 32px 80px rgba(0,0,0,.2);
   transform:translateY(20px) scale(.97);
   transition:transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s;
-  opacity:0; overflow:hidden;
+  opacity:0; overflow:hidden; max-height:90vh; overflow-y:auto;
 }
 .pm-overlay.open .pm-modal { transform:translateY(0) scale(1); opacity:1; }
 .pm-header { padding:24px 24px 0; display:flex; align-items:flex-start; justify-content:space-between; }
-.pm-title { font-family:var(--font-d); font-weight:800; font-size:20px; letter-spacing:-.5px; }
+.pm-title { font-family:var(--font-d); font-weight:800; font-size:20px; letter-spacing:-.5px; color:var(--dark); }
 .pm-subtitle { font-size:13px; color:var(--gray); margin-top:4px; }
 .pm-close { width:32px; height:32px; border-radius:50%; border:1.5px solid var(--border); background:var(--light); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all .18s; flex-shrink:0; margin-left:12px; }
 .pm-close:hover { background:var(--dark); border-color:var(--dark); }
@@ -112,7 +90,7 @@
 .pm-card:hover { border-color:var(--dark); box-shadow:0 4px 16px rgba(0,0,0,.08); }
 .pm-card.selected { border-color:var(--green); background:linear-gradient(135deg,#f0fdf4,#fff); }
 .pm-card-icon { font-size:28px; margin-bottom:10px; display:block; }
-.pm-card-title { font-family:var(--font-d); font-weight:700; font-size:15px; margin-bottom:4px; }
+.pm-card-title { font-family:var(--font-d); font-weight:700; font-size:15px; margin-bottom:4px; color:var(--dark); }
 .pm-card-desc { font-size:12px; color:var(--gray); line-height:1.5; }
 .pm-card-badge { position:absolute; top:10px; right:10px; font-size:10px; font-weight:700; padding:2px 8px; border-radius:100px; text-transform:uppercase; letter-spacing:.3px; }
 .pm-card-badge.safe { background:#dcfce7; color:#166634; }
@@ -125,7 +103,7 @@
 .pm-delivery-toggle.active { border-color:var(--green); background:#f0fdf4; }
 .pm-delivery-left { display:flex; align-items:center; gap:10px; }
 .pm-delivery-icon { font-size:20px; }
-.pm-delivery-label { font-size:14px; font-weight:600; }
+.pm-delivery-label { font-size:14px; font-weight:600; color:var(--dark); }
 .pm-delivery-hint { font-size:12px; color:var(--gray); margin-top:1px; }
 .toggle-pill { width:42px; height:24px; border-radius:100px; background:var(--border); position:relative; transition:background .2s; flex-shrink:0; }
 .toggle-pill.on { background:var(--green); }
@@ -141,34 +119,53 @@
 
 /* Dark mode */
 [data-theme="dark"] .cart-items-wrap,
-[data-theme="dark"] .order-summary,
-[data-theme="dark"] .browse-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .order-summary { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .cart-items-head { border-color:#2a2a2a; color:#aaa; }
+[data-theme="dark"] .cart-item { border-color:#2a2a2a; }
 [data-theme="dark"] .cart-item:hover { background:#252525; }
+[data-theme="dark"] .cart-item-name { color:#f0f0f0; }
+[data-theme="dark"] .qty-btn { background:#2a2a2a; border-color:#3a3a3a; color:#f0f0f0; }
+[data-theme="dark"] .qty-val { color:#f0f0f0; }
+[data-theme="dark"] .ci-img-ph { background:#2a2a2a; }
+[data-theme="dark"] .os-head { border-color:#2a2a2a; color:#f0f0f0; }
+[data-theme="dark"] .os-item-name { color:#e0e0e0; }
+[data-theme="dark"] .os-item-price { color:#e0e0e0; }
+[data-theme="dark"] .os-item-img-ph { background:#2a2a2a; }
+[data-theme="dark"] .summary-row { color:#aaa; }
+[data-theme="dark"] .summary-row.total { color:#f0f0f0; border-color:#3a3a3a; }
 [data-theme="dark"] .pm-modal { background:#1e1e1e; }
+[data-theme="dark"] .pm-title { color:#f0f0f0; }
 [data-theme="dark"] .pm-card { background:#1e1e1e; border-color:#3a3a3a; }
+[data-theme="dark"] .pm-card-title { color:#f0f0f0; }
 [data-theme="dark"] .pm-card.selected { background:#0d2014; border-color:var(--green); }
 [data-theme="dark"] .pm-delivery-toggle { background:#252525; border-color:#3a3a3a; }
 [data-theme="dark"] .pm-delivery-toggle.active { background:#0d2014; border-color:var(--green); }
+[data-theme="dark"] .pm-delivery-label { color:#f0f0f0; }
 [data-theme="dark"] .pm-close { background:#252525; border-color:#3a3a3a; }
 [data-theme="dark"] .pm-close svg { color:#f0f0f0; }
 [data-theme="dark"] .pm-close:hover { background:#f0f0f0; border-color:#f0f0f0; }
 [data-theme="dark"] .pm-close:hover svg { color:#000; }
-[data-theme="dark"] .os-item-name { color:#e0e0e0; }
-[data-theme="dark"] .os-item-price { color:#e0e0e0; }
+[data-theme="dark"] .pm-cancel-btn { border-color:#3a3a3a; color:#aaa; }
+[data-theme="dark"] .pm-cancel-btn:hover { border-color:#f0f0f0; color:#f0f0f0; }
 
 /* Responsive */
 @media(max-width:768px) {
+  .cart-page { padding:24px 16px 80px; }
   .cart-layout { grid-template-columns:1fr; }
-  .order-summary { position:static; }
+  .order-summary { position:static; order:-1; }
   .cart-item { gap:12px; padding:14px 16px; }
-  .pm-cards { grid-template-columns:1fr; }
   .ci-img, .ci-img-ph { width:56px; height:56px; }
+  .pm-cards { grid-template-columns:1fr; }
+  .cart-header h1 { font-size:22px; }
+}
+@media(max-width:400px) {
+  .cart-item-controls { gap:5px; }
+  .qty-btn { width:26px; height:26px; font-size:14px; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-
 
 <script id="productDataEl" type="application/json">
 {
@@ -193,69 +190,24 @@
 
   <div class="cart-layout">
 
-    <!-- Cart Items column -->
+    <!-- Cart Items -->
     <div>
       <div class="cart-items-wrap">
         <div class="cart-items-head">Cart Items (<span id="itemCount">0</span>)</div>
-
         <div class="cart-empty-state" id="emptyState">
           <span class="empty-icon">🛒</span>
           <h3>Your cart is empty</h3>
-          <p>Browse products below and tap to add them.</p>
+          <p>Go back and add some products.</p>
         </div>
         <div id="cartItemsList"></div>
       </div>
-
-      {% if product_map %}
-      <div class="browse-section">
-        <h2>All Products</h2>
-        <div class="browse-grid">
-          {% for pid, product in product_map.items %}
-          {% if not product.is_sold_out and product.price %}
-          <div class="browse-card" id="browse-{{ product.id }}">
-            <div class="browse-img">
-              {% with product.images.first as img %}
-                {% if img %}<img src="{{ img.image_url }}" alt="" loading="lazy">
-                {% else %}<div class="browse-img-ph">📦</div>{% endif %}
-              {% endwith %}
-            </div>
-            <div class="browse-info">
-              <div class="browse-name">{{ product.description|default:"Product"|truncatewords:8 }}</div>
-              <div class="browse-price">{{ currency }}{{ product.price|floatformat:"0" }}</div>
-            </div>
-            <button class="browse-add-btn" id="addbtn-{{ product.id }}"
-                    onclick="addToCart('{{ product.id }}')">
-              + Add to Cart
-            </button>
-          </div>
-          {% elif not product.is_sold_out %}
-          <div class="browse-card" id="browse-{{ product.id }}">
-            <div class="browse-img">
-              {% with product.images.first as img %}
-                {% if img %}<img src="{{ img.image_url }}" alt="" loading="lazy">
-                {% else %}<div class="browse-img-ph">📦</div>{% endif %}
-              {% endwith %}
-            </div>
-            <div class="browse-info">
-              <div class="browse-name">{{ product.description|default:"Product"|truncatewords:8 }}</div>
-              <div class="browse-price" style="color:var(--gray-lt);font-size:11px;">Price on request</div>
-            </div>
-            <button class="browse-add-btn" disabled>No price set</button>
-          </div>
-          {% endif %}
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
     </div>
 
-    <!-- Order Summary column -->
+    <!-- Order Summary -->
     <div>
       <div class="order-summary">
         <div class="os-head">Order Summary</div>
-
         <div class="os-items" id="summaryItems"></div>
-
         <div class="os-totals">
           <div class="summary-row"><span>Subtotal</span><span id="summarySubtotal">{{ currency }}0</span></div>
           <div class="summary-row"><span>Delivery</span><span>At checkout</span></div>
@@ -276,9 +228,9 @@
       </div>
     </div>
 
-  </div><!-- /cart-layout -->
-</div><!-- /cart-inner -->
-</div><!-- /cart-page -->
+  </div>
+</div>
+</div>
 
 <!-- PAYMENT MODAL -->
 <div class="pm-overlay" id="pmOverlay" onclick="handleOverlayClick(event)">
@@ -336,32 +288,20 @@
 {% block footer %}{% endblock %}
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   CONFIG — from Django template
-═══════════════════════════════════════════════════════════ */
 const CURRENCY = '{{ currency|escapejs }}';
 const SLUG     = '{{ seller.slug|escapejs }}';
 const CART_KEY = 'vp_cart_' + SLUG;
 
-/* ═══════════════════════════════════════════════════════════
-   FIX 1 — Product data comes from the embedded JSON, not onclick strings.
-   Each product has exactly ONE image keyed by its own ID.
-   No more wrong images.
-═══════════════════════════════════════════════════════════ */
 const PRODUCTS = JSON.parse(document.getElementById('productDataEl').textContent);
 
-/* ═══════════════════════════════════════════════════════════
-   CART STATE
-═══════════════════════════════════════════════════════════ */
-let cart = {};   // { [productId]: qty }
-
+let cart = {};
 let selectedPaymentType = 'escrow';
 let deliveryRequired    = true;
 
-/* ── Persistence ─────────────────────────────────────────── */
 function saveCart() {
   sessionStorage.setItem(CART_KEY, JSON.stringify(cart));
 }
+
 function loadCart() {
   try {
     const raw = sessionStorage.getItem(CART_KEY);
@@ -371,14 +311,10 @@ function loadCart() {
     Object.keys(parsed).forEach(function(id) {
       const val = parsed[id];
       if (typeof val === 'number' && val > 0) {
-        // New format {id: qty} — look up product data from PRODUCTS
         if (PRODUCTS[id]) cart[id] = val;
       } else if (val && typeof val === 'object') {
-        // Old format from seller page: {name, price, qty, imageUrl}
-        // Keep even if not in PRODUCTS — use the saved data directly
         const qty = Number(val.qty) || 1;
         if (qty > 0) {
-          // Merge into PRODUCTS so renderCart can find it
           if (!PRODUCTS[id]) {
             PRODUCTS[id] = {
               id:    id,
@@ -394,20 +330,8 @@ function loadCart() {
   } catch(e) { cart = {}; }
 }
 
-/* ── Format ──────────────────────────────────────────────── */
 function fmt(n) {
   return CURRENCY + Number(n).toLocaleString('en-NG', { minimumFractionDigits:0, maximumFractionDigits:0 });
-}
-
-/* ═══════════════════════════════════════════════════════════
-   CART ACTIONS
-═══════════════════════════════════════════════════════════ */
-function addToCart(id) {
-  const p = PRODUCTS[id];
-  if (!p || !p.price) return;
-  cart[id] = (cart[id] || 0) + 1;
-  saveCart();
-  renderCart();
 }
 
 function updateQty(id, delta) {
@@ -416,7 +340,7 @@ function updateQty(id, delta) {
   if (newQty < 1) { removeItem(id); return; }
   cart[id] = newQty;
   saveCart();
-  renderCart();  /* FIX 2 — always re-renders correctly because emptyState is a sibling */
+  renderCart();
 }
 
 function removeItem(id) {
@@ -425,31 +349,16 @@ function removeItem(id) {
   renderCart();
 }
 
-/* ═══════════════════════════════════════════════════════════
-   RENDER
-═══════════════════════════════════════════════════════════ */
 function renderCart() {
-  const listEl    = document.getElementById('cartItemsList');
-  const emptyEl   = document.getElementById('emptyState');
-  const countEl   = document.getElementById('itemCount');
-  const checkBtn  = document.getElementById('checkoutBtn');
-  const ids       = Object.keys(cart);
-  const totalQty  = ids.reduce((s, id) => s + (cart[id] || 0), 0);
+  const listEl   = document.getElementById('cartItemsList');
+  const emptyEl  = document.getElementById('emptyState');
+  const countEl  = document.getElementById('itemCount');
+  const checkBtn = document.getElementById('checkoutBtn');
+  const ids      = Object.keys(cart);
+  const totalQty = ids.reduce((s, id) => s + (cart[id] || 0), 0);
 
   countEl.textContent = totalQty;
 
-  /* ── Update browse grid buttons (no "In cart" badges per request) ── */
-  Object.keys(PRODUCTS).forEach(id => {
-    const btn = document.getElementById('addbtn-' + id);
-    if (!btn) return;
-    if (cart[id]) {
-      btn.textContent = '+ Add more';   /* subtle indicator without big badges */
-    } else {
-      btn.textContent = '+ Add to Cart';
-    }
-  });
-
-  /* ── Empty state ── */
   if (ids.length === 0) {
     emptyEl.style.display = '';
     listEl.innerHTML = '';
@@ -461,16 +370,13 @@ function renderCart() {
   emptyEl.style.display = 'none';
   checkBtn.disabled = false;
 
-  /* ── Cart item rows ── */
   let cartHtml = '';
   ids.forEach(id => {
-    const p   = PRODUCTS[id];
+    const p = PRODUCTS[id];
     if (!p) return;
     const qty       = cart[id] || 1;
     const lineTotal = p.price * qty;
-
-    /* FIX 1 — image comes from PRODUCTS[id].image, guaranteed correct */
-    const imgHtml = p.image
+    const imgHtml   = p.image
       ? `<img class="ci-img" src="${p.image}" alt="">`
       : `<div class="ci-img-ph">📦</div>`;
 
@@ -496,12 +402,9 @@ function renderCart() {
       </div>`;
   });
   listEl.innerHTML = cartHtml;
-
-  /* ── Order summary with per-item images ── */
   updateSummary(ids);
 }
 
-/* FIX 4 — Order summary: image + name + qty + line price per item */
 function updateSummary(ids) {
   const itemsEl    = document.getElementById('summaryItems');
   const subtotalEl = document.getElementById('summarySubtotal');
@@ -514,7 +417,7 @@ function updateSummary(ids) {
     return;
   }
 
-  let subtotal = 0;
+  let subtotal    = 0;
   let summaryHtml = '';
 
   ids.forEach(id => {
@@ -523,12 +426,9 @@ function updateSummary(ids) {
     const qty       = cart[id] || 1;
     const lineTotal = p.price * qty;
     subtotal += lineTotal;
-
-    /* Per-item image in the summary panel */
     const imgHtml = p.image
       ? `<img class="os-item-img" src="${p.image}" alt="">`
       : `<div class="os-item-img-ph">📦</div>`;
-
     summaryHtml += `
       <div class="os-item">
         ${imgHtml}
@@ -540,16 +440,11 @@ function updateSummary(ids) {
       </div>`;
   });
 
-  itemsEl.innerHTML = summaryHtml;
-
-  /* FIX 2 — subtotal and total update correctly every time */
+  itemsEl.innerHTML      = summaryHtml;
   subtotalEl.textContent = fmt(subtotal);
   totalEl.textContent    = fmt(subtotal);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   PAYMENT MODAL
-═══════════════════════════════════════════════════════════ */
 function openPaymentModal() {
   if (Object.keys(cart).length === 0) return;
   document.getElementById('pmOverlay').classList.add('open');
@@ -585,9 +480,9 @@ function proceedToCheckout() {
   closePaymentModal();
   window.location.href = '/order/{{ seller.slug }}/checkout/';
 }
+
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePaymentModal(); });
 
-/* ── Boot ─────────────────────────────────────────────────── */
 loadCart();
 renderCart();
 </script>

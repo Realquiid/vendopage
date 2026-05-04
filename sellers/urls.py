@@ -79,7 +79,7 @@ urlpatterns = [
     # ── Admin — reviews ───────────────────────────────────────
     path('admin-dashboard/reviews/', views.admin_reviews, name='admin_reviews'),
     path('admin-dashboard/reviews/<int:review_id>/delete/', views.admin_delete_review, name='admin_delete_review'),
-    path('get-my-ip/', views.get_my_ip, name='get_my_ip'),
+    path('settings/currency/', views.update_currency, name='update_currency'),
 
 
     # ── Admin — bank accounts ─────────────────────────────────

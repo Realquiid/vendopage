@@ -169,7 +169,6 @@ def logout_view(request):
 def upload_product(request):
     if request.method == 'GET':
         return render(request, 'dashboard/upload.html')
-
     try:
         seller = request.user
         description = request.POST.get('description', '').strip()
@@ -1165,11 +1164,7 @@ def order_confirmation(request):
 
     return redirect('order_detail', order_ref=str(order.order_ref))
 
-def get_my_ip(request):
-    from django.http import HttpResponse
-    import requests as req
-    ip = req.get('https://api.ipify.org').text
-    return HttpResponse(f'Your server IP is: {ip}')
+
 
 
 # ─────────────────────────────────────────────
@@ -1337,6 +1332,19 @@ def mark_shipped(request, order_ref):
         messages.success(request, '✓ Order marked as shipped. Buyer has been notified.')
         return redirect('vendor_order_detail', order_ref=order_ref)
     return render(request, 'dashboard/mark_shipped.html', {'order': order})
+
+
+@login_required
+@require_http_methods(["POST"])
+def update_currency(request):
+    currency_code   = request.POST.get('currency_code', '').strip()
+    currency_symbol = request.POST.get('currency_symbol', '').strip()
+    if currency_code and currency_symbol:
+        request.user.currency_code   = currency_code
+        request.user.currency_symbol = currency_symbol
+        request.user.save(update_fields=['currency_code', 'currency_symbol'])
+        messages.success(request, 'Currency updated.')
+    return redirect('settings')
 
 
 # ─────────────────────────────────────────────
