@@ -55,8 +55,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoise
-    'config.middleware.RedirectToWWWMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'config.middleware.RedirectToWWWMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
