@@ -1050,7 +1050,8 @@ def initiate_payment(request, slug):
     flw = FlutterwavePayment()
     result = flw.initialize_payment(
         email=buyer_email, amount=subtotal, tx_ref=tx_ref,
-        redirect_url=request.build_absolute_uri('/order/confirm/'),
+        # redirect_url=request.build_absolute_uri('/order/confirm/'),
+        redirect_url='https://www.vendopage.com/order/confirm/',
         customer_name=buyer_name,
         currency=request.session.get('buyer_currency_code', seller.currency_code or 'NGN'),
         title=pay_title, description=pay_description,
