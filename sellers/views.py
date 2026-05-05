@@ -1070,12 +1070,18 @@ def order_confirmation(request):
     transaction_id = request.GET.get('transaction_id', '')
     status         = request.GET.get('status', '')
 
+    logger.error(f"ORDER CONFIRM HIT — status={status} tx_ref={tx_ref} transaction_id={transaction_id}")
+    logger.error(f"SESSION pending_order = {request.session.get('pending_order')}")
+
+
     if status != 'successful' or not tx_ref or not transaction_id:
         request.session.pop('pending_order', None)
+        logger.error("FAILED AT: status check")
         return render(request, 'store/order_failed.html', {'reason': 'Payment was not completed.'})
 
     pending = request.session.get('pending_order')
     if not pending or pending.get('tx_ref') != tx_ref:
+        logger.error(f"FAILED AT: session check — pending={pending}")
         try:
             existing = Order.objects.get(flutterwave_tx_ref=tx_ref)
             return redirect('order_detail', order_ref=str(existing.order_ref))
@@ -1092,6 +1098,7 @@ def order_confirmation(request):
             and data.get('status') == 'successful'
             and data.get('tx_ref') == tx_ref):
         request.session.pop('pending_order', None)
+        logger.error(f"FAILED AT: payment verification — result={result}")
         return render(request, 'store/order_failed.html', {
             'reason': 'Payment verification failed. If you were charged, contact support.'
         })
