@@ -1520,52 +1520,167 @@ def update_currency(request):
     return redirect('settings')
 
 
-# ─────────────────────────────────────────────
-# PAYOUT
-# ─────────────────────────────────────────────
-def _trigger_payout(order):
-    """
-    Send the seller their payout from your Paystack Transfer Balance.
+# # ─────────────────────────────────────────────
+# # PAYOUT
+# # ─────────────────────────────────────────────
+# def _trigger_payout(order):
+#     """
+#     Send the seller their payout from your Paystack Transfer Balance.
  
-    Works for:
-      - Buyer confirms delivery (escrow)
-      - Direct payment (fires right after payment confirmed)
-      - 72hr auto-release
-      - Admin resolves dispute in seller's favour
-    """
+#     Works for:
+#       - Buyer confirms delivery (escrow)
+#       - Direct payment (fires right after payment confirmed)
+#       - 72hr auto-release
+#       - Admin resolves dispute in seller's favour
+#     """
+#     if order.payout_triggered:
+#         logger.info(f"Payout already triggered for order {order.order_ref} — skipping")
+#         return
+ 
+#     try:
+#         bank = order.seller.bank_account
+#     except VendorBankAccount.DoesNotExist:
+#         logger.error(
+#             f"PAYOUT FAILED: No bank account for seller "
+#             f"{order.seller.business_name} (order {order.order_ref})"
+#         )
+#         return
+ 
+#     psk    = PaystackPayment()
+ 
+#     # Optional: check balance first so we know what we're dealing with
+#     balance_check = psk.check_balance()
+#     if balance_check.get('status') == 'success':
+#         available = balance_check['balance']
+#         if available < order.vendor_payout:
+#             logger.error(
+#                 f"PAYOUT FAILED: Insufficient balance. "
+#                 f"Need ₦{order.vendor_payout}, have ₦{available}. "
+#                 f"Order: {order.order_ref}. "
+#                 f"ACTION REQUIRED: Top up Paystack balance or enable Manual Payouts."
+#             )
+#             # Don't return — still attempt the transfer, Paystack will give proper error
+#     else:
+#         logger.warning(f"Could not check balance before payout: {balance_check}")
+ 
+#     result = psk.transfer_to_vendor(order)
+ 
+#     # Paystack returns status: True (boolean) on success
+#     if result.get('status') is True:
+#         order.payout_triggered        = True
+#         order.payout_at               = timezone.now()
+#         order.status                  = 'completed'
+#         order.flutterwave_transfer_id = str(
+#             result.get('data', {}).get('transfer_code', '')
+#         )
+#         order.save(update_fields=[
+#             'payout_triggered', 'payout_at',
+#             'status', 'flutterwave_transfer_id'
+#         ])
+ 
+#         logger.info(
+#             f"PAYOUT SUCCESS: ₦{order.vendor_payout} → "
+#             f"{order.seller.business_name} | "
+#             f"order {str(order.order_ref)[:8].upper()} | "
+#             f"transfer {order.flutterwave_transfer_id}"
+#         )
+ 
+#         try:
+#             send_payment_sent_vendor(
+#                 to_email       = order.seller.email,
+#                 business_name  = order.seller.business_name,
+#                 amount         = order.vendor_payout,
+#                 currency       = order.currency,
+#                 order_ref      = str(order.order_ref)[:8].upper(),
+#                 bank_name      = bank.bank_name,
+#                 account_number = bank.account_number[-4:],
+#             )
+#         except Exception as e:
+#             logger.error(f"Payout email failed for order {order.order_ref}: {e}")
+ 
+#     else:
+#         # Transfer failed — log everything for manual recovery
+#         logger.error(
+#             f"PAYOUT FAILED: order={str(order.order_ref)[:8].upper()} | "
+#             f"seller={order.seller.business_name} | "
+#             f"amount=₦{order.vendor_payout} | "
+#             f"paystack_response={result}"
+#         )
+#         # NOTE: If this keeps failing, the two most likely causes are:
+#         # 1. Manual Payouts not enabled → email support@paystack.com
+#         # 2. Transfer OTP enabled → go to Paystack Settings → Preferences → disable
+ 
+
+def _trigger_payout(order):
+    logger.info(f"[PAYOUT] START — order={str(order.order_ref)[:8].upper()} seller={order.seller.business_name} amount=₦{order.vendor_payout}")
+ 
     if order.payout_triggered:
-        logger.info(f"Payout already triggered for order {order.order_ref} — skipping")
+        logger.info(f"[PAYOUT] SKIP — already triggered for {str(order.order_ref)[:8].upper()}")
         return
  
+    # ── Step 1: Check bank account ──────────────────────────────────
     try:
         bank = order.seller.bank_account
+        logger.info(
+            f"[PAYOUT] BANK — name={bank.bank_name} code={bank.bank_code} "
+            f"acct={bank.account_number} recipient={bank.recipient_code} "
+            f"verified={bank.is_verified}"
+        )
     except VendorBankAccount.DoesNotExist:
         logger.error(
-            f"PAYOUT FAILED: No bank account for seller "
-            f"{order.seller.business_name} (order {order.order_ref})"
+            f"[PAYOUT] FAIL — no bank account for seller {order.seller.business_name} "
+            f"order={str(order.order_ref)[:8].upper()}"
         )
         return
  
-    psk    = PaystackPayment()
+    # ── Step 2: Validate bank_code ──────────────────────────────────
+    if not bank.bank_code or not bank.bank_code.strip():
+        logger.error(
+            f"[PAYOUT] FAIL — bank_code is empty for {order.seller.business_name}. "
+            f"Seller must re-save bank details in Settings."
+        )
+        return
  
-    # Optional: check balance first so we know what we're dealing with
-    balance_check = psk.check_balance()
-    if balance_check.get('status') == 'success':
-        available = balance_check['balance']
+    psk = PaystackPayment()
+ 
+    # ── Step 3: Check Transfer Balance ─────────────────────────────
+    balance = psk.check_balance()
+    logger.info(f"[PAYOUT] BALANCE — {balance}")
+ 
+    if balance.get('status') == 'success':
+        available = balance['balance']
         if available < order.vendor_payout:
             logger.error(
-                f"PAYOUT FAILED: Insufficient balance. "
-                f"Need ₦{order.vendor_payout}, have ₦{available}. "
-                f"Order: {order.order_ref}. "
-                f"ACTION REQUIRED: Top up Paystack balance or enable Manual Payouts."
+                f"[PAYOUT] BALANCE LOW — have ₦{available} need ₦{order.vendor_payout}. "
+                f"Manual Payouts likely not enabled. "
+                f"Email support@paystack.com to enable."
             )
-            # Don't return — still attempt the transfer, Paystack will give proper error
     else:
-        logger.warning(f"Could not check balance before payout: {balance_check}")
+        logger.warning(f"[PAYOUT] BALANCE CHECK FAILED — {balance.get('message')}")
  
+    # ── Step 4: Create recipient if missing ────────────────────────
+    if not bank.recipient_code or not bank.recipient_code.strip():
+        logger.info(f"[PAYOUT] CREATING RECIPIENT for {order.seller.business_name}")
+        recipient_result = psk.create_transfer_recipient(bank)
+        logger.info(f"[PAYOUT] RECIPIENT RESULT — {recipient_result}")
+ 
+        if recipient_result.get('status') != 'success':
+            logger.error(
+                f"[PAYOUT] FAIL — could not create recipient: "
+                f"{recipient_result.get('message')}"
+            )
+            return
+        bank.refresh_from_db()
+ 
+    # ── Step 5: Initiate transfer ───────────────────────────────────
+    logger.info(
+        f"[PAYOUT] TRANSFER — sending ₦{order.vendor_payout} "
+        f"to recipient {bank.recipient_code}"
+    )
     result = psk.transfer_to_vendor(order)
+    logger.info(f"[PAYOUT] TRANSFER RESULT — {result}")
  
-    # Paystack returns status: True (boolean) on success
+    # ── Step 6: Handle result ───────────────────────────────────────
     if result.get('status') is True:
         order.payout_triggered        = True
         order.payout_at               = timezone.now()
@@ -1575,16 +1690,14 @@ def _trigger_payout(order):
         )
         order.save(update_fields=[
             'payout_triggered', 'payout_at',
-            'status', 'flutterwave_transfer_id'
+            'status', 'flutterwave_transfer_id',
         ])
- 
         logger.info(
-            f"PAYOUT SUCCESS: ₦{order.vendor_payout} → "
-            f"{order.seller.business_name} | "
-            f"order {str(order.order_ref)[:8].upper()} | "
-            f"transfer {order.flutterwave_transfer_id}"
+            f"[PAYOUT] SUCCESS ✅ — "
+            f"order={str(order.order_ref)[:8].upper()} "
+            f"transfer={order.flutterwave_transfer_id} "
+            f"seller={order.seller.business_name}"
         )
- 
         try:
             send_payment_sent_vendor(
                 to_email       = order.seller.email,
@@ -1596,21 +1709,17 @@ def _trigger_payout(order):
                 account_number = bank.account_number[-4:],
             )
         except Exception as e:
-            logger.error(f"Payout email failed for order {order.order_ref}: {e}")
+            logger.error(f"[PAYOUT] EMAIL FAILED (non-critical) — {e}")
  
     else:
-        # Transfer failed — log everything for manual recovery
         logger.error(
-            f"PAYOUT FAILED: order={str(order.order_ref)[:8].upper()} | "
-            f"seller={order.seller.business_name} | "
-            f"amount=₦{order.vendor_payout} | "
-            f"paystack_response={result}"
+            f"[PAYOUT] FAIL ❌ — "
+            f"order={str(order.order_ref)[:8].upper()} "
+            f"seller={order.seller.business_name} "
+            f"paystack_message={result.get('message')} "
+            f"full_response={result}"
         )
-        # NOTE: If this keeps failing, the two most likely causes are:
-        # 1. Manual Payouts not enabled → email support@paystack.com
-        # 2. Transfer OTP enabled → go to Paystack Settings → Preferences → disable
  
-
 
 def auto_release_expired_orders():
     """

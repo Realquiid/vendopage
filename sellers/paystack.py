@@ -160,67 +160,115 @@ class PaystackPayment:
     # TRANSFER — send seller their payout
     # ─────────────────────────────────────────────────────────────
 
-    def transfer_to_vendor(self, order) -> dict:
-        """
-        Send the seller their cut (vendor_payout) from your Transfer Balance.
-        Called after:
-          - Buyer confirms delivery (escrow)
-          - Direct payment order confirmed (immediate)
-          - 72hr auto-release fires
-          - Admin resolves dispute in seller's favour
+    # def transfer_to_vendor(self, order) -> dict:
+    #     """
+    #     Send the seller their cut (vendor_payout) from your Transfer Balance.
+    #     Called after:
+    #       - Buyer confirms delivery (escrow)
+    #       - Direct payment order confirmed (immediate)
+    #       - 72hr auto-release fires
+    #       - Admin resolves dispute in seller's favour
 
-        Requires:
-          - Manual Payouts enabled on your Paystack account
-          - Seller has a VendorBankAccount with bank_code saved
-        """
+    #     Requires:
+    #       - Manual Payouts enabled on your Paystack account
+    #       - Seller has a VendorBankAccount with bank_code saved
+    #     """
+    #     try:
+    #         bank = order.seller.bank_account
+    #     except Exception:
+    #         logger.error(
+    #             "No bank account for seller %s — payout skipped",
+    #             order.seller.business_name
+    #         )
+    #         return {"status": "error", "message": "No bank account configured"}
+
+    #     # Create recipient code if missing
+    #     if not bank.recipient_code:
+    #         result = self.create_transfer_recipient(bank)
+    #         if result.get('status') != 'success':
+    #             logger.error(
+    #                 "Could not create transfer recipient for %s: %s",
+    #                 order.seller.business_name, result
+    #             )
+    #             return result
+
+    #     amount_kobo = int(Decimal(str(order.vendor_payout)) * 100)
+
+    #     payload = {
+    #         "source":    "balance",
+    #         "amount":    amount_kobo,
+    #         "recipient": bank.recipient_code,
+    #         "reason":    f"Vendopage payout — Order #{str(order.order_ref)[:8].upper()}",
+    #         "reference": f"VDP-PAY-{str(order.order_ref)[:16]}",
+    #     }
+
+    #     try:
+    #         resp = requests.post(
+    #             f"{self.BASE_URL}/transfer",
+    #             json=payload, headers=self._headers(), timeout=30
+    #         )
+    #         resp.raise_for_status()
+    #         data = resp.json()
+    #         logger.info(
+    #             "Transfer API response for order %s: status=%s message=%s",
+    #             order.order_ref, data.get('status'), data.get('message')
+    #         )
+    #         return data
+
+    #     except requests.exceptions.RequestException as e:
+    #         logger.error(
+    #             "Paystack transfer error for order %s: %s",
+    #             order.order_ref, e
+    #         )
+    #         return {"status": False, "message": str(e)}
+
+
+    def transfer_to_vendor(self, order) -> dict:
         try:
             bank = order.seller.bank_account
-        except Exception:
-            logger.error(
-                "No bank account for seller %s — payout skipped",
-                order.seller.business_name
-            )
-            return {"status": "error", "message": "No bank account configured"}
-
-        # Create recipient code if missing
+        except Exception as e:
+            return {"status": "error", "message": f"No bank account: {e}"}
+ 
         if not bank.recipient_code:
             result = self.create_transfer_recipient(bank)
             if result.get('status') != 'success':
-                logger.error(
-                    "Could not create transfer recipient for %s: %s",
-                    order.seller.business_name, result
-                )
                 return result
-
+ 
         amount_kobo = int(Decimal(str(order.vendor_payout)) * 100)
-
+        reference   = f"VDP-PAY-{str(order.order_ref)[:16]}"
+ 
         payload = {
             "source":    "balance",
             "amount":    amount_kobo,
             "recipient": bank.recipient_code,
             "reason":    f"Vendopage payout — Order #{str(order.order_ref)[:8].upper()}",
-            "reference": f"VDP-PAY-{str(order.order_ref)[:16]}",
+            "reference": reference,
         }
-
+ 
+        logger.info(
+            f"[TRANSFER API] POST /transfer — "
+            f"amount_kobo={amount_kobo} "
+            f"recipient={bank.recipient_code} "
+            f"reference={reference}"
+        )
+ 
         try:
             resp = requests.post(
                 f"{self.BASE_URL}/transfer",
                 json=payload, headers=self._headers(), timeout=30
             )
-            resp.raise_for_status()
-            data = resp.json()
+ 
             logger.info(
-                "Transfer API response for order %s: status=%s message=%s",
-                order.order_ref, data.get('status'), data.get('message')
+                f"[TRANSFER API] HTTP {resp.status_code} — {resp.text}"
             )
+ 
+            data = resp.json()
             return data
-
+ 
         except requests.exceptions.RequestException as e:
-            logger.error(
-                "Paystack transfer error for order %s: %s",
-                order.order_ref, e
-            )
+            logger.error(f"[TRANSFER API] RequestException — {e}")
             return {"status": False, "message": str(e)}
+ 
 
     def create_transfer_recipient(self, bank_account) -> dict:
         """
