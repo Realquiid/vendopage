@@ -636,48 +636,138 @@ def paystack_webhook(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def paystack_order_webhook(request):
-    """Handles order payments webhook — safety net if redirect fails."""
+    """
+    Handles all order-related Paystack webhook events.
+    Register this URL in Paystack Dashboard → Settings → API Keys & Webhooks.
+    """
     try:
-        signature = request.headers.get('x-paystack-signature')
+        signature = request.headers.get('x-paystack-signature', '')
         psk       = PaystackPayment()
+ 
         if not psk.verify_webhook_signature(request.body, signature):
+            logger.warning("Webhook signature verification failed")
             return JsonResponse({'status': 'error'}, status=400)
-
+ 
         data   = json.loads(request.body)
-        event  = data.get('event')
+        event  = data.get('event', '')
         charge = data.get('data', {})
-
-        if event != 'charge.success':
-            return JsonResponse({'status': 'received'})
-
-        reference = charge.get('reference', '')
-        if not reference.startswith('VDP-ORD-'):
-            return JsonResponse({'status': 'skipped'})
-
-        # Already processed?
-        try:
-            Order.objects.get(flutterwave_tx_ref=reference, payment_verified=True)
-            return JsonResponse({'status': 'already_processed'})
-        except Order.DoesNotExist:
-            pass
-
-        # Fix unverified order
-        try:
-            order = Order.objects.get(flutterwave_tx_ref=reference, payment_verified=False)
-            order.status           = 'paid'
-            order.payment_verified = True
-            order.paid_at          = timezone.now()
-            order.save()
-            return JsonResponse({'status': 'fixed_unverified_order'})
-        except Order.DoesNotExist:
-            pass
-
-        logger.error(f"WEBHOOK: Payment received but no order found for reference={reference}")
-        return JsonResponse({'status': 'logged_for_review'})
-
+ 
+        logger.info(f"WEBHOOK received: event={event}")
+ 
+        # ── Payment succeeded ──────────────────────────────────────
+        if event == 'charge.success':
+            reference = charge.get('reference', '')
+ 
+            if not reference.startswith('VDP-ORD-'):
+                return JsonResponse({'status': 'skipped'})
+ 
+            # Already processed?
+            try:
+                Order.objects.get(flutterwave_tx_ref=reference, payment_verified=True)
+                return JsonResponse({'status': 'already_processed'})
+            except Order.DoesNotExist:
+                pass
+ 
+            # Fix unverified order (payment arrived but redirect failed)
+            try:
+                order = Order.objects.get(
+                    flutterwave_tx_ref=reference,
+                    payment_verified=False
+                )
+                order.status           = 'paid'
+                order.payment_verified = True
+                order.paid_at          = timezone.now()
+                order.save(update_fields=['status', 'payment_verified', 'paid_at'])
+                logger.info(f"WEBHOOK: Fixed unverified order {reference}")
+                return JsonResponse({'status': 'fixed_order'})
+            except Order.DoesNotExist:
+                logger.error(f"WEBHOOK: No order found for reference {reference}")
+                return JsonResponse({'status': 'logged'})
+ 
+        # ── Refund pending ─────────────────────────────────────────
+        elif event == 'refund.pending':
+            ref = charge.get('transaction', {}).get('reference', '')
+            logger.info(f"REFUND PENDING: transaction {ref}")
+ 
+        # ── Refund processed (completed successfully) ──────────────
+        elif event == 'refund.processed':
+            ref = charge.get('transaction', {}).get('reference', '')
+            logger.info(f"REFUND PROCESSED: transaction {ref}")
+            try:
+                order = Order.objects.get(flutterwave_tx_ref=ref)
+                logger.info(
+                    f"Refund confirmed for order {order.order_ref} "
+                    f"→ buyer {order.buyer_name} ({order.buyer_email})"
+                )
+                # Optionally send buyer a "your refund is complete" email here
+            except Order.DoesNotExist:
+                logger.warning(f"Refund processed but no order for ref {ref}")
+ 
+        # ── Refund failed ──────────────────────────────────────────
+        elif event == 'refund.failed':
+            ref = charge.get('transaction', {}).get('reference', '')
+            logger.error(
+                f"REFUND FAILED for transaction {ref}. "
+                f"Manual action required in Paystack dashboard."
+            )
+            try:
+                order = Order.objects.get(flutterwave_tx_ref=ref)
+                # Clear the refund reference so admin knows it needs retry
+                order.refund_reference = ''
+                order.save(update_fields=['refund_reference'])
+                logger.error(
+                    f"MANUAL REFUND NEEDED: "
+                    f"order={str(order.order_ref)[:8].upper()} | "
+                    f"buyer={order.buyer_email} | "
+                    f"amount=₦{order.subtotal}"
+                )
+            except Order.DoesNotExist:
+                pass
+ 
+        # ── Transfer success (payout confirmed) ───────────────────
+        elif event == 'transfer.success':
+            transfer_code = charge.get('transfer_code', '')
+            logger.info(f"TRANSFER SUCCESS: {transfer_code}")
+            # Order already marked completed in _trigger_payout
+            # This is just a confirmation log
+ 
+        # ── Transfer failed ────────────────────────────────────────
+        elif event == 'transfer.failed':
+            transfer_code = charge.get('transfer_code', '')
+            reference     = charge.get('reference', '')
+            logger.error(
+                f"TRANSFER FAILED: code={transfer_code} ref={reference}. "
+                f"Check Paystack dashboard. May need manual retry."
+            )
+            # Try to find the order and mark payout as not triggered
+            # so it can be retried
+            if reference.startswith('VDP-PAY-'):
+                order_ref_part = reference.replace('VDP-PAY-', '')
+                try:
+                    order = Order.objects.get(
+                        order_ref__startswith=order_ref_part[:16],
+                        payout_triggered=True
+                    )
+                    order.payout_triggered = False
+                    order.status           = 'delivered'
+                    order.save(update_fields=['payout_triggered', 'status'])
+                    logger.error(
+                        f"Marked order {order.order_ref} payout as failed — "
+                        f"needs retry"
+                    )
+                except Order.DoesNotExist:
+                    pass
+ 
+        return JsonResponse({'status': 'received'})
+ 
     except Exception as e:
         logger.error(f"Order webhook error: {e}")
         return JsonResponse({'status': 'error'}, status=500)
+ 
+
+
+
+
 # ─────────────────────────────────────────────
 # UPLOAD BATCH
 # ─────────────────────────────────────────────
@@ -1236,37 +1326,75 @@ def confirm_receipt(request, order_ref):
 
 @require_http_methods(["GET", "POST"])
 def raise_dispute(request, order_ref):
+    """
+    Buyer raises a dispute.
+    When raised: order is locked, no payout can fire until admin resolves.
+    Buyer gets message that their payment is protected.
+    """
     order = get_object_or_404(Order, order_ref=order_ref)
+ 
     if hasattr(order, 'dispute'):
         messages.info(request, 'A dispute already exists for this order.')
         return redirect('order_detail', order_ref=order_ref)
+ 
     if order.status not in ('shipped', 'paid'):
         messages.error(request, 'You can only dispute an active order.')
         return redirect('order_detail', order_ref=order_ref)
+ 
+    # Can't dispute if payout already sent (shouldn't normally happen,
+    # but guard against edge cases)
+    if order.payout_triggered:
+        messages.error(
+            request,
+            'Payout has already been sent for this order. '
+            'Please contact support directly.'
+        )
+        return redirect('order_detail', order_ref=order_ref)
+ 
     if request.method == 'POST':
         reason        = request.POST.get('reason', 'other')
         buyer_message = request.POST.get('message', '').strip()
         evidence_url  = request.POST.get('evidence_url', '').strip()
+ 
         if not buyer_message:
             messages.error(request, 'Please describe the issue.')
             return render(request, 'store/dispute.html', {'order': order})
-        Dispute.objects.create(order=order, raised_by='buyer', reason=reason,
-                               buyer_message=buyer_message, buyer_evidence=evidence_url)
+ 
+        Dispute.objects.create(
+            order          = order,
+            raised_by      = 'buyer',
+            reason         = reason,
+            buyer_message  = buyer_message,
+            buyer_evidence = evidence_url,
+        )
+ 
+        # Lock the order — _trigger_payout checks payout_triggered == False
+        # but status 'disputed' also prevents auto-release from firing payout
         order.status = 'disputed'
-        order.save()
+        order.save(update_fields=['status'])
+ 
+        # Notify both parties
         try:
             send_dispute_opened(
-                vendor_email=order.seller.email,
-                buyer_email=order.buyer_email,
-                order_ref=str(order.order_ref)[:8].upper(),
-                reason=reason,
-                buyer_name=order.buyer_name, 
-                order_url=f"https://www.vendopage.com/order/{order.order_ref}/",
+                vendor_email = order.seller.email,
+                buyer_email  = order.buyer_email,
+                order_ref    = str(order.order_ref)[:8].upper(),
+                reason       = reason,
+                buyer_name   = order.buyer_name,
+                order_url    = f"https://www.vendopage.com/order/{order.order_ref}/",
             )
         except Exception as e:
             logger.error(f"Dispute email failed: {e}")
-        messages.success(request, 'Dispute raised. Our team will review it within 48 hours.')
+ 
+        messages.success(
+            request,
+            '✅ Dispute raised successfully. '
+            'Your payment is protected and will not be released to the seller '
+            'until our team reviews your case. '
+            'We will respond within 48 hours.'
+        )
         return redirect('order_detail', order_ref=order_ref)
+ 
     return render(request, 'store/dispute.html', {'order': order})
 
 
@@ -1396,36 +1524,92 @@ def update_currency(request):
 # PAYOUT
 # ─────────────────────────────────────────────
 def _trigger_payout(order):
+    """
+    Send the seller their payout from your Paystack Transfer Balance.
+ 
+    Works for:
+      - Buyer confirms delivery (escrow)
+      - Direct payment (fires right after payment confirmed)
+      - 72hr auto-release
+      - Admin resolves dispute in seller's favour
+    """
     if order.payout_triggered:
+        logger.info(f"Payout already triggered for order {order.order_ref} — skipping")
         return
+ 
     try:
         bank = order.seller.bank_account
     except VendorBankAccount.DoesNotExist:
-        logger.error(f"No bank account for seller {order.seller.id} — payout skipped")
+        logger.error(
+            f"PAYOUT FAILED: No bank account for seller "
+            f"{order.seller.business_name} (order {order.order_ref})"
+        )
         return
-
-    psk = PaystackPayment()
+ 
+    psk    = PaystackPayment()
+ 
+    # Optional: check balance first so we know what we're dealing with
+    balance_check = psk.check_balance()
+    if balance_check.get('status') == 'success':
+        available = balance_check['balance']
+        if available < order.vendor_payout:
+            logger.error(
+                f"PAYOUT FAILED: Insufficient balance. "
+                f"Need ₦{order.vendor_payout}, have ₦{available}. "
+                f"Order: {order.order_ref}. "
+                f"ACTION REQUIRED: Top up Paystack balance or enable Manual Payouts."
+            )
+            # Don't return — still attempt the transfer, Paystack will give proper error
+    else:
+        logger.warning(f"Could not check balance before payout: {balance_check}")
+ 
     result = psk.transfer_to_vendor(order)
-
-    if result.get('status') == True or result.get('status') == 'success':
-        order.payout_triggered = True
-        order.payout_at        = timezone.now()
-        order.status           = 'completed'
-        order.flutterwave_transfer_id = str(result.get('data', {}).get('transfer_code', ''))
-        order.save()
+ 
+    # Paystack returns status: True (boolean) on success
+    if result.get('status') is True:
+        order.payout_triggered        = True
+        order.payout_at               = timezone.now()
+        order.status                  = 'completed'
+        order.flutterwave_transfer_id = str(
+            result.get('data', {}).get('transfer_code', '')
+        )
+        order.save(update_fields=[
+            'payout_triggered', 'payout_at',
+            'status', 'flutterwave_transfer_id'
+        ])
+ 
+        logger.info(
+            f"PAYOUT SUCCESS: ₦{order.vendor_payout} → "
+            f"{order.seller.business_name} | "
+            f"order {str(order.order_ref)[:8].upper()} | "
+            f"transfer {order.flutterwave_transfer_id}"
+        )
+ 
         try:
             send_payment_sent_vendor(
-                to_email=order.seller.email,
-                business_name=order.seller.business_name,
-                amount=order.vendor_payout, currency=order.currency,
-                order_ref=str(order.order_ref)[:8].upper(),
-                bank_name=bank.bank_name,
-                account_number=bank.account_number[-4:],
+                to_email       = order.seller.email,
+                business_name  = order.seller.business_name,
+                amount         = order.vendor_payout,
+                currency       = order.currency,
+                order_ref      = str(order.order_ref)[:8].upper(),
+                bank_name      = bank.bank_name,
+                account_number = bank.account_number[-4:],
             )
         except Exception as e:
-            logger.error(f"Payout email failed: {e}")
+            logger.error(f"Payout email failed for order {order.order_ref}: {e}")
+ 
     else:
-        logger.error(f"Paystack payout failed for order {order.order_ref}: {result}")
+        # Transfer failed — log everything for manual recovery
+        logger.error(
+            f"PAYOUT FAILED: order={str(order.order_ref)[:8].upper()} | "
+            f"seller={order.seller.business_name} | "
+            f"amount=₦{order.vendor_payout} | "
+            f"paystack_response={result}"
+        )
+        # NOTE: If this keeps failing, the two most likely causes are:
+        # 1. Manual Payouts not enabled → email support@paystack.com
+        # 2. Transfer OTP enabled → go to Paystack Settings → Preferences → disable
+ 
 
 
 def auto_release_expired_orders():
@@ -1728,63 +1912,160 @@ def admin_disputes(request):
         'open_disputes_count': open_disputes_count, 'pending_payouts_count': pending_payouts_count,
     })
 
-
+ 
 @staff_member_required
 @require_http_methods(["POST"])
 def resolve_dispute(request, dispute_id):
+    """
+    Admin resolves a dispute. Three outcomes:
+ 
+    refund_buyer:
+        Paystack Refund API sends full order amount back to buyer.
+        Seller gets nothing. Order marked refunded.
+        Note: Paystack reverses the full transaction amount from your balance.
+        This is normal — your 5% fee covers occasional refund costs.
+ 
+    pay_vendor:
+        Transfer API sends seller's 95% cut to their bank.
+        Buyer gets nothing back. Order marked completed.
+ 
+    under_review:
+        No money moves. Notes saved. Status updated.
+    """
     dispute = get_object_or_404(Dispute, id=dispute_id)
     order   = dispute.order
     action  = request.POST.get('action')
     note    = request.POST.get('admin_note', '').strip()
-
+ 
     dispute.admin_note  = note
     dispute.resolved_at = timezone.now()
-
+ 
+    # ── REFUND BUYER ────────────────────────────────────────────────
     if action == 'refund_buyer':
-        dispute.status = 'resolved_buyer'
-        order.status   = 'refunded'
-        order.save()
-        dispute.save()
-        # ── NEW: notify buyer of refund decision ──
-        try:
-            send_dispute_resolved_buyer(
-                to_email=order.buyer_email,
-                buyer_name=order.buyer_name,
-                order_ref=str(order.order_ref)[:8].upper(),
-                admin_note=note,
+ 
+        # Guards
+        if order.payout_triggered:
+            messages.error(
+                request,
+                f'Cannot refund order #{str(order.order_ref)[:8].upper()} — '
+                f'payout was already sent to the seller. Resolve manually.'
             )
-        except Exception as e:
-            logger.error(f"Dispute resolved buyer email failed: {e}")
-        messages.success(request, f'Dispute resolved — refund issued to buyer for order {str(order.order_ref)[:8].upper()}.')
-
+            return redirect('admin_disputes')
+ 
+        if order.status == 'refunded':
+            messages.warning(
+                request,
+                f'Order #{str(order.order_ref)[:8].upper()} is already refunded.'
+            )
+            return redirect('admin_disputes')
+ 
+        psk    = PaystackPayment()
+        result = psk.refund_transaction(
+            transaction_reference = order.flutterwave_tx_ref,
+            amount                = None,  # full refund
+        )
+ 
+        if result.get('status') == 'success':
+            order.status              = 'refunded'
+            order.refund_reference    = result.get('refund_id', '')
+            order.refund_initiated_at = timezone.now()
+            order.save(update_fields=[
+                'status', 'refund_reference', 'refund_initiated_at'
+            ])
+ 
+            dispute.status = 'resolved_buyer'
+            dispute.save()
+ 
+            # Email buyer
+            try:
+                send_dispute_resolved_buyer(
+                    to_email   = order.buyer_email,
+                    buyer_name = order.buyer_name,
+                    order_ref  = str(order.order_ref)[:8].upper(),
+                    admin_note = note,
+                )
+            except Exception as e:
+                logger.error(f"Dispute resolved buyer email failed: {e}")
+ 
+            # Email seller explaining why they didn't get paid
+            try:
+                send_dispute_resolved_vendor(
+                    to_email      = order.seller.email,
+                    business_name = order.seller.business_name,
+                    order_ref     = str(order.order_ref)[:8].upper(),
+                    admin_note    = f"Dispute resolved in buyer's favour. {note}",
+                )
+            except Exception as e:
+                logger.error(f"Dispute resolved seller email failed: {e}")
+ 
+            messages.success(
+                request,
+                f'✅ Refund initiated for order #{str(order.order_ref)[:8].upper()} '
+                f'→ {order.buyer_name}. '
+                f'Paystack will process within 5–10 business days. '
+                f'Refund ID: {result.get("refund_id")}'
+            )
+ 
+        else:
+            logger.error(
+                f"REFUND API FAILED for order {order.order_ref}: {result}"
+            )
+            messages.error(
+                request,
+                f'❌ Paystack refund failed: {result.get("message")}. '
+                f'Go to your Paystack dashboard → Transactions → find reference '
+                f'{order.flutterwave_tx_ref} → click Refund manually.'
+            )
+ 
+    # ── PAY VENDOR ──────────────────────────────────────────────────
     elif action == 'pay_vendor':
+ 
         dispute.status = 'resolved_vendor'
         dispute.save()
-        order.status   = 'delivered'
-        order.save()
+ 
+        order.status = 'delivered'
+        order.save(update_fields=['status'])
+ 
         _trigger_payout(order)
-        # ── NEW: notify vendor of payout decision ──
+ 
         try:
             send_dispute_resolved_vendor(
-                to_email=order.seller.email,
-                business_name=order.seller.business_name,
-                order_ref=str(order.order_ref)[:8].upper(),
-                admin_note=note,
+                to_email      = order.seller.email,
+                business_name = order.seller.business_name,
+                order_ref     = str(order.order_ref)[:8].upper(),
+                admin_note    = note,
             )
         except Exception as e:
             logger.error(f"Dispute resolved vendor email failed: {e}")
-        messages.success(request, f'Dispute resolved — payment released to vendor for order {str(order.order_ref)[:8].upper()}.')
-
+ 
+        if order.payout_triggered:
+            messages.success(
+                request,
+                f'✅ Dispute resolved — ₦{order.vendor_payout} sent to '
+                f'{order.seller.business_name}.'
+            )
+        else:
+            messages.warning(
+                request,
+                f'Dispute marked resolved but payout transfer failed. '
+                f'Check logs and trigger manually from Payouts page.'
+            )
+ 
+    # ── UNDER REVIEW ────────────────────────────────────────────────
     elif action == 'under_review':
         dispute.status = 'under_review'
         dispute.save()
-        messages.info(request, 'Dispute marked as under review.')
-
+        messages.info(
+            request,
+            'Dispute marked as under review. No money has moved.'
+        )
+ 
     else:
         messages.error(request, 'Invalid action.')
-
+ 
     return redirect('admin_disputes')
-
+ 
+ 
 
 @staff_member_required
 def admin_orders(request):

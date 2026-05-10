@@ -79,7 +79,7 @@
   <a href="?status=delivered" class="stab {% if status_filter == 'delivered' %}active{% endif %}">✅ Delivered</a>
   <a href="?status=disputed" class="stab {% if status_filter == 'disputed' %}active{% endif %}">⚠️ Disputed</a>
   <a href="?status=refunded" class="stab {% if status_filter == 'refunded' %}active{% endif %}">↩️ Refunded</a>
-  <a href="?payout=pending" class="stab {% if request.GET.payout == 'pending' %}active{% endif %}" style="{% if request.GET.payout == 'pending' %}background:var(--amber);color:#000;{% endif %}">💸 Payout Pending</a>
+  <a href="?payout=pending" class="stab {% if request.GET.payout == 'pending' %}active{% endif %}">💸 Payout Pending</a>
 </div>
 
 <!-- Search bar -->
@@ -87,7 +87,7 @@
   <form method="GET" style="display:flex;gap:10px;align-items:center;flex:1;flex-wrap:wrap;">
     <input type="hidden" name="status" value="{{ status_filter }}">
     <input type="text" name="search" value="{{ request.GET.search }}"
-      placeholder="Order ref, buyer name, email, Flutterwave ref…"
+      placeholder="Order ref, buyer name, email, Paystack ref…"
       class="form-input" style="max-width:320px;">
     <button type="submit" class="btn btn-amber btn-sm">Search</button>
     <a href="{% url 'admin_orders' %}" class="btn btn-ghost btn-sm">Clear</a>
@@ -116,7 +116,10 @@
       <tr style="cursor:pointer;" onclick="toggleOrder('{{ order.id }}')">
         <td class="mono amber" style="font-size:12px;font-weight:600;">#{{ order.order_ref|slice:":8"|upper }}</td>
         <td>
-          <a href="{% url 'admin_seller_detail' order.seller.id %}" onclick="event.stopPropagation();" style="font-weight:600;font-size:13px;text-decoration:none;color:var(--text);">{{ order.seller.business_name }}</a>
+          <a href="{% url 'admin_seller_detail' order.seller.id %}" onclick="event.stopPropagation();"
+             style="font-weight:600;font-size:13px;text-decoration:none;color:var(--text);">
+            {{ order.seller.business_name }}
+          </a>
         </td>
         <td>
           <div style="font-size:13px;">{{ order.buyer_name }}</div>
@@ -126,13 +129,21 @@
         <td class="mono red">{{ order.currency }} {{ order.platform_fee|floatformat:0 }}</td>
         <td class="mono green" style="font-weight:600;">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</td>
         <td>
-          {% if order.status == 'pending' %}<span class="badge badge-gray">Pending</span>
-          {% elif order.status == 'paid' %}<span class="badge badge-amber">Paid</span>
-          {% elif order.status == 'shipped' %}<span class="badge badge-blue">Shipped</span>
-          {% elif order.status == 'delivered' or order.status == 'completed' %}<span class="badge badge-green">Delivered</span>
-          {% elif order.status == 'disputed' %}<span class="badge badge-red">Disputed</span>
-          {% elif order.status == 'refunded' %}<span class="badge badge-purple">Refunded</span>
-          {% else %}<span class="badge badge-gray">{{ order.status }}</span>{% endif %}
+          {% if order.status == 'pending' %}
+            <span class="badge badge-gray">Pending</span>
+          {% elif order.status == 'paid' %}
+            <span class="badge badge-amber">Paid</span>
+          {% elif order.status == 'shipped' %}
+            <span class="badge badge-blue">Shipped</span>
+          {% elif order.status == 'delivered' or order.status == 'completed' %}
+            <span class="badge badge-green">Delivered</span>
+          {% elif order.status == 'disputed' %}
+            <span class="badge badge-red">Disputed</span>
+          {% elif order.status == 'refunded' %}
+            <span class="badge badge-purple">Refunded</span>
+          {% else %}
+            <span class="badge badge-gray">{{ order.status }}</span>
+          {% endif %}
         </td>
         <td>
           {% if order.payout_triggered %}
@@ -143,22 +154,15 @@
         </td>
         <td class="mono muted">{{ order.created_at|date:"M d, Y" }}</td>
         <td onclick="event.stopPropagation();">
-          <div style="display:flex;gap:4px;">
-            {% if not order.payout_triggered and order.status in 'delivered,completed' %}
-            <form method="POST" action="{% url 'admin_trigger_payout' order.id %}">
-              {% csrf_token %}
-              <button class="btn btn-green btn-sm" onclick="return confirm('Trigger payout for this order?')">💸</button>
-            </form>
-            {% endif %}
-            {% if order.status == 'shipped' %}
-            <form method="POST" action="{% url 'admin_mark_delivered' order.id %}">
-              {% csrf_token %}
-              <button class="btn btn-ghost btn-sm">✓ Delivered</button>
-            </form>
-            {% endif %}
-          </div>
+          {% if order.status == 'shipped' %}
+          <form method="POST" action="{% url 'admin_mark_delivered' order.id %}">
+            {% csrf_token %}
+            <button class="btn btn-ghost btn-sm">✓ Delivered</button>
+          </form>
+          {% endif %}
         </td>
       </tr>
+
       <!-- Expanded row -->
       <tr id="order-exp-{{ order.id }}" style="display:none;">
         <td colspan="10" style="padding:0;">
@@ -167,7 +171,9 @@
               <div>
                 <div class="mono muted" style="font-size:10px;margin-bottom:4px;">DELIVERY ADDRESS</div>
                 <div style="font-size:13px;">{{ order.buyer_name }} · {{ order.buyer_phone }}</div>
-                <div style="font-size:13px;color:var(--text2);">{{ order.delivery_address }}{% if order.delivery_city %}, {{ order.delivery_city }}{% endif %}</div>
+                <div style="font-size:13px;color:var(--text2);">
+                  {{ order.delivery_address }}{% if order.delivery_city %}, {{ order.delivery_city }}{% endif %}
+                </div>
               </div>
               <div>
                 {% if order.tracking_info %}
@@ -175,7 +181,9 @@
                 <div style="font-size:13px;">{{ order.courier_name|default:"" }} · {{ order.tracking_info }}</div>
                 {% endif %}
                 {% if order.auto_release_at and order.status == 'shipped' %}
-                <div class="mono" style="font-size:11px;color:var(--amber);margin-top:4px;">Auto-release: {{ order.auto_release_at|date:"M d, Y H:i" }}</div>
+                <div class="mono" style="font-size:11px;color:var(--amber);margin-top:4px;">
+                  Auto-release: {{ order.auto_release_at|date:"M d, Y H:i" }}
+                </div>
                 {% endif %}
               </div>
             </div>
@@ -185,30 +193,43 @@
                 {% if item.product_image_url %}
                   <img class="order-item-thumb" src="{{ item.product_image_url }}" alt="">
                 {% else %}
-                  <div class="order-item-thumb" style="background:var(--bg3);display:flex;align-items:center;justify-content:center;">📦</div>
+                  <div class="order-item-thumb"
+                       style="background:var(--bg3);display:flex;align-items:center;justify-content:center;">📦</div>
                 {% endif %}
                 <div style="flex:1;">
                   <div style="font-size:13px;font-weight:600;">{{ item.product_name }}</div>
-                  <div class="mono muted" style="font-size:11px;">{{ item.quantity }} × {{ order.currency }} {{ item.price|floatformat:0 }}</div>
+                  <div class="mono muted" style="font-size:11px;">
+                    {{ item.quantity }} × {{ order.currency }} {{ item.price|floatformat:0 }}
+                  </div>
                 </div>
-                <div class="mono amber" style="font-size:13px;font-weight:600;">{{ order.currency }} {{ item.line_total|floatformat:0 }}</div>
+                <div class="mono amber" style="font-size:13px;font-weight:600;">
+                  {{ order.currency }} {{ item.line_total|floatformat:0 }}
+                </div>
               </div>
               {% endfor %}
             </div>
             {% if order.flutterwave_tx_ref %}
-            <div class="mono muted" style="font-size:11px;margin-top:12px;">Paystack ref: {{ order.flutterwave_tx_ref }} · {{ order.flutterwave_tx_id }}</div>
+            <div class="mono muted" style="font-size:11px;margin-top:12px;">
+              Paystack ref: {{ order.flutterwave_tx_ref }} · {{ order.flutterwave_tx_id }}
+            </div>
             {% endif %}
           </div>
         </td>
       </tr>
       {% empty %}
-      <tr><td colspan="10">
-        <div class="empty-state">
-          <div class="empty-icon"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/></svg></div>
-          <div class="empty-title">No orders found</div>
-          <div class="empty-sub">Try adjusting filters</div>
-        </div>
-      </td></tr>
+      <tr>
+        <td colspan="10">
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+              </svg>
+            </div>
+            <div class="empty-title">No orders found</div>
+            <div class="empty-sub">Try adjusting filters</div>
+          </div>
+        </td>
+      </tr>
       {% endfor %}
     </tbody>
   </table>
@@ -221,7 +242,6 @@ function toggleOrder(id) {
   const row = document.getElementById('order-exp-' + id);
   if (!row) return;
   const isOpen = row.style.display !== 'none';
-  // close all
   document.querySelectorAll('[id^="order-exp-"]').forEach(r => r.style.display = 'none');
   if (!isOpen) row.style.display = 'table-row';
 }

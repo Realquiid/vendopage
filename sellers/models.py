@@ -192,6 +192,8 @@ class Order(models.Model):
     payout_triggered   = models.BooleanField(default=False)
     payout_at          = models.DateTimeField(blank=True, null=True)
     flutterwave_transfer_id = models.CharField(max_length=200, blank=True)
+    refund_reference   = models.CharField(max_length=200, blank=True)
+    refund_initiated_at = models.DateTimeField(blank=True, null=True)
 
     created_at         = models.DateTimeField(auto_now_add=True)
     updated_at         = models.DateTimeField(auto_now=True)

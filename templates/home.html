@@ -611,6 +611,133 @@ img { display: block; max-width: 100%; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
 }
 
+
+@media (max-width: 768px) {
+ 
+  /* Switch from horizontal row to vertical stepper */
+  .escrow-flow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-top: 36px;
+  }
+ 
+  /* Each step becomes a horizontal row */
+  .escrow-step {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .escrow-step:last-child {
+    border-bottom: none;
+  }
+ 
+  /* Remove the horizontal pseudo-line — we use border-bottom instead */
+  .escrow-step::after {
+    display: none !important;
+  }
+ 
+  /* Left: vertical connector line */
+  .escrow-step:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 30px; /* centers under the 40px dot */
+    bottom: -1px;
+    width: 2px;
+    height: 100%;
+    background: var(--border);
+    z-index: 0;
+    display: none; /* handled by border-bottom */
+  }
+ 
+  /* Dot stays its size, doesn't shrink */
+  .es-dot {
+    flex-shrink: 0;
+    width: 40px; height: 40px;
+    position: relative; z-index: 1;
+  }
+ 
+  /* Active step gets a green left border accent */
+  .escrow-step.active {
+    background: rgba(0,200,83,.04);
+    border-left: 3px solid var(--green);
+  }
+  .escrow-step.done {
+    background: var(--bg);
+    border-left: 3px solid transparent;
+  }
+ 
+  /* Text block beside the dot */
+  .es-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .es-label {
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 0;
+    color: var(--text);
+  }
+  .es-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 0;
+    max-width: none;
+    line-height: 1.4;
+  }
+ 
+  /* Step number badge top-right */
+  .es-step-num {
+    margin-left: auto;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: var(--bg-alt);
+    padding: 2px 8px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+ 
+  /* Legend below the flow */
+  .plan-legend {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: var(--bg-alt);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+  .plan-label {
+    font-size: 13px;
+  }
+}
+ 
+/* Extra small screens */
+@media (max-width: 380px) {
+  .escrow-step {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+  .es-dot {
+    width: 36px; height: 36px;
+    font-size: 12px;
+  }
+  .es-label { font-size: 12px; }
+}
+
 </style>
 {% endblock %}
 
@@ -998,40 +1125,79 @@ img { display: block; max-width: 100%; }
       <h2 class="sec-title">From order to payout —<br>fully protected</h2>
       <p class="sec-sub">Enable Store Mode and accept direct payments on your page. Every naira held safely until delivery is confirmed.</p>
     </div>
-
+ 
     <div class="escrow-flow hp-fade">
+ 
       <div class="escrow-step done">
-        <div class="es-dot"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="es-label">Buyer pays</div>
-        <div class="es-sub">Secured via Paystack</div>
+        <div class="es-dot">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="es-text">
+          <div class="es-label">Buyer pays</div>
+          <div class="es-sub">Secured via Paystack</div>
+        </div>
+        <span class="es-step-num">01</span>
       </div>
+ 
       <div class="escrow-step done">
-        <div class="es-dot"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-        <div class="es-label">Escrow holds funds</div>
-        <div class="es-sub">Money is secured</div>
+        <div class="es-dot">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="es-text">
+          <div class="es-label">Escrow holds funds</div>
+          <div class="es-sub">Money is secured</div>
+        </div>
+        <span class="es-step-num">02</span>
       </div>
+ 
       <div class="escrow-step active">
-        <div class="es-dot"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
-        <div class="es-label">You ship</div>
-        <div class="es-sub">Tracking sent to buyer</div>
+        <div class="es-dot">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        </div>
+        <div class="es-text">
+          <div class="es-label">You ship</div>
+          <div class="es-sub">Tracking sent to buyer</div>
+        </div>
+        <span class="es-step-num">03</span>
       </div>
+ 
       <div class="escrow-step">
         <div class="es-dot" style="font-size:12px;font-family:var(--font-d);">72h</div>
-        <div class="es-label">Buyer confirms</div>
-        <div class="es-sub">Or auto-releases</div>
+        <div class="es-text">
+          <div class="es-label">Buyer confirms</div>
+          <div class="es-sub">Or auto-releases after 72hrs</div>
+        </div>
+        <span class="es-step-num">04</span>
       </div>
+ 
       <div class="escrow-step">
-        <div class="es-dot"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div class="es-label">Payout sent</div>
-        <div class="es-sub">Direct to your bank</div>
+        <div class="es-dot">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="es-text">
+          <div class="es-label">Payout sent</div>
+          <div class="es-sub">Direct to your bank</div>
+        </div>
+        <span class="es-step-num">05</span>
+      </div>
+ 
+    </div>{# end .escrow-flow #}
+ 
+    <div class="plan-legend hp-fade">
+      <div class="plan-label">
+        <div class="plan-dot" style="background:var(--green)"></div>
+        Free plan — WhatsApp ordering
+      </div>
+      <div class="plan-label">
+        <div class="plan-dot" style="background:#F59E0B"></div>
+        Store Mode — direct escrow payments
+      </div>
+      <div class="plan-label">
+        <div class="plan-dot" style="background:var(--text-muted)"></div>
+        Premium — verified badge + analytics
       </div>
     </div>
-
-    <div class="plan-legend hp-fade">
-      <div class="plan-label"><div class="plan-dot" style="background:var(--green)"></div>Free plan — WhatsApp ordering</div>
-      <div class="plan-label"><div class="plan-dot" style="background:#F59E0B"></div>Store Mode — direct escrow payments</div>
-      <div class="plan-label"><div class="plan-dot" style="background:var(--text-muted)"></div>Premium — verified badge + analytics</div>
-    </div>
+ 
   </div>
 </section>
 
