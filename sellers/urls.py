@@ -66,7 +66,6 @@ urlpatterns = [
 
     # ── Admin — orders & payouts ─────────────────────────────
     path('admin-dashboard/orders/', views.admin_orders, name='admin_orders'),
-    path('admin-dashboard/orders/<int:order_id>/trigger-payout/', views.admin_trigger_payout, name='admin_trigger_payout'),
     path('admin-dashboard/orders/<int:order_id>/mark-delivered/', views.admin_mark_delivered, name='admin_mark_delivered'),
     path('admin-dashboard/orders/<int:order_id>/mark-refunded/', views.admin_mark_refunded, name='admin_mark_refunded'),
     path('admin-dashboard/payouts/', views.admin_payouts, name='admin_payouts'),

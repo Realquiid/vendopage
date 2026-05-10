@@ -931,9 +931,10 @@ def update_payout_account(request):
     seller = request.user
     account_number = request.POST.get('account_number', '').strip()
     bank_name      = request.POST.get('bank_name', '').strip()
+    bank_code      = request.POST.get('bank_code', '').strip()  # ← add this
     account_name   = request.POST.get('account_name', '').strip()
 
-    if not all([account_number, bank_name, account_name]):
+    if not all([account_number, bank_name, account_name, bank_code]):
         messages.error(request, 'All payout fields are required.')
         return redirect('settings')
 
@@ -942,13 +943,14 @@ def update_payout_account(request):
         defaults={
             'account_number': account_number,
             'bank_name':      bank_name,
+            'bank_code':      bank_code,  # ← save it
             'account_name':   account_name,
             'is_verified':    False,
+            'recipient_code': '',  # ← reset so it gets recreated
         }
     )
     messages.success(request, 'Payout account saved.')
     return redirect('settings')
-
 
 # ─────────────────────────────────────────────
 # CART + CHECKOUT
@@ -1200,7 +1202,6 @@ def order_confirmation(request):
             buyer_name=order.buyer_name, order_ref=str(order.order_ref)[:8].upper(),
             items=list(order.items.all()), subtotal=order.subtotal, currency=order.currency,
             dashboard_url=f"https://www.vendopage.com/dashboard/orders/{order.order_ref}/",
-            payment_type=payment_type,
         )
     except Exception as e:
         logger.error(f"Vendor new order email failed: {e}")
