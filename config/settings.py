@@ -151,10 +151,8 @@ if not DEBUG:
     X_FRAME_OPTIONS = 'DENY'
 
 # Flutterwave Payment Settings
-FLUTTERWAVE_PUBLIC_KEY = config('FLUTTERWAVE_PUBLIC_KEY', default='')
-FLUTTERWAVE_SECRET_KEY = config('FLUTTERWAVE_SECRET_KEY', default='')
-FLUTTERWAVE_ENCRYPTION_KEY = config('FLUTTERWAVE_ENCRYPTION_KEY', default='')
-FLW_SECRET_HASH = config('FLW_SECRET_HASH', default='')
+PAYSTACK_PUBLIC_KEY = config('PAYSTACK_PUBLIC_KEY', default='')
+PAYSTACK_SECRET_KEY = config('PAYSTACK_SECRET_KEY', default='')
 
   
 TEMPLATES[0]['OPTIONS']['context_processors'] += [

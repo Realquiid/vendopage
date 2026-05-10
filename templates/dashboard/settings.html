@@ -4,833 +4,27 @@
 {% block title %}Settings — Vendopage{% endblock %}
 
 {% block extra_css %}
-<style>
-/* ── Reset & Base ── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-.sp {
-  background: var(--light);
-  min-height: calc(100vh - 64px);
-  padding-bottom: 100px;
-  font-family: var(--font-b);
-}
-
-/* ── Page Header ── */
-.sp-header {
-  padding: 32px 20px 0;
-  max-width: 700px;
-  margin: 0 auto;
-}
-.sp-header h1 {
-  font-family: var(--font-d);
-  font-weight: 800;
-  font-size: 24px;
-  letter-spacing: -0.6px;
-  color: var(--dark);
-  margin-bottom: 2px;
-}
-.sp-header p { font-size: 13px; color: var(--gray); }
-
-/* ── Messages ── */
-.sp-msgs {
-  max-width: 700px;
-  margin: 16px auto 0;
-  padding: 0 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.sp-msg {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 500;
-  animation: msgIn .25s ease;
-}
-@keyframes msgIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
-.sp-msg.success { background: #f0fff5; border: 1px solid #bbf7d0; color: #166534; }
-.sp-msg.error   { background: #fff5f5; border: 1px solid #fecaca; color: #991b1b; }
-[data-theme="dark"] .sp-msg.success { background: #0a1f12; border-color: #166534; color: #4ade80; }
-[data-theme="dark"] .sp-msg.error   { background: #1f0a0a; border-color: #991b1b; color: #f87171; }
-
-/* ── Tab Navigation ── */
-.sp-nav-wrap {
-  position: sticky;
-  top: 64px;
-  z-index: 80;
-  background: var(--light);
-  border-bottom: 1px solid var(--border);
-  margin-top: 24px;
-}
-[data-theme="dark"] .sp-nav-wrap { background: #141414; border-color: #222; }
-
-.sp-nav {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  gap: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-.sp-nav::-webkit-scrollbar { display: none; }
-
-.sp-tab {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 13px 16px 12px;
-  font-family: var(--font-b);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gray);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: color .15s;
-  letter-spacing: 0;
-}
-.sp-tab:hover { color: var(--dark); }
-.sp-tab.active { color: var(--dark); border-bottom-color: var(--green); }
-.sp-tab svg { flex-shrink: 0; opacity: .6; transition: opacity .15s; }
-.sp-tab.active svg { opacity: 1; color: var(--green); }
-.sp-tab .tab-label { display: none; }
-@media (min-width: 420px) { .sp-tab .tab-label { display: inline; } }
-
-[data-theme="dark"] .sp-tab { color: #555; }
-[data-theme="dark"] .sp-tab:hover { color: #e0e0e0; }
-[data-theme="dark"] .sp-tab.active { color: #f0f0f0; }
-
-/* ── Tab Panels ── */
-.sp-panels {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 24px 20px 0;
-}
-.sp-panel { display: none; }
-.sp-panel.active { display: block; }
-
-/* ── Card ── */
-.sc {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  margin-bottom: 14px;
-  overflow: hidden;
-  transition: box-shadow .2s;
-}
-.sc:hover { box-shadow: 0 2px 16px rgba(0,0,0,.06); }
-.sc-head { padding: 20px 22px 0; }
-.sc-head h2 {
-  font-family: var(--font-d);
-  font-weight: 700;
-  font-size: 15px;
-  color: var(--dark);
-  margin-bottom: 2px;
-}
-.sc-head p { font-size: 12px; color: var(--gray); margin-top: 2px; line-height: 1.5; }
-.sc-body { padding: 16px 22px 22px; }
-.sc-divider { border: none; border-top: 1px solid var(--border); margin: 18px 0; }
-
-[data-theme="dark"] .sc { background: #1c1c1c; border-color: #2a2a2a; }
-[data-theme="dark"] .sc:hover { box-shadow: 0 2px 16px rgba(0,0,0,.3); }
-[data-theme="dark"] .sc-head h2 { color: #f0f0f0; }
-[data-theme="dark"] .sc-head p { color: #777; }
-[data-theme="dark"] .sc-divider { border-color: #2a2a2a; }
-
-/* ── Form Fields ── */
-.fg { margin-bottom: 14px; }
-.fg:last-of-type { margin-bottom: 0; }
-.fl {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--gray);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: .4px;
-}
-[data-theme="dark"] .fl { color: #888; }
-
-.fi, .fta, .fsel {
-  width: 100%;
-  background: var(--light);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  padding: 11px 14px;
-  font-family: var(--font-b);
-  font-size: 14px;
-  color: var(--dark);
-  outline: none;
-  transition: border-color .18s, background .18s, box-shadow .18s;
-  appearance: none;
-  -webkit-appearance: none;
-}
-.fi:focus, .fta:focus, .fsel:focus {
-  border-color: var(--green);
-  background: var(--white);
-  box-shadow: 0 0 0 3px rgba(0,200,83,.09);
-}
-.fi:disabled { opacity: .4; cursor: not-allowed; }
-.fta { resize: vertical; min-height: 80px; }
-.fhint { font-size: 11px; color: var(--gray-lt); margin-top: 5px; line-height: 1.4; }
-.frow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (max-width: 520px) { .frow { grid-template-columns: 1fr; } }
-
-[data-theme="dark"] .fi,
-[data-theme="dark"] .fta,
-[data-theme="dark"] .fsel {
-  background: #252525;
-  border-color: #333;
-  color: #f0f0f0;
-}
-[data-theme="dark"] .fi:focus,
-[data-theme="dark"] .fta:focus,
-[data-theme="dark"] .fsel:focus {
-  background: #2a2a2a;
-  border-color: var(--green);
-}
-[data-theme="dark"] .fi:disabled { opacity: .3; }
-
-/* Select arrow */
-.fsel-wrap { position: relative; }
-.fsel-wrap::after {
-  content: '';
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 0; height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 5px solid var(--gray-lt);
-  pointer-events: none;
-}
-.fsel-wrap .fsel { padding-right: 36px; }
-
-/* ── Buttons ── */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 11px 20px;
-  border-radius: 100px;
-  font-family: var(--font-b);
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all .18s;
-  border: none;
-  white-space: nowrap;
-  text-decoration: none;
-}
-.btn-g  { background: var(--green); color: #fff; }
-.btn-g:hover { background: var(--green-dk); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,200,83,.3); }
-.btn-g:disabled { background: var(--gray-lt); cursor: not-allowed; transform: none; box-shadow: none; }
-.btn-s  { background: var(--white); color: var(--dark); border: 1.5px solid var(--border); }
-.btn-s:hover { border-color: var(--dark); }
-.btn-d  { background: #fff5f5; color: #991b1b; border: 1.5px solid #fecaca; }
-.btn-d:hover { background: #fef2f2; }
-.btn-sm { padding: 8px 14px; font-size: 12px; }
-.btn-full { width: 100%; justify-content: center; }
-
-[data-theme="dark"] .btn-s { background: #252525; border-color: #333; color: #e0e0e0; }
-[data-theme="dark"] .btn-s:hover { border-color: #777; }
-[data-theme="dark"] .btn-d { background: #1f0a0a; border-color: #7f1d1d; color: #f87171; }
-
-/* ── Toggle Switch ── */
-.tog-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 2px 0;
-}
-.tog-info h3 { font-family: var(--font-d); font-weight: 700; font-size: 14px; color: var(--dark); margin-bottom: 3px; }
-.tog-info p  { font-size: 13px; color: var(--gray); line-height: 1.4; }
-.tog-info .plan-note { font-size: 12px; color: var(--gray-lt); margin-top: 4px; }
-.tog-info .plan-note a { color: var(--green); font-weight: 600; text-decoration: none; }
-[data-theme="dark"] .tog-info h3 { color: #f0f0f0; }
-[data-theme="dark"] .tog-info p  { color: #888; }
-
-.sw { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
-.sw input { opacity: 0; width: 0; height: 0; position: absolute; }
-.sw-track {
-  position: absolute; inset: 0;
-  background: var(--border);
-  border-radius: 100px;
-  cursor: pointer;
-  transition: background .2s;
-}
-.sw input:checked + .sw-track { background: var(--green); }
-.sw input:disabled + .sw-track { opacity: .45; cursor: not-allowed; }
-.sw-thumb {
-  position: absolute;
-  top: 3px; left: 3px;
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0,0,0,.18);
-  transition: transform .2s;
-  pointer-events: none;
-}
-.sw input:checked ~ .sw-thumb { transform: translateX(20px); }
-
-/* ── Store Mode Banner ── */
-.store-banner {
-  background: var(--dark);
-  border-radius: 16px;
-  padding: 20px 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-.store-banner-badge {
-  display: inline-block;
-  background: var(--green);
-  color: #fff;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  padding: 2px 8px;
-  border-radius: 100px;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-}
-.store-banner h3 { font-family: var(--font-d); font-weight: 700; font-size: 14px; color: #fff; margin-bottom: 3px; }
-.store-banner p  { font-size: 12px; color: rgba(255,255,255,.5); line-height: 1.4; max-width: 340px; }
-[data-theme="dark"] .store-banner { background: #111; border: 1px solid #2a2a2a; }
-
-/* ── Notice ── */
-.notice {
-  background: #fffbeb;
-  border: 1px solid #fde68a;
-  border-radius: 12px;
-  padding: 12px 16px;
-  margin-bottom: 14px;
-  font-size: 13px;
-  color: #92400e;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.notice button { background: none; border: none; color: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; padding: 0; font-size: inherit; }
-[data-theme="dark"] .notice { background: #2a1f00; border-color: #7c5a00; color: #fbbf24; }
-
-/* ── Link Box ── */
-.link-box {
-  display: flex;
-  align-items: center;
-  background: var(--light);
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-  transition: border-color .18s;
-}
-.link-box:focus-within { border-color: var(--green); }
-.link-box input {
-  flex: 1;
-  min-width: 0;
-  background: none;
-  border: none;
-  outline: none;
-  padding: 11px 14px;
-  font-family: var(--font-b);
-  font-size: 13px;
-  color: var(--dark);
-  cursor: pointer;
-}
-.link-copy {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 11px 14px;
-  background: none;
-  border: none;
-  border-left: 1px solid var(--border);
-  cursor: pointer;
-  color: var(--gray);
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-b);
-  transition: all .18s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.link-copy:hover { background: var(--green); color: #fff; border-color: var(--green); }
-[data-theme="dark"] .link-box { background: #252525; border-color: #333; }
-[data-theme="dark"] .link-box input { color: #e0e0e0; }
-[data-theme="dark"] .link-copy { border-color: #333; color: #888; }
-[data-theme="dark"] .link-copy:hover { background: var(--green); color: #fff; border-color: var(--green); }
-
-/* ── Avatar ── */
-.avatar-row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
-.avatar-circle {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: var(--green);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-d);
-  font-weight: 800;
-  font-size: 28px;
-  color: #fff;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 0 0 3px rgba(0,200,83,.15), 0 0 0 4px var(--border);
-}
-.avatar-circle img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.avatar-spinner {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,.45);
-  border-radius: 50%;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-@keyframes sp { to { transform: rotate(360deg); } }
-.avatar-spinner svg { animation: sp .8s linear infinite; }
-.avatar-hint { font-size: 11px; color: var(--gray-lt); margin-top: 6px; }
-
-/* ── Payout: Account Number ── */
-@keyframes spin { to { transform: rotate(360deg); } }
-.acct-wrap { position: relative; }
-.acct-wrap .fi { padding-right: 120px; font-size: 15px; font-weight: 600; letter-spacing: 1.5px; }
-@media (max-width: 520px) { .acct-wrap .fi { padding-right: 14px; letter-spacing: .5px; font-size: 14px; } }
-
-.acct-badge {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: none;
-  align-items: center;
-  gap: 5px;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 100px;
-  pointer-events: none;
-  white-space: nowrap;
-}
-.acct-badge.show { display: flex; }
-.acct-badge.checking   { background: var(--light); border: 1px solid var(--border); color: var(--gray); }
-.acct-badge.verified   { background: #f0fff5; border: 1px solid #bbf7d0; color: #166534; }
-.acct-badge.unverified { background: #fff5f5; border: 1px solid #fecaca; color: #991b1b; }
-[data-theme="dark"] .acct-badge.checking   { background: #252525; border-color: #3a3a3a; color: #aaa; }
-[data-theme="dark"] .acct-badge.verified   { background: #0a1f12; border-color: #166534; color: #4ade80; }
-[data-theme="dark"] .acct-badge.unverified { background: #1f0a0a; border-color: #991b1b; color: #f87171; }
-.acct-badge-mobile { display: none; margin-top: 6px; }
-@media (max-width: 520px) { .acct-badge { display: none !important; } .acct-badge-mobile { display: flex; } }
-
-.spin-ring {
-  width: 10px; height: 10px;
-  border-radius: 50%;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  animation: spin .65s linear infinite;
-  opacity: .7;
-}
-
-.acct-banner {
-  display: none;
-  align-items: center;
-  gap: 10px;
-  margin-top: 8px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 700;
-}
-.acct-banner.show    { display: flex; }
-.acct-banner.success { background: #f0fff5; border: 1px solid #bbf7d0; color: #166534; }
-.acct-banner.error   { background: #fff5f5; border: 1px solid #fecaca; color: #991b1b; font-weight: 500; font-size: 13px; }
-[data-theme="dark"] .acct-banner.success { background: #0a1f12; border-color: #166534; color: #4ade80; }
-[data-theme="dark"] .acct-banner.error   { background: #1f0a0a; border-color: #991b1b; color: #f87171; }
-
-/* ── Bank Picker ── */
-.bank-picker {
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--light);
-  transition: border-color .18s;
-}
-.bank-picker:focus-within { border-color: var(--green); background: var(--white); }
-[data-theme="dark"] .bank-picker { background: #252525; border-color: #333; }
-[data-theme="dark"] .bank-picker:focus-within { background: #2a2a2a; border-color: var(--green); }
-
-.bp-selected {
-  display: none;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  background: rgba(0,200,83,.07);
-  border-bottom: 1px solid var(--border);
-}
-.bp-selected.show { display: flex; }
-[data-theme="dark"] .bp-selected { background: rgba(0,200,83,.1); border-color: #333; }
-.bp-selected-name { font-size: 14px; font-weight: 700; color: var(--green-dk, #15803d); flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-[data-theme="dark"] .bp-selected-name { color: #4ade80; }
-.bp-change { background: none; border: 1px solid var(--border); cursor: pointer; color: var(--gray); font-size: 12px; font-weight: 600; font-family: var(--font-b); padding: 4px 10px; border-radius: 100px; transition: all .15s; flex-shrink: 0; }
-.bp-change:hover { border-color: var(--dark); color: var(--dark); }
-[data-theme="dark"] .bp-change { border-color: #3a3a3a; color: #888; }
-
-.bp-search-row { display: flex; align-items: center; gap: 0; padding: 0 12px; border-bottom: 1px solid var(--border); }
-[data-theme="dark"] .bp-search-row { border-color: #333; }
-.bp-search-icon { color: var(--gray-lt); flex-shrink: 0; pointer-events: none; }
-.bp-input { flex: 1; background: none; border: none; outline: none; padding: 12px 10px; font-family: var(--font-b); font-size: 14px; color: var(--dark); min-width: 0; }
-[data-theme="dark"] .bp-input { color: #f0f0f0; }
-.bp-input::placeholder { color: var(--gray-lt); }
-.bp-clear { background: none; border: none; cursor: pointer; color: var(--gray-lt); padding: 4px 6px; border-radius: 4px; display: none; line-height: 1; font-size: 13px; }
-.bp-clear:hover { color: var(--dark); }
-
-.bp-list { display: none; max-height: 220px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
-.bp-list.open { display: block; }
-.bp-list::-webkit-scrollbar { width: 4px; }
-.bp-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-.bp-item { padding: 11px 14px; font-size: 13px; color: var(--dark); cursor: pointer; transition: background .1s; border-bottom: 1px solid var(--border); }
-.bp-item:last-child { border-bottom: none; }
-.bp-item:hover, .bp-item.kbdfocus { background: rgba(0,200,83,.07); color: var(--green-dk, #15803d); }
-[data-theme="dark"] .bp-item { color: #e0e0e0; border-color: #2a2a2a; }
-[data-theme="dark"] .bp-item:hover, [data-theme="dark"] .bp-item.kbdfocus { background: rgba(0,200,83,.12); color: #4ade80; }
-.bp-empty { padding: 20px 14px; font-size: 13px; color: var(--gray-lt); text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.bp-count-row { padding: 7px 14px; font-size: 11px; color: var(--gray-lt); border-top: 1px solid var(--border); text-align: right; }
-[data-theme="dark"] .bp-count-row { border-color: #2a2a2a; }
-
-/* ── Payout Saved ── */
-.payout-saved {
-  background: var(--light);
-  border: 1.5px solid var(--border);
-  border-radius: 14px;
-  padding: 16px 18px;
-  margin-bottom: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.payout-saved-name { font-family: var(--font-d); font-weight: 700; font-size: 15px; margin-bottom: 2px; color: var(--dark); }
-.payout-saved-meta { font-size: 13px; color: var(--gray); }
-[data-theme="dark"] .payout-saved { background: #252525; border-color: #333; }
-[data-theme="dark"] .payout-saved-name { color: #f0f0f0; }
-[data-theme="dark"] .payout-saved-meta { color: #888; }
-.verified-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: #f0fff5;
-  border: 1px solid #bbf7d0;
-  color: #166534;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 3px 10px;
-  border-radius: 100px;
-  margin-top: 5px;
-}
-[data-theme="dark"] .verified-pill { background: #0a1f12; border-color: #166534; color: #4ade80; }
-
-.payout-save-row { display: flex; align-items: center; gap: 12px; margin-top: 18px; flex-wrap: wrap; }
-.payout-save-hint { font-size: 12px; color: var(--gray-lt); line-height: 1.4; flex: 1; min-width: 0; }
-.payout-save-hint.ready { color: var(--green-dk, #15803d); font-weight: 600; }
-[data-theme="dark"] .payout-save-hint.ready { color: #4ade80; }
-@media (max-width: 520px) { .payout-save-row { flex-direction: column; align-items: stretch; } .payout-save-row .btn { width: 100%; justify-content: center; } }
-
-/* ── Payout Steps ── */
-.payout-steps { display: flex; flex-direction: column; gap: 16px; }
-.payout-step { display: flex; gap: 14px; align-items: flex-start; }
-.pstep-num {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  background: var(--green);
-  color: #fff;
-  font-family: var(--font-d);
-  font-weight: 800;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-.pstep-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; color: var(--dark); }
-.pstep-desc  { font-size: 12px; color: var(--gray); line-height: 1.4; }
-[data-theme="dark"] .pstep-title { color: #f0f0f0; }
-[data-theme="dark"] .pstep-desc  { color: #888; }
-
-/* ── Currency Section ── */
-.currency-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background: var(--light);
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-.currency-flag { font-size: 24px; flex-shrink: 0; line-height: 1; }
-.currency-info { flex: 1; min-width: 0; }
-.currency-name { font-weight: 700; font-size: 14px; color: var(--dark); }
-.currency-code { font-size: 12px; color: var(--gray); margin-top: 1px; }
-[data-theme="dark"] .currency-row { background: #252525; border-color: #333; }
-[data-theme="dark"] .currency-name { color: #f0f0f0; }
-[data-theme="dark"] .currency-code { color: #888; }
-
-/* Country picker (currency) */
-.cp-wrap { position: relative; }
-.cp-field {
-  display: flex;
-  border: 1.5px solid var(--border);
-  border-radius: 10px;
-  background: var(--light);
-  overflow: hidden;
-  transition: border-color .18s, box-shadow .18s;
-}
-.cp-field:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,200,83,.09); background: var(--white); }
-[data-theme="dark"] .cp-field { background: #252525; border-color: #333; }
-.cp-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 11px 12px;
-  border: none;
-  border-right: 1px solid var(--border);
-  background: none;
-  cursor: pointer;
-  font-family: var(--font-b);
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--dark);
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: background .15s;
-  min-width: 120px;
-}
-.cp-btn:hover { background: rgba(0,0,0,.04); }
-[data-theme="dark"] .cp-btn { color: #f0f0f0; border-color: #333; }
-.cp-symbol { font-size: 15px; font-weight: 800; }
-.cp-label  { font-size: 12px; color: var(--gray); }
-.cp-caret  { color: var(--gray-lt); margin-left: auto; }
-.cp-preview {
-  flex: 1;
-  padding: 11px 14px;
-  font-family: var(--font-b);
-  font-size: 13px;
-  color: var(--gray);
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-}
-.cp-dropdown {
-  display: none;
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  width: 100%;
-  min-width: 260px;
-  background: var(--white);
-  border: 1.5px solid var(--border);
-  border-radius: 14px;
-  box-shadow: 0 12px 40px rgba(0,0,0,.14);
-  z-index: 9999;
-  overflow: hidden;
-  flex-direction: column;
-  max-height: 260px;
-}
-.cp-dropdown.open { display: flex; }
-[data-theme="dark"] .cp-dropdown { background: #1e1e1e; border-color: #333; }
-.cp-search { padding: 10px 12px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-[data-theme="dark"] .cp-search { border-color: #333; }
-.cp-search input { width: 100%; border: none; outline: none; font-family: var(--font-b); font-size: 13px; background: transparent; color: var(--dark); }
-[data-theme="dark"] .cp-search input { color: #f0f0f0; }
-.cp-list { overflow-y: auto; flex: 1; }
-.cp-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; font-size: 13px; transition: background .12s; }
-.cp-item:hover { background: var(--light); }
-[data-theme="dark"] .cp-item:hover { background: #252525; }
-.cp-item-flag { font-size: 17px; flex-shrink: 0; }
-.cp-item-flag img { display: block; border-radius: 2px; }
-.cp-item-name { flex: 1; font-weight: 500; color: var(--dark); }
-[data-theme="dark"] .cp-item-name { color: #e0e0e0; }
-.cp-item-code { color: var(--gray-lt); font-size: 12px; font-weight: 700; }
-
-/* ── Plan Tab ── */
-.fee-banner {
-  background: var(--dark);
-  color: #fff;
-  border-radius: 16px;
-  padding: 20px 22px;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-.fee-banner-text { flex: 1; min-width: 0; }
-.fee-banner-text h3 { font-family: var(--font-d); font-weight: 700; font-size: 14px; margin-bottom: 3px; }
-.fee-banner-text p  { font-size: 12px; color: rgba(255,255,255,.5); line-height: 1.4; }
-.fee-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--green);
-  color: #fff;
-  font-family: var(--font-d);
-  font-weight: 800;
-  font-size: 16px;
-  padding: 7px 16px;
-  border-radius: 100px;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-.fee-pill span { font-size: 10px; font-weight: 500; opacity: .85; }
-[data-theme="dark"] .fee-banner { background: #111; border: 1px solid #2a2a2a; }
-
-.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-@media (max-width: 480px) { .plan-grid { grid-template-columns: 1fr; } }
-.plan-card { border: 1.5px solid var(--border); border-radius: 18px; overflow: hidden; background: var(--white); }
-[data-theme="dark"] .plan-card { background: #1c1c1c; border-color: #2a2a2a; }
-.plan-card.featured { border-color: var(--dark); }
-[data-theme="dark"] .plan-card.featured { border-color: #888; }
-.plan-card.current  { border-color: var(--green); }
-.plan-card-head { padding: 18px 20px 0; }
-.plan-card-name { display: flex; align-items: center; gap: 8px; font-family: var(--font-d); font-weight: 700; font-size: 15px; color: var(--dark); margin-bottom: 8px; }
-[data-theme="dark"] .plan-card-name { color: #f0f0f0; }
-.plan-current-tag {
-  font-size: 9px;
-  font-weight: 800;
-  background: var(--green);
-  color: #fff;
-  padding: 2px 8px;
-  border-radius: 100px;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-}
-.plan-price {
-  font-family: var(--font-d);
-  font-weight: 800;
-  font-size: 28px;
-  color: var(--dark);
-  letter-spacing: -1px;
-  margin-bottom: 14px;
-  line-height: 1;
-}
-[data-theme="dark"] .plan-price { color: #f0f0f0; }
-.plan-price span { font-size: 13px; font-weight: 400; color: var(--gray); letter-spacing: 0; }
-.plan-card-body { padding: 14px 20px 20px; }
-.plan-features { display: flex; flex-direction: column; gap: 7px; margin-bottom: 16px; }
-.pf-item { display: flex; align-items: flex-start; gap: 9px; font-size: 13px; color: var(--dark); line-height: 1.3; }
-[data-theme="dark"] .pf-item { color: #e0e0e0; }
-.pf-item svg { flex-shrink: 0; margin-top: 1px; }
-.pf-item.off { color: var(--gray-lt); }
-
-.earn-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  background: var(--light);
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-[data-theme="dark"] .earn-grid { background: #252525; border-color: #333; }
-.earn-cell { padding: 14px 16px; border-right: 1px solid var(--border); }
-.earn-cell:last-child { border-right: none; }
-[data-theme="dark"] .earn-cell { border-color: #333; }
-.earn-label { font-size: 10px; font-weight: 700; color: var(--gray); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
-.earn-value { font-family: var(--font-d); font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
-.earn-sub { font-size: 11px; color: var(--gray-lt); margin-top: 3px; }
-
-/* ── Mode Pills (appearance) ── */
-.mode-pills { display: flex; gap: 6px; flex-wrap: wrap; }
-.mpill {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 16px;
-  border-radius: 100px;
-  border: 1.5px solid var(--border);
-  background: var(--white);
-  font-family: var(--font-b);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all .18s;
-  color: var(--gray);
-}
-.mpill:hover { border-color: var(--dark); color: var(--dark); }
-.mpill.active { border-color: var(--dark); background: var(--dark); color: #fff; }
-[data-theme="dark"] .mpill { background: #1e1e1e; border-color: #3a3a3a; color: #888; }
-[data-theme="dark"] .mpill:hover { border-color: #888; color: #f0f0f0; }
-[data-theme="dark"] .mpill.active { background: #f0f0f0; border-color: #f0f0f0; color: #111; }
-
-/* ── Section Label ── */
-.section-label {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  color: var(--gray-lt);
-  margin: 20px 0 10px;
-  padding: 0 2px;
-}
-.section-label:first-child { margin-top: 0; }
-
-/* ── Responsive tweaks ── */
-@media (max-width: 520px) {
-  .sp-header { padding: 20px 16px 0; }
-  .sp-header h1 { font-size: 20px; }
-  .sp-nav { padding: 0 16px; }
-  .sp-panels { padding: 16px 16px 0; }
-  .sc-head { padding: 16px 18px 0; }
-  .sc-body { padding: 14px 18px 18px; }
-  .store-banner { flex-direction: column; align-items: flex-start; gap: 14px; }
-  .tog-row { flex-direction: column; align-items: flex-start; gap: 10px; }
-  .fee-banner { flex-direction: column; gap: 12px; }
-  .fee-pill { width: 100%; justify-content: center; }
-  .earn-cell { padding: 12px; }
-  .earn-value { font-size: 15px; }
-  .avatar-row { gap: 14px; }
-  .avatar-circle { width: 60px; height: 60px; font-size: 22px; }
-  .plan-card-name { font-size: 14px; }
-  .plan-price { font-size: 24px; }
-}
-</style>
+<link rel="stylesheet" href="/static/css/vendopage-settings.css">
 {% endblock %}
 
 {% block content %}
-<div class="sp">
-<div class="settings-wrap">
+<div class="vp-settings">
 
-  <div class="sp-header">
+  <!-- ── Page Header ── -->
+  <div class="vps-header">
     <h1>Settings</h1>
-    <p>Manage your store, account, and preferences.</p>
+    <p>Manage your store, account &amp; preferences</p>
   </div>
 
+  <!-- ── Flash Messages ── -->
   {% if messages %}
-  <div class="sp-msgs">
+  <div class="vps-messages">
     {% for message in messages %}
-    <div class="sp-msg {% if message.tags == 'error' %}error{% else %}success{% endif %}">
+    <div class="vps-msg {% if message.tags == 'error' %}error{% else %}success{% endif %}">
       {% if message.tags == 'error' %}
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
       {% else %}
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
       {% endif %}
       {{ message }}
     </div>
@@ -838,288 +32,306 @@
   </div>
   {% endif %}
 
-  <!-- Tab Nav -->
-  <div class="sp-nav-wrap">
-    <nav class="sp-nav" role="tablist">
-      <button class="sp-tab active" onclick="switchTab('store',this)" role="tab">
+  <!-- ── Tab Navigation ── -->
+  <div class="vps-tabs-wrap">
+    <div class="vps-tabs" role="tablist">
+      <button class="vps-tab active" onclick="vpSwitchTab('store', this)" role="tab" aria-selected="true">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        <span class="tab-label">Store</span>
+        <span>Store</span>
       </button>
-      <button class="sp-tab" onclick="switchTab('payout',this)" role="tab">
+      <button class="vps-tab" onclick="vpSwitchTab('payout', this)" role="tab">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
-        <span class="tab-label">Payout</span>
+        <span>Payout</span>
       </button>
-      <button class="sp-tab" onclick="switchTab('profile',this)" role="tab">
+      <button class="vps-tab" onclick="vpSwitchTab('profile', this)" role="tab">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span class="tab-label">Profile</span>
+        <span>Profile</span>
       </button>
-      <button class="sp-tab" onclick="switchTab('account',this)" role="tab">
+      <button class="vps-tab" onclick="vpSwitchTab('account', this)" role="tab">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span class="tab-label">Account</span>
+        <span>Account</span>
       </button>
-      <button class="sp-tab" onclick="switchTab('appearance',this)" role="tab">
+      <button class="vps-tab" onclick="vpSwitchTab('appearance', this)" role="tab">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M21 12h-2M5 12H3M12 21v-2M12 5V3"/></svg>
-        <span class="tab-label">Theme</span>
+        <span>Theme</span>
       </button>
-      <button class="sp-tab" onclick="switchTab('plan',this)" role="tab">
+      <button class="vps-tab" onclick="vpSwitchTab('plan', this)" role="tab">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-        <span class="tab-label">Plan</span>
+        <span>Plan</span>
       </button>
-    </nav>
+    </div>
   </div>
 
-  <div class="sp-panels">
+  <!-- ── Panels ── -->
+  <div class="vps-panels">
 
-    <!-- ══ STORE ══ -->
-    <div class="sp-panel active" id="tab-store">
+    <!-- ══════════════════ STORE ══════════════════ -->
+    <div class="vps-panel active" id="tab-store">
 
-      <div class="store-banner">
-        <div>
-          <div class="store-banner-badge">New</div>
+      <!-- Store Mode Banner -->
+      <div class="vps-store-banner">
+        <div class="vps-store-banner-info">
+          <span class="vps-badge">New</span>
           <h3>Store Mode — Escrow Payments</h3>
           <p>Enable buyers to pay directly. Funds are held safely until you ship and they confirm receipt.</p>
         </div>
-        <form method="POST" action="{% url 'toggle_store_mode' %}" style="flex-shrink:0;">
+        <form method="POST" action="{% url 'toggle_store_mode' %}">
           {% csrf_token %}
-          <label class="sw">
+          <label class="vps-toggle">
             <input type="checkbox" name="store_mode"
               {% if user.store_mode %}checked{% endif %}
               onchange="this.form.submit()">
-            <span class="sw-track"></span>
-            <span class="sw-thumb"></span>
+            <span class="vps-toggle-track"></span>
+            <span class="vps-toggle-thumb"></span>
           </label>
         </form>
       </div>
 
       {% if not user.bank_account %}
-      <div class="notice">
+      <div class="vps-notice">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         Add a payout account before enabling Store Mode.
-        <button onclick="switchTab('payout', document.querySelector('[onclick*=payout]'))">Add account →</button>
+        <button onclick="vpSwitchTab('payout', document.querySelector('[onclick*=payout]'))">Add account →</button>
       </div>
       {% endif %}
 
-      <div class="section-label">Business</div>
-
-      <div class="sc">
-        <div class="sc-head">
+      <!-- Business Information -->
+      <div class="vps-section-label">Business</div>
+      <div class="vps-card">
+        <div class="vps-card-header">
           <h2>Business Information</h2>
-          <p>Shown to customers on your storefront.</p>
+          <p>Shown to customers on your storefront</p>
         </div>
-        <div class="sc-body">
-          <form method="POST" action="{% url 'update_business_info' %}">
-            {% csrf_token %}
-            <div class="fg">
-              <label class="fl">Business Name</label>
-              <input type="text" name="business_name" class="fi" value="{{ user.business_name }}" required>
-            </div>
-            <div class="fg">
-              <label class="fl">Bio <span style="font-weight:400;color:var(--gray-lt);text-transform:none;letter-spacing:0;font-size:11px;">optional</span></label>
-              <textarea name="bio" class="fta" placeholder="Tell customers about your business…">{{ user.bio }}</textarea>
-            </div>
-            <div class="frow">
-              <div class="fg">
-                <label class="fl">Category</label>
-                <div class="fsel-wrap">
-                  <select name="category" class="fsel">
-                    <option value="fashion"     {% if user.category == 'fashion' %}selected{% endif %}>Fashion &amp; Clothing</option>
-                    <option value="beauty"      {% if user.category == 'beauty' %}selected{% endif %}>Beauty &amp; Cosmetics</option>
-                    <option value="electronics" {% if user.category == 'electronics' %}selected{% endif %}>Electronics</option>
-                    <option value="food"        {% if user.category == 'food' %}selected{% endif %}>Food &amp; Beverages</option>
-                    <option value="home"        {% if user.category == 'home' %}selected{% endif %}>Home &amp; Living</option>
-                    <option value="sports"      {% if user.category == 'sports' %}selected{% endif %}>Sports &amp; Fitness</option>
-                    <option value="health"      {% if user.category == 'health' %}selected{% endif %}>Health &amp; Wellness</option>
-                    <option value="other"       {% if user.category == 'other' %}selected{% endif %}>Other</option>
-                  </select>
-                </div>
-              </div>
-              <div class="fg">
-                <label class="fl">WhatsApp Number</label>
-                <input type="tel" name="whatsapp_number" class="fi" value="{{ user.whatsapp_number }}" required>
-                <div class="fhint">Include country code e.g. 2348012345678</div>
+        <form method="POST" action="{% url 'update_business_info' %}">
+          {% csrf_token %}
+          <div class="vps-form-group">
+            <label class="vps-label">Business Name</label>
+            <input type="text" name="business_name" class="vps-input" value="{{ user.business_name }}" required>
+          </div>
+          <div class="vps-form-group">
+            <label class="vps-label">
+              Bio
+              <span class="vps-label-opt">optional</span>
+            </label>
+            <textarea name="bio" class="vps-input vps-textarea" placeholder="Tell customers about your business…">{{ user.bio }}</textarea>
+          </div>
+          <div class="vps-grid-2">
+            <div class="vps-form-group">
+              <label class="vps-label">Category</label>
+              <div class="vps-select-wrap">
+                <select name="category" class="vps-input vps-select">
+                  <option value="fashion"     {% if user.category == 'fashion' %}selected{% endif %}>Fashion &amp; Clothing</option>
+                  <option value="beauty"      {% if user.category == 'beauty' %}selected{% endif %}>Beauty &amp; Cosmetics</option>
+                  <option value="electronics" {% if user.category == 'electronics' %}selected{% endif %}>Electronics</option>
+                  <option value="food"        {% if user.category == 'food' %}selected{% endif %}>Food &amp; Beverages</option>
+                  <option value="home"        {% if user.category == 'home' %}selected{% endif %}>Home &amp; Living</option>
+                  <option value="sports"      {% if user.category == 'sports' %}selected{% endif %}>Sports &amp; Fitness</option>
+                  <option value="health"      {% if user.category == 'health' %}selected{% endif %}>Health &amp; Wellness</option>
+                  <option value="other"       {% if user.category == 'other' %}selected{% endif %}>Other</option>
+                </select>
+                <svg class="vps-select-arrow" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
             </div>
-            <button type="submit" class="btn btn-g">Save Changes</button>
-          </form>
-        </div>
+            <div class="vps-form-group">
+              <label class="vps-label">WhatsApp Number</label>
+              <input type="tel" name="whatsapp_number" class="vps-input" value="{{ user.whatsapp_number }}" required>
+              <span class="vps-hint">Include country code, e.g. 2348012345678</span>
+            </div>
+          </div>
+          <div class="vps-form-actions">
+            <button type="submit" class="vps-btn vps-btn-primary">Save Changes</button>
+          </div>
+        </form>
       </div>
 
-      <div class="section-label">Store</div>
+      <!-- Store Settings -->
+      <div class="vps-section-label">Store</div>
 
-      <div class="sc">
-        <div class="sc-head">
+      <div class="vps-card">
+        <div class="vps-card-header">
           <h2>Product Watermark</h2>
-          <p>Protect your product images with your business name.</p>
+          <p>Protect your product images with your business name</p>
         </div>
-        <div class="sc-body">
-          <form method="POST" action="{% url 'update_watermark' %}">
-            {% csrf_token %}
-            <div class="tog-row">
-              <div class="tog-info">
-                <h3>Show watermark on images</h3>
-                <p>Your business name appears diagonally across each product photo.</p>
-                {% if user.subscription_type == 'free' %}
-                <p class="plan-note">Premium sellers can disable this. <a href="{% url 'subscription' %}">Upgrade →</a></p>
-                {% endif %}
-              </div>
-              <label class="sw">
-                <input type="checkbox" name="watermark_enabled"
-                  {% if user.watermark_enabled %}checked{% endif %}
-                  {% if user.subscription_type == 'free' %}disabled{% endif %}
-                  onchange="this.form.submit()">
-                <span class="sw-track"></span>
-                <span class="sw-thumb"></span>
-              </label>
+        <form method="POST" action="{% url 'update_watermark' %}">
+          {% csrf_token %}
+          <div class="vps-settings-row">
+            <div class="vps-settings-row-info">
+              <h4>Show watermark on images</h4>
+              <p>Your business name appears diagonally across each product photo.</p>
+              {% if user.subscription_type == 'free' %}
+              <p class="vps-plan-note">Premium sellers can disable this. <a href="{% url 'subscription' %}">Upgrade →</a></p>
+              {% endif %}
             </div>
-          </form>
-        </div>
+            <label class="vps-toggle">
+              <input type="checkbox" name="watermark_enabled"
+                {% if user.watermark_enabled %}checked{% endif %}
+                {% if user.subscription_type == 'free' %}disabled{% endif %}
+                onchange="this.form.submit()">
+              <span class="vps-toggle-track"></span>
+              <span class="vps-toggle-thumb"></span>
+            </label>
+          </div>
+        </form>
       </div>
 
-      <div class="sc">
-        <div class="sc-head">
+      <div class="vps-card">
+        <div class="vps-card-header">
           <h2>Your Store Link</h2>
-          <p>Share this link everywhere to let customers find your store.</p>
+          <p>Share this link everywhere to let customers find your store</p>
         </div>
-        <div class="sc-body">
-          <div class="link-box">
-            <input type="text" value="{{ request.scheme }}://{{ request.get_host }}/{{ user.slug }}" readonly id="publicLink" onclick="this.select()">
-            <button class="link-copy" onclick="copyLink()" id="linkCopyBtn">
-              <svg id="copyIcon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-              <svg id="checkIcon" style="display:none" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-              <span id="copyTxt">Copy</span>
-            </button>
-          </div>
-          <div style="margin-top:10px;">
-            <a href="/{{ user.slug }}" target="_blank" class="btn btn-s btn-sm">
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              View Store
-            </a>
-          </div>
+        <div class="vps-link-box">
+          <input type="text" value="{{ request.scheme }}://{{ request.get_host }}/{{ user.slug }}" readonly id="publicLink" onclick="this.select()">
+          <button class="vps-link-copy" onclick="copyLink()" id="linkCopyBtn">
+            <svg id="copyIcon" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            <svg id="checkIcon" style="display:none" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+            <span id="copyTxt">Copy</span>
+          </button>
+        </div>
+        <div style="margin-top:12px;">
+          <a href="/{{ user.slug }}" target="_blank" class="vps-btn vps-btn-secondary vps-btn-sm">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            View Store
+          </a>
         </div>
       </div>
 
     </div><!-- /store -->
 
 
-    <!-- ══ PAYOUT ══ -->
-    <div class="sp-panel" id="tab-payout">
+    <!-- ══════════════════ PAYOUT ══════════════════ -->
+    <div class="vps-panel" id="tab-payout">
 
-      <div class="section-label">Bank Account</div>
+      <div class="vps-section-label">Bank Account</div>
 
-      <div class="sc">
-        <div class="sc-head">
+      <div class="vps-card">
+        <div class="vps-card-header">
           <h2>Payout Account</h2>
-          <p>Where we send your money after a buyer confirms receipt.</p>
+          <p>Where we send your money after a buyer confirms receipt</p>
         </div>
-        <div class="sc-body">
 
-          {% if user.bank_account %}
-          <div class="payout-saved" id="payoutSavedRow">
-            <div>
-              <div class="payout-saved-name">{{ user.bank_account.account_name }}</div>
-              <div class="payout-saved-meta">{{ user.bank_account.bank_name }} · ****{{ user.bank_account.account_number|slice:"-4:" }}</div>
-              {% if user.bank_account.is_verified %}
-              <div class="verified-pill">
-                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                Verified
+        {% if user.bank_account %}
+        <div class="vps-payout-saved" id="payoutSavedRow">
+          <div class="vps-payout-saved-details">
+            <div class="vps-payout-saved-name">{{ user.bank_account.account_name }}</div>
+            <div class="vps-payout-saved-meta">{{ user.bank_account.bank_name }} · ****{{ user.bank_account.account_number|slice:"-4:" }}</div>
+            {% if user.bank_account.is_verified %}
+            <span class="vps-verified-pill">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              Verified
+            </span>
+            {% endif %}
+          </div>
+          <button type="button" class="vps-btn vps-btn-secondary vps-btn-sm" onclick="showPayoutForm()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Change
+          </button>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{% url 'update_payout_account' %}" id="payoutForm"
+              {% if user.bank_account %}style="display:none"{% endif %}>
+          {% csrf_token %}
+          <input type="hidden" id="hBankCode"  name="bank_code"    value="{{ user.bank_account.bank_code|default:'' }}">
+          <input type="hidden" id="hBankName"  name="bank_name"    value="{{ user.bank_account.bank_name|default:'' }}">
+          <input type="hidden" id="hAcctName"  name="account_name" value="{{ user.bank_account.account_name|default:'' }}">
+
+          <div class="vps-form-group">
+            <label class="vps-label">Account Number</label>
+            <div class="vps-acct-wrap">
+              <input type="text" id="acctNum" name="account_number" class="vps-input vps-acct-input"
+                value="{{ user.bank_account.account_number|default:'' }}"
+                placeholder="0000000000"
+                maxlength="10" inputmode="numeric" autocomplete="off"
+                oninput="onAcctInput(this)">
+              <span class="vps-acct-badge" id="acctBadge"></span>
+            </div>
+            <span class="vps-acct-badge vps-acct-badge-mobile" id="acctBadgeMobile"></span>
+          </div>
+
+          <div class="vps-form-group">
+            <label class="vps-label">Bank</label>
+            <div class="vps-bank-picker" id="bankPicker">
+              <div class="vps-bp-selected" id="bpSelected">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--vp-green);flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+                <span class="vps-bp-selected-name" id="bpSelectedName">—</span>
+                <button type="button" class="vps-bp-change" onclick="resetBank()">Change</button>
               </div>
+              <div class="vps-bp-search-row" id="bpSearchRow">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--vp-text-tertiary);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" class="vps-bp-input" id="bpInput" placeholder="Search banks…" autocomplete="off"
+                  oninput="filterBanks(this.value)" onfocus="openBpList()">
+                <button type="button" class="vps-bp-clear" id="bpClear" onclick="clearBpSearch()">✕</button>
+              </div>
+              <div class="vps-bp-list" id="bpList">
+                <div class="vps-bp-empty" id="bpEmpty">Loading banks…</div>
+              </div>
+              <div class="vps-bp-count" id="bpCountRow" style="display:none;"></div>
+            </div>
+            <span class="vps-hint" id="bpHint">All Nigerian banks — commercial, microfinance &amp; fintech</span>
+          </div>
+
+          <div class="vps-form-group" id="acctNameGroup"
+               style="display:{% if user.bank_account and user.bank_account.account_name %}block{% else %}none{% endif %}">
+            <label class="vps-label">
+              Account Name
+              <span class="vps-label-verified">auto-verified</span>
+            </label>
+            <div class="vps-acct-banner show success" id="acctBanner">
+              {% if user.bank_account and user.bank_account.account_name %}
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              {{ user.bank_account.account_name }}
               {% endif %}
             </div>
-            <button type="button" class="btn btn-s btn-sm" onclick="showPayoutForm()">
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              Change
-            </button>
+            <span class="vps-hint">Name fetched directly from your bank.</span>
           </div>
-          {% endif %}
 
-          <form method="POST" action="{% url 'update_payout_account' %}" id="payoutForm"
-                {% if user.bank_account %}style="display:none"{% endif %}>
-            {% csrf_token %}
-            <input type="hidden" id="hBankCode"  name="bank_code"    value="{{ user.bank_account.bank_code|default:'' }}">
-            <input type="hidden" id="hBankName"  name="bank_name"    value="{{ user.bank_account.bank_name|default:'' }}">
-            <input type="hidden" id="hAcctName"  name="account_name" value="{{ user.bank_account.account_name|default:'' }}">
-
-            <div class="fg">
-              <label class="fl">Account Number</label>
-              <div class="acct-wrap">
-                <input type="text" id="acctNum" name="account_number" class="fi"
-                  value="{{ user.bank_account.account_number|default:'' }}"
-                  placeholder="0000000000"
-                  maxlength="10" inputmode="numeric" autocomplete="off"
-                  oninput="onAcctInput(this)">
-                <span class="acct-badge" id="acctBadge"></span>
-              </div>
-              <span class="acct-badge acct-badge-mobile" id="acctBadgeMobile"></span>
-            </div>
-
-            <div class="fg">
-              <label class="fl">Bank</label>
-              <div class="bank-picker" id="bankPicker">
-                <div class="bp-selected" id="bpSelected">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--green);flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
-                  <span class="bp-selected-name" id="bpSelectedName">—</span>
-                  <button type="button" class="bp-change" onclick="resetBank()">Change</button>
-                </div>
-                <div class="bp-search-row" id="bpSearchRow">
-                  <svg class="bp-search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                  <input type="text" class="bp-input" id="bpInput" placeholder="Search banks…" autocomplete="off"
-                    oninput="filterBanks(this.value)" onfocus="openBpList()">
-                  <button type="button" class="bp-clear" id="bpClear" onclick="clearBpSearch()">✕</button>
-                </div>
-                <div class="bp-list" id="bpList">
-                  <div class="bp-empty" id="bpEmpty">Loading banks…</div>
-                </div>
-                <div class="bp-count-row" id="bpCountRow" style="display:none;"></div>
-              </div>
-              <div class="fhint" id="bpHint">All Nigerian banks — commercial, microfinance &amp; fintech</div>
-            </div>
-
-            <div class="fg" id="acctNameGroup" style="display:{% if user.bank_account and user.bank_account.account_name %}block{% else %}none{% endif %}">
-              <label class="fl">Account Name <span style="color:var(--green);text-transform:none;letter-spacing:0;font-weight:600;font-size:11px;">auto-verified</span></label>
-              <div class="acct-banner show success" id="acctBanner">
-                {% if user.bank_account and user.bank_account.account_name %}
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                {{ user.bank_account.account_name }}
-                {% endif %}
-              </div>
-              <div class="fhint">Name fetched directly from your bank.</div>
-            </div>
-
-            <div class="payout-save-row">
-              <button type="submit" class="btn btn-g" id="payoutSaveBtn" {% if not user.bank_account %}disabled{% endif %}>
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                Save Payout Account
-              </button>
-              <span class="payout-save-hint" id="payoutSaveHint">
-                {% if user.bank_account %}Change details above and save.{% else %}Enter account number then select your bank.{% endif %}
-              </span>
-            </div>
-          </form>
-
-        </div>
+          <div class="vps-payout-save-row">
+            <button type="submit" class="vps-btn vps-btn-primary" id="payoutSaveBtn"
+                    {% if not user.bank_account %}disabled{% endif %}>
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              Save Payout Account
+            </button>
+            <span class="vps-payout-save-hint" id="payoutSaveHint">
+              {% if user.bank_account %}Change details above and save.{% else %}Enter account number then select your bank.{% endif %}
+            </span>
+          </div>
+        </form>
       </div>
 
-      <div class="section-label">How It Works</div>
+      <div class="vps-section-label">How It Works</div>
 
-      <div class="sc">
-        <div class="sc-head"><h2>Payout Process</h2></div>
-        <div class="sc-body">
-          <div class="payout-steps">
-            <div class="payout-step">
-              <div class="pstep-num">1</div>
-              <div><div class="pstep-title">Buyer pays</div><div class="pstep-desc">Funds are held securely by Vendopage in escrow.</div></div>
+      <div class="vps-card">
+        <div class="vps-card-header">
+          <h2>Payout Process</h2>
+          <p>Here's exactly how your money flows to you</p>
+        </div>
+        <div class="vps-payout-steps">
+          <div class="vps-payout-step">
+            <div class="vps-step-num">1</div>
+            <div>
+              <div class="vps-step-title">Buyer pays</div>
+              <div class="vps-step-desc">Funds are held securely by Vendopage in escrow.</div>
             </div>
-            <div class="payout-step">
-              <div class="pstep-num">2</div>
-              <div><div class="pstep-title">You ship the order</div><div class="pstep-desc">Mark it shipped in your orders dashboard.</div></div>
+          </div>
+          <div class="vps-payout-step">
+            <div class="vps-step-num">2</div>
+            <div>
+              <div class="vps-step-title">You ship the order</div>
+              <div class="vps-step-desc">Mark it shipped in your orders dashboard.</div>
             </div>
-            <div class="payout-step">
-              <div class="pstep-num">3</div>
-              <div><div class="pstep-title">Buyer confirms</div><div class="pstep-desc">Or funds auto-release after 72 hours if no response.</div></div>
+          </div>
+          <div class="vps-payout-step">
+            <div class="vps-step-num">3</div>
+            <div>
+              <div class="vps-step-title">Buyer confirms</div>
+              <div class="vps-step-desc">Or funds auto-release after 72 hours if no response.</div>
             </div>
-            <div class="payout-step">
-              <div class="pstep-num">4</div>
-              <div><div class="pstep-title">You get paid</div><div class="pstep-desc">Funds sent to your bank minus the {{ platform_fee_percent }}% platform fee.</div></div>
+          </div>
+          <div class="vps-payout-step">
+            <div class="vps-step-num">4</div>
+            <div>
+              <div class="vps-step-title">You get paid</div>
+              <div class="vps-step-desc">Funds sent to your bank minus the {{ platform_fee_percent }}% platform fee.</div>
             </div>
           </div>
         </div>
@@ -1128,185 +340,182 @@
     </div><!-- /payout -->
 
 
-    <!-- ══ PROFILE ══ -->
-    <div class="sp-panel" id="tab-profile">
+    <!-- ══════════════════ PROFILE ══════════════════ -->
+    <div class="vps-panel" id="tab-profile">
 
-      <div class="section-label">Photo</div>
+      <div class="vps-section-label">Photo</div>
 
-      <div class="sc">
-        <div class="sc-head">
+      <div class="vps-card">
+        <div class="vps-card-header">
           <h2>Profile Picture</h2>
-          <p>Shown on your public storefront.</p>
+          <p>Shown on your public storefront</p>
         </div>
-        <div class="sc-body">
-          <div class="avatar-row">
-            <div class="avatar-circle" id="avatarCircle">
+        <div class="vps-avatar-row">
+          <div class="vps-avatar" id="avatarCircle">
+            {% if user.profile_picture %}
+              <img src="{{ user.profile_picture.url }}" alt="" id="avatarImg">
+            {% else %}
+              <span id="avatarLetter">{{ user.business_name|first }}</span>
+            {% endif %}
+            <div class="vps-avatar-spinner" id="avatarSpinner">
+              <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+              <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+              <button type="button" onclick="document.getElementById('avatarFile').click()" class="vps-btn vps-btn-secondary vps-btn-sm">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                Choose Photo
+              </button>
               {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}" alt="" id="avatarImg">
-              {% else %}
-                <span id="avatarLetter">{{ user.business_name|first }}</span>
+              <form method="POST" action="{% url 'update_profile_picture' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" name="remove_picture" value="true" class="vps-btn vps-btn-danger vps-btn-sm">Remove</button>
+              </form>
               {% endif %}
-              <div class="avatar-spinner" id="avatarSpinner">
-                <svg width="20" height="20" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
-              </div>
             </div>
-            <div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-                <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
-                <button type="button" onclick="document.getElementById('avatarFile').click()" class="btn btn-s btn-sm">
-                  <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                  Choose Photo
-                </button>
-                {% if user.profile_picture %}
-                <form method="POST" action="{% url 'update_profile_picture' %}" style="display:inline;">
-                  {% csrf_token %}
-                  <button type="submit" name="remove_picture" value="true" class="btn btn-d btn-sm">Remove</button>
-                </form>
-                {% endif %}
-              </div>
-              <p class="avatar-hint">JPG, PNG or GIF · Max 5MB · Square works best</p>
-            </div>
+            <p class="vps-hint">JPG, PNG or GIF · Max 5MB · Square works best</p>
           </div>
         </div>
       </div>
 
-      <div class="section-label">Currency</div>
+      <div class="vps-section-label">Currency</div>
 
-      <div class="sc">
-        <div class="sc-head">
+      <div class="vps-card">
+        <div class="vps-card-header">
           <h2>Store Currency</h2>
-          <p>The currency your product prices are shown in.</p>
+          <p>The currency your product prices are shown in</p>
         </div>
-        <div class="sc-body">
-          <!-- Current currency display -->
-          <div class="currency-row" id="currencyDisplay">
-            <div class="currency-flag">
-              <img src="https://flagcdn.com/24x18/{{ user.country_code|lower|default:'ng' }}.png" width="24" height="18" alt="" style="border-radius:2px;" onerror="this.style.display='none'">
-            </div>
-            <div class="currency-info">
-              <div class="currency-name">{{ user.currency_code|default:"NGN" }} — {{ user.currency_symbol|default:"₦" }}</div>
-              <div class="currency-code">Your store's pricing currency</div>
-            </div>
-            <button type="button" class="btn btn-s btn-sm" onclick="toggleCurrencyForm()">Change</button>
-          </div>
 
-          <!-- Currency change form (hidden by default) -->
-          <form method="POST" action="{% url 'update_currency' %}" id="currencyForm" style="display:none;">
-            {% csrf_token %}
-            <input type="hidden" name="currency_code"   id="cpCurrencyCode"   value="{{ user.currency_code|default:'NGN' }}">
-            <input type="hidden" name="currency_symbol" id="cpCurrencySymbol" value="{{ user.currency_symbol|default:'₦' }}">
-            <div class="fg">
-              <label class="fl">Select Country / Currency</label>
-              <div class="cp-wrap">
-                <div class="cp-field">
-                  <button type="button" class="cp-btn" id="cpBtn" onclick="toggleCpDropdown()">
-                    <span class="cp-symbol" id="cpSymbol">{{ user.currency_symbol|default:"₦" }}</span>
-                    <span class="cp-label" id="cpCodeLabel">{{ user.currency_code|default:"NGN" }}</span>
-                    <svg class="cp-caret" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-                  </button>
-                  <div class="cp-preview" id="cpPreview">Tap to change currency</div>
-                </div>
-                <div class="cp-dropdown" id="cpDropdown">
-                  <div class="cp-search">
-                    <input type="text" id="cpSearch" placeholder="Search country or currency…" autocomplete="off" oninput="filterCp(this.value)">
-                  </div>
-                  <div class="cp-list" id="cpList"></div>
-                </div>
-              </div>
-              <div class="fhint">This updates what currency symbol buyers see on your products.</div>
-            </div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
-              <button type="submit" class="btn btn-g">Save Currency</button>
-              <button type="button" class="btn btn-s" onclick="toggleCurrencyForm()">Cancel</button>
-            </div>
-          </form>
+        <!-- Current currency display -->
+        <div class="vps-currency-row" id="currencyDisplay">
+          <div class="vps-currency-flag">
+            <img src="https://flagcdn.com/24x18/{{ user.country_code|lower|default:'ng' }}.png" width="24" height="18" alt="" style="border-radius:3px;" onerror="this.style.display='none'">
+          </div>
+          <div class="vps-currency-info">
+            <div class="vps-currency-name">{{ user.currency_code|default:"NGN" }} — {{ user.currency_symbol|default:"₦" }}</div>
+            <div class="vps-currency-meta">Your store's pricing currency</div>
+          </div>
+          <button type="button" class="vps-btn vps-btn-secondary vps-btn-sm" onclick="toggleCurrencyForm()">Change</button>
         </div>
+
+        <!-- Currency change form -->
+        <form method="POST" action="{% url 'update_currency' %}" id="currencyForm" style="display:none;">
+          {% csrf_token %}
+          <input type="hidden" name="currency_code"   id="cpCurrencyCode"   value="{{ user.currency_code|default:'NGN' }}">
+          <input type="hidden" name="currency_symbol" id="cpCurrencySymbol" value="{{ user.currency_symbol|default:'₦' }}">
+          <div class="vps-form-group">
+            <label class="vps-label">Select Country / Currency</label>
+            <div class="vps-cp-wrap">
+              <div class="vps-cp-field">
+                <button type="button" class="vps-cp-btn" id="cpBtn" onclick="toggleCpDropdown()">
+                  <span class="vps-cp-symbol" id="cpSymbol">{{ user.currency_symbol|default:"₦" }}</span>
+                  <span class="vps-cp-code" id="cpCodeLabel">{{ user.currency_code|default:"NGN" }}</span>
+                  <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-left:auto;color:var(--vp-text-tertiary)"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="vps-cp-preview" id="cpPreview">Tap to change currency</div>
+              </div>
+              <div class="vps-cp-dropdown" id="cpDropdown">
+                <div class="vps-cp-search">
+                  <input type="text" id="cpSearch" placeholder="Search country or currency…" autocomplete="off" oninput="filterCp(this.value)">
+                </div>
+                <div class="vps-cp-list" id="cpList"></div>
+              </div>
+            </div>
+            <span class="vps-hint">This updates what currency symbol buyers see on your products.</span>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+            <button type="submit" class="vps-btn vps-btn-primary">Save Currency</button>
+            <button type="button" class="vps-btn vps-btn-secondary" onclick="toggleCurrencyForm()">Cancel</button>
+          </div>
+        </form>
       </div>
 
     </div><!-- /profile -->
 
 
-    <!-- ══ ACCOUNT ══ -->
-    <div class="sp-panel" id="tab-account">
+    <!-- ══════════════════ ACCOUNT ══════════════════ -->
+    <div class="vps-panel" id="tab-account">
 
-      <div class="section-label">Login Details</div>
+      <div class="vps-section-label">Login Details</div>
 
-      <div class="sc">
-        <div class="sc-head">
+      <div class="vps-card">
+        <div class="vps-card-header">
           <h2>Email &amp; Username</h2>
-          <p>Manage your login credentials.</p>
+          <p>Manage your login credentials</p>
         </div>
-        <div class="sc-body">
-          <form method="POST" action="{% url 'update_account' %}">
-            {% csrf_token %}
-            <div class="frow">
-              <div class="fg">
-                <label class="fl">Email Address</label>
-                <input type="email" name="email" class="fi" value="{{ user.email }}" required>
-              </div>
-              <div class="fg">
-                <label class="fl">Username</label>
-                <input type="text" class="fi" value="{{ user.username }}" disabled>
-                <div class="fhint">Username cannot be changed.</div>
-              </div>
+        <form method="POST" action="{% url 'update_account' %}">
+          {% csrf_token %}
+          <div class="vps-grid-2">
+            <div class="vps-form-group">
+              <label class="vps-label">Email Address</label>
+              <input type="email" name="email" class="vps-input" value="{{ user.email }}" required>
             </div>
-            <button type="submit" class="btn btn-g">Update Email</button>
-          </form>
+            <div class="vps-form-group">
+              <label class="vps-label">Username</label>
+              <input type="text" class="vps-input" value="{{ user.username }}" disabled>
+              <span class="vps-hint">Username cannot be changed.</span>
+            </div>
+          </div>
+          <div class="vps-form-actions">
+            <button type="submit" class="vps-btn vps-btn-primary">Update Email</button>
+          </div>
+        </form>
 
-          <hr class="sc-divider">
+        <hr class="vps-divider">
 
-          <h3 style="font-family:var(--font-d);font-weight:700;font-size:14px;margin-bottom:14px;color:var(--dark);">Change Password</h3>
-          <form method="POST" action="{% url 'change_password' %}">
-            {% csrf_token %}
-            <div class="fg">
-              <label class="fl">Current Password</label>
-              <input type="password" name="current_password" class="fi" required>
+        <h3 class="vps-subsection-title">Change Password</h3>
+        <form method="POST" action="{% url 'change_password' %}">
+          {% csrf_token %}
+          <div class="vps-form-group">
+            <label class="vps-label">Current Password</label>
+            <input type="password" name="current_password" class="vps-input" required>
+          </div>
+          <div class="vps-grid-2">
+            <div class="vps-form-group">
+              <label class="vps-label">New Password</label>
+              <input type="password" name="new_password" class="vps-input" required>
             </div>
-            <div class="frow">
-              <div class="fg">
-                <label class="fl">New Password</label>
-                <input type="password" name="new_password" class="fi" required>
-              </div>
-              <div class="fg">
-                <label class="fl">Confirm Password</label>
-                <input type="password" name="confirm_password" class="fi" required>
-              </div>
+            <div class="vps-form-group">
+              <label class="vps-label">Confirm Password</label>
+              <input type="password" name="confirm_password" class="vps-input" required>
             </div>
-            <button type="submit" class="btn btn-s">Change Password</button>
-          </form>
-        </div>
+          </div>
+          <div class="vps-form-actions">
+            <button type="submit" class="vps-btn vps-btn-secondary">Change Password</button>
+          </div>
+        </form>
       </div>
 
     </div><!-- /account -->
 
 
-    <!-- ══ APPEARANCE ══ -->
-    <div class="sp-panel" id="tab-appearance">
+    <!-- ══════════════════ APPEARANCE ══════════════════ -->
+    <div class="vps-panel" id="tab-appearance">
 
-      <div class="section-label">Display</div>
+      <div class="vps-section-label">Display</div>
 
-      <div class="sc">
-        <div class="sc-head">
+      <div class="vps-card">
+        <div class="vps-card-header">
           <h2>Color Mode</h2>
-          <p>Choose how Vendopage looks for you.</p>
+          <p>Choose how Vendopage looks for you</p>
         </div>
-        <div class="sc-body">
-          <div class="tog-row">
-            <div class="tog-info">
-              <h3>Theme</h3>
-              <p>Auto follows your device's system preference.</p>
-            </div>
-            <div class="mode-pills">
-              <button class="mpill" id="pillLight" onclick="pickMode('light')">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-                Light
-              </button>
-              <button class="mpill" id="pillAuto" onclick="pickMode('auto')">Auto</button>
-              <button class="mpill" id="pillDark" onclick="pickMode('dark')">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-                Dark
-              </button>
-            </div>
+        <div class="vps-settings-row">
+          <div class="vps-settings-row-info">
+            <h4>Theme</h4>
+            <p>Auto follows your device's system preference.</p>
+          </div>
+          <div class="vps-mode-pills">
+            <button class="vps-pill" id="pillLight" onclick="pickMode('light')">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+              Light
+            </button>
+            <button class="vps-pill" id="pillAuto" onclick="pickMode('auto')">Auto</button>
+            <button class="vps-pill" id="pillDark" onclick="pickMode('dark')">
+              <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+              Dark
+            </button>
           </div>
         </div>
       </div>
@@ -1314,66 +523,86 @@
     </div><!-- /appearance -->
 
 
-    <!-- ══ PLAN ══ -->
-    <div class="sp-panel" id="tab-plan">
+    <!-- ══════════════════ PLAN ══════════════════ -->
+    <div class="vps-panel" id="tab-plan">
 
-      <div class="fee-banner">
-        <div class="fee-banner-text">
+      <!-- Fee Banner -->
+      <div class="vps-fee-banner">
+        <div class="vps-fee-banner-text">
           <h3>We only earn when you make a sale</h3>
           <p>Store Mode is free to enable. We take a small % from each order only.</p>
         </div>
-        <div class="fee-pill">{{ transaction_fee|floatformat:"-2" }}% <span>per sale</span></div>
+        <div class="vps-fee-pill">{{ transaction_fee|floatformat:"-2" }}%<span>per sale</span></div>
       </div>
 
-      <div class="plan-grid">
-        <div class="plan-card {% if current_subscription == 'free' %}current{% endif %}">
-          <div class="plan-card-head">
-            <div class="plan-card-name">
+      <!-- Plan Cards -->
+      <div class="vps-plan-grid">
+        <div class="vps-plan-card {% if current_subscription == 'free' %}vps-plan-current{% endif %}">
+          <div class="vps-plan-card-head">
+            <div class="vps-plan-name">
               Free Forever
-              {% if current_subscription == 'free' %}<span class="plan-current-tag">Current</span>{% endif %}
+              {% if current_subscription == 'free' %}<span class="vps-plan-tag">Current</span>{% endif %}
             </div>
-            <div class="plan-price">₦0<span>/mo</span></div>
+            <div class="vps-plan-price">₦0<span>/mo</span></div>
           </div>
-          <div class="plan-card-body">
-            <div class="plan-features">
-              <div class="pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited products</div>
-              <div class="pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom store URL</div>
-              <div class="pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>WhatsApp integration</div>
-              <div class="pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Store Mode (escrow)</div>
-              <div class="pf-item off"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>"Powered by" badge</div>
-              <div class="pf-item off"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Watermarks on</div>
-            </div>
-            <button class="btn btn-s btn-full" disabled style="opacity:.5;cursor:default;">
+          <div class="vps-plan-card-body">
+            <ul class="vps-plan-features">
+              <li class="vps-pf-item">
+                <svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Unlimited products
+              </li>
+              <li class="vps-pf-item">
+                <svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Custom store URL
+              </li>
+              <li class="vps-pf-item">
+                <svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                WhatsApp integration
+              </li>
+              <li class="vps-pf-item">
+                <svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Store Mode (escrow)
+              </li>
+              <li class="vps-pf-item vps-pf-off">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                "Powered by" badge
+              </li>
+              <li class="vps-pf-item vps-pf-off">
+                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Watermarks on
+              </li>
+            </ul>
+            <button class="vps-btn vps-btn-secondary vps-btn-full" disabled style="opacity:.5;cursor:default;">
               {% if current_subscription == 'free' %}Current plan{% else %}Free{% endif %}
             </button>
           </div>
         </div>
 
-        <div class="plan-card featured {% if current_subscription == 'premium' %}current{% endif %}">
-          <div class="plan-card-head">
-            <div class="plan-card-name">
+        <div class="vps-plan-card vps-plan-featured {% if current_subscription == 'premium' %}vps-plan-current{% endif %}">
+          <div class="vps-plan-card-head">
+            <div class="vps-plan-name">
               ⭐ Premium
-              {% if current_subscription == 'premium' %}<span class="plan-current-tag">Active</span>{% endif %}
+              {% if current_subscription == 'premium' %}<span class="vps-plan-tag">Active</span>{% endif %}
             </div>
-            <div class="plan-price">₦{{ premium_price|floatformat:"0" }}<span>/mo</span></div>
+            <div class="vps-plan-price">₦{{ premium_price|floatformat:"0" }}<span>/mo</span></div>
           </div>
-          <div class="plan-card-body">
-            <div class="plan-features">
-              <div class="pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Free</div>
-              <div class="pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Remove "Powered by"</div>
-              <div class="pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Disable watermarks</div>
-              <div class="pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Featured on homepage</div>
-              <div class="pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verified badge</div>
-              <div class="pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority support</div>
-            </div>
+          <div class="vps-plan-card-body">
+            <ul class="vps-plan-features">
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Free</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Remove "Powered by"</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Disable watermarks</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Featured on homepage</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verified badge</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
+            </ul>
             {% if current_subscription == 'premium' %}
-              <button class="btn btn-g btn-full" disabled style="opacity:.7;cursor:default;">
+              <button class="vps-btn vps-btn-primary vps-btn-full" disabled style="opacity:.75;cursor:default;">
                 ✓ Active · expires {{ subscription_expires|date:"M d, Y" }}
               </button>
             {% else %}
               <form method="POST" action="{% url 'upgrade_to_premium' %}">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-g btn-full">
+                <button type="submit" class="vps-btn vps-btn-primary vps-btn-full">
                   <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
                   Upgrade — ₦{{ premium_price|floatformat:"0" }}/mo
                 </button>
@@ -1383,34 +612,35 @@
         </div>
       </div>
 
-      <div class="section-label">Earnings Breakdown</div>
+      <!-- Earnings Breakdown -->
+      <div class="vps-section-label">Earnings Breakdown</div>
 
-      <div class="sc">
-        <div class="sc-head"><h2>What you keep on every ₦{{ example_order|floatformat:"0" }} sale</h2></div>
-        <div class="sc-body">
-          <div class="earn-grid">
-            <div class="earn-cell">
-              <div class="earn-label">Buyer pays</div>
-              <div class="earn-value" style="color:var(--dark);">₦{{ example_order|floatformat:"0" }}</div>
-              <div class="earn-sub">Held in escrow</div>
-            </div>
-            <div class="earn-cell">
-              <div class="earn-label">Our fee ({{ transaction_fee|floatformat:"-2" }}%)</div>
-              <div class="earn-value" style="color:#c2410c;">₦{{ example_fee|floatformat:"0" }}</div>
-              <div class="earn-sub">Platform cut</div>
-            </div>
-            <div class="earn-cell">
-              <div class="earn-label">You receive</div>
-              <div class="earn-value" style="color:var(--green);">₦{{ example_payout|floatformat:"0" }}</div>
-              <div class="earn-sub">To your bank</div>
-            </div>
-          </div>
-          <p style="font-size:11px;color:var(--gray-lt);margin-top:10px;">Flutterwave processing fees apply separately.</p>
+      <div class="vps-card">
+        <div class="vps-card-header">
+          <h2>What you keep on every ₦{{ example_order|floatformat:"0" }} sale</h2>
         </div>
+        <div class="vps-earn-grid">
+          <div class="vps-earn-cell">
+            <div class="vps-earn-label">Buyer pays</div>
+            <div class="vps-earn-value" style="color:var(--vp-text-primary);">₦{{ example_order|floatformat:"0" }}</div>
+            <div class="vps-earn-sub">Held in escrow</div>
+          </div>
+          <div class="vps-earn-cell">
+            <div class="vps-earn-label">Our fee ({{ transaction_fee|floatformat:"-2" }}%)</div>
+            <div class="vps-earn-value" style="color:#c2410c;">₦{{ example_fee|floatformat:"0" }}</div>
+            <div class="vps-earn-sub">Platform cut</div>
+          </div>
+          <div class="vps-earn-cell">
+            <div class="vps-earn-label">You receive</div>
+            <div class="vps-earn-value" style="color:var(--vp-green);">₦{{ example_payout|floatformat:"0" }}</div>
+            <div class="vps-earn-sub">To your bank</div>
+          </div>
+        </div>
+        <p class="vps-earn-footnote">Paystack processing fees apply separately.</p>
       </div>
 
-      <div style="text-align:center;padding:8px 0 4px;">
-        <a href="{% url 'subscription' %}" class="btn btn-s btn-sm">
+      <div style="text-align:center;padding:4px 0 8px;">
+        <a href="{% url 'subscription' %}" class="vps-btn vps-btn-secondary vps-btn-sm">
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           Full pricing page
         </a>
@@ -1419,35 +649,38 @@
     </div><!-- /plan -->
 
   </div><!-- /panels -->
-</div>
-</div>
-{% block footer %}{% endblock %}
+</div><!-- /vp-settings -->
 
+{% endblock %}
+
+{% block extra_js %}
+{% block footer %}{% endblock %}
+<link rel="stylesheet" href="/static/css/vendopage-settings.css">
 <script>
 const CSRF = '{{ csrf_token }}';
 
 /* ── Tab switching ── */
-function switchTab(name, btn) {
-  document.querySelectorAll('.sp-tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.sp-panel').forEach(p => p.classList.remove('active'));
+function vpSwitchTab(name, btn) {
+  document.querySelectorAll('.vps-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.vps-panel').forEach(p => p.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
+  const panel = document.getElementById('tab-' + name);
+  if (panel) panel.classList.add('active');
   history.replaceState(null, '', '#' + name);
   if (name === 'payout' && !banksLoaded) fetchBanks();
 }
-
-(function(){
-  const hash  = location.hash.replace('#','');
-  const valid = ['store','payout','profile','account','appearance','plan'];
+(function () {
+  const hash = location.hash.replace('#', '');
+  const valid = ['store', 'payout', 'profile', 'account', 'appearance', 'plan'];
   if (hash && valid.includes(hash)) {
-    const btn = document.querySelector(`.sp-tab[onclick*="'${hash}'"]`);
-    if (btn) switchTab(hash, btn);
+    const btn = document.querySelector(`.vps-tab[onclick*="'${hash}'"]`);
+    if (btn) vpSwitchTab(hash, btn);
   }
 })();
 
-/* ── Copy link ── */
+/* ── Copy store link ── */
 function copyLink() {
-  navigator.clipboard.writeText(document.getElementById('publicLink').value).catch(()=>{});
+  navigator.clipboard.writeText(document.getElementById('publicLink').value).catch(() => {});
   document.getElementById('copyIcon').style.display = 'none';
   document.getElementById('checkIcon').style.display = 'block';
   document.getElementById('copyTxt').textContent = 'Copied!';
@@ -1458,13 +691,14 @@ function copyLink() {
   }, 2000);
 }
 
-/* ── Dark mode ── */
+/* ── Theme / mode ── */
 function pickMode(mode) {
   window.vpSetTheme && window.vpSetTheme(mode);
-  ['Light','Auto','Dark'].forEach(m => document.getElementById('pill'+m).classList.remove('active'));
+  ['Light', 'Auto', 'Dark'].forEach(m => document.getElementById('pill' + m).classList.remove('active'));
   document.getElementById('pill' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+  localStorage.setItem('vp-theme', mode);
 }
-(function(){
+(function () {
   const saved = localStorage.getItem('vp-theme') || 'auto';
   document.addEventListener('DOMContentLoaded', () => {
     const cap = saved.charAt(0).toUpperCase() + saved.slice(1);
@@ -1477,25 +711,25 @@ function pickMode(mode) {
 const CLOUD = 'dqxlkie1i', PRESET = 'vendopage_unsigned';
 async function uploadAvatar(input) {
   const file = input.files[0]; if (!file) return;
-  if (file.size > 5*1024*1024) { spMsg('Image too large. Max 5MB.','error'); return; }
+  if (file.size > 5 * 1024 * 1024) { spMsg('Image too large. Max 5MB.', 'error'); return; }
   document.getElementById('avatarSpinner').style.display = 'flex';
   try {
     const fd = new FormData();
-    fd.append('file', file); fd.append('upload_preset', PRESET); fd.append('folder','vendopage/profiles');
-    const r = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`, {method:'POST',body:fd});
+    fd.append('file', file); fd.append('upload_preset', PRESET); fd.append('folder', 'vendopage/profiles');
+    const r = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`, { method: 'POST', body: fd });
     const data = await r.json();
     if (!r.ok) throw new Error(data.error?.message || 'Upload failed');
     const dfd = new FormData();
     dfd.append('profile_picture_url', data.secure_url);
-    const dr = await fetch('{% url "update_profile_picture" %}', {method:'POST',body:dfd,headers:{'X-CSRFToken':CSRF}});
+    const dr = await fetch('{% url "update_profile_picture" %}', { method: 'POST', body: dfd, headers: { 'X-CSRFToken': CSRF } });
     if (!dr.ok) throw new Error('Save failed');
     const circle = document.getElementById('avatarCircle');
     let img = document.getElementById('avatarImg');
-    if (!img) { circle.innerHTML=''; img=document.createElement('img'); img.id='avatarImg'; circle.appendChild(img); }
+    if (!img) { circle.innerHTML = ''; img = document.createElement('img'); img.id = 'avatarImg'; circle.appendChild(img); }
     img.src = data.secure_url;
-    spMsg('Profile picture updated!','success');
-  } catch(e) {
-    spMsg('Upload failed: ' + e.message,'error');
+    spMsg('Profile picture updated!', 'success');
+  } catch (e) {
+    spMsg('Upload failed: ' + e.message, 'error');
   } finally {
     document.getElementById('avatarSpinner').style.display = 'none';
   }
@@ -1503,59 +737,46 @@ async function uploadAvatar(input) {
 
 /* ── Currency picker ── */
 const COUNTRIES = [
-  {n:'Afghanistan',f:'af',d:'+93',c:'AFN',s:'؋'},{n:'Albania',f:'al',d:'+355',c:'ALL',s:'L'},
-  {n:'Algeria',f:'dz',d:'+213',c:'DZD',s:'دج'},{n:'Angola',f:'ao',d:'+244',c:'AOA',s:'Kz'},
-  {n:'Argentina',f:'ar',d:'+54',c:'ARS',s:'$'},{n:'Armenia',f:'am',d:'+374',c:'AMD',s:'֏'},
-  {n:'Australia',f:'au',d:'+61',c:'AUD',s:'A$'},{n:'Austria',f:'at',d:'+43',c:'EUR',s:'€'},
-  {n:'Azerbaijan',f:'az',d:'+994',c:'AZN',s:'₼'},{n:'Bahrain',f:'bh',d:'+973',c:'BHD',s:'BD'},
-  {n:'Bangladesh',f:'bd',d:'+880',c:'BDT',s:'৳'},{n:'Belgium',f:'be',d:'+32',c:'EUR',s:'€'},
-  {n:'Bolivia',f:'bo',d:'+591',c:'BOB',s:'Bs'},{n:'Brazil',f:'br',d:'+55',c:'BRL',s:'R$'},
-  {n:'Bulgaria',f:'bg',d:'+359',c:'BGN',s:'лв'},{n:'Canada',f:'ca',d:'+1',c:'CAD',s:'CA$'},
-  {n:'Chile',f:'cl',d:'+56',c:'CLP',s:'$'},{n:'China',f:'cn',d:'+86',c:'CNY',s:'¥'},
-  {n:'Colombia',f:'co',d:'+57',c:'COP',s:'$'},{n:'Croatia',f:'hr',d:'+385',c:'EUR',s:'€'},
-  {n:'Czech Republic',f:'cz',d:'+420',c:'CZK',s:'Kč'},{n:'Denmark',f:'dk',d:'+45',c:'DKK',s:'kr'},
-  {n:'Egypt',f:'eg',d:'+20',c:'EGP',s:'E£'},{n:'Ethiopia',f:'et',d:'+251',c:'ETB',s:'Br'},
-  {n:'Finland',f:'fi',d:'+358',c:'EUR',s:'€'},{n:'France',f:'fr',d:'+33',c:'EUR',s:'€'},
-  {n:'Germany',f:'de',d:'+49',c:'EUR',s:'€'},{n:'Ghana',f:'gh',d:'+233',c:'GHS',s:'₵'},
-  {n:'Greece',f:'gr',d:'+30',c:'EUR',s:'€'},{n:'Hungary',f:'hu',d:'+36',c:'HUF',s:'Ft'},
-  {n:'India',f:'in',d:'+91',c:'INR',s:'₹'},{n:'Indonesia',f:'id',d:'+62',c:'IDR',s:'Rp'},
-  {n:'Iran',f:'ir',d:'+98',c:'IRR',s:'﷼'},{n:'Iraq',f:'iq',d:'+964',c:'IQD',s:'ع.د'},
-  {n:'Ireland',f:'ie',d:'+353',c:'EUR',s:'€'},{n:'Israel',f:'il',d:'+972',c:'ILS',s:'₪'},
-  {n:'Italy',f:'it',d:'+39',c:'EUR',s:'€'},{n:'Jamaica',f:'jm',d:'+1',c:'JMD',s:'$'},
-  {n:'Japan',f:'jp',d:'+81',c:'JPY',s:'¥'},{n:'Jordan',f:'jo',d:'+962',c:'JOD',s:'JD'},
-  {n:'Kazakhstan',f:'kz',d:'+7',c:'KZT',s:'₸'},{n:'Kenya',f:'ke',d:'+254',c:'KES',s:'KSh'},
-  {n:'Kuwait',f:'kw',d:'+965',c:'KWD',s:'KD'},{n:'Malaysia',f:'my',d:'+60',c:'MYR',s:'RM'},
-  {n:'Mexico',f:'mx',d:'+52',c:'MXN',s:'$'},{n:'Morocco',f:'ma',d:'+212',c:'MAD',s:'MAD'},
-  {n:'Netherlands',f:'nl',d:'+31',c:'EUR',s:'€'},{n:'New Zealand',f:'nz',d:'+64',c:'NZD',s:'NZ$'},
-  {n:'Nigeria',f:'ng',d:'+234',c:'NGN',s:'₦'},{n:'Norway',f:'no',d:'+47',c:'NOK',s:'kr'},
-  {n:'Pakistan',f:'pk',d:'+92',c:'PKR',s:'₨'},{n:'Peru',f:'pe',d:'+51',c:'PEN',s:'S/'},
-  {n:'Philippines',f:'ph',d:'+63',c:'PHP',s:'₱'},{n:'Poland',f:'pl',d:'+48',c:'PLN',s:'zł'},
-  {n:'Portugal',f:'pt',d:'+351',c:'EUR',s:'€'},{n:'Qatar',f:'qa',d:'+974',c:'QAR',s:'QR'},
-  {n:'Romania',f:'ro',d:'+40',c:'RON',s:'lei'},{n:'Russia',f:'ru',d:'+7',c:'RUB',s:'₽'},
-  {n:'Rwanda',f:'rw',d:'+250',c:'RWF',s:'FRw'},{n:'Saudi Arabia',f:'sa',d:'+966',c:'SAR',s:'SR'},
-  {n:'Senegal',f:'sn',d:'+221',c:'XOF',s:'CFA'},{n:'Singapore',f:'sg',d:'+65',c:'SGD',s:'S$'},
-  {n:'South Africa',f:'za',d:'+27',c:'ZAR',s:'R'},{n:'South Korea',f:'kr',d:'+82',c:'KRW',s:'₩'},
-  {n:'Spain',f:'es',d:'+34',c:'EUR',s:'€'},{n:'Sri Lanka',f:'lk',d:'+94',c:'LKR',s:'₨'},
-  {n:'Sweden',f:'se',d:'+46',c:'SEK',s:'kr'},{n:'Switzerland',f:'ch',d:'+41',c:'CHF',s:'CHF'},
-  {n:'Taiwan',f:'tw',d:'+886',c:'TWD',s:'NT$'},{n:'Tanzania',f:'tz',d:'+255',c:'TZS',s:'TSh'},
-  {n:'Thailand',f:'th',d:'+66',c:'THB',s:'฿'},{n:'Turkey',f:'tr',d:'+90',c:'TRY',s:'₺'},
-  {n:'Uganda',f:'ug',d:'+256',c:'UGX',s:'USh'},{n:'Ukraine',f:'ua',d:'+380',c:'UAH',s:'₴'},
-  {n:'United Arab Emirates',f:'ae',d:'+971',c:'AED',s:'د.إ'},
-  {n:'United Kingdom',f:'gb',d:'+44',c:'GBP',s:'£'},
-  {n:'United States',f:'us',d:'+1',c:'USD',s:'$'},
-  {n:'Uruguay',f:'uy',d:'+598',c:'UYU',s:'$'},{n:'Venezuela',f:'ve',d:'+58',c:'VES',s:'Bs'},
-  {n:'Vietnam',f:'vn',d:'+84',c:'VND',s:'₫'},{n:'Zambia',f:'zm',d:'+260',c:'ZMW',s:'ZK'},
-  {n:'Zimbabwe',f:'zw',d:'+263',c:'ZWL',s:'$'},
+  {n:'Afghanistan',f:'af',c:'AFN',s:'؋'},{n:'Albania',f:'al',c:'ALL',s:'L'},
+  {n:'Algeria',f:'dz',c:'DZD',s:'دج'},{n:'Angola',f:'ao',c:'AOA',s:'Kz'},
+  {n:'Argentina',f:'ar',c:'ARS',s:'$'},{n:'Australia',f:'au',c:'AUD',s:'A$'},
+  {n:'Austria',f:'at',c:'EUR',s:'€'},{n:'Bangladesh',f:'bd',c:'BDT',s:'৳'},
+  {n:'Belgium',f:'be',c:'EUR',s:'€'},{n:'Brazil',f:'br',c:'BRL',s:'R$'},
+  {n:'Canada',f:'ca',c:'CAD',s:'CA$'},{n:'China',f:'cn',c:'CNY',s:'¥'},
+  {n:'Denmark',f:'dk',c:'DKK',s:'kr'},{n:'Egypt',f:'eg',c:'EGP',s:'E£'},
+  {n:'Ethiopia',f:'et',c:'ETB',s:'Br'},{n:'France',f:'fr',c:'EUR',s:'€'},
+  {n:'Germany',f:'de',c:'EUR',s:'€'},{n:'Ghana',f:'gh',c:'GHS',s:'₵'},
+  {n:'India',f:'in',c:'INR',s:'₹'},{n:'Indonesia',f:'id',c:'IDR',s:'Rp'},
+  {n:'Israel',f:'il',c:'ILS',s:'₪'},{n:'Italy',f:'it',c:'EUR',s:'€'},
+  {n:'Japan',f:'jp',c:'JPY',s:'¥'},{n:'Kenya',f:'ke',c:'KES',s:'KSh'},
+  {n:'Malaysia',f:'my',c:'MYR',s:'RM'},{n:'Mexico',f:'mx',c:'MXN',s:'$'},
+  {n:'Morocco',f:'ma',c:'MAD',s:'MAD'},{n:'Netherlands',f:'nl',c:'EUR',s:'€'},
+  {n:'New Zealand',f:'nz',c:'NZD',s:'NZ$'},{n:'Nigeria',f:'ng',c:'NGN',s:'₦'},
+  {n:'Norway',f:'no',c:'NOK',s:'kr'},{n:'Pakistan',f:'pk',c:'PKR',s:'₨'},
+  {n:'Philippines',f:'ph',c:'PHP',s:'₱'},{n:'Poland',f:'pl',c:'PLN',s:'zł'},
+  {n:'Portugal',f:'pt',c:'EUR',s:'€'},{n:'Qatar',f:'qa',c:'QAR',s:'QR'},
+  {n:'Romania',f:'ro',c:'RON',s:'lei'},{n:'Russia',f:'ru',c:'RUB',s:'₽'},
+  {n:'Rwanda',f:'rw',c:'RWF',s:'FRw'},{n:'Saudi Arabia',f:'sa',c:'SAR',s:'SR'},
+  {n:'Senegal',f:'sn',c:'XOF',s:'CFA'},{n:'Singapore',f:'sg',c:'SGD',s:'S$'},
+  {n:'South Africa',f:'za',c:'ZAR',s:'R'},{n:'South Korea',f:'kr',c:'KRW',s:'₩'},
+  {n:'Spain',f:'es',c:'EUR',s:'€'},{n:'Sweden',f:'se',c:'SEK',s:'kr'},
+  {n:'Switzerland',f:'ch',c:'CHF',s:'CHF'},{n:'Tanzania',f:'tz',c:'TZS',s:'TSh'},
+  {n:'Thailand',f:'th',c:'THB',s:'฿'},{n:'Turkey',f:'tr',c:'TRY',s:'₺'},
+  {n:'Uganda',f:'ug',c:'UGX',s:'USh'},{n:'Ukraine',f:'ua',c:'UAH',s:'₴'},
+  {n:'United Arab Emirates',f:'ae',c:'AED',s:'د.إ'},
+  {n:'United Kingdom',f:'gb',c:'GBP',s:'£'},
+  {n:'United States',f:'us',c:'USD',s:'$'},
+  {n:'Vietnam',f:'vn',c:'VND',s:'₫'},{n:'Zambia',f:'zm',c:'ZMW',s:'ZK'},
 ];
 
 function flagImg(f) { return `<img src="https://flagcdn.com/20x15/${f}.png" width="20" height="15" alt="${f}" style="border-radius:2px;flex-shrink:0;">`; }
 
 function renderCpList(list) {
   document.getElementById('cpList').innerHTML = list.map(c =>
-    `<div class="cp-item" onclick="selectCp('${c.f}')">
-      <span class="cp-item-flag">${flagImg(c.f)}</span>
-      <span class="cp-item-name">${c.n}</span>
-      <span class="cp-item-code">${c.c} ${c.s}</span>
+    `<div class="vps-cp-item" onclick="selectCp('${c.f}')">
+      <span>${flagImg(c.f)}</span>
+      <span class="vps-cp-item-name">${c.n}</span>
+      <span class="vps-cp-item-code">${c.c} ${c.s}</span>
     </div>`
   ).join('');
 }
@@ -1573,8 +794,8 @@ function toggleCpDropdown() {
   renderCpList(COUNTRIES);
   dd.classList.add('open');
   setTimeout(() => {
-    const s = document.getElementById('cpSearch'); if(s){s.value='';s.focus();}
-    document.addEventListener('click', closeCpOutside, {once:true});
+    const s = document.getElementById('cpSearch'); if (s) { s.value = ''; s.focus(); }
+    document.addEventListener('click', closeCpOutside, { once: true });
   }, 60);
 }
 
@@ -1585,11 +806,11 @@ function closeCpOutside(e) {
 
 function selectCp(code) {
   const c = COUNTRIES.find(x => x.f === code); if (!c) return;
-  document.getElementById('cpCurrencyCode').value   = c.c;
-  document.getElementById('cpCurrencySymbol').value = c.s;
-  document.getElementById('cpSymbol').textContent   = c.s;
-  document.getElementById('cpCodeLabel').textContent= c.c;
-  document.getElementById('cpPreview').textContent  = c.n + ' — ' + c.c;
+  document.getElementById('cpCurrencyCode').value    = c.c;
+  document.getElementById('cpCurrencySymbol').value  = c.s;
+  document.getElementById('cpSymbol').textContent    = c.s;
+  document.getElementById('cpCodeLabel').textContent = c.c;
+  document.getElementById('cpPreview').textContent   = c.n + ' — ' + c.c;
   document.getElementById('cpDropdown').classList.remove('open');
 }
 
@@ -1599,24 +820,24 @@ function toggleCurrencyForm() {
   const show = form.style.display === 'none';
   form.style.display = show ? '' : 'none';
   disp.style.display = show ? 'none' : '';
-  if (show) { renderCpList(COUNTRIES); }
+  if (show) renderCpList(COUNTRIES);
 }
 
-/* ── Payout state ── */
-let allBanks=[], banksLoaded=false, verifyTimer=null, kbdIdx=-1, acctOk=false;
+/* ── Payout / bank picker ── */
+let allBanks = [], banksLoaded = false, verifyTimer = null, kbdIdx = -1, acctOk = false;
 let selBank = {
-  code:'{{ user.bank_account.bank_code|default:""|escapejs }}',
-  name:'{{ user.bank_account.bank_name|default:""|escapejs }}'
+  code: '{{ user.bank_account.bank_code|default:""|escapejs }}',
+  name: '{{ user.bank_account.bank_name|default:""|escapejs }}'
 };
 
 function showPayoutForm() {
   const sr = document.getElementById('payoutSavedRow');
-  if (sr) sr.style.display='none';
-  document.getElementById('payoutForm').style.display='';
+  if (sr) sr.style.display = 'none';
+  document.getElementById('payoutForm').style.display = '';
   if (!banksLoaded) fetchBanks();
   if (selBank.code) showBpPill(selBank.name);
   const acc = document.getElementById('acctNum').value.trim();
-  if (acc.length===10 && selBank.code) doVerify(acc, selBank.code);
+  if (acc.length === 10 && selBank.code) doVerify(acc, selBank.code);
 }
 
 async function fetchBanks() {
@@ -1625,184 +846,205 @@ async function fetchBanks() {
     const r = await fetch('/api/banks/');
     const data = await r.json();
     if (data.success && data.banks && data.banks.length) {
-      allBanks=data.banks; banksLoaded=true;
+      allBanks = data.banks; banksLoaded = true;
       renderBpItems(allBanks);
-      const cr=document.getElementById('bpCountRow');
-      cr.style.display='block'; cr.textContent=`${allBanks.length} banks available`;
-      document.getElementById('bpHint').textContent=`${allBanks.length} banks — type to search`;
+      const cr = document.getElementById('bpCountRow');
+      cr.style.display = 'block'; cr.textContent = `${allBanks.length} banks available`;
+      document.getElementById('bpHint').textContent = `${allBanks.length} banks — type to search`;
     } else throw new Error();
   } catch { setBpEmpty('Could not load banks. Please refresh.'); }
 }
 
 function renderBpItems(banks) {
-  const list=document.getElementById('bpList');
-  document.getElementById('bpEmpty').style.display='none';
-  if (!banks.length) { list.innerHTML='<div class="bp-empty">No banks match your search</div>'; return; }
-  list.innerHTML=banks.map((b,i)=>
-    `<div class="bp-item" data-idx="${i}" onclick="selectBank('${esc(b.code)}','${esc(b.name)}')" onmouseenter="kbdIdx=${i}">${escHtml(b.name)}</div>`
+  const list = document.getElementById('bpList');
+  document.getElementById('bpEmpty').style.display = 'none';
+  if (!banks.length) {
+    list.innerHTML = '<div class="vps-bp-empty">No banks match your search</div>'; return;
+  }
+  list.innerHTML = banks.map((b, i) =>
+    `<div class="vps-bp-item" data-idx="${i}" onclick="selectBank('${esc(b.code)}','${esc(b.name)}')" onmouseenter="kbdIdx=${i}">${escHtml(b.name)}</div>`
   ).join('');
 }
 
 function setBpEmpty(msg) {
-  const el=document.getElementById('bpEmpty'); el.textContent=msg; el.style.display='flex';
-  document.getElementById('bpList').innerHTML=''; document.getElementById('bpList').appendChild(el);
+  const el = document.getElementById('bpEmpty'); el.textContent = msg; el.style.display = 'flex';
+  document.getElementById('bpList').innerHTML = ''; document.getElementById('bpList').appendChild(el);
 }
 
-function esc(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+function esc(s) { return String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'"); }
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function filterBanks(q) {
-  kbdIdx=-1;
-  document.getElementById('bpClear').style.display=q?'block':'none';
+  kbdIdx = -1;
+  document.getElementById('bpClear').style.display = q ? 'block' : 'none';
   if (!q.trim()) { renderBpItems(allBanks); openBpList(); return; }
-  const ql=q.toLowerCase();
-  const scored=allBanks.map(b=>{
-    const name=b.name.toLowerCase();
-    let score=0;
-    if(name===ql) score=100;
-    else if(name.startsWith(ql)) score=80;
-    else if(name.includes(ql)) score=60;
-    b.name.toLowerCase().split(/[\s\/\-&]+/).forEach(w=>{
-      if(w===ql && score<90) score=90;
-      else if(w.startsWith(ql) && score<70) score=70;
+  const ql = q.toLowerCase();
+  const scored = allBanks.map(b => {
+    const name = b.name.toLowerCase(); let score = 0;
+    if (name === ql) score = 100;
+    else if (name.startsWith(ql)) score = 80;
+    else if (name.includes(ql)) score = 60;
+    b.name.toLowerCase().split(/[\s\/\-&]+/).forEach(w => {
+      if (w === ql && score < 90) score = 90;
+      else if (w.startsWith(ql) && score < 70) score = 70;
     });
-    return {bank:b,score};
-  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).map(x=>x.bank);
+    return { bank: b, score };
+  }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).map(x => x.bank);
   renderBpItems(scored); openBpList();
 }
 
 function openBpList() {
-  if(!banksLoaded) fetchBanks();
+  if (!banksLoaded) fetchBanks();
   document.getElementById('bpList').classList.add('open');
-  setTimeout(()=>{ document.addEventListener('click',closeBpOutside,{once:true}); },60);
+  setTimeout(() => { document.addEventListener('click', closeBpOutside, { once: true }); }, 60);
 }
-function closeBpOutside(e) { if(!document.getElementById('bankPicker').contains(e.target)) document.getElementById('bpList').classList.remove('open'); }
+function closeBpOutside(e) {
+  if (!document.getElementById('bankPicker').contains(e.target))
+    document.getElementById('bpList').classList.remove('open');
+}
 
-function selectBank(code,name) {
-  selBank={code,name};
-  document.getElementById('hBankCode').value=code;
-  document.getElementById('hBankName').value=name;
+function selectBank(code, name) {
+  selBank = { code, name };
+  document.getElementById('hBankCode').value = code;
+  document.getElementById('hBankName').value = name;
   document.getElementById('bpList').classList.remove('open');
   showBpPill(name);
-  document.getElementById('bpHint').textContent=name+' ✓';
-  const acc=document.getElementById('acctNum').value.trim();
-  if(acc.length===10) doVerify(acc,code);
+  document.getElementById('bpHint').textContent = name + ' ✓';
+  const acc = document.getElementById('acctNum').value.trim();
+  if (acc.length === 10) doVerify(acc, code);
   else updateSaveBtn();
 }
 
 function showBpPill(name) {
-  document.getElementById('bpSearchRow').style.display='none';
+  document.getElementById('bpSearchRow').style.display = 'none';
   document.getElementById('bpSelected').classList.add('show');
-  document.getElementById('bpSelectedName').textContent=name;
+  document.getElementById('bpSelectedName').textContent = name;
 }
 
 function resetBank() {
-  selBank={code:'',name:''};
-  document.getElementById('hBankCode').value='';
-  document.getElementById('hBankName').value='';
-  document.getElementById('bpSearchRow').style.display='';
+  selBank = { code: '', name: '' };
+  document.getElementById('hBankCode').value = '';
+  document.getElementById('hBankName').value = '';
+  document.getElementById('bpSearchRow').style.display = '';
   document.getElementById('bpSelected').classList.remove('show');
-  document.getElementById('bpInput').value='';
-  document.getElementById('bpClear').style.display='none';
-  document.getElementById('bpHint').textContent='All Nigerian banks — commercial, microfinance & fintech';
-  renderBpItems(allBanks); acctOk=false; clearBanner(); setBadge(''); updateSaveBtn();
+  document.getElementById('bpInput').value = '';
+  document.getElementById('bpClear').style.display = 'none';
+  document.getElementById('bpHint').textContent = 'All Nigerian banks — commercial, microfinance & fintech';
+  renderBpItems(allBanks); acctOk = false; clearBanner(); setBadge(''); updateSaveBtn();
   document.getElementById('bpInput').focus(); openBpList();
 }
 
 function clearBpSearch() {
-  document.getElementById('bpInput').value='';
-  document.getElementById('bpClear').style.display='none';
+  document.getElementById('bpInput').value = '';
+  document.getElementById('bpClear').style.display = 'none';
   renderBpItems(allBanks);
 }
 
-document.addEventListener('keydown',function(e){
-  const list=document.getElementById('bpList');
-  if(!list.classList.contains('open')) return;
-  const items=list.querySelectorAll('.bp-item'); if(!items.length) return;
-  if(e.key==='ArrowDown'){e.preventDefault();kbdIdx=Math.min(kbdIdx+1,items.length-1);hlKbd(items);}
-  if(e.key==='ArrowUp'){e.preventDefault();kbdIdx=Math.max(kbdIdx-1,0);hlKbd(items);}
-  if(e.key==='Enter'&&kbdIdx>=0){e.preventDefault();items[kbdIdx].click();}
-  if(e.key==='Escape') list.classList.remove('open');
+document.addEventListener('keydown', function (e) {
+  const list = document.getElementById('bpList');
+  if (!list.classList.contains('open')) return;
+  const items = list.querySelectorAll('.vps-bp-item'); if (!items.length) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); kbdIdx = Math.min(kbdIdx + 1, items.length - 1); hlKbd(items); }
+  if (e.key === 'ArrowUp')   { e.preventDefault(); kbdIdx = Math.max(kbdIdx - 1, 0); hlKbd(items); }
+  if (e.key === 'Enter' && kbdIdx >= 0) { e.preventDefault(); items[kbdIdx].click(); }
+  if (e.key === 'Escape') list.classList.remove('open');
 });
 function hlKbd(items) {
-  items.forEach(i=>i.classList.remove('kbdfocus'));
-  if(kbdIdx>=0){items[kbdIdx].classList.add('kbdfocus');items[kbdIdx].scrollIntoView({block:'nearest'});}
+  items.forEach(i => i.classList.remove('kbdfocus'));
+  if (kbdIdx >= 0) { items[kbdIdx].classList.add('kbdfocus'); items[kbdIdx].scrollIntoView({ block: 'nearest' }); }
 }
 
 function onAcctInput(el) {
-  el.value=el.value.replace(/\D/g,'');
-  clearTimeout(verifyTimer); acctOk=false; clearBanner(); setBadge(''); updateSaveBtn();
-  if(el.value.length===10) {
-    if(selBank.code){setBadge('checking');verifyTimer=setTimeout(()=>doVerify(el.value,selBank.code),700);}
-    else showBanner("Select your bank — we'll verify automatically.",'error');
+  el.value = el.value.replace(/\D/g, '');
+  clearTimeout(verifyTimer); acctOk = false; clearBanner(); setBadge(''); updateSaveBtn();
+  if (el.value.length === 10) {
+    if (selBank.code) { setBadge('checking'); verifyTimer = setTimeout(() => doVerify(el.value, selBank.code), 700); }
+    else showBanner("Select your bank — we'll verify automatically.", 'error');
   }
 }
 
-async function doVerify(acctNum,bankCode) {
+async function doVerify(acctNum, bankCode) {
   setBadge('checking'); clearBanner();
   try {
-    const r=await fetch('/api/verify-bank-account/',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify({account_number:acctNum,bank_code:bankCode})});
-    const data=await r.json();
-    if(data.success&&data.account_name){
-      document.getElementById('hAcctName').value=data.account_name;
-      setBadge('verified'); showBanner(data.account_name,'success'); acctOk=true;
+    const r = await fetch('/api/verify-bank-account/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ account_number: acctNum, bank_code: bankCode })
+    });
+    const data = await r.json();
+    if (data.success && data.account_name) {
+      document.getElementById('hAcctName').value = data.account_name;
+      setBadge('verified'); showBanner(data.account_name, 'success'); acctOk = true;
     } else {
-      setBadge('unverified'); showBanner(data.error||'Account not found. Check the number and bank.','error'); acctOk=false;
+      setBadge('unverified'); showBanner(data.error || 'Account not found. Check the number and bank.', 'error'); acctOk = false;
     }
   } catch {
-    setBadge('unverified'); showBanner("Could not verify — you can still save.",'error'); acctOk=true;
+    setBadge('unverified'); showBanner('Could not verify — you can still save.', 'error'); acctOk = true;
   }
   updateSaveBtn();
 }
 
 function setBadge(state) {
-  const isMob=window.innerWidth<=520;
-  ['acctBadge','acctBadgeMobile'].forEach(id=>{
-    const b=document.getElementById(id);
-    b.className=id==='acctBadge'?'acct-badge':'acct-badge acct-badge-mobile';
-    b.innerHTML=''; b.style.display='none';
+  const isMob = window.innerWidth <= 520;
+  ['acctBadge', 'acctBadgeMobile'].forEach(id => {
+    const b = document.getElementById(id);
+    b.className = id === 'acctBadge' ? 'vps-acct-badge' : 'vps-acct-badge vps-acct-badge-mobile';
+    b.innerHTML = ''; b.style.display = 'none';
   });
-  if(!state) return;
-  const el=document.getElementById(isMob?'acctBadgeMobile':'acctBadge');
-  el.style.display='flex'; el.classList.add('show',state);
-  const icons={checking:'<span class="spin-ring"></span> Verifying…',verified:'<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Verified',unverified:'<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Not found'};
-  el.innerHTML=icons[state]||'';
+  if (!state) return;
+  const el = document.getElementById(isMob ? 'acctBadgeMobile' : 'acctBadge');
+  el.style.display = 'flex'; el.classList.add('show', state);
+  const icons = {
+    checking: '<span class="vps-spin-ring"></span> Verifying…',
+    verified: '<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Verified',
+    unverified: '<svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg> Not found'
+  };
+  el.innerHTML = icons[state] || '';
 }
 
-function showBanner(msg,type) {
-  const el=document.getElementById('acctBanner'),g=document.getElementById('acctNameGroup');
-  el.className=`acct-banner show ${type}`;
-  const icon=type==='success'?'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>':'<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
-  el.innerHTML=icon+escHtml(msg);
-  if(g) g.style.display=type==='success'?'block':'none';
+function showBanner(msg, type) {
+  const el = document.getElementById('acctBanner'), g = document.getElementById('acctNameGroup');
+  el.className = `vps-acct-banner show ${type}`;
+  const icon = type === 'success'
+    ? '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>'
+    : '<svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+  el.innerHTML = icon + escHtml(msg);
+  if (g) g.style.display = type === 'success' ? 'block' : 'none';
 }
 
 function clearBanner() {
-  const el=document.getElementById('acctBanner'),g=document.getElementById('acctNameGroup');
-  el.className='acct-banner'; el.innerHTML=''; if(g) g.style.display='none';
+  const el = document.getElementById('acctBanner'), g = document.getElementById('acctNameGroup');
+  el.className = 'vps-acct-banner'; el.innerHTML = ''; if (g) g.style.display = 'none';
 }
 
 function updateSaveBtn() {
-  const acc=document.getElementById('acctNum').value.trim();
-  const btn=document.getElementById('payoutSaveBtn'),hint=document.getElementById('payoutSaveHint');
-  const ready=acctOk&&selBank.code&&acc.length===10;
-  btn.disabled=!ready; hint.className='payout-save-hint'+(ready?' ready':'');
-  if(ready) hint.textContent='✓ Account verified — ready to save.';
-  else if(!acc) hint.textContent='Enter your 10-digit account number.';
-  else if(acc.length<10) hint.textContent=`${10-acc.length} more digit${10-acc.length===1?'':'s'} needed.`;
-  else if(!selBank.code) hint.textContent='Now select your bank to verify.';
-  else hint.textContent='Verifying your account…';
+  const acc = document.getElementById('acctNum').value.trim();
+  const btn = document.getElementById('payoutSaveBtn'), hint = document.getElementById('payoutSaveHint');
+  const ready = acctOk && selBank.code && acc.length === 10;
+  btn.disabled = !ready;
+  hint.className = 'vps-payout-save-hint' + (ready ? ' ready' : '');
+  if (ready) hint.textContent = '✓ Account verified — ready to save.';
+  else if (!acc) hint.textContent = 'Enter your 10-digit account number.';
+  else if (acc.length < 10) hint.textContent = `${10 - acc.length} more digit${10 - acc.length === 1 ? '' : 's'} needed.`;
+  else if (!selBank.code) hint.textContent = 'Now select your bank to verify.';
+  else hint.textContent = 'Verifying your account…';
 }
 
-document.addEventListener('DOMContentLoaded',()=>{ if(location.hash==='#payout') fetchBanks(); });
+document.addEventListener('DOMContentLoaded', () => { if (location.hash === '#payout') fetchBanks(); });
 
-/* ── Toast ── */
-function spMsg(msg,type) {
-  const el=document.createElement('div'); el.className=`sp-msg ${type}`;
-  el.innerHTML=`<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ${escHtml(msg)}`;
-  let list=document.querySelector('.sp-msgs');
-  if(!list){list=document.createElement('div');list.className='sp-msgs';document.querySelector('.settings-wrap').insertBefore(list,document.querySelector('.sp-nav-wrap'));}
-  list.appendChild(el); setTimeout(()=>el.remove(),4000);
+/* ── Toast message ── */
+function spMsg(msg, type) {
+  const el = document.createElement('div');
+  el.className = `vps-msg ${type}`;
+  el.innerHTML = `<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> ${escHtml(msg)}`;
+  let list = document.querySelector('.vps-messages');
+  if (!list) {
+    list = document.createElement('div');
+    list.className = 'vps-messages';
+    document.querySelector('.vps-settings').insertBefore(list, document.querySelector('.vps-tabs-wrap'));
+  }
+  list.appendChild(el);
+  setTimeout(() => el.remove(), 4000);
 }
 </script>
 {% endblock %}

@@ -219,7 +219,7 @@ def send_reengagement_email(to_email, business_name, store_url, days_inactive=5)
 # ─────────────────────────────────────────────
 
 def send_order_confirmed_buyer(to_email, buyer_name, order_ref, seller_name,
-                                items, subtotal, currency, payment_type='escrow'):
+                                items, subtotal, currency, payment_type='escrow', order_url=''):
     order_items_html = _build_order_items_html(items, currency)
 
     if payment_type == 'direct':
@@ -263,6 +263,7 @@ def send_order_confirmed_buyer(to_email, buyer_name, order_ref, seller_name,
         'subtotal':         f'{float(subtotal):,.0f}',
         'order_items_html': order_items_html,
         'payment_notice':   payment_notice,
+        'order_url':        order_url,
     })
     return send_email_via_brevo(
         to_email=to_email,
@@ -339,11 +340,12 @@ def send_payment_sent_vendor(to_email, business_name, amount, currency,
 # 11 & 12. DISPUTE OPENED — VENDOR + BUYER
 # ─────────────────────────────────────────────
 def send_dispute_opened(vendor_email, buyer_email, order_ref, reason,
-                         buyer_name='there'):
+                         buyer_name='there', order_url=''):
     """Sent to both parties when a dispute is raised."""
     vendor_html = _render('dispute_opened_vendor.html', {
         'order_ref': order_ref,
         'reason':    reason,
+        'order_url': order_url,
     })
     send_email_via_brevo(
         to_email=vendor_email,

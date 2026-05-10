@@ -15,7 +15,6 @@ urlpatterns = [
     path('dashboard/subscription/', views.subscription, name='subscription'),
     path('payment/upgrade/', views.upgrade_to_premium, name='upgrade_to_premium'),
     path('payment/verify/', views.verify_payment, name='verify_payment'),
-    path('webhook/flutterwave/', views.flutterwave_webhook, name='flutterwave_webhook'),
 
     # ── Settings ─────────────────────────────────────────────
     path('dashboard/settings/', views.dashboard_settings, name='settings'),
@@ -51,9 +50,9 @@ urlpatterns = [
     path('dashboard/orders/<str:order_ref>/', views.vendor_order_detail, name='vendor_order_detail'),
     path('dashboard/orders/<str:order_ref>/ship/', views.mark_shipped, name='mark_shipped'),
 
-    # ── ESCROW — Webhooks ────────────────────────────────────
-    path('webhook/flutterwave/order/', views.flutterwave_order_webhook, name='flutterwave_order_webhook'),
-
+    # ── Webhooks ────────────────────────────────────
+    path('webhook/paystack/', views.paystack_webhook, name='paystack_webhook'),
+    path('webhook/paystack/order/', views.paystack_order_webhook, name='paystack_order_webhook'),
     # ── Admin — core ─────────────────────────────────────────
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin-dashboard/sellers/', views.admin_sellers, name='admin_sellers'),

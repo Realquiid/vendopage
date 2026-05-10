@@ -1,4 +1,3 @@
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -50,6 +49,20 @@
     })();
     </script>
 
+    <!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/69fa16efaad7681c33913fa1/1jnsej74t';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->
+
     <style>
     :root {
       --green:    #00C853;
@@ -73,7 +86,6 @@
       --sh-md:  0 8px 24px rgba(0,0,0,.10);
       --sh-lg:  0 20px 60px rgba(0,0,0,.14);
       --nav-h:  64px;
-      --drawer-w: 320px;
     }
     [data-theme="dark"] {
       --dark:    #f0f0f0;
@@ -95,7 +107,7 @@
       transition: background-color .3s, color .3s;
     }
 
-    /* ── TOAST SYSTEM ────────────────────────────────────────── */
+    /* ── TOAST SYSTEM ── */
     #vp-toast-container {
       position: fixed;
       bottom: 28px;
@@ -110,7 +122,6 @@
       width: max-content;
       max-width: calc(100vw - 32px);
     }
-
     .vp-toast {
       display: flex;
       align-items: center;
@@ -128,83 +139,29 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      /* entrance */
       animation: vp-toast-in .32s cubic-bezier(.34,1.56,.64,1) forwards;
       transform-origin: bottom center;
+      position: relative;
     }
-    .vp-toast.hiding {
-      animation: vp-toast-out .28s ease-in forwards;
-    }
-
-    /* Toast variants */
-    .vp-toast-success {
-      background: #0A0A0A;
-      color: #ffffff;
-      border: 1px solid #1a1a1a;
-    }
-    [data-theme="dark"] .vp-toast-success {
-      background: #f0fdf4;
-      color: #166534;
-      border: 1px solid #bbf7d0;
-    }
-    .vp-toast-error {
-      background: #FF4444;
-      color: #ffffff;
-      border: 1px solid #e53935;
-    }
-    .vp-toast-warning {
-      background: #f59e0b;
-      color: #ffffff;
-      border: 1px solid #d97706;
-    }
-    .vp-toast-info {
-      background: #0284c7;
-      color: #ffffff;
-      border: 1px solid #0369a1;
-    }
-
-    .vp-toast-icon {
-      flex-shrink: 0;
-      font-size: 15px;
-      line-height: 1;
-    }
-    .vp-toast-msg {
-      flex: 1;
-      min-width: 0;
-    }
-    .vp-toast-close {
-      flex-shrink: 0;
-      opacity: .6;
-      font-size: 16px;
-      line-height: 1;
-      margin-left: 4px;
-      cursor: pointer;
-    }
+    .vp-toast.hiding { animation: vp-toast-out .28s ease-in forwards; }
+    .vp-toast-success { background: #0A0A0A; color: #ffffff; border: 1px solid #1a1a1a; }
+    [data-theme="dark"] .vp-toast-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .vp-toast-error   { background: #FF4444; color: #ffffff; border: 1px solid #e53935; }
+    .vp-toast-warning { background: #f59e0b; color: #ffffff; border: 1px solid #d97706; }
+    .vp-toast-info    { background: #0284c7; color: #ffffff; border: 1px solid #0369a1; }
+    .vp-toast-icon  { flex-shrink: 0; font-size: 15px; line-height: 1; }
+    .vp-toast-msg   { flex: 1; min-width: 0; }
+    .vp-toast-close { flex-shrink: 0; opacity: .6; font-size: 16px; line-height: 1; margin-left: 4px; cursor: pointer; }
     .vp-toast-close:hover { opacity: 1; }
-
     .vp-toast-progress {
-      position: absolute;
-      bottom: 0; left: 0;
-      height: 3px;
+      position: absolute; bottom: 0; left: 0; height: 3px;
       border-radius: 0 0 var(--r-pill) var(--r-pill);
       background: rgba(255,255,255,.35);
       animation: vp-progress linear forwards;
     }
-    .vp-toast { position: relative; }
-
-    @keyframes vp-toast-in {
-      from { opacity:0; transform: translateY(16px) scale(.92); }
-      to   { opacity:1; transform: translateY(0)    scale(1);   }
-    }
-    @keyframes vp-toast-out {
-      from { opacity:1; transform: translateY(0)    scale(1);   }
-      to   { opacity:0; transform: translateY(10px) scale(.94); }
-    }
-    @keyframes vp-progress {
-      from { width: 100%; }
-      to   { width: 0%;   }
-    }
-
+    @keyframes vp-toast-in  { from { opacity:0; transform: translateY(16px) scale(.92); } to { opacity:1; transform: translateY(0) scale(1); } }
+    @keyframes vp-toast-out { from { opacity:1; transform: translateY(0) scale(1); } to { opacity:0; transform: translateY(10px) scale(.94); } }
+    @keyframes vp-progress  { from { width: 100%; } to { width: 0%; } }
     @media (max-width: 480px) {
       #vp-toast-container { bottom: 16px; max-width: calc(100vw - 24px); }
       .vp-toast { font-size: 13px; padding: 12px 15px; white-space: normal; }
@@ -221,23 +178,23 @@
       transition: background .3s, border-color .3s;
     }
     [data-theme="dark"] .nav { background: rgba(20,20,20,.92); border-color: var(--border); }
+
     .nav-inner {
-      max-width: 1280px; margin: 0 auto; 
+      max-width: 1280px; margin: 0 auto;
+      padding: 0 28px; /* ← logo breathing room */
       height: 100%; display: flex; align-items: center;
       justify-content: space-between; gap: 24px;
     }
+    @media (max-width: 900px) { .nav-inner { padding: 0 20px; } }
 
     .nav-logo { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
-    .nav-logo img { height: 130px; width: auto; display: block; }
-    .nav-logo .logo-dark { display: block; }
+    .nav-logo img { height: 50px; width: auto; display: block; }
+    .nav-logo .logo-dark  { display: block; }
     .nav-logo .logo-light { display: none; }
-    [data-theme="dark"] .nav-logo .logo-dark { display: none; }
+    [data-theme="dark"] .nav-logo .logo-dark  { display: none; }
     [data-theme="dark"] .nav-logo .logo-light { display: block; }
 
-    .nav-links {
-      display: flex; align-items: center; gap: 2px;
-      flex: 1; justify-content: center;
-    }
+    .nav-links { display: flex; align-items: center; gap: 2px; flex: 1; justify-content: center; }
     .nav-link {
       padding: 7px 14px; border-radius: var(--r-pill);
       font-size: 14px; font-weight: 500; color: var(--gray);
@@ -263,6 +220,7 @@
     [data-theme="dark"] .btn-ghost { border-color: #333; color: #a0a0a0; }
     [data-theme="dark"] .btn-ghost:hover { border-color: #888; color: #f0f0f0; background: #1e1e1e; }
 
+    /* Profile dropdown */
     .nav-profile { position: relative; }
     .nav-profile-btn {
       display: flex; align-items: center; gap: 8px;
@@ -282,7 +240,6 @@
     .nav-profile-name { font-size: 13px; font-weight: 600; color: var(--dark); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .nav-caret { color: var(--gray-lt); transition: transform .2s; flex-shrink: 0; }
     .nav-profile-btn.open .nav-caret { transform: rotate(180deg); }
-
     .nav-dropdown {
       position: absolute; top: calc(100% + 10px); right: 0;
       background: var(--white); border: 1.5px solid var(--border);
@@ -295,7 +252,7 @@
     [data-theme="dark"] .nav-dropdown { background: #1e1e1e; border-color: #333; }
     .dropdown-head { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); }
     [data-theme="dark"] .dropdown-head { border-color: #333; }
-    .dropdown-name { font-family: var(--font-d); font-weight: 700; font-size: 14px; color: var(--dark); }
+    .dropdown-name   { font-family: var(--font-d); font-weight: 700; font-size: 14px; color: var(--dark); }
     .dropdown-handle { font-size: 12px; color: var(--gray-lt); margin-top: 2px; }
     .dropdown-item {
       display: flex; align-items: center; gap: 10px; padding: 11px 18px;
@@ -312,92 +269,145 @@
     .dropdown-divider { height: 1px; background: var(--border); }
     [data-theme="dark"] .dropdown-divider { background: #333; }
 
+    /* Hamburger */
     .nav-hamburger {
       display: none; flex-direction: column; justify-content: center;
       gap: 5px; width: 40px; height: 40px;
       background: none; border: none; cursor: pointer;
       padding: 8px; border-radius: var(--r-md); transition: background .18s;
+      position: relative; z-index: 1100;
     }
     .nav-hamburger:hover { background: var(--light); }
-    .nav-hamburger span { display: block; width: 100%; height: 2px; background: var(--dark); border-radius: 2px; transition: transform .3s cubic-bezier(.4,0,.2,1), opacity .3s, width .3s; transform-origin: center; }
+    .nav-hamburger span {
+      display: block; width: 100%; height: 2px;
+      background: var(--dark); border-radius: 2px;
+      transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .25s, width .25s;
+      transform-origin: center;
+    }
+    .nav-hamburger.open span { background: var(--dark); }
     .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .nav-hamburger.open span:nth-child(2) { opacity: 0; width: 0; }
     .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    [data-theme="dark"] .nav-hamburger span { background: #f0f0f0; }
+    [data-theme="dark"] .nav-hamburger:hover { background: #1e1e1e; }
 
-    /* ── DRAWER ── */
-    .drawer-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,.55);
-      backdrop-filter: blur(6px); z-index: 800;
-      opacity: 0; pointer-events: none; transition: opacity .35s;
-    }
-    .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+    /* ── FULLSCREEN DRAWER ── */
     .drawer {
-      position: fixed; top: 0; left: 0;
-      width: min(var(--drawer-w), 88vw); height: 100dvh;
-      background: var(--white); z-index: 900;
-      display: flex; flex-direction: column;
-      transform: translateX(-100%);
-      transition: transform .35s cubic-bezier(.4,0,.2,1); overflow: hidden;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100dvh;
+      background: var(--white);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      transform: translateY(-100%);
+      transition: transform .42s cubic-bezier(.4,0,.2,1);
+      overflow: hidden;
     }
-    [data-theme="dark"] .drawer { background: #141414; }
-    .drawer.open { transform: translateX(0); }
+    [data-theme="dark"] .drawer { background: #0f0f0f; }
+    .drawer.open { transform: translateY(0); }
+
+    /* Head row: logo + close button */
     .drawer-head {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: var(--nav-h);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
+    [data-theme="dark"] .drawer-head { border-color: var(--border); }
+
     .drawer-logo { display: flex; align-items: center; text-decoration: none; }
-    .drawer-logo img { height: 80px; width: auto; }
-    .drawer-logo .logo-dark { display: block; }
+    .drawer-logo img { height: 46px; width: auto; }
+    .drawer-logo .logo-dark  { display: block; }
     .drawer-logo .logo-light { display: none; }
-    [data-theme="dark"] .drawer-logo .logo-dark { display: none; }
+    [data-theme="dark"] .drawer-logo .logo-dark  { display: none; }
     [data-theme="dark"] .drawer-logo .logo-light { display: block; }
+
     .drawer-close {
-      width: 36px; height: 36px; border-radius: 50%;
-      border: 1.5px solid var(--border); background: var(--light);
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--light);
       display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: all .18s; flex-shrink: 0;
+      cursor: pointer; transition: all .2s; flex-shrink: 0;
     }
     .drawer-close:hover { background: var(--dark); border-color: var(--dark); }
     .drawer-close:hover svg { color: #fff; }
-    .drawer-close svg { color: var(--dark); transition: color .18s; }
+    .drawer-close svg { color: var(--dark); transition: color .2s; }
+    [data-theme="dark"] .drawer-close { background: #1e1e1e; border-color: #333; }
+    [data-theme="dark"] .drawer-close svg { color: #f0f0f0; }
+    [data-theme="dark"] .drawer-close:hover { background: #f0f0f0; border-color: #f0f0f0; }
+    [data-theme="dark"] .drawer-close:hover svg { color: #0f0f0f; }
+
+    /* User row */
     .drawer-user {
-      display: flex; align-items: center; gap: 14px;
-      padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+      display: flex; align-items: center; gap: 16px;
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
     }
     .drawer-user-avatar {
-      width: 46px; height: 46px; border-radius: 50%;
+      width: 52px; height: 52px; border-radius: 50%;
       background: var(--green); color: #fff;
-      font-family: var(--font-d); font-weight: 800; font-size: 18px;
+      font-family: var(--font-d); font-weight: 800; font-size: 20px;
       display: flex; align-items: center; justify-content: center;
       overflow: hidden; flex-shrink: 0;
+      box-shadow: 0 0 0 3px rgba(0,200,83,.2);
     }
     .drawer-user-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .drawer-user-name { font-family: var(--font-d); font-weight: 700; font-size: 15px; color: var(--dark); }
-    .drawer-user-handle { font-size: 12px; color: var(--gray-lt); margin-top: 2px; }
-    .drawer-nav { flex: 1; overflow-y: auto; padding: 12px 0; }
+    .drawer-user-name   { font-family: var(--font-d); font-weight: 700; font-size: 16px; color: var(--dark); }
+    .drawer-user-handle { font-size: 13px; color: var(--gray-lt); margin-top: 2px; }
+    [data-theme="dark"] .drawer-user-name { color: #f0f0f0; }
+
+    /* Nav links */
+    .drawer-nav { flex: 1; overflow-y: auto; padding: 16px 0; }
+
     .drawer-link {
-      display: flex; align-items: center; gap: 13px; padding: 14px 24px;
-      font-size: 15px; font-weight: 500; color: var(--dark);
-      text-decoration: none; border-left: 3px solid transparent;
+      display: flex; align-items: center; gap: 16px;
+      padding: 16px 28px;
+      font-size: 17px; font-weight: 500; color: var(--dark);
+      text-decoration: none;
+      border-left: 3px solid transparent;
       transition: background .15s, border-color .15s, color .15s;
+      letter-spacing: -0.1px;
     }
     .drawer-link:hover { background: var(--light); border-left-color: var(--green); }
-    [data-theme="dark"] .drawer-link:hover { background: #1e1e1e; }
-    .drawer-link svg { color: var(--gray-lt); flex-shrink: 0; }
+    .drawer-link svg { color: var(--gray-lt); flex-shrink: 0; width: 20px; height: 20px; }
     .drawer-link.active { background: var(--green-lt); border-left-color: var(--green); color: var(--green-dk); }
-    [data-theme="dark"] .drawer-link.active { background: rgba(0,200,83,.1); }
     .drawer-link.active svg { color: var(--green); }
     .drawer-link.danger { color: var(--red); }
     .drawer-link.danger svg { color: var(--red); }
     .drawer-link.danger:hover { background: #fff0f0; border-left-color: var(--red); }
-    [data-theme="dark"] .drawer-link.danger:hover { background: #2a1515; }
-    .drawer-sep { height: 1px; background: var(--border); margin: 8px 24px; }
-    .drawer-foot { padding: 20px 24px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
+
+    [data-theme="dark"] .drawer-link { color: #d0d0d0; }
+    [data-theme="dark"] .drawer-link svg { color: #444; }
+    [data-theme="dark"] .drawer-link:hover { background: #1a1a1a; }
+    [data-theme="dark"] .drawer-link.active { background: rgba(0,200,83,.1); color: #00C853; }
+    [data-theme="dark"] .drawer-link.danger:hover { background: #1f0a0a; }
+
+    .drawer-sep { height: 1px; background: var(--border); margin: 10px 28px; }
+    [data-theme="dark"] .drawer-sep { background: #222; }
+
+    /* Footer CTAs (logged out) */
+    .drawer-foot {
+      padding: 20px 28px;
+      border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 10px;
+      flex-shrink: 0;
+    }
+    [data-theme="dark"] .drawer-foot { border-color: var(--border); }
     .btn-full { width: 100%; justify-content: center; }
 
+    /* No overlay needed — drawer is fullscreen */
+    .drawer-overlay { display: none; }
+
+    /* Misc */
     .alert { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: var(--r-md); font-size: 14px; font-weight: 500; margin-bottom: 16px; }
-    .alert-error  { background: #fff5f5; color: #c0392b; border: 1px solid #fecaca; }
-    .alert-success{ background: #f0fff5; color: #166534; border: 1px solid #bbf7d0; }
+    .alert-error   { background: #fff5f5; color: #c0392b; border: 1px solid #fecaca; }
+    .alert-success { background: #f0fff5; color: #166534; border: 1px solid #bbf7d0; }
 
     /* ── DARK MODE ── */
     [data-theme="dark"] body { background: #141414; color: #f0f0f0; }
@@ -406,17 +416,7 @@
     [data-theme="dark"] .nav-link:hover { color: #f0f0f0; background: #1e1e1e; }
     [data-theme="dark"] .nav-profile-btn { background: #1e1e1e; border-color: #333; }
     [data-theme="dark"] .nav-profile-name { color: #f0f0f0; }
-    [data-theme="dark"] .nav-hamburger span { background: #f0f0f0; }
-    [data-theme="dark"] .nav-hamburger:hover { background: #1e1e1e; }
-    [data-theme="dark"] .drawer-logo { color: #f0f0f0; }
-    [data-theme="dark"] .drawer-close { background: #1e1e1e; border-color: #333; }
-    [data-theme="dark"] .drawer-close svg { color: #f0f0f0; }
-    [data-theme="dark"] .drawer-user-name { color: #f0f0f0; }
-    [data-theme="dark"] .drawer-link { color: #d0d0d0; }
-    [data-theme="dark"] .drawer-link svg { color: #555; }
-    [data-theme="dark"] .drawer-sep { background: #2a2a2a; }
 
-    @media (max-width: 900px) { .nav-inner { padding: 0 20px; } }
     @media (max-width: 768px) {
       .nav-links { display: none; }
       .nav-right .btn { display: none; }
@@ -428,10 +428,8 @@
 </head>
 <body>
 
-<!-- ── TOAST CONTAINER ──────────────────────────────────────── -->
 <div id="vp-toast-container"></div>
 
-<!-- Django messages → JS toasts (hidden, parsed by JS below) -->
 {% if messages %}
 <script id="vp-django-messages" type="application/json">
 [{% for message in messages %}{"level":"{{ message.tags }}","text":"{{ message|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]
@@ -441,7 +439,7 @@
 <nav class="nav">
   <div class="nav-inner">
     <a href="/" class="nav-logo">
-      <img class="logo-dark" src="{% static 'images/logoo.png' %}" alt="Vendopage" loading="lazy">
+      <img class="logo-dark"  src="{% static 'images/logoo.png' %}"     alt="Vendopage" loading="lazy">
       <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage" loading="lazy">
     </a>
 
@@ -485,7 +483,7 @@
           </div>
         </div>
       {% else %}
-        <a href="{% url 'login' %}" class="btn btn-ghost">Sign In</a>
+        <a href="{% url 'login' %}"    class="btn btn-ghost">Sign In</a>
         <a href="{% url 'register' %}" class="btn btn-primary">Get Started Free</a>
       {% endif %}
 
@@ -496,16 +494,20 @@
   </div>
 </nav>
 
-<!-- MOBILE DRAWER -->
-<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<!-- hidden overlay kept for JS compat, visually inactive -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+
+<!-- FULLSCREEN DRAWER -->
 <div class="drawer" id="drawer">
+
+  <!-- Header row mirrors the navbar -->
   <div class="drawer-head">
     <a href="/" class="drawer-logo">
-      <img class="logo-dark" src="{% static 'images/logoo.png' %}" alt="Vendopage" loading="lazy">
+      <img class="logo-dark"  src="{% static 'images/logoo.png' %}"     alt="Vendopage" loading="lazy">
       <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage" loading="lazy">
     </a>
     <button class="drawer-close" onclick="closeDrawer()" aria-label="Close menu">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </button>
   </div>
 
@@ -520,53 +522,57 @@
       <div class="drawer-user-handle">@{{ user.username }}</div>
     </div>
   </div>
+
   <nav class="drawer-nav">
     <a href="{% url 'dashboard' %}" class="drawer-link">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
       Dashboard
     </a>
     <a href="{% url 'upload_product' %}" class="drawer-link">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Add Product
     </a>
     <a href="/{{ user.slug }}" target="_blank" class="drawer-link">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       View My Store
     </a>
     <div class="drawer-sep"></div>
     <a href="{% url 'settings' %}" class="drawer-link">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       Settings
     </a>
     <a href="{% url 'subscription' %}" class="drawer-link">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
       Subscription
     </a>
     <div class="drawer-sep"></div>
     <a href="{% url 'logout' %}" class="drawer-link danger">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       Log out
     </a>
   </nav>
+
   {% else %}
+
   <nav class="drawer-nav">
     <a href="{% url 'home' %}" class="drawer-link">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       Home
     </a>
     <a href="{% url 'home' %}#how" class="drawer-link">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       How it works
     </a>
     <a href="{% url 'home' %}#stores" class="drawer-link">
-      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
       Live Stores
     </a>
   </nav>
   <div class="drawer-foot">
-    <a href="{% url 'login' %}" class="btn btn-ghost btn-full">Sign In</a>
+    <a href="{% url 'login' %}"    class="btn btn-ghost btn-full">Sign In</a>
     <a href="{% url 'register' %}" class="btn btn-primary btn-full">Get Started Free</a>
   </div>
+
   {% endif %}
 </div>
 
@@ -575,21 +581,12 @@
   {% include 'includes/footer.html' %}
 {% endblock %}
 
-
 <script>
-/* ── TOAST ENGINE ─────────────────────────────────────────── */
+/* ── TOAST ENGINE ── */
 (function() {
-  const DURATION = 3200; // ms before auto-dismiss
+  const DURATION = 3200;
+  const ICONS = { success:'✓', error:'✕', warning:'⚠', info:'ℹ', default:'●' };
 
-  const ICONS = {
-    success: '✓',
-    error:   '✕',
-    warning: '⚠',
-    info:    'ℹ',
-    default: '●',
-  };
-
-  // Map Django message tags → toast variant
   function resolveVariant(tag) {
     if (!tag) return 'info';
     if (tag.includes('success')) return 'success';
@@ -603,40 +600,28 @@
     variant = variant || 'info';
     const container = document.getElementById('vp-toast-container');
     if (!container) return;
-
     const toast = document.createElement('div');
     toast.className = `vp-toast vp-toast-${variant}`;
     toast.setAttribute('role', 'alert');
-
     const icon = document.createElement('span');
     icon.className = 'vp-toast-icon';
     icon.textContent = ICONS[variant] || ICONS.default;
-
     const msg = document.createElement('span');
     msg.className = 'vp-toast-msg';
     msg.textContent = message;
-
     const close = document.createElement('span');
     close.className = 'vp-toast-close';
     close.textContent = '×';
     close.addEventListener('click', () => dismiss(toast));
-
     const progress = document.createElement('div');
     progress.className = 'vp-toast-progress';
     progress.style.animationDuration = DURATION + 'ms';
-
     toast.appendChild(icon);
     toast.appendChild(msg);
     toast.appendChild(close);
     toast.appendChild(progress);
     container.appendChild(toast);
-
-    // Click anywhere on toast to dismiss
-    toast.addEventListener('click', function(e) {
-      if (e.target !== close) dismiss(toast);
-    });
-
-    // Auto-dismiss
+    toast.addEventListener('click', function(e) { if (e.target !== close) dismiss(toast); });
     const timer = setTimeout(() => dismiss(toast), DURATION);
     toast._dismissTimer = timer;
   }
@@ -647,32 +632,26 @@
     clearTimeout(toast._dismissTimer);
     toast.classList.add('hiding');
     toast.addEventListener('animationend', () => toast.remove(), { once: true });
-    // Fallback remove
     setTimeout(() => { if (toast.parentNode) toast.remove(); }, 400);
   }
 
-  // Expose globally so views/JS can call vpToast(msg, type)
   window.vpToast = showToast;
 
-  // Boot: fire Django messages after DOM ready
   document.addEventListener('DOMContentLoaded', function() {
     const el = document.getElementById('vp-django-messages');
     if (!el) return;
     try {
       const messages = JSON.parse(el.textContent || '[]');
-      // Stagger multiple messages
       messages.forEach(function(m, i) {
-        setTimeout(function() {
-          showToast(m.text, resolveVariant(m.level));
-        }, i * 180);
+        setTimeout(function() { showToast(m.text, resolveVariant(m.level)); }, i * 180);
       });
     } catch(e) {}
   });
 })();
 
-/* ── NAV / DRAWER ────────────────────────────────────────── */
+/* ── NAV DROPDOWN ── */
 function toggleDropdown() {
-  const btn = document.getElementById('navProfileBtn');
+  const btn   = document.getElementById('navProfileBtn');
   const panel = document.getElementById('navDropdown');
   const isOpen = panel.classList.contains('open');
   panel.classList.toggle('open', !isOpen);
@@ -685,6 +664,8 @@ document.addEventListener('click', function(e) {
     document.getElementById('navProfileBtn')?.classList.remove('open');
   }
 });
+
+/* ── FULLSCREEN DRAWER ── */
 function toggleDrawer() {
   const drawer = document.getElementById('drawer');
   if (drawer.classList.contains('open')) closeDrawer();
@@ -692,19 +673,19 @@ function toggleDrawer() {
 }
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
-  document.getElementById('drawerOverlay').classList.add('open');
   document.getElementById('navHamburger').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
 function closeDrawer() {
   document.getElementById('drawer').classList.remove('open');
-  document.getElementById('drawerOverlay').classList.remove('open');
   document.getElementById('navHamburger').classList.remove('open');
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') { closeDrawer(); }
+  if (e.key === 'Escape') closeDrawer();
 });
+
+/* ── ACTIVE LINK HIGHLIGHT ── */
 document.addEventListener('DOMContentLoaded', function() {
   const path = window.location.pathname;
   document.querySelectorAll('.drawer-link, .nav-link').forEach(link => {

@@ -531,11 +531,7 @@ def reset_password(request, token):
     return render(request, 'auth/reset_password.html')
 
 
-# ─────────────────────────────────────────────
-# SUBSCRIPTION / PAYMENT
-# ─────────────────────────────────────────────
-from .flutterwave import FlutterwavePayment
-
+from .paystack import PaystackPayment
 
 @login_required
 def subscription(request):
@@ -560,86 +556,128 @@ def subscription(request):
 @login_required
 def upgrade_to_premium(request):
     if request.method == 'POST':
-        seller = request.user
+        seller   = request.user
         platform = PlatformSettings.get()
-        amount = platform.premium_monthly_price
-        tx_ref = f"VDP-{seller.id}-{uuid.uuid4().hex[:8]}"
+        amount   = platform.premium_monthly_price
+        tx_ref   = f"VDP-{seller.id}-{uuid.uuid4().hex[:8]}"
 
-        flw = FlutterwavePayment()
-        redirect_url = request.build_absolute_uri('/payment/verify/')
-        result = flw.initialize_payment(
+        psk = PaystackPayment()
+        redirect_url = 'https://www.vendopage.com/payment/verify/'
+        result = psk.initialize_payment(
             email=seller.email, amount=amount, tx_ref=tx_ref,
-            redirect_url=redirect_url, customer_name=seller.business_name
+            redirect_url=redirect_url, customer_name=seller.business_name,
+            title="VendoPage Premium Subscription",
         )
         if result.get('status') == 'success':
             request.session['tx_ref'] = tx_ref
             request.session['upgrading_to_premium'] = True
             return redirect(result['data']['link'])
-        else:
-            messages.error(request, 'Payment initialization failed. Please try again.')
-            return redirect('subscription')
+        messages.error(request, 'Payment initialization failed. Please try again.')
+        return redirect('subscription')
     return redirect('subscription')
 
 
 @login_required
 def verify_payment(request):
-    tx_ref = request.GET.get('tx_ref')
-    transaction_id = request.GET.get('transaction_id')
+    reference = request.GET.get('reference') or request.GET.get('tx_ref')
 
     if not request.session.get('upgrading_to_premium'):
         messages.error(request, 'Invalid payment session')
         return redirect('subscription')
 
-    flw = FlutterwavePayment()
-    result = flw.verify_payment(transaction_id)
+    psk    = PaystackPayment()
+    result = psk.verify_payment(reference)
 
     if result.get('status') == 'success':
-        data = result.get('data', {})
-        if data.get('status') == 'successful' and data.get('tx_ref') == tx_ref:
-            seller = request.user
-            seller.subscription_type = 'premium'
-            seller.subscription_expires = timezone.now() + timedelta(days=30)
-            seller.save()
-            request.session.pop('upgrading_to_premium', None)
-            request.session.pop('tx_ref', None)
+        seller = request.user
+        seller.subscription_type    = 'premium'
+        seller.subscription_expires = timezone.now() + timedelta(days=30)
+        seller.save()
+        request.session.pop('upgrading_to_premium', None)
+        request.session.pop('tx_ref', None)
+        try:
+            send_premium_upgrade_email(
+                to_email=seller.email,
+                business_name=seller.business_name,
+                expires_date=seller.subscription_expires.strftime('%B %d, %Y'),
+            )
+        except Exception as e:
+            logger.error(f"Premium upgrade email failed: {e}")
+        messages.success(request, '🎉 Welcome to Premium!')
+        return redirect('dashboard')
 
-            # ── NEW: send premium upgrade confirmation email ──
-            try:
-                send_premium_upgrade_email(
-                    to_email=seller.email,
-                    business_name=seller.business_name,
-                    expires_date=seller.subscription_expires.strftime('%B %d, %Y'),
-                )
-            except Exception as e:
-                logger.error(f"Premium upgrade email failed: {e}")
-
-            messages.success(request, '🎉 Welcome to Premium! Your subscription is now active.')
-            return redirect('dashboard')
-        else:
-            messages.error(request, 'Payment verification failed. Please contact support.')
-            return redirect('subscription')
-    else:
-        messages.error(request, 'Payment verification failed. Please try again.')
-        return redirect('subscription')
-
+    messages.error(request, 'Payment verification failed. Please contact support.')
+    return redirect('subscription')
 
 @csrf_exempt
 @require_http_methods(["POST"])
-def flutterwave_webhook(request):
+def paystack_webhook(request):
+    """Handles subscription payments webhook."""
     try:
-        signature = request.headers.get('verif-hash')
-        flw = FlutterwavePayment()
-        payload = request.body.decode('utf-8')
-        if not signature or not flw.verify_webhook_signature(signature, payload):
-            return JsonResponse({'status': 'error', 'message': 'Invalid signature'}, status=400)
-        data = json.loads(payload)
-        if data.get('event') == 'charge.completed' and data.get('data', {}).get('status') == 'successful':
-            return JsonResponse({'status': 'success'})
+        signature = request.headers.get('x-paystack-signature')
+        psk       = PaystackPayment()
+        if not psk.verify_webhook_signature(request.body, signature):
+            return JsonResponse({'status': 'error'}, status=400)
+
+        data  = json.loads(request.body)
+        event = data.get('event')
+
+        if event == 'charge.success':
+            reference = data['data']['reference']
+            if reference.startswith('VDP-') and not reference.startswith('VDP-ORD-'):
+                # Premium subscription payment
+                pass  # handled by verify_payment redirect
+
         return JsonResponse({'status': 'received'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
+@csrf_exempt
+@require_http_methods(["POST"])
+def paystack_order_webhook(request):
+    """Handles order payments webhook — safety net if redirect fails."""
+    try:
+        signature = request.headers.get('x-paystack-signature')
+        psk       = PaystackPayment()
+        if not psk.verify_webhook_signature(request.body, signature):
+            return JsonResponse({'status': 'error'}, status=400)
+
+        data   = json.loads(request.body)
+        event  = data.get('event')
+        charge = data.get('data', {})
+
+        if event != 'charge.success':
+            return JsonResponse({'status': 'received'})
+
+        reference = charge.get('reference', '')
+        if not reference.startswith('VDP-ORD-'):
+            return JsonResponse({'status': 'skipped'})
+
+        # Already processed?
+        try:
+            Order.objects.get(flutterwave_tx_ref=reference, payment_verified=True)
+            return JsonResponse({'status': 'already_processed'})
+        except Order.DoesNotExist:
+            pass
+
+        # Fix unverified order
+        try:
+            order = Order.objects.get(flutterwave_tx_ref=reference, payment_verified=False)
+            order.status           = 'paid'
+            order.payment_verified = True
+            order.paid_at          = timezone.now()
+            order.save()
+            return JsonResponse({'status': 'fixed_unverified_order'})
+        except Order.DoesNotExist:
+            pass
+
+        logger.error(f"WEBHOOK: Payment received but no order found for reference={reference}")
+        return JsonResponse({'status': 'logged_for_review'})
+
+    except Exception as e:
+        logger.error(f"Order webhook error: {e}")
+        return JsonResponse({'status': 'error'}, status=500)
 # ─────────────────────────────────────────────
 # UPLOAD BATCH
 # ─────────────────────────────────────────────
@@ -1047,10 +1085,10 @@ def initiate_payment(request, slug):
     }
     request.session.modified = True
 
-    flw = FlutterwavePayment()
-    result = flw.initialize_payment(
+    psk = PaystackPayment()
+    result = psk.initialize_payment(
         email=buyer_email, amount=subtotal, tx_ref=tx_ref,
-        redirect_url=request.build_absolute_uri('/order/confirm/'),
+        redirect_url='https://www.vendopage.com/order/confirm/',
         customer_name=buyer_name,
         currency=request.session.get('buyer_currency_code', seller.currency_code or 'NGN'),
         title=pay_title, description=pay_description,
@@ -1065,20 +1103,15 @@ def initiate_payment(request, slug):
 
 
 def order_confirmation(request):
-    tx_ref         = request.GET.get('tx_ref', '')
-    transaction_id = request.GET.get('transaction_id', '')
-    status         = request.GET.get('status', '')
+    tx_ref    = request.GET.get('reference') or request.GET.get('tx_ref', '')
+    status    = request.GET.get('trxref') 
 
-    logger.error(f"ORDER CONFIRM HIT — status={status} tx_ref={tx_ref} transaction_id={transaction_id}")
+    logger.error(f"ORDER CONFIRM HIT — tx_ref={tx_ref}")
     logger.error(f"SESSION pending_order = {request.session.get('pending_order')}")
 
-
+    if not tx_ref:
+        return render(request, 'store/order_failed.html', {'reason': 'Payment reference missing.'})
     
-    if status not in ('successful', 'completed') or not tx_ref or not transaction_id:
-        request.session.pop('pending_order', None)
-        logger.error("FAILED AT: status check")
-        return render(request, 'store/order_failed.html', {'reason': 'Payment was not completed.'})
-
     pending = request.session.get('pending_order')
     if not pending or pending.get('tx_ref') != tx_ref:
         logger.error(f"FAILED AT: session check — pending={pending}")
@@ -1090,9 +1123,10 @@ def order_confirmation(request):
                 'reason': 'Session expired. If you were charged, contact support.'
             })
 
-    flw    = FlutterwavePayment()
-    result = flw.verify_payment(transaction_id)
+    psk    = PaystackPayment()
+    result = psk.verify_payment(tx_ref)
     data   = result.get('data', {})
+    logger.error(f"PAYSTACK VERIFY RESULT: {result}")
 
     if not (result.get('status') == 'success'
             and data.get('status') == 'successful'
@@ -1115,7 +1149,7 @@ def order_confirmation(request):
     order = Order(
         seller             = seller,
         flutterwave_tx_ref = tx_ref,
-        flutterwave_tx_id  = str(transaction_id),
+        flutterwave_tx_id  = str(tx_ref),
         buyer_name         = pending['buyer_name'],
         buyer_email        = pending['buyer_email'],
         buyer_phone        = pending['buyer_phone'],
@@ -1153,6 +1187,7 @@ def order_confirmation(request):
         send_order_confirmed_buyer(
             to_email=order.buyer_email, buyer_name=order.buyer_name,
             order_ref=str(order.order_ref)[:8].upper(), seller_name=seller.business_name,
+            order_url=f"https://www.vendopage.com/order/{order.order_ref}/",
             items=list(order.items.all()), subtotal=order.subtotal, currency=order.currency,
             payment_type=payment_type,
         )
@@ -1224,7 +1259,8 @@ def raise_dispute(request, order_ref):
                 buyer_email=order.buyer_email,
                 order_ref=str(order.order_ref)[:8].upper(),
                 reason=reason,
-                buyer_name=order.buyer_name,  # ← now passed so buyer email is personalised
+                buyer_name=order.buyer_name, 
+                order_url=f"https://www.vendopage.com/order/{order.order_ref}/",
             )
         except Exception as e:
             logger.error(f"Dispute email failed: {e}")
@@ -1367,41 +1403,28 @@ def _trigger_payout(order):
         logger.error(f"No bank account for seller {order.seller.id} — payout skipped")
         return
 
-    headers = {
-        'Authorization': f'Bearer {settings.FLUTTERWAVE_SECRET_KEY}',
-        'Content-Type':  'application/json',
-    }
-    payload = {
-        'account_bank':   bank.bank_code or bank.bank_name,
-        'account_number': bank.account_number,
-        'amount':         float(order.vendor_payout),
-        'currency':       order.currency,
-        'narration':      f'Vendopage payout — Order {str(order.order_ref)[:8].upper()}',
-        'reference':      f'VDP-PAY-{uuid.uuid4().hex[:10]}',
-    }
-    try:
-        r = req.post('https://api.flutterwave.com/v3/transfers',
-                     json=payload, headers=headers, timeout=15)
-        data = r.json()
-        if data.get('status') == 'success':
-            order.payout_triggered        = True
-            order.payout_at               = timezone.now()
-            order.status                  = 'completed'
-            order.flutterwave_transfer_id = str(data['data'].get('id', ''))
-            order.save()
-            try:
-                send_payment_sent_vendor(
-                    to_email=order.seller.email, business_name=order.seller.business_name,
-                    amount=order.vendor_payout, currency=order.currency,
-                    order_ref=str(order.order_ref)[:8].upper(),
-                    bank_name=bank.bank_name, account_number=bank.account_number[-4:],
-                )
-            except Exception as e:
-                logger.error(f"Payout email failed: {e}")
-        else:
-            logger.error(f"Flutterwave payout failed for order {order.order_ref}: {data}")
-    except Exception as e:
-        logger.error(f"Payout request exception for order {order.order_ref}: {e}")
+    psk = PaystackPayment()
+    result = psk.transfer_to_vendor(order)
+
+    if result.get('status') == True or result.get('status') == 'success':
+        order.payout_triggered = True
+        order.payout_at        = timezone.now()
+        order.status           = 'completed'
+        order.flutterwave_transfer_id = str(result.get('data', {}).get('transfer_code', ''))
+        order.save()
+        try:
+            send_payment_sent_vendor(
+                to_email=order.seller.email,
+                business_name=order.seller.business_name,
+                amount=order.vendor_payout, currency=order.currency,
+                order_ref=str(order.order_ref)[:8].upper(),
+                bank_name=bank.bank_name,
+                account_number=bank.account_number[-4:],
+            )
+        except Exception as e:
+            logger.error(f"Payout email failed: {e}")
+    else:
+        logger.error(f"Paystack payout failed for order {order.order_ref}: {result}")
 
 
 def auto_release_expired_orders():
@@ -1432,111 +1455,37 @@ def auto_release_expired_orders():
             logger.error(f"Auto-release buyer email failed for order {order.order_ref}: {e}")
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
-def flutterwave_order_webhook(request):
-    try:
-        signature = request.headers.get('verif-hash')
-        payload   = request.body.decode('utf-8')
-        flw = FlutterwavePayment()
-        if not signature or not flw.verify_webhook_signature(signature, payload):
-            return JsonResponse({'status': 'error', 'message': 'Invalid signature'}, status=400)
-
-        data   = json.loads(payload)
-        event  = data.get('event')
-        charge = data.get('data', {})
-
-        if event != 'charge.completed' or charge.get('status') != 'successful':
-            return JsonResponse({'status': 'received'})
-
-        tx_ref         = charge.get('tx_ref', '')
-        transaction_id = str(charge.get('id', ''))
-
-        if not tx_ref.startswith('VDP-ORD-'):
-            return JsonResponse({'status': 'skipped - not an order payment'})
-
-        try:
-            Order.objects.get(flutterwave_tx_ref=tx_ref, payment_verified=True)
-            return JsonResponse({'status': 'already_processed'})
-        except Order.DoesNotExist:
-            pass
-
-        try:
-            order = Order.objects.get(flutterwave_tx_ref=tx_ref, payment_verified=False)
-            order.status            = 'paid'
-            order.payment_verified  = True
-            order.flutterwave_tx_id = transaction_id
-            order.paid_at           = timezone.now()
-            order.save()
-            try:
-                send_new_order_vendor(
-                    to_email=order.seller.email, business_name=order.seller.business_name,
-                    buyer_name=order.buyer_name, order_ref=str(order.order_ref)[:8].upper(),
-                    items=list(order.items.all()), subtotal=order.subtotal, currency=order.currency,
-                    dashboard_url=f"https://www.vendopage.com/dashboard/orders/{order.order_ref}/",
-                )
-            except Exception as e:
-                logger.error(f"Webhook vendor email failed: {e}")
-            return JsonResponse({'status': 'fixed_unverified_order'})
-        except Order.DoesNotExist:
-            pass
-
-        logger.error(
-            f"WEBHOOK ALERT: Payment received but no Order found.\n"
-            f"tx_ref: {tx_ref}\ntransaction_id: {transaction_id}\n"
-            f"amount: {charge.get('amount')} {charge.get('currency')}\n"
-            f"customer: {charge.get('customer', {}).get('email')}\n"
-            f"ACTION REQUIRED: Manual order creation or refund needed."
-        )
-        return JsonResponse({'status': 'logged_for_review'})
-
-    except Exception as e:
-        logger.error(f"Order webhook error: {e}")
-        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
-
-
 # ─────────────────────────────────────────────
 # BANK PROXY APIs
 # ─────────────────────────────────────────────
 @require_http_methods(["GET"])
 def get_banks(request):
     try:
-        r = req.get(
-            'https://api.flutterwave.com/v3/banks/NG',
-            headers={'Authorization': f'Bearer {settings.FLUTTERWAVE_SECRET_KEY}'},
-            timeout=10,
-        )
-        data = r.json()
-        if data.get('status') == 'success' and data.get('data'):
-            banks = [{'code': b['code'], 'name': b['name']} for b in data['data']]
-            return JsonResponse({'success': True, 'banks': banks})
-        raise Exception("Bad response from Flutterwave")
+        psk   = PaystackPayment()
+        banks = psk.get_banks()
+        if banks:
+            return JsonResponse({
+                'success': True,
+                'banks': [{'code': b['code'], 'name': b['name']} for b in banks]
+            })
+        raise Exception("Empty response")
     except Exception as e:
         logger.error(f"get_banks error: {e}")
         fallback = [
-            {'code': '044', 'name': 'Access Bank'},
-            {'code': '011', 'name': 'First Bank of Nigeria'},
-            {'code': '058', 'name': 'Guaranty Trust Bank (GTB)'},
-            {'code': '057', 'name': 'Zenith Bank'},
-            {'code': '033', 'name': 'United Bank for Africa (UBA)'},
-            {'code': '214', 'name': 'First City Monument Bank (FCMB)'},
-            {'code': '070', 'name': 'Fidelity Bank'},
-            {'code': '050', 'name': 'EcoBank Nigeria'},
-            {'code': '221', 'name': 'Stanbic IBTC Bank'},
-            {'code': '232', 'name': 'Sterling Bank'},
-            {'code': '032', 'name': 'Union Bank of Nigeria'},
-            {'code': '035', 'name': 'Wema Bank'},
-            {'code': '076', 'name': 'Polaris Bank'},
-            {'code': '082', 'name': 'Keystone Bank'},
-            {'code': '101', 'name': 'Providus Bank'},
-            {'code': '215', 'name': 'Unity Bank'},
-            {'code': '110', 'name': 'VFD Microfinance Bank'},
-            {'code': '090267', 'name': 'Kuda Bank'},
-            {'code': '090405', 'name': 'OPay'},
-            {'code': '090175', 'name': 'PalmPay'},
-            {'code': '090304', 'name': 'Moniepoint'},
-        ]
-        return JsonResponse({'success': True, 'banks': fallback, 'fallback': True})
+        {'code': '044', 'name': 'Access Bank'},
+        {'code': '011', 'name': 'First Bank of Nigeria'},
+        {'code': '058', 'name': 'Guaranty Trust Bank (GTB)'},
+        {'code': '057', 'name': 'Zenith Bank'},
+        {'code': '033', 'name': 'United Bank for Africa (UBA)'},
+        {'code': '214', 'name': 'First City Monument Bank (FCMB)'},
+        {'code': '070', 'name': 'Fidelity Bank'},
+        {'code': '221', 'name': 'Stanbic IBTC Bank'},
+        {'code': '090267', 'name': 'Kuda Bank'},
+        {'code': '090405', 'name': 'OPay'},
+        {'code': '090175', 'name': 'PalmPay'},
+        {'code': '090304', 'name': 'Moniepoint'},
+    ]
+    return JsonResponse({'success': True, 'banks': fallback, 'fallback': True})
 
 
 @require_http_methods(["POST"])
@@ -1546,31 +1495,16 @@ def verify_bank_account(request):
         account_number = body.get('account_number', '').strip()
         bank_code      = body.get('bank_code', '').strip()
 
-        if not account_number or not bank_code:
-            return JsonResponse({'success': False, 'error': 'Missing fields'}, status=400)
-        if len(account_number) != 10 or not account_number.isdigit():
-            return JsonResponse({'success': False, 'error': 'Invalid account number'}, status=400)
+        psk    = PaystackPayment()
+        result = psk.verify_bank_account(account_number, bank_code)
 
-        r = req.post(
-            'https://api.flutterwave.com/v3/accounts/resolve',
-            json={'account_number': account_number, 'account_bank': bank_code},
-            headers={
-                'Authorization': f'Bearer {settings.FLUTTERWAVE_SECRET_KEY}',
-                'Content-Type': 'application/json',
-            },
-            timeout=10,
-        )
-        data = r.json()
-        if data.get('status') == 'success' and data.get('data', {}).get('account_name'):
-            return JsonResponse({'success': True, 'account_name': data['data']['account_name']})
-        return JsonResponse({'success': False, 'error': data.get('message', 'Account not found')})
-
-    except req.exceptions.Timeout:
-        return JsonResponse({'success': False, 'error': 'Verification timed out. Please try again.'})
+        if result.get('status') and result.get('data', {}).get('account_name'):
+            return JsonResponse({'success': True, 'account_name': result['data']['account_name']})
+        return JsonResponse({'success': False, 'error': result.get('message', 'Account not found')})
     except Exception as e:
         logger.error(f"verify_bank_account error: {e}")
-        return JsonResponse({'success': False, 'error': 'Verification failed. Please try again.'}, status=500)
-
+        return JsonResponse({'success': False, 'error': 'Verification failed.'}, status=500)
+    
 
 # ─────────────────────────────────────────────
 # ADMIN VIEWS
