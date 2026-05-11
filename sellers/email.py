@@ -4,10 +4,9 @@ import sib_api_v3_sdk
 from sib_api_v3_sdk.rest import ApiException
 from django.conf import settings
 
-SITE_URL = 'https://www.vendopage.com'
+SITE_URL     = 'https://www.vendopage.com'
 SUPPORT_EMAIL = 'support@vendopage.com'
 
-# Templates directory — sits next to this file: sellers/email_templates/
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'email_templates')
 
 
@@ -18,7 +17,7 @@ def _load_template(filename):
 
 
 def _render(filename, context):
-    """Simple {{key}} → value replacement. No Django template engine needed."""
+    """Simple {{key}} → value replacement."""
     html = _load_template(filename)
     for key, value in context.items():
         html = html.replace('{{' + key + '}}', str(value))
@@ -43,7 +42,7 @@ def send_email_via_brevo(to_email, subject, html_content, text_content=None):
             sender={"email": SUPPORT_EMAIL, "name": "Vendopage"},
             subject=subject,
             html_content=html_content,
-            text_content=text_content
+            text_content=text_content,
         )
 
         response = api_instance.send_transac_email(send_smtp_email)
@@ -59,7 +58,6 @@ def send_email_via_brevo(to_email, subject, html_content, text_content=None):
 
 
 def _build_order_items_html(items, currency=''):
-    """Render order items as clean inline HTML rows for email templates."""
     rows = ''
     for item in items:
         try:
@@ -85,13 +83,34 @@ def _build_order_items_html(items, currency=''):
     return rows
 
 
+# ─────────────────────────────────────────────────────────────
+# URL HELPERS
+# Centralise all URL building here so templates never hardcode
+# ─────────────────────────────────────────────────────────────
+
+def _buyer_order_url(order_ref_full):
+    """https://www.vendopage.com/order/FULL-UUID/"""
+    return f"{SITE_URL}/order/{order_ref_full}/"
+
+def _vendor_order_url(order_ref_full):
+    """https://www.vendopage.com/dashboard/orders/FULL-UUID/"""
+    return f"{SITE_URL}/dashboard/orders/{order_ref_full}/"
+
+def _vendor_dashboard_url():
+    return f"{SITE_URL}/dashboard/"
+
+def _upload_url():
+    """Correct upload URL matching urls.py: dashboard/upload/"""
+    return f"{SITE_URL}/dashboard/upload/"
+
+
 # ─────────────────────────────────────────────
 # 1. PASSWORD RESET
 # ─────────────────────────────────────────────
 def send_password_reset_email(to_email, business_name, reset_code):
     html = _render('password_reset.html', {
         'business_name': business_name,
-        'reset_code': reset_code,
+        'reset_code':    reset_code,
     })
     return send_email_via_brevo(
         to_email=to_email,
@@ -106,7 +125,7 @@ def send_password_reset_email(to_email, business_name, reset_code):
 def send_welcome_email(to_email, business_name, store_url):
     html = _render('welcome.html', {
         'business_name': business_name,
-        'store_url': store_url,
+        'store_url':     store_url,
     })
     return send_email_via_brevo(
         to_email=to_email,
@@ -116,27 +135,30 @@ def send_welcome_email(to_email, business_name, store_url):
 
 
 # ─────────────────────────────────────────────
-# 3. FIRST PRODUCT UPLOADED
+# 3. FIRST PRODUCT UPLOADED  →  seller only
 # ─────────────────────────────────────────────
 def send_first_product_email(to_email, business_name, store_url):
+    """Sent to SELLER when they upload their first product."""
     html = _render('first_product.html', {
         'business_name': business_name,
-        'store_url': store_url,
+        'store_url':     store_url,
+        'upload_url':    _upload_url(),   # /dashboard/upload/ not /upload/
     })
     return send_email_via_brevo(
         to_email=to_email,
-        subject='Your product is live — keep going!',
+        subject='Your first product is live — keep going!',
         html_content=html,
     )
 
 
 # ─────────────────────────────────────────────
-# 4. FIRST WHATSAPP CLICK
+# 4. FIRST WHATSAPP CLICK  →  seller only
 # ─────────────────────────────────────────────
 def send_first_whatsapp_click_email(to_email, business_name, store_url):
+    """Sent to SELLER when their first WhatsApp click happens."""
     html = _render('first_whatsapp_click.html', {
         'business_name': business_name,
-        'store_url': store_url,
+        'store_url':     store_url,
     })
     return send_email_via_brevo(
         to_email=to_email,
@@ -146,7 +168,7 @@ def send_first_whatsapp_click_email(to_email, business_name, store_url):
 
 
 # ─────────────────────────────────────────────
-# 5. WEEKLY SUMMARY
+# 5. WEEKLY SUMMARY  →  seller only
 # ─────────────────────────────────────────────
 def send_weekly_summary_email(to_email, business_name, store_url,
                                page_views, whatsapp_clicks, active_products,
@@ -162,6 +184,7 @@ def send_weekly_summary_email(to_email, business_name, store_url,
         trend = 'same as last week'
         trend_color = '#888888'
 
+    low_views_tip = ''
     if page_views < 20:
         low_views_tip = '''
   <tr>
@@ -178,8 +201,6 @@ def send_weekly_summary_email(to_email, business_name, store_url,
       </table>
     </td>
   </tr>'''
-    else:
-        low_views_tip = ''
 
     html = _render('weekly_summary.html', {
         'business_name':   business_name,
@@ -199,7 +220,7 @@ def send_weekly_summary_email(to_email, business_name, store_url,
 
 
 # ─────────────────────────────────────────────
-# 6. RE-ENGAGEMENT
+# 6. RE-ENGAGEMENT  →  seller only
 # ─────────────────────────────────────────────
 def send_reengagement_email(to_email, business_name, store_url, days_inactive=5):
     html = _render('reengagement.html', {
@@ -215,11 +236,24 @@ def send_reengagement_email(to_email, business_name, store_url, days_inactive=5)
 
 
 # ─────────────────────────────────────────────
-# 7. ORDER CONFIRMED — BUYER
+# 7. ORDER CONFIRMED  →  BUYER only
 # ─────────────────────────────────────────────
-
 def send_order_confirmed_buyer(to_email, buyer_name, order_ref, seller_name,
-                                items, subtotal, currency, payment_type='escrow', order_url=''):
+                                items, subtotal, currency,
+                                payment_type='escrow',
+                                order_ref_full=None,
+                                order_url=''):
+    """
+    Sent to BUYER only after payment confirmed.
+    order_ref      = short 8-char display ref e.g. "BCAE8B6B"
+    order_ref_full = full UUID for building the correct link
+    order_url      = full URL if already built by caller (optional)
+    """
+    # Build correct buyer order URL
+    if not order_url and order_ref_full:
+        order_url = _buyer_order_url(order_ref_full)
+    order_url = order_url.rstrip('/')   # safety: no double slash
+
     order_items_html = _build_order_items_html(items, currency)
 
     if payment_type == 'direct':
@@ -247,7 +281,7 @@ def send_order_confirmed_buyer(to_email, buyer_name, order_ref, seller_name,
                 <td style="background:#f7f7f7;border-left:3px solid #0A0A0A;border-radius:0 8px 8px 0;padding:18px 22px;">
                   <p style="margin:0 0 5px;font-size:11px;font-weight:700;color:#0A0A0A;text-transform:uppercase;letter-spacing:.8px;">Your money is safe</p>
                   <p style="margin:0;font-size:14px;color:#555555;line-height:1.6;">
-                    Your funds are held in escrow. They are only released to the seller after you confirm delivery. If anything goes wrong, you can raise a dispute.
+                    Your funds are held in escrow and only released to the seller after you confirm delivery. If anything goes wrong, you can raise a dispute.
                   </p>
                 </td>
               </tr>
@@ -266,17 +300,27 @@ def send_order_confirmed_buyer(to_email, buyer_name, order_ref, seller_name,
         'order_url':        order_url,
     })
     return send_email_via_brevo(
-        to_email=to_email,
+        to_email=to_email,       # ← BUYER email only
         subject=f'Order #{order_ref} confirmed — {seller_name}',
         html_content=html,
     )
 
+
 # ─────────────────────────────────────────────
-# 8. NEW ORDER — VENDOR
+# 8. NEW ORDER  →  VENDOR (seller) only
 # ─────────────────────────────────────────────
 def send_new_order_vendor(to_email, business_name, buyer_name, order_ref,
-                           items, subtotal, currency, dashboard_url):
-    """Sent to vendor when a new paid order comes in."""
+                           items, subtotal, currency,
+                           order_ref_full=None,
+                           dashboard_url=''):
+    """
+    Sent to SELLER only when a new paid order comes in.
+    Links to their DASHBOARD order detail, not the buyer order page.
+    """
+    if not dashboard_url and order_ref_full:
+        dashboard_url = _vendor_order_url(order_ref_full)
+    dashboard_url = dashboard_url.rstrip('/')
+
     order_items_html = _build_order_items_html(items, currency)
     html = _render('new_order_vendor.html', {
         'business_name':    business_name,
@@ -288,18 +332,24 @@ def send_new_order_vendor(to_email, business_name, buyer_name, order_ref,
         'dashboard_url':    dashboard_url,
     })
     return send_email_via_brevo(
-        to_email=to_email,
+        to_email=to_email,       # ← SELLER email only
         subject=f'New order #{order_ref} — {currency}{float(subtotal):,.0f}',
         html_content=html,
     )
 
 
 # ─────────────────────────────────────────────
-# 9. ORDER SHIPPED — BUYER
+# 9. ORDER SHIPPED  →  BUYER only
 # ─────────────────────────────────────────────
 def send_order_shipped_buyer(to_email, buyer_name, order_ref, seller_name,
-                              tracking_info, courier_name, order_url):
-    """Sent to buyer when vendor marks order as shipped."""
+                              tracking_info, courier_name,
+                              order_ref_full=None,
+                              order_url=''):
+    """Sent to BUYER when seller marks order as shipped."""
+    if not order_url and order_ref_full:
+        order_url = _buyer_order_url(order_ref_full)
+    order_url = order_url.rstrip('/')
+
     html = _render('order_shipped_buyer.html', {
         'buyer_name':    buyer_name,
         'order_ref':     order_ref,
@@ -309,18 +359,18 @@ def send_order_shipped_buyer(to_email, buyer_name, order_ref, seller_name,
         'order_url':     order_url,
     })
     return send_email_via_brevo(
-        to_email=to_email,
+        to_email=to_email,       # ← BUYER email only
         subject=f'Your order #{order_ref} has been shipped',
         html_content=html,
     )
 
 
 # ─────────────────────────────────────────────
-# 10. PAYOUT SENT — VENDOR
+# 10. PAYOUT SENT  →  VENDOR (seller) only
 # ─────────────────────────────────────────────
 def send_payment_sent_vendor(to_email, business_name, amount, currency,
                               order_ref, bank_name, account_number):
-    """Sent to vendor when payout is triggered."""
+    """Sent to SELLER when their payout is sent to their bank."""
     html = _render('payout_sent_vendor.html', {
         'business_name': business_name,
         'order_ref':     order_ref,
@@ -328,102 +378,134 @@ def send_payment_sent_vendor(to_email, business_name, amount, currency,
         'amount':        f'{float(amount):,.0f}',
         'bank_name':     bank_name,
         'account_last4': str(account_number)[-4:],
+        'dashboard_url': _vendor_dashboard_url(),
     })
     return send_email_via_brevo(
-        to_email=to_email,
+        to_email=to_email,       # ← SELLER email only
         subject=f'Payment sent — {currency}{float(amount):,.0f} for order #{order_ref}',
         html_content=html,
     )
 
 
 # ─────────────────────────────────────────────
-# 11 & 12. DISPUTE OPENED — VENDOR + BUYER
+# 11. DISPUTE OPENED  →  VENDOR gets vendor email
+#                    →  BUYER gets buyer email
+#     Two separate emails, two separate templates
 # ─────────────────────────────────────────────
 def send_dispute_opened(vendor_email, buyer_email, order_ref, reason,
-                         buyer_name='there', order_url=''):
-    """Sent to both parties when a dispute is raised."""
+                         buyer_name='there',
+                         order_url='',
+                         order_ref_full=None):
+    """
+    Sends TWO separate emails:
+      - Vendor gets dispute_opened_VENDOR.html → links to dashboard
+      - Buyer  gets dispute_opened_BUYER.html  → links to their order page
+
+    order_url      = full buyer order URL (from views.py)
+    order_ref_full = full UUID (used if order_url not provided)
+    """
+    # Build correct URLs for each party
+    if order_url:
+        buyer_order_url  = order_url.rstrip('/')
+        # Vendor URL: swap /order/ for /dashboard/orders/
+        vendor_order_url = order_url.rstrip('/').replace(
+            f'{SITE_URL}/order/',
+            f'{SITE_URL}/dashboard/orders/'
+        )
+    elif order_ref_full:
+        buyer_order_url  = _buyer_order_url(order_ref_full).rstrip('/')
+        vendor_order_url = _vendor_order_url(order_ref_full).rstrip('/')
+    else:
+        buyer_order_url  = _vendor_dashboard_url()
+        vendor_order_url = _vendor_dashboard_url()
+
+    # ── Email to VENDOR ─────────────────────────────────────────────
     vendor_html = _render('dispute_opened_vendor.html', {
         'order_ref': order_ref,
         'reason':    reason,
-        'order_url': order_url,
+        'order_url': vendor_order_url,   # → /dashboard/orders/FULL-UUID/
     })
     send_email_via_brevo(
-        to_email=vendor_email,
-        subject=f'Dispute opened on order #{order_ref}',
+        to_email=vendor_email,           # ← SELLER only
+        subject=f'Dispute opened on order #{order_ref} — respond within 48 hours',
         html_content=vendor_html,
     )
 
+    # ── Email to BUYER ──────────────────────────────────────────────
     buyer_html = _render('dispute_opened_buyer.html', {
         'buyer_name': buyer_name,
         'order_ref':  order_ref,
         'reason':     reason,
+        'order_url':  buyer_order_url,   # → /order/FULL-UUID/
     })
     send_email_via_brevo(
-        to_email=buyer_email,
+        to_email=buyer_email,            # ← BUYER only
         subject=f'Your dispute on order #{order_ref} has been received',
         html_content=buyer_html,
     )
 
 
 # ─────────────────────────────────────────────
-# 13. DISPUTE RESOLVED — BUYER (refund)
+# 12. DISPUTE RESOLVED — BUYER (refund issued)
 # ─────────────────────────────────────────────
 def send_dispute_resolved_buyer(to_email, buyer_name, order_ref, admin_note=''):
-    """Sent to buyer when admin resolves dispute in their favour."""
+    """Sent to BUYER when admin resolves dispute in their favour."""
     html = _render('dispute_resolved_buyer.html', {
         'buyer_name': buyer_name,
         'order_ref':  order_ref,
         'admin_note': admin_note or 'Our team reviewed the case and resolved it in your favour.',
     })
     return send_email_via_brevo(
-        to_email=to_email,
+        to_email=to_email,       # ← BUYER only
         subject=f'Dispute resolved — refund issued for order #{order_ref}',
         html_content=html,
     )
 
 
 # ─────────────────────────────────────────────
-# 14. DISPUTE RESOLVED — VENDOR (paid out)
+# 13. DISPUTE RESOLVED — VENDOR (payment released)
 # ─────────────────────────────────────────────
 def send_dispute_resolved_vendor(to_email, business_name, order_ref, admin_note=''):
-    """Sent to vendor when admin resolves dispute in their favour."""
+    """Sent to SELLER when admin resolves dispute in their favour."""
     html = _render('dispute_resolved_vendor.html', {
         'business_name': business_name,
         'order_ref':     order_ref,
         'admin_note':    admin_note or 'Our team reviewed the case and resolved it in your favour.',
+        'dashboard_url': _vendor_dashboard_url(),
     })
     return send_email_via_brevo(
-        to_email=to_email,
+        to_email=to_email,       # ← SELLER only
         subject=f'Dispute resolved — payment released for order #{order_ref}',
         html_content=html,
     )
 
 
 # ─────────────────────────────────────────────
-# 15. PREMIUM UPGRADE CONFIRMED
+# 14. PREMIUM UPGRADE  →  seller only
 # ─────────────────────────────────────────────
 def send_premium_upgrade_email(to_email, business_name, expires_date):
-    """Sent to seller immediately after successful premium payment."""
+    """Sent to SELLER after successful premium payment."""
     html = _render('premium_upgrade.html', {
         'business_name': business_name,
         'expires_date':  expires_date,
+        'dashboard_url': _vendor_dashboard_url(),
     })
     return send_email_via_brevo(
-        to_email=to_email,
+        to_email=to_email,       # ← SELLER only
         subject=f'{business_name}, you are now Premium ⭐',
         html_content=html,
     )
 
 
 # ─────────────────────────────────────────────
-# 16. PREMIUM EXPIRY WARNING
+# 15. PREMIUM EXPIRY WARNING  →  seller only
 # ─────────────────────────────────────────────
 def send_premium_expiry_warning(to_email, business_name, expires_date, days_left):
-    """Sent 3 days before premium subscription expires. Call from a management command."""
     html = _render('premium_expiry_warning.html', {
         'business_name': business_name,
         'expires_date':  expires_date,
         'days_left':     days_left,
+        'dashboard_url': _vendor_dashboard_url(),
     })
     return send_email_via_brevo(
         to_email=to_email,
@@ -433,28 +515,29 @@ def send_premium_expiry_warning(to_email, business_name, expires_date, days_left
 
 
 # ─────────────────────────────────────────────
-# 17. ORDER AUTO-RELEASED — BUYER
+# 16. ORDER AUTO-RELEASED  →  BUYER only
 # ─────────────────────────────────────────────
-def send_order_auto_released_buyer(to_email, buyer_name, order_ref, seller_name):
-    """Sent to buyer when 72-hour window passes and funds auto-release to vendor."""
+def send_order_auto_released_buyer(to_email, buyer_name, order_ref, seller_name,
+                                    order_ref_full=None):
+    """Sent to BUYER when 72-hour window passes and funds auto-release to seller."""
     html = _render('order_auto_released_buyer.html', {
         'buyer_name':  buyer_name,
         'order_ref':   order_ref,
         'seller_name': seller_name,
     })
     return send_email_via_brevo(
-        to_email=to_email,
+        to_email=to_email,       # ← BUYER only
         subject=f'Your order #{order_ref} has been completed',
         html_content=html,
     )
 
 
 # ─────────────────────────────────────────────
-# 18. REVIEW RECEIVED — VENDOR
+# 17. REVIEW RECEIVED  →  VENDOR (seller) only
 # ─────────────────────────────────────────────
 def send_review_received_vendor(to_email, business_name, order_ref,
                                  rating, comment):
-    """Sent to vendor when a buyer submits a review."""
+    """Sent to SELLER when a buyer leaves a review."""
     stars_display = ('★' * rating) + ('☆' * (5 - rating))
     html = _render('review_received_vendor.html', {
         'business_name': business_name,
@@ -462,9 +545,10 @@ def send_review_received_vendor(to_email, business_name, order_ref,
         'rating':        rating,
         'stars_display': stars_display,
         'comment':       comment or 'No comment left.',
+        'dashboard_url': _vendor_dashboard_url(),
     })
     return send_email_via_brevo(
-        to_email=to_email,
+        to_email=to_email,       # ← SELLER only
         subject=f'New {rating}★ review on your store',
         html_content=html,
     )

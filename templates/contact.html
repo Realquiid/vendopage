@@ -1,44 +1,61 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Contact VendoPage — We're Here to Help{% endblock %}
-{% block meta_description %}Get in touch with the VendoPage team. Support, partnerships, investor inquiries, and press contact.{% endblock %}
+{% block title %}Contact Vendopage — We're Here to Help{% endblock %}
+{% block meta_description %}Get in touch with Vendopage. Support for your store, escrow disputes, payouts, or anything else. We're fast — usually same day on WhatsApp.{% endblock %}
 
 {% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --primary:#00C853; --primary-dark:#00a844; --primary-lt:#e8fff0;
+  --wa:#25D366; --wa-dark:#1fbc59;
   --bg:#ffffff; --bg-alt:#F7F7F5; --text:#0A0A0A; --text-muted:#6B6B6B;
   --border-c:#E8E8E4; --radius:12px; --radius-lg:20px;
 }
-
 [data-theme="dark"] .ct-hero,
-[data-theme="dark"] .ct-section { background:#141414; }
+[data-theme="dark"] .ct-section  { background:#141414; }
 [data-theme="dark"] .ct-section-alt { background:#1a1a1a; }
 [data-theme="dark"] .ct-hero h1,
 [data-theme="dark"] .ct-section-title,
 [data-theme="dark"] .ct-card-title,
 [data-theme="dark"] .ct-channel-title,
-[data-theme="dark"] .ct-faq-q { color:#f0f0f0; }
+[data-theme="dark"] .ct-faq-btn { color:#f0f0f0; }
 [data-theme="dark"] .ct-hero-sub,
 [data-theme="dark"] .ct-section-sub,
-[data-theme="dark"] .ct-card-desc,
 [data-theme="dark"] .ct-channel-desc,
-[data-theme="dark"] .ct-faq-a,
 [data-theme="dark"] .ct-form-label { color:#a0a0a0; }
-[data-theme="dark"] .ct-card { background:#1e1e1e; border-color:#2e2e2e; }
-[data-theme="dark"] .ct-card:hover { border-color:var(--primary); }
+[data-theme="dark"] .ct-channel-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .ct-channel-card:hover { border-color:var(--primary); }
 [data-theme="dark"] .ct-form-wrap { background:#1e1e1e; border-color:#2e2e2e; }
 [data-theme="dark"] .ct-input { background:#252525; border-color:#3a3a3a; color:#f0f0f0; }
 [data-theme="dark"] .ct-input:focus { border-color:var(--primary); }
 [data-theme="dark"] .ct-faq-item { border-color:#2e2e2e; }
-[data-theme="dark"] .ct-faq-btn:hover { background:#1e1e1e; }
+[data-theme="dark"] .ct-faq-btn:hover,
 [data-theme="dark"] .ct-faq-item.open .ct-faq-btn { background:#1e1e1e; }
 [data-theme="dark"] .ct-faq-body { background:#1e1e1e; }
-[data-theme="dark"] .ct-channel-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .ct-faq-a { color:#a0a0a0; }
 [data-theme="dark"] .ct-submit { background:#f0f0f0; color:#000; }
 [data-theme="dark"] .ct-submit:hover { background:#fff; }
+[data-theme="dark"] .ct-info-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .ct-info-label { color:#a0a0a0; }
+[data-theme="dark"] .ct-info-val { color:#f0f0f0; }
+[data-theme="dark"] .ct-resp-row { border-color:#2e2e2e; }
 
+/* ── LETTER DROP ── */
+.letter-drop { overflow:hidden; display:inline-block; }
+.letter-drop .ld-word { display:inline-block; overflow:hidden; }
+.letter-drop .ld-char {
+  display:inline-block;
+  transform:translateY(110%); opacity:0;
+  transition:transform .55s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+}
+.letter-drop.triggered .ld-char { transform:translateY(0); opacity:1; }
+
+.ct-fade { opacity:0; transform:translateY(20px); transition:opacity .6s ease, transform .6s ease; }
+.ct-fade.visible { opacity:1; transform:translateY(0); }
+
+/* ── HERO ── */
 .ct-hero {
   padding:100px 40px 80px; background:var(--bg);
   position:relative; overflow:hidden;
@@ -50,7 +67,11 @@
   border-radius:50%; pointer-events:none;
 }
 .ct-hero-inner { max-width:760px; margin:0 auto; text-align:center; position:relative; z-index:1; }
-.ct-label { display:inline-block; font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--primary); margin-bottom:18px; }
+.ct-label {
+  display:inline-block; font-size:11px; font-weight:700;
+  letter-spacing:2.5px; text-transform:uppercase;
+  color:var(--primary); margin-bottom:18px;
+}
 .ct-hero h1 {
   font-family:'Syne',sans-serif; font-weight:800;
   font-size:clamp(34px,5.5vw,62px); line-height:1.05;
@@ -58,19 +79,19 @@
 }
 .ct-hero-sub { font-size:18px; color:var(--text-muted); max-width:480px; margin:0 auto; line-height:1.7; }
 
-.ct-section { padding:80px 40px; background:var(--bg); }
+.ct-section     { padding:80px 40px; background:var(--bg); }
 .ct-section-alt { padding:80px 40px; background:var(--bg-alt); }
-.ct-container { max-width:1080px; margin:0 auto; }
-.ct-container-sm { max-width:760px; margin:0 auto; }
+.ct-container    { max-width:1080px; margin:0 auto; }
+.ct-container-sm { max-width:760px;  margin:0 auto; }
 .ct-section-title {
   font-family:'Syne',sans-serif; font-weight:800;
   font-size:clamp(22px,3.5vw,38px); letter-spacing:-1px;
   color:var(--text); margin-bottom:12px; line-height:1.1;
 }
-.ct-section-sub { font-size:16px; color:var(--text-muted); line-height:1.65; margin-bottom:40px; }
+.ct-section-sub  { font-size:16px; color:var(--text-muted); line-height:1.65; margin-bottom:40px; }
 .ct-section-head { margin-bottom:48px; }
 
-/* CHANNEL CARDS */
+/* ── CHANNEL CARDS ── */
 .ct-channels { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
 .ct-channel-card {
   background:var(--bg); border:1.5px solid var(--border-c);
@@ -79,24 +100,49 @@
   text-decoration:none; color:inherit; display:block;
 }
 .ct-channel-card:hover { border-color:var(--primary); transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,200,83,.1); }
+.ct-channel-card.wa-card { border-color:rgba(37,211,102,.35); background:rgba(37,211,102,.04); }
+.ct-channel-card.wa-card:hover { border-color:var(--wa); box-shadow:0 12px 36px rgba(37,211,102,.15); }
 .ct-channel-icon {
-  width:48px; height:48px; background:var(--primary-lt);
-  border-radius:12px; display:flex; align-items:center; justify-content:center;
-  margin-bottom:18px;
+  width:48px; height:48px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; margin-bottom:18px;
 }
+.ct-channel-icon.green { background:var(--primary-lt); }
+.ct-channel-icon.wa    { background:#25D366; }
+.ct-channel-icon.dark  { background:var(--text); }
 .ct-channel-title { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:var(--text); margin-bottom:8px; }
-.ct-channel-desc { font-size:13px; color:var(--text-muted); line-height:1.7; margin-bottom:14px; }
-.ct-channel-link { font-size:13px; font-weight:600; color:var(--primary); display:inline-flex; align-items:center; gap:5px; }
+.ct-channel-desc  { font-size:13px; color:var(--text-muted); line-height:1.7; margin-bottom:14px; }
+.ct-channel-link  { font-size:13px; font-weight:600; color:var(--primary); display:inline-flex; align-items:center; gap:5px; }
+.ct-channel-card.wa-card .ct-channel-link { color:var(--wa-dark); }
+.ct-resp-badge {
+  display:inline-block; font-size:10px; font-weight:700;
+  padding:3px 9px; border-radius:100px; margin-bottom:12px; letter-spacing:.4px;
+}
+.ct-resp-badge.fast   { background:var(--primary-lt); color:var(--primary-dark); border:1px solid rgba(0,200,83,.2); }
+.ct-resp-badge.medium { background:rgba(245,158,11,.1); color:#d97706; border:1px solid rgba(245,158,11,.2); }
+[data-theme="dark"] .ct-resp-badge.fast { color:var(--primary); }
+[data-theme="dark"] .ct-resp-badge.medium { color:#fbbf24; }
 
-/* CONTACT FORM */
+/* ── CONTACT LAYOUT ── */
+.ct-contact-layout { display:grid; grid-template-columns:1fr 360px; gap:40px; align-items:start; }
+
+/* ── FORM ── */
 .ct-form-wrap {
   background:var(--bg); border:1.5px solid var(--border-c);
-  border-radius:var(--radius-lg); padding:40px 36px;
-  max-width:640px; margin:0 auto;
+  border-radius:var(--radius-lg); padding:36px 32px;
 }
-.ct-form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-.ct-form-group { margin-bottom:18px; }
-.ct-form-label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px; color:var(--text-muted); margin-bottom:6px; }
+.ct-form-wrap h2 {
+  font-family:'Syne',sans-serif; font-weight:800; font-size:22px;
+  letter-spacing:-.5px; color:var(--text); margin-bottom:6px;
+}
+.ct-form-wrap > p { font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:26px; }
+
+.ct-form-row   { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.ct-form-group { margin-bottom:16px; }
+.ct-form-label {
+  display:block; font-size:11px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.4px;
+  color:var(--text-muted); margin-bottom:6px;
+}
 .ct-input {
   width:100%; padding:12px 14px;
   border:1.5px solid var(--border-c); border-radius:10px;
@@ -109,23 +155,72 @@
 textarea.ct-input { resize:vertical; min-height:120px; }
 .ct-select-wrap { position:relative; }
 .ct-select-wrap select.ct-input { appearance:none; cursor:pointer; }
-.ct-select-wrap::after { content:''; position:absolute; right:14px; top:50%; transform:translateY(-50%); border:5px solid transparent; border-top-color:var(--text-muted); pointer-events:none; }
+.ct-select-wrap::after {
+  content:''; position:absolute; right:14px; top:50%;
+  transform:translateY(-50%); border:5px solid transparent;
+  border-top-color:var(--text-muted); pointer-events:none;
+}
 .ct-submit {
   width:100%; padding:14px; background:var(--text); color:#fff;
   border:none; border-radius:10px; font-family:'DM Sans',sans-serif;
-  font-size:15px; font-weight:600; cursor:pointer; transition:background .2s;
+  font-size:15px; font-weight:600; cursor:pointer; transition:background .2s, transform .18s;
   display:flex; align-items:center; justify-content:center; gap:8px;
 }
-.ct-submit:hover { background:#222; }
-.ct-submit:disabled { background:#bbb; cursor:not-allowed; }
-.ct-success {
-  text-align:center; padding:32px; display:none;
-}
-.ct-success-icon { width:56px; height:56px; background:var(--primary-lt); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
-.ct-success h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:20px; color:var(--text); margin-bottom:8px; }
-.ct-success p { font-size:14px; color:var(--text-muted); }
+.ct-submit:hover { background:#222; transform:translateY(-1px); }
+.ct-submit:disabled { background:#bbb; cursor:not-allowed; transform:none; }
+.ct-form-note { font-size:11px; color:var(--text-muted); text-align:center; margin-top:10px; line-height:1.5; }
 
-/* FAQ */
+.ct-success { text-align:center; padding:32px; display:none; }
+.ct-success-icon {
+  width:56px; height:56px; background:var(--primary-lt); border-radius:50%;
+  display:flex; align-items:center; justify-content:center; margin:0 auto 16px;
+}
+.ct-success h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:20px; color:var(--text); margin-bottom:8px; }
+.ct-success p  { font-size:14px; color:var(--text-muted); }
+
+/* ── SIDEBAR INFO ── */
+.ct-sidebar { display:flex; flex-direction:column; gap:14px; }
+.ct-info-card {
+  background:var(--bg-alt); border:1.5px solid var(--border-c);
+  border-radius:var(--radius-lg); padding:20px 22px;
+}
+.ct-info-card h3 {
+  font-family:'Syne',sans-serif; font-weight:700; font-size:13px;
+  color:var(--text); margin-bottom:14px; letter-spacing:-.2px;
+}
+.ct-info-row {
+  display:flex; align-items:flex-start; gap:12px;
+  padding:10px 0; border-bottom:1px solid var(--border-c);
+}
+.ct-info-row:last-child { border-bottom:none; padding-bottom:0; }
+.ct-info-icon {
+  width:32px; height:32px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.ct-info-icon.g  { background:var(--primary-lt); }
+.ct-info-icon.wa { background:#25D366; }
+.ct-info-icon.m  { background:var(--text); }
+.ct-info-body { flex:1; min-width:0; }
+.ct-info-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); margin-bottom:2px; }
+.ct-info-val   { font-size:12.5px; font-weight:600; color:var(--text); word-break:break-all; }
+.ct-info-sub   { font-size:11px; color:var(--text-muted); margin-top:1px; }
+
+/* response times */
+.ct-resp-list  { display:flex; flex-direction:column; gap:0; }
+.ct-resp-row   { display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border-c); }
+.ct-resp-row:last-child { border-bottom:none; }
+.ct-resp-label { font-size:12px; color:var(--text-muted); }
+.ct-resp-time  {
+  font-size:10.5px; font-weight:700; padding:3px 8px;
+  border-radius:100px; white-space:nowrap;
+}
+.ct-resp-time.fast   { background:var(--primary-lt); color:var(--primary-dark); }
+.ct-resp-time.medium { background:rgba(245,158,11,.1); color:#d97706; }
+.ct-resp-time.slow   { background:var(--bg); border:1px solid var(--border-c); color:var(--text-muted); }
+[data-theme="dark"] .ct-resp-time.fast   { color:var(--primary); background:rgba(0,200,83,.12); }
+[data-theme="dark"] .ct-resp-time.medium { color:#fbbf24; }
+
+/* ── FAQ ── */
 .ct-faq-list { border:1.5px solid var(--border-c); border-radius:var(--radius-lg); overflow:hidden; }
 .ct-faq-item { border-bottom:1px solid var(--border-c); }
 .ct-faq-item:last-child { border-bottom:none; }
@@ -143,13 +238,19 @@ textarea.ct-input { resize:vertical; min-height:120px; }
 .ct-faq-item.open .ct-faq-body { max-height:300px; }
 .ct-faq-a { padding:0 24px 20px; font-size:14px; color:var(--text-muted); line-height:1.8; }
 
-.ct-fade { opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease; }
-.ct-fade.visible { opacity:1; transform:translateY(0); }
-
+/* ── RESPONSIVE ── */
+@media(max-width:900px) {
+  .ct-contact-layout { grid-template-columns:1fr; }
+  .ct-sidebar { display:grid; grid-template-columns:1fr 1fr; }
+}
 @media(max-width:768px) {
   .ct-hero, .ct-section, .ct-section-alt { padding:64px 20px; }
-  .ct-form-wrap { padding:28px 20px; }
-  .ct-form-row { grid-template-columns:1fr; }
+  .ct-form-wrap { padding:24px 20px; }
+  .ct-form-row  { grid-template-columns:1fr; }
+  .ct-sidebar   { grid-template-columns:1fr; }
+}
+@media(max-width:560px) {
+  .ct-channels { grid-template-columns:1fr; }
 }
 </style>
 {% endblock %}
@@ -160,8 +261,11 @@ textarea.ct-input { resize:vertical; min-height:120px; }
 <section class="ct-hero">
   <div class="ct-hero-inner">
     <span class="ct-label">Contact Us</span>
-    <h1>We'd love to<br>hear from you.</h1>
-    <p class="ct-hero-sub">Questions about VendoPage, partnership enquiries, investor conversations, or just need help — we're here.</p>
+    <h1 class="letter-drop">
+      <span class="ld-word">We'd&nbsp;</span><span class="ld-word">love&nbsp;</span><span class="ld-word">to<br></span>
+      <span class="ld-word">hear&nbsp;</span><span class="ld-word">from&nbsp;</span><span class="ld-word">you.</span>
+    </h1>
+    <p class="ct-hero-sub ct-fade">Questions about your store, escrow, payouts, or disputes — we respond fast. WhatsApp is fastest.</p>
   </div>
 </section>
 
@@ -169,129 +273,262 @@ textarea.ct-input { resize:vertical; min-height:120px; }
 <section class="ct-section-alt">
   <div class="ct-container">
     <div class="ct-channels">
+
+      <!-- WhatsApp — FASTEST -->
+      <a href="https://wa.me/2347017820434" target="_blank" rel="noopener" class="ct-channel-card wa-card ct-fade">
+        <div class="ct-channel-icon wa">
+          <svg width="22" height="22" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        </div>
+        <span class="ct-resp-badge fast">⚡ Fastest — usually within 1 hour</span>
+        <div class="ct-channel-title">WhatsApp — CTO Direct</div>
+        <div class="ct-channel-desc">Message us directly on WhatsApp for the fastest response. Real people, no bots. Urgent escrow and payout issues resolved same day.</div>
+        <span class="ct-channel-link" style="color:#25D366;">
+          +234 701 782 0434
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
+      </a>
+
+      <!-- Support Email -->
       <a href="mailto:support@vendopage.com" class="ct-channel-card ct-fade">
-        <div class="ct-channel-icon">
-          <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        <div class="ct-channel-icon green">
+          <svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
         </div>
+        <span class="ct-resp-badge medium">Within 24 hours</span>
         <div class="ct-channel-title">Vendor Support</div>
-        <div class="ct-channel-desc">Need help with your store, products, or account? Our support team responds within 24 hours.</div>
-        <span class="ct-channel-link">support@vendopage.com <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <div class="ct-channel-desc">For detailed store questions, account issues, disputes, or anything that needs a proper record. We read and respond to every message.</div>
+        <span class="ct-channel-link">
+          support@vendopage.com
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
       </a>
 
-      <a href="mailto:partners@vendopage.com" class="ct-channel-card ct-fade">
-        <div class="ct-channel-icon">
-          <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <!-- General / Gmail -->
+      <a href="mailto:vendopageglobalventures@gmail.com" class="ct-channel-card ct-fade">
+        <div class="ct-channel-icon dark">
+          <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         </div>
-        <div class="ct-channel-title">Partnerships</div>
-        <div class="ct-channel-desc">Interested in integrating with VendoPage or building something together? Let's talk.</div>
-        <span class="ct-channel-link">partners@vendopage.com <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <span class="ct-resp-badge medium">Within 48 hours</span>
+        <div class="ct-channel-title">General Enquiries</div>
+        <div class="ct-channel-desc">Partnerships, press, investor conversations, or anything that doesn't fit the categories above. We love hearing from people building things.</div>
+        <span class="ct-channel-link">
+          vendopageglobalventures@gmail.com
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
       </a>
 
-      <a href="mailto:invest@vendopage.com" class="ct-channel-card ct-fade">
-        <div class="ct-channel-icon">
-          <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+      <!-- FAQ scroll -->
+      <a href="#faq" class="ct-channel-card ct-fade">
+        <div class="ct-channel-icon green">
+          <svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <div class="ct-channel-title">Investors</div>
-        <div class="ct-channel-desc">We're building the storefront infrastructure for global social commerce. Want to be part of it?</div>
-        <span class="ct-channel-link">invest@vendopage.com <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        <span class="ct-resp-badge fast">Instant</span>
+        <div class="ct-channel-title">Common Questions</div>
+        <div class="ct-channel-desc">Most answers are right on this page — escrow, disputes, payouts, delivery tracking, and more. Check the FAQ below first.</div>
+        <span class="ct-channel-link">
+          Browse FAQs below
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </span>
       </a>
 
-      <a href="mailto:press@vendopage.com" class="ct-channel-card ct-fade">
-        <div class="ct-channel-icon">
-          <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        </div>
-        <div class="ct-channel-title">Press & Media</div>
-        <div class="ct-channel-desc">Writing about social commerce, mobile business, or informal economies? We'd love to help.</div>
-        <span class="ct-channel-link">press@vendopage.com <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-      </a>
     </div>
   </div>
 </section>
 
-<!-- CONTACT FORM -->
+<!-- FORM + SIDEBAR -->
 <section class="ct-section">
-  <div class="ct-container-sm">
-    <div class="ct-section-head" style="text-align:center;">
-      <span class="ct-label">Send a Message</span>
-      <h2 class="ct-section-title">Not sure where to send it?<br>Just fill this out.</h2>
-      <p class="ct-section-sub">We'll route it to the right person and get back to you within one business day.</p>
-    </div>
-    <div class="ct-form-wrap ct-fade" id="ctFormWrap">
-      <form id="ctForm" onsubmit="handleContactForm(event)">
-        <div class="ct-form-row">
-          <div class="ct-form-group">
-            <label class="ct-form-label">First Name</label>
-            <input type="text" class="ct-input" placeholder="Amara" required>
+  <div class="ct-container">
+    <div class="ct-contact-layout">
+
+      <!-- Form -->
+      <div class="ct-form-wrap ct-fade" id="ctFormWrap">
+        <h2>Send us a message</h2>
+        <p>Fill this in and we'll get back to you — usually within 24 hours. For urgent help, WhatsApp is faster.</p>
+
+        <form id="ctForm" method="post" action="{% url 'contact' %}">
+          {% csrf_token %}
+          <div class="ct-form-row">
+            <div class="ct-form-group">
+              <label class="ct-form-label">First Name</label>
+              <input type="text" name="first_name" class="ct-input" placeholder="Amara" required>
+            </div>
+            <div class="ct-form-group">
+              <label class="ct-form-label">Last Name</label>
+              <input type="text" name="last_name" class="ct-input" placeholder="Osei" required>
+            </div>
           </div>
           <div class="ct-form-group">
-            <label class="ct-form-label">Last Name</label>
-            <input type="text" class="ct-input" placeholder="Osei" required>
+            <label class="ct-form-label">Email Address</label>
+            <input type="email" name="email" class="ct-input" placeholder="you@example.com" required>
+          </div>
+          <div class="ct-form-group">
+            <label class="ct-form-label">Your store link (optional)</label>
+            <input type="text" name="store_link" class="ct-input" placeholder="vendopage.com/yourname">
+          </div>
+          <div class="ct-form-group">
+            <label class="ct-form-label">Topic</label>
+            <div class="ct-select-wrap">
+              <select name="topic" class="ct-input">
+                <option value="">Select a topic</option>
+                <option>Store setup &amp; products</option>
+                <option>Escrow &amp; payments</option>
+                <option>Dispute &amp; refund</option>
+                <option>Payout to my bank</option>
+                <option>Delivery &amp; tracking</option>
+                <option>Account or login</option>
+                <option>Store Mode / Premium</option>
+                <option>Partnership enquiry</option>
+                <option>Bug report</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="ct-form-group">
+            <label class="ct-form-label">Message</label>
+            <textarea name="message" class="ct-input" placeholder="Describe what you need help with. The more detail, the faster we can help." required></textarea>
+          </div>
+          <button type="submit" class="ct-submit" id="ctSubmitBtn">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Send Message
+          </button>
+        </form>
+        <p class="ct-form-note">We read every message. Your info is never shared with third parties.</p>
+
+        <div class="ct-success" id="ctSuccess">
+          <div class="ct-success-icon"><svg width="26" height="26" fill="none" stroke="#00C853" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <h3>Message sent!</h3>
+          <p>We'll get back to you within 24 hours. For urgent help, WhatsApp us at +234 701 782 0434.</p>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="ct-sidebar">
+
+        <!-- Contact details -->
+        <div class="ct-info-card ct-fade">
+          <h3>Contact Details</h3>
+          <div class="ct-info-row">
+            <div class="ct-info-icon wa"><svg width="15" height="15" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></div>
+            <div class="ct-info-body">
+              <div class="ct-info-label">WhatsApp (Fastest)</div>
+              <div class="ct-info-val">+234 701 782 0434</div>
+              <div class="ct-info-sub">CTO / Founder — direct line</div>
+            </div>
+          </div>
+          <div class="ct-info-row">
+            <div class="ct-info-icon g"><svg width="15" height="15" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <div class="ct-info-body">
+              <div class="ct-info-label">Support Email</div>
+              <div class="ct-info-val">support@vendopage.com</div>
+              <div class="ct-info-sub">Store help &amp; disputes</div>
+            </div>
+          </div>
+          <div class="ct-info-row">
+            <div class="ct-info-icon m"><svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <div class="ct-info-body">
+              <div class="ct-info-label">General Email</div>
+              <div class="ct-info-val" style="font-size:11px;">vendopageglobalventures<br>@gmail.com</div>
+              <div class="ct-info-sub">Partnerships &amp; press</div>
+            </div>
           </div>
         </div>
-        <div class="ct-form-group">
-          <label class="ct-form-label">Email Address</label>
-          <input type="email" class="ct-input" placeholder="amara@example.com" required>
-        </div>
-        <div class="ct-form-group">
-          <label class="ct-form-label">Topic</label>
-          <div class="ct-select-wrap">
-            <select class="ct-input">
-              <option value="">Select a topic</option>
-              <option>Vendor Support</option>
-              <option>Account & Billing</option>
-              <option>Partnership Enquiry</option>
-              <option>Investor Relations</option>
-              <option>Press & Media</option>
-              <option>Bug Report</option>
-              <option>Feature Request</option>
-              <option>Other</option>
-            </select>
+
+        <!-- Response times -->
+        <div class="ct-info-card ct-fade">
+          <h3>Response Times</h3>
+          <div class="ct-resp-list">
+            <div class="ct-resp-row">
+              <span class="ct-resp-label">WhatsApp</span>
+              <span class="ct-resp-time fast">~1 hour</span>
+            </div>
+            <div class="ct-resp-row">
+              <span class="ct-resp-label">Support email</span>
+              <span class="ct-resp-time medium">24 hours</span>
+            </div>
+            <div class="ct-resp-row">
+              <span class="ct-resp-label">Escrow disputes</span>
+              <span class="ct-resp-time medium">48 hours</span>
+            </div>
+            <div class="ct-resp-row">
+              <span class="ct-resp-label">Payout issues</span>
+              <span class="ct-resp-time fast">Same day</span>
+            </div>
+            <div class="ct-resp-row">
+              <span class="ct-resp-label">General enquiries</span>
+              <span class="ct-resp-time slow">2–3 days</span>
+            </div>
           </div>
         </div>
-        <div class="ct-form-group">
-          <label class="ct-form-label">Message</label>
-          <textarea class="ct-input" placeholder="Tell us what's on your mind..." required></textarea>
+
+        <!-- Support hours -->
+        <div class="ct-info-card ct-fade">
+          <h3>Support Hours</h3>
+          <div class="ct-resp-list">
+            <div class="ct-resp-row">
+              <span class="ct-resp-label">Mon – Fri</span>
+              <span class="ct-resp-time fast">8am – 8pm WAT</span>
+            </div>
+            <div class="ct-resp-row">
+              <span class="ct-resp-label">Saturday</span>
+              <span class="ct-resp-time medium">9am – 5pm WAT</span>
+            </div>
+            <div class="ct-resp-row">
+              <span class="ct-resp-label">Sunday</span>
+              <span class="ct-resp-time slow">WhatsApp only</span>
+            </div>
+          </div>
+          <p style="font-size:11px;color:var(--text-muted);margin-top:12px;line-height:1.5;">For urgent escrow or payout issues outside office hours, WhatsApp us directly — we monitor it around the clock.</p>
         </div>
-        <button type="submit" class="ct-submit" id="ctSubmitBtn">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          Send Message
-        </button>
-      </form>
-      <div class="ct-success" id="ctSuccess">
-        <div class="ct-success-icon">
-          <svg width="26" height="26" fill="none" stroke="#00C853" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <h3>Message sent!</h3>
-        <p>We'll get back to you within one business day. Thanks for reaching out.</p>
+
       </div>
     </div>
   </div>
 </section>
 
 <!-- FAQ -->
-<section class="ct-section-alt">
+<section class="ct-section-alt" id="faq">
   <div class="ct-container-sm">
     <div class="ct-section-head ct-fade">
       <span class="ct-label">Quick Answers</span>
       <h2 class="ct-section-title">Common questions.</h2>
+      <p class="ct-section-sub">Answers to what vendors and buyers ask us most.</p>
     </div>
     <div class="ct-faq-list">
+
+      <div class="ct-faq-item ct-fade">
+        <button class="ct-faq-btn"><span>I sent money but the seller isn't responding. What do I do?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="ct-faq-body"><p class="ct-faq-a">If you paid via escrow, your money is safe — it's held by Vendopage and hasn't been sent to the seller. Open a dispute from your order page, or WhatsApp us at +234 701 782 0434. We'll investigate and issue a refund if the seller can't be reached.</p></div>
+      </div>
+
+      <div class="ct-faq-item ct-fade">
+        <button class="ct-faq-btn"><span>My item arrived but it's not what was described. Can I get a refund?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="ct-faq-body"><p class="ct-faq-a">Yes. Don't confirm delivery. Open a dispute from your order page and describe what arrived vs what was listed. Send photos if you can. Our team reviews all disputes within 48 hours. If the item doesn't match the listing, you get a full refund — the money is still held by us.</p></div>
+      </div>
+
+      <div class="ct-faq-item ct-fade">
+        <button class="ct-faq-btn"><span>My payout hasn't arrived. How long does it take?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="ct-faq-body"><p class="ct-faq-a">Once an order is confirmed (or auto-released after 72 hours), payouts are processed to your verified bank account — usually the same business day. If it's been more than 24 hours after confirmation, WhatsApp us directly with your order reference and we'll fix it immediately.</p></div>
+      </div>
+
+      <div class="ct-faq-item ct-fade">
+        <button class="ct-faq-btn"><span>How do I upload tracking after shipping?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="ct-faq-body"><p class="ct-faq-a">Go to your dashboard, open the order, and tap "Mark as Shipped." Enter the courier tracking number or your driver's phone number. Vendopage automatically sends the tracking details to the buyer's email so they can follow their delivery.</p></div>
+      </div>
+
+      <div class="ct-faq-item ct-fade">
+        <button class="ct-faq-btn"><span>Can I use Vendopage without accepting payments?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="ct-faq-body"><p class="ct-faq-a">Absolutely. The free Catalogue Mode lets buyers browse your store and tap to message you directly on WhatsApp. You handle payment yourself — bank transfer, mobile money, cash, whatever you prefer. Enable Store Mode only if you want payments directly on your page with escrow protection.</p></div>
+      </div>
+
       <div class="ct-faq-item ct-fade">
         <button class="ct-faq-btn"><span>How quickly do you respond to support requests?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">We aim to respond to all support enquiries within 24 hours on business days. Urgent issues relating to store access are prioritised and typically resolved same day.</p></div>
+        <div class="ct-faq-body"><p class="ct-faq-a">WhatsApp is usually within 1 hour. Email support@vendopage.com is within 24 hours on business days. Escrow and payout issues are highest priority and handled same day wherever possible.</p></div>
       </div>
+
       <div class="ct-faq-item ct-fade">
-        <button class="ct-faq-btn"><span>I'm a developer — can I access your API?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">API access is currently in private beta. Email partners@vendopage.com to express interest and we'll add you to the waitlist.</p></div>
+        <button class="ct-faq-btn"><span>I want to partner with or invest in Vendopage.</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
+        <div class="ct-faq-body"><p class="ct-faq-a">We'd love to hear from you. Email vendopageglobalventures@gmail.com with a brief introduction and we'll arrange a conversation. We're building the storefront layer for social commerce across Africa and beyond.</p></div>
       </div>
-      <div class="ct-faq-item ct-fade">
-        <button class="ct-faq-btn"><span>Can I use VendoPage if I'm not based in Africa?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">Absolutely — VendoPage works for vendors in any country. We have sellers from Southeast Asia, South America, South Asia, the Middle East, and beyond. Any vendor, any country, any currency.</p></div>
-      </div>
-      <div class="ct-faq-item ct-fade">
-        <button class="ct-faq-btn"><span>I want to invest in or partner with VendoPage.</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">We love that. Email invest@vendopage.com with a brief introduction and we'll arrange a conversation. For partnership enquiries, partners@vendopage.com is the right address.</p></div>
-      </div>
+
     </div>
   </div>
 </section>
@@ -300,11 +537,41 @@ textarea.ct-input { resize:vertical; min-height:120px; }
 
 {% block extra_js %}
 <script>
+/* ── LETTER DROP ── */
+(function() {
+  const h1 = document.querySelector('.letter-drop');
+  if (!h1) return;
+  h1.querySelectorAll('.ld-word').forEach((word, wi) => {
+    const text = word.textContent;
+    word.innerHTML = '';
+    [...text].forEach((ch, ci) => {
+      const span = document.createElement('span');
+      span.className = 'ld-char';
+      span.textContent = ch === ' ' ? '\u00a0' : ch;
+      span.style.transitionDelay = ((wi * 6 + ci) * 0.04) + 's';
+      word.appendChild(span);
+    });
+  });
+  const trigger = () => {
+    const rect = h1.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.9) {
+      h1.classList.add('triggered');
+      window.removeEventListener('scroll', trigger);
+    }
+  };
+  window.addEventListener('scroll', trigger, { passive: true });
+  trigger();
+})();
+
+/* ── SCROLL FADE ── */
 const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
-}, { threshold: 0.1 });
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.08 });
 document.querySelectorAll('.ct-fade').forEach(el => obs.observe(el));
 
+/* ── FAQ ── */
 document.querySelectorAll('.ct-faq-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const item = btn.closest('.ct-faq-item');
@@ -314,15 +581,43 @@ document.querySelectorAll('.ct-faq-btn').forEach(btn => {
   });
 });
 
-function handleContactForm(e) {
-  e.preventDefault();
-  const btn = document.getElementById('ctSubmitBtn');
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
-  setTimeout(() => {
-    document.getElementById('ctForm').style.display = 'none';
-    document.getElementById('ctSuccess').style.display = 'block';
-  }, 1200);
+/* ── SMOOTH SCROLL ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href').slice(1);
+    const el = document.getElementById(id);
+    if (el) { e.preventDefault(); el.scrollIntoView({ behavior:'smooth', block:'start' }); }
+  });
+});
+
+/* ── FORM SUBMIT ── */
+const form = document.getElementById('ctForm');
+if (form) {
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('ctSubmitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Sending…';
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (res.ok) {
+        form.style.display = 'none';
+        document.getElementById('ctSuccess').style.display = 'block';
+      } else {
+        btn.disabled = false;
+        btn.innerHTML = 'Send Message';
+        alert('Something went wrong. Please WhatsApp us at +234 701 782 0434.');
+      }
+    } catch {
+      btn.disabled = false;
+      btn.innerHTML = 'Send Message';
+      alert('Network error. Please WhatsApp us at +234 701 782 0434.');
+    }
+  });
 }
 </script>
 {% endblock %}

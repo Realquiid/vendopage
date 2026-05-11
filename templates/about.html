@@ -1,17 +1,17 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}About VendoPage — Upload Once. Sell Forever.{% endblock %}
-{% block meta_description %}VendoPage helps vendors worldwide turn their product photos into a permanent store link. Learn our story, mission, and the team building the future of social commerce.{% endblock %}
+{% block title %}About Vendopage — Upload Once. Sell Forever.{% endblock %}
+{% block meta_description %}Vendopage turns WhatsApp vendors into permanent online stores. One link, all your products, built-in escrow protection. No coding needed.{% endblock %}
 
 {% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --primary:#00C853; --primary-dark:#00a844; --primary-lt:#e8fff0;
   --bg:#ffffff; --bg-alt:#F7F7F5; --text:#0A0A0A; --text-muted:#6B6B6B;
   --border-c:#E8E8E4; --radius:12px; --radius-lg:20px;
 }
-
 [data-theme="dark"] .ab-hero,
 [data-theme="dark"] .ab-section { background:#141414; }
 [data-theme="dark"] .ab-section-alt,
@@ -21,22 +21,53 @@
 [data-theme="dark"] .ab-val-title,
 [data-theme="dark"] .ab-stat-num,
 [data-theme="dark"] .ab-timeline-title,
-[data-theme="dark"] .ab-country-name { color:#f0f0f0; }
+[data-theme="dark"] .ab-country-name,
+[data-theme="dark"] .ab-step-title { color:#f0f0f0; }
 [data-theme="dark"] .ab-hero-sub,
 [data-theme="dark"] .ab-section-sub,
 [data-theme="dark"] .ab-val-desc,
 [data-theme="dark"] .ab-timeline-desc,
 [data-theme="dark"] .ab-stat-label,
-[data-theme="dark"] .ab-country-cat { color:#a0a0a0; }
+[data-theme="dark"] .ab-country-cat,
+[data-theme="dark"] .ab-step-desc { color:#a0a0a0; }
 [data-theme="dark"] .ab-val-card { background:#1e1e1e; border-color:#2e2e2e; }
 [data-theme="dark"] .ab-val-card:hover { border-color:var(--primary); }
 [data-theme="dark"] .ab-timeline-dot { background:#2e2e2e; border-color:#3a3a3a; }
-[data-theme="dark"] .ab-timeline-item::before { background:#2e2e2e; }
 [data-theme="dark"] .ab-globe-card { background:#1e1e1e; border-color:#2e2e2e; }
 [data-theme="dark"] .ab-flag { background:#252525; }
-[data-theme="dark"] .ab-cta-inner { background:#1e1e1e; border-color:#2e2e2e; }
-[data-theme="dark"] .ab-cta-inner h2 { color:#f0f0f0; }
+[data-theme="dark"] .ab-step-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .ab-mode-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .ab-mode-title { color:#f0f0f0; }
+[data-theme="dark"] .ab-mode-list li { color:#a0a0a0; }
+[data-theme="dark"] .ab-visual-phone { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .ab-visual-screen { background:#111; }
+[data-theme="dark"] .ab-phone-bar { background:#1a1a1a; border-color:#2e2e2e; }
+[data-theme="dark"] .ab-phone-prod { background:#252525; }
 
+/* ─── LETTER DROP ANIMATION ─── */
+.letter-drop {
+  overflow: hidden;
+  display: inline-block;
+}
+.letter-drop .ld-word {
+  display: inline-block;
+  overflow: hidden;
+}
+.letter-drop .ld-char {
+  display: inline-block;
+  transform: translateY(110%);
+  opacity: 0;
+  transition: transform .55s cubic-bezier(.22,1,.36,1), opacity .4s ease;
+}
+.letter-drop.triggered .ld-char {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.ab-fade { opacity:0; transform:translateY(22px); transition:opacity .65s ease, transform .65s ease; }
+.ab-fade.visible { opacity:1; transform:translateY(0); }
+
+/* ─── HERO ─── */
 .ab-hero {
   padding:100px 40px 80px; background:var(--bg);
   position:relative; overflow:hidden;
@@ -47,8 +78,18 @@
   background:radial-gradient(circle,rgba(0,200,83,.07) 0%,transparent 65%);
   border-radius:50%; pointer-events:none;
 }
+.ab-hero::after {
+  content:''; position:absolute; top:-60px; right:-100px;
+  width:380px; height:380px;
+  background:radial-gradient(circle,rgba(0,200,83,.05) 0%,transparent 65%);
+  border-radius:50%; pointer-events:none;
+}
 .ab-hero-inner { max-width:860px; margin:0 auto; text-align:center; position:relative; z-index:1; }
-.ab-label { display:inline-block; font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--primary); margin-bottom:18px; }
+.ab-label {
+  display:inline-block; font-size:11px; font-weight:700;
+  letter-spacing:2.5px; text-transform:uppercase;
+  color:var(--primary); margin-bottom:18px;
+}
 .ab-hero h1 {
   font-family:'Syne',sans-serif; font-weight:800;
   font-size:clamp(36px,6vw,68px); line-height:1.05;
@@ -80,6 +121,7 @@
 }
 .ab-btn-ghost:hover { color:var(--text); border-color:var(--text); background:var(--bg-alt); }
 
+/* ─── SECTIONS ─── */
 .ab-section { padding:90px 40px; background:var(--bg); }
 .ab-section-alt { padding:90px 40px; background:var(--bg-alt); }
 .ab-container { max-width:1080px; margin:0 auto; }
@@ -94,16 +136,190 @@
 .ab-section-head.center { text-align:center; }
 .ab-section-head.center .ab-section-sub { margin:0 auto; }
 
-/* STATS */
+/* ─── STATS ─── */
 .ab-stats-wrap { padding:60px 40px; background:var(--bg-alt); }
-.ab-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1px; background:var(--border-c); border:1.5px solid var(--border-c); border-radius:var(--radius-lg); overflow:hidden; max-width:1080px; margin:0 auto; }
+.ab-stats {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:1px; background:var(--border-c);
+  border:1.5px solid var(--border-c); border-radius:var(--radius-lg);
+  overflow:hidden; max-width:1080px; margin:0 auto;
+}
 .ab-stat { background:var(--bg); padding:36px 28px; text-align:center; transition:background .2s; }
 .ab-stat:hover { background:var(--bg-alt); }
-.ab-stat-num { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(32px,4vw,52px); letter-spacing:-2px; color:var(--text); line-height:1; margin-bottom:8px; }
+.ab-stat-num {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:clamp(32px,4vw,52px); letter-spacing:-2px;
+  color:var(--text); line-height:1; margin-bottom:8px;
+}
 .ab-stat-num .ab-stat-accent { color:var(--primary); }
 .ab-stat-label { font-size:13px; color:var(--text-muted); font-weight:500; line-height:1.4; }
 
-/* VALUES */
+/* ─── VISUAL: PHONE MOCKUP SIDE BY SIDE ─── */
+.ab-visual-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:56px; align-items:center;
+}
+.ab-visual-text .ab-section-sub { max-width:100%; }
+.ab-visual-phone {
+  background:var(--bg); border:1.5px solid var(--border-c);
+  border-radius:28px; overflow:hidden;
+  box-shadow:0 32px 80px rgba(0,0,0,.1);
+  max-width:280px; margin:0 auto;
+  animation:phoneFloat 5s ease-in-out infinite;
+}
+@keyframes phoneFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+[data-theme="dark"] .ab-visual-phone { box-shadow:0 32px 80px rgba(0,0,0,.45); }
+
+.ab-phone-header {
+  background:var(--primary); padding:20px 18px 16px; color:#fff;
+}
+.ab-phone-toprow { display:flex; align-items:center; gap:10px; margin-bottom:2px; }
+.ab-phone-ava {
+  width:36px; height:36px; background:rgba(255,255,255,.25);
+  border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-weight:800; font-size:15px;
+}
+.ab-phone-name { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; }
+.ab-phone-url  { font-size:10px; opacity:.75; }
+.ab-phone-prods {
+  padding:12px; display:grid; grid-template-columns:1fr 1fr; gap:8px;
+  background:var(--bg-alt);
+}
+.ab-phone-prod { background:var(--bg); border-radius:10px; overflow:hidden; }
+.ab-phone-img  {
+  height:64px; display:flex; align-items:center; justify-content:center; font-size:24px;
+  position:relative; overflow:hidden; background:#f0f0f0;
+}
+.ab-phone-img span { position:relative; z-index:1; }
+/* price overlay on mini card */
+.ab-phone-img-foot {
+  position:absolute; bottom:0; left:0; right:0;
+  background:linear-gradient(to top,rgba(0,0,0,.7),transparent);
+  padding:4px 7px 4px;
+}
+.ab-phone-price { font-size:10px; font-weight:800; color:#fff; display:block; }
+.ab-phone-pname { padding:6px 8px; font-size:10px; font-weight:600; color:var(--text); }
+.ab-phone-bar {
+  background:var(--bg); border-top:1px solid var(--border-c);
+  padding:10px 14px; display:flex; align-items:center; justify-content:space-between;
+}
+.ab-phone-bar-count { font-size:10px; color:var(--text-muted); font-weight:500; }
+.ab-phone-order-btn {
+  background:var(--text); color:#fff;
+  font-size:10px; font-weight:700; padding:6px 12px; border-radius:100px;
+  font-family:'DM Sans',sans-serif;
+}
+
+/* Status pile (before/after) */
+.ab-before-after { display:flex; flex-direction:column; gap:14px; }
+.ab-ba-label {
+  font-size:11px; font-weight:700; text-transform:uppercase;
+  letter-spacing:1.5px; color:var(--text-muted); margin-bottom:8px;
+}
+.ab-status-pile { display:flex; flex-direction:column; gap:8px; }
+.ab-status-item {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 14px; background:var(--bg);
+  border-radius:var(--radius); border:1px solid var(--border-c);
+}
+.ab-status-emoji { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0; }
+.ab-status-emoji.red    { background:rgba(239,68,68,.1); }
+.ab-status-emoji.amber  { background:rgba(245,158,11,.1); }
+.ab-status-emoji.blue   { background:rgba(59,130,246,.1); }
+.ab-status-name { font-size:12px; font-weight:600; color:var(--text); margin-bottom:1px; }
+.ab-status-meta { font-size:10px; color:var(--text-muted); }
+.ab-expired-tag {
+  margin-left:auto; font-size:10px; font-weight:700;
+  color:#ef4444; background:rgba(239,68,68,.1);
+  padding:2px 8px; border-radius:4px; flex-shrink:0;
+}
+.ab-divider-row {
+  display:flex; align-items:center; gap:10px;
+  font-size:11px; font-weight:700; color:var(--text-muted);
+  text-transform:uppercase; letter-spacing:1px;
+}
+.ab-divider-row::before, .ab-divider-row::after {
+  content:''; flex:1; height:1px; background:var(--border-c);
+}
+.ab-solution-row {
+  display:flex; align-items:center; gap:12px;
+  padding:12px 14px; background:var(--primary-lt);
+  border-radius:var(--radius); border:1.5px solid rgba(0,200,83,.2);
+}
+.ab-solution-icon {
+  width:36px; height:36px; background:var(--primary); border-radius:50%;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.ab-solution-name { font-size:12px; font-weight:700; color:var(--text); }
+.ab-solution-url  { font-size:10px; color:var(--primary-dark); font-weight:600; margin-top:1px; }
+
+/* ─── HOW IT WORKS STEPS ─── */
+.ab-steps { display:flex; flex-direction:column; gap:0; }
+.ab-step {
+  display:grid; grid-template-columns:56px 1fr; gap:22px;
+  padding:30px 0; border-bottom:1px solid var(--border-c);
+}
+.ab-step:last-child { border-bottom:none; }
+.ab-step-left { display:flex; flex-direction:column; align-items:center; }
+.ab-step-num {
+  width:42px; height:42px; border-radius:50%;
+  background:var(--text); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Syne',sans-serif; font-size:14px; font-weight:800; flex-shrink:0;
+}
+.ab-step-line { flex:1; width:2px; background:var(--border-c); margin-top:8px; }
+.ab-step:last-child .ab-step-line { display:none; }
+.ab-step-right { padding-top:8px; }
+.ab-step-title {
+  font-family:'Syne',sans-serif; font-weight:700; font-size:17px;
+  color:var(--text); letter-spacing:-.3px; margin-bottom:7px;
+}
+.ab-step-desc { font-size:14px; color:var(--text-muted); line-height:1.8; margin-bottom:10px; }
+.ab-step-tag {
+  display:inline-flex; align-items:center; gap:5px;
+  background:var(--bg-alt); border:1px solid var(--border-c);
+  border-radius:6px; padding:4px 10px;
+  font-size:11px; font-weight:600; color:var(--text-muted);
+}
+
+/* ─── MODES ─── */
+.ab-modes-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.ab-mode-card {
+  border:1.5px solid var(--border-c); border-radius:var(--radius-lg);
+  padding:28px 24px; background:var(--bg);
+  transition:border-color .22s, transform .22s, box-shadow .22s;
+}
+.ab-mode-card:hover { border-color:var(--primary); transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,200,83,.1); }
+.ab-mode-icon {
+  width:48px; height:48px; border-radius:12px;
+  display:flex; align-items:center; justify-content:center; margin-bottom:18px;
+}
+.ab-mode-icon.dark  { background:var(--text); }
+.ab-mode-icon.green { background:var(--primary); }
+.ab-mode-title {
+  font-family:'Syne',sans-serif; font-weight:700; font-size:17px;
+  color:var(--text); margin-bottom:6px;
+}
+.ab-mode-badge {
+  display:inline-block; font-size:10px; font-weight:700;
+  padding:3px 9px; border-radius:100px; margin-bottom:14px;
+  letter-spacing:.5px; text-transform:uppercase;
+}
+.ab-mode-badge.free  { background:var(--primary-lt); color:var(--primary-dark); border:1px solid rgba(0,200,83,.2); }
+.ab-mode-badge.store { background:rgba(245,158,11,.1); color:#d97706; border:1px solid rgba(245,158,11,.25); }
+.ab-mode-list { list-style:none; display:flex; flex-direction:column; gap:8px; }
+.ab-mode-list li {
+  display:flex; align-items:flex-start; gap:8px;
+  font-size:13px; color:var(--text-muted); line-height:1.5;
+}
+.ab-mode-list li::before {
+  content:''; width:16px; height:16px; border-radius:50%; flex-shrink:0; margin-top:1px;
+  background:var(--primary-lt);
+  background-image:url("data:image/svg+xml,%3Csvg width='8' height='8' fill='none' stroke='%2300C853' stroke-width='2.5' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:center; background-size:8px;
+  border:1.5px solid rgba(0,200,83,.2);
+}
+
+/* ─── VALUES ─── */
 .ab-vals { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
 .ab-val-card {
   padding:32px 28px; border:1.5px solid var(--border-c);
@@ -113,19 +329,18 @@
 .ab-val-card:hover { border-color:var(--primary); transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,200,83,.1); }
 .ab-val-icon {
   width:48px; height:48px; background:var(--primary-lt);
-  border-radius:12px; display:flex; align-items:center; justify-content:center;
-  margin-bottom:18px;
+  border-radius:12px; display:flex; align-items:center; justify-content:center; margin-bottom:18px;
 }
 .ab-val-title { font-family:'Syne',sans-serif; font-weight:700; font-size:17px; color:var(--text); margin-bottom:10px; }
-.ab-val-desc { font-size:14px; color:var(--text-muted); line-height:1.75; }
+.ab-val-desc  { font-size:14px; color:var(--text-muted); line-height:1.75; }
 
-/* STORY TIMELINE */
+/* ─── TIMELINE ─── */
 .ab-timeline { position:relative; max-width:680px; margin:0 auto; }
 .ab-timeline::before {
   content:''; position:absolute; left:20px; top:0; bottom:0;
   width:1.5px; background:var(--border-c);
 }
-.ab-timeline-item { display:flex; gap:28px; padding-bottom:44px; position:relative; }
+.ab-timeline-item { display:flex; gap:28px; padding-bottom:44px; }
 .ab-timeline-item:last-child { padding-bottom:0; }
 .ab-timeline-dot {
   width:41px; height:41px; border-radius:50%;
@@ -136,9 +351,9 @@
 .ab-timeline-item:hover .ab-timeline-dot { background:var(--primary-lt); border-color:var(--primary); }
 .ab-timeline-year { font-family:'Syne',sans-serif; font-size:11px; font-weight:800; color:var(--text-muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
 .ab-timeline-title { font-family:'Syne',sans-serif; font-weight:700; font-size:17px; color:var(--text); margin-bottom:8px; }
-.ab-timeline-desc { font-size:14px; color:var(--text-muted); line-height:1.75; }
+.ab-timeline-desc  { font-size:14px; color:var(--text-muted); line-height:1.75; }
 
-/* GLOBAL REACH */
+/* ─── GLOBE ─── */
 .ab-globe-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
 .ab-globe-card {
   background:var(--bg); border:1.5px solid var(--border-c);
@@ -153,15 +368,60 @@
   justify-content:center; font-size:20px; flex-shrink:0;
 }
 .ab-country-name { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--text); }
-.ab-country-cat { font-size:11px; color:var(--text-muted); margin-top:2px; }
+.ab-country-cat  { font-size:11px; color:var(--text-muted); margin-top:2px; }
 
-/* INVEST CTA */
-.ab-invest { padding:90px 40px; background:var(--text); position:relative; overflow:hidden; }
-.ab-invest::before { content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px); background-size:52px 52px; }
+/* ─── ESCROW VISUAL ─── */
+.ab-escrow-card {
+  background:var(--bg); border:1.5px solid var(--border-c);
+  border-radius:var(--radius-lg); overflow:hidden;
+  max-width:680px; margin:0 auto;
+}
+.ab-escrow-header {
+  padding:22px 26px; background:#0A0A0A; color:#fff;
+  display:flex; align-items:center; gap:14px;
+}
+.ab-escrow-shield {
+  width:46px; height:46px; background:rgba(0,200,83,.15);
+  border-radius:11px; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.ab-escrow-header h3 { font-family:'Syne',sans-serif; font-weight:800; font-size:18px; margin-bottom:3px; }
+.ab-escrow-header p  { font-size:12px; color:rgba(255,255,255,.5); }
+.ab-escrow-row {
+  display:flex; align-items:flex-start; gap:16px;
+  padding:18px 26px; border-bottom:1px solid var(--border-c);
+}
+.ab-escrow-row:last-child { border-bottom:none; }
+.ab-escrow-num {
+  width:28px; height:28px; border-radius:50%;
+  background:var(--bg-alt); border:1.5px solid var(--border-c);
+  font-family:'Syne',sans-serif; font-size:11px; font-weight:800;
+  color:var(--text-muted); display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.ab-escrow-row.done .ab-escrow-num   { background:var(--primary-lt); border-color:rgba(0,200,83,.35); color:var(--primary-dark); }
+.ab-escrow-row.active .ab-escrow-num { background:var(--primary); border-color:var(--primary); color:#fff; }
+.ab-escrow-body h4 { font-family:'Syne',sans-serif; font-size:14px; font-weight:700; color:var(--text); margin-bottom:3px; }
+.ab-escrow-body p  { font-size:12.5px; color:var(--text-muted); line-height:1.6; }
+[data-theme="dark"] .ab-escrow-row.done .ab-escrow-num { color:var(--primary); }
+[data-theme="dark"] .ab-escrow-card { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .ab-escrow-row  { border-color:#2e2e2e; }
+[data-theme="dark"] .ab-escrow-body h4 { color:#f0f0f0; }
+[data-theme="dark"] .ab-escrow-body p  { color:#a0a0a0; }
+[data-theme="dark"] .ab-escrow-num { background:#252525; border-color:#3a3a3a; }
+
+/* ─── CTA ─── */
+.ab-invest {
+  padding:90px 40px; background:var(--text);
+  position:relative; overflow:hidden;
+}
+.ab-invest::before {
+  content:''; position:absolute; inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:52px 52px;
+}
 .ab-invest > * { position:relative; z-index:1; }
 .ab-invest-inner { max-width:680px; margin:0 auto; text-align:center; }
 .ab-invest h2 { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(28px,5vw,52px); letter-spacing:-2px; color:#fff; margin-bottom:16px; line-height:1.05; }
-.ab-invest p { font-size:17px; color:rgba(255,255,255,.5); margin-bottom:36px; line-height:1.65; }
+.ab-invest p   { font-size:17px; color:rgba(255,255,255,.5); margin-bottom:36px; line-height:1.65; }
 .ab-invest-actions { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
 .ab-invest-btn {
   display:inline-flex; align-items:center; gap:10px;
@@ -178,13 +438,16 @@
 }
 .ab-invest-btn-ghost:hover { color:#fff; border-color:rgba(255,255,255,.4); }
 
-.ab-fade { opacity:0; transform:translateY(20px); transition:opacity .6s ease, transform .6s ease; }
-.ab-fade.visible { opacity:1; transform:translateY(0); }
-
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px) {
+  .ab-visual-grid   { grid-template-columns:1fr; gap:36px; }
+  .ab-modes-grid    { grid-template-columns:1fr; }
+}
 @media(max-width:768px) {
   .ab-hero, .ab-section, .ab-section-alt, .ab-stats-wrap, .ab-invest { padding:64px 20px; }
   .ab-timeline::before { left:17px; }
   .ab-globe-grid { grid-template-columns:repeat(2,1fr); }
+  .ab-step { grid-template-columns:44px 1fr; gap:16px; }
 }
 @media(max-width:520px) {
   .ab-hero-actions, .ab-invest-actions { flex-direction:column; align-items:stretch; }
@@ -199,9 +462,12 @@
 <section class="ab-hero">
   <div class="ab-hero-inner">
     <span class="ab-label">Our Story</span>
-    <h1>Selling online should be<br><span class="ab-accent">simple for everyone.</span></h1>
-    <p class="ab-hero-sub">VendoPage was built for the millions of vendors worldwide who run their businesses through messaging apps — and deserve a storefront that actually works for them.</p>
-    <div class="ab-hero-actions">
+    <h1 class="letter-drop">
+      <span class="ld-word">Selling&nbsp;</span><span class="ld-word">online&nbsp;</span><span class="ld-word">should&nbsp;</span><span class="ld-word">be<br></span>
+      <span class="ab-accent"><span class="ld-word">simple&nbsp;</span><span class="ld-word">for&nbsp;</span><span class="ld-word">everyone.</span></span>
+    </h1>
+    <p class="ab-hero-sub ab-fade">Vendopage was built for the millions of vendors who run their businesses on WhatsApp — and deserve a permanent storefront that actually works for them, with zero setup and real payment protection.</p>
+    <div class="ab-hero-actions ab-fade">
       {% if user.is_authenticated %}
         <a href="{% url 'upload_product' %}" class="ab-btn-primary">
           Go to Dashboard
@@ -221,41 +487,266 @@
 <!-- STATS BAR -->
 <div class="ab-stats-wrap">
   <div class="ab-stats">
-    <div class="ab-stat ab-fade">
-      <div class="ab-stat-num">50<span class="ab-stat-accent">+</span></div>
-      <div class="ab-stat-label">Products<br>per upload</div>
-    </div>
-    <div class="ab-stat ab-fade">
-      <div class="ab-stat-num"><span class="ab-stat-accent">30</span>s</div>
-      <div class="ab-stat-label">Average<br>store setup time</div>
-    </div>
-    <div class="ab-stat ab-fade">
-      <div class="ab-stat-num">0</div>
-      <div class="ab-stat-label">Coding skills<br>required</div>
-    </div>
-    <div class="ab-stat ab-fade">
-      <div class="ab-stat-num"><span class="ab-stat-accent">∞</span></div>
-      <div class="ab-stat-label">Store link<br>duration</div>
-    </div>
-    <div class="ab-stat ab-fade">
-      <div class="ab-stat-num"><span class="ab-stat-accent">Free</span></div>
-      <div class="ab-stat-label">Always<br>forever</div>
-    </div>
+    <div class="ab-stat ab-fade"><div class="ab-stat-num">50<span class="ab-stat-accent">+</span></div><div class="ab-stat-label">Products<br>per upload</div></div>
+    <div class="ab-stat ab-fade"><div class="ab-stat-num"><span class="ab-stat-accent">30</span>s</div><div class="ab-stat-label">Store live<br>in seconds</div></div>
+    <div class="ab-stat ab-fade"><div class="ab-stat-num">0</div><div class="ab-stat-label">Coding skills<br>required</div></div>
+    <div class="ab-stat ab-fade"><div class="ab-stat-num"><span class="ab-stat-accent">72</span>h</div><div class="ab-stat-label">Max escrow<br>hold period</div></div>
+    <div class="ab-stat ab-fade"><div class="ab-stat-num"><span class="ab-stat-accent">Free</span></div><div class="ab-stat-label">Always<br>forever</div></div>
   </div>
 </div>
 
-<!-- PROBLEM / MISSION -->
+<!-- THE PROBLEM — visual before/after -->
+<section class="ab-section">
+  <div class="ab-container">
+    <div class="ab-visual-grid">
+      <div class="ab-visual-text ab-fade">
+        <span class="ab-label">The Problem We Solve</span>
+        <h2 class="ab-section-title">Vendors were losing sales every 24 hours.</h2>
+        <p class="ab-section-sub" style="margin-bottom:16px;">WhatsApp Status posts disappear in 24 hours. Customers scroll back and can't find that dress they saw yesterday. Orders are lost. Revenue is lost. The same products get re-uploaded every single day.</p>
+        <p class="ab-section-sub" style="margin-bottom:24px;">Buyers on the other hand were afraid to send money to strangers. Sellers got ghosted after delivery. Disputes had nowhere to go. Everyone lost trust.</p>
+        <p class="ab-section-sub"><strong style="color:var(--text);">Vendopage fixes both sides.</strong> One permanent link for vendors. One safe payment system for buyers.</p>
+      </div>
+
+      <!-- Visual: status pile → solution -->
+      <div class="ab-before-after ab-fade">
+        <div class="ab-ba-label">Before Vendopage</div>
+        <div class="ab-status-pile">
+          <div class="ab-status-item">
+            <div class="ab-status-emoji red">👗</div>
+            <div><div class="ab-status-name">Ankara Gown — ₦18,000</div><div class="ab-status-meta">Posted on WhatsApp Status</div></div>
+            <span class="ab-expired-tag">Expired</span>
+          </div>
+          <div class="ab-status-item">
+            <div class="ab-status-emoji amber">👜</div>
+            <div><div class="ab-status-name">Leather Bag — ₦12,500</div><div class="ab-status-meta">Posted on WhatsApp Status</div></div>
+            <span class="ab-expired-tag">Expired</span>
+          </div>
+          <div class="ab-status-item">
+            <div class="ab-status-emoji blue">👠</div>
+            <div><div class="ab-status-name">Block Heels — ₦9,000</div><div class="ab-status-meta">Posted on WhatsApp Status</div></div>
+            <span class="ab-expired-tag">Expired</span>
+          </div>
+        </div>
+        <div class="ab-divider-row" style="margin:14px 0;">With Vendopage</div>
+        <div class="ab-solution-row">
+          <div class="ab-solution-icon">
+            <svg width="16" height="16" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          </div>
+          <div>
+            <div class="ab-solution-name">All 3 products. Permanent. Always.</div>
+            <div class="ab-solution-url">vendopage.com/chiomafashion</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE STORE VISUAL -->
+<section class="ab-section-alt">
+  <div class="ab-container">
+    <div class="ab-visual-grid" style="direction:rtl;">
+      <div style="direction:ltr;" class="ab-fade">
+        <!-- Phone mockup -->
+        <div class="ab-visual-phone">
+          <div class="ab-phone-header">
+            <div class="ab-phone-toprow">
+              <div class="ab-phone-ava">C</div>
+              <div>
+                <div class="ab-phone-name">Chioma Fashion</div>
+                <div class="ab-phone-url">vendopage.com/chioma</div>
+              </div>
+            </div>
+          </div>
+          <div class="ab-phone-prods">
+            <div class="ab-phone-prod">
+              <div class="ab-phone-img" style="background:#fef3c7;">
+                <span>👗</span>
+                <div class="ab-phone-img-foot"><span class="ab-phone-price">₦18,000</span></div>
+              </div>
+              <div class="ab-phone-pname">Ankara Gown</div>
+            </div>
+            <div class="ab-phone-prod">
+              <div class="ab-phone-img" style="background:#e0f2fe;">
+                <span>👜</span>
+                <div class="ab-phone-img-foot"><span class="ab-phone-price">₦12,500</span></div>
+              </div>
+              <div class="ab-phone-pname">Leather Bag</div>
+            </div>
+            <div class="ab-phone-prod">
+              <div class="ab-phone-img" style="background:#fce7f3;">
+                <span>👠</span>
+                <div class="ab-phone-img-foot"><span class="ab-phone-price">₦9,000</span></div>
+              </div>
+              <div class="ab-phone-pname">Block Heels</div>
+            </div>
+            <div class="ab-phone-prod">
+              <div class="ab-phone-img" style="background:#f0fdf4;">
+                <span>💍</span>
+                <div class="ab-phone-img-foot"><span class="ab-phone-price">₦7,000</span></div>
+              </div>
+              <div class="ab-phone-pname">Gold Set</div>
+            </div>
+          </div>
+          <div class="ab-phone-bar">
+            <span class="ab-phone-bar-count">4 products</span>
+            <span class="ab-phone-order-btn">Order Now</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="direction:ltr;" class="ab-fade">
+        <span class="ab-label">Live Preview</span>
+        <h2 class="ab-section-title">What your buyers see.</h2>
+        <p class="ab-section-sub" style="margin-bottom:16px;">A clean, fast store they can browse on any phone — no app download, no login, no friction. Tap a product, tap Order, a WhatsApp message opens instantly.</p>
+        <p class="ab-section-sub" style="margin-bottom:16px;">Buyers in Ghana see cedis. Buyers in London see pounds. Buyers in Dubai see dirhams. Auto-detected from their location — no setup needed.</p>
+        <p class="ab-section-sub">In Store Mode, buyers can pay directly on the page with full escrow protection built in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
 <section class="ab-section">
   <div class="ab-container-sm">
     <div class="ab-section-head ab-fade">
-      <span class="ab-label">The Problem We Solve</span>
-      <h2 class="ab-section-title">Vendors were losing sales every 24 hours.</h2>
-      <p class="ab-section-sub">Across the world — in Lagos, Nairobi, Manila, São Paulo, Dhaka, and beyond — millions of small business owners run their shops through WhatsApp and Instagram. They photograph their products, post them to their status, and watch them disappear a day later. Customers scroll back and can't find that dress they saw yesterday. Orders are lost. Revenue is lost. Time is wasted re-uploading the same products every single day.</p>
+      <span class="ab-label">How It Works</span>
+      <h2 class="ab-section-title">From photos to first sale.</h2>
+      <p class="ab-section-sub">Everything a vendor needs — in the exact order it makes sense.</p>
     </div>
-    <div class="ab-section-head ab-fade" style="margin-bottom:0;">
-      <span class="ab-label">Our Answer</span>
-      <h2 class="ab-section-title">A permanent store that lives at your own link.</h2>
-      <p class="ab-section-sub">VendoPage gives every vendor — regardless of country, language, or technical skill — a professional storefront they can set up in 30 seconds. Upload your photos, add your prices, and share one link everywhere. Your customers can always find your products. Your sales never disappear.</p>
+    <div class="ab-steps">
+      <div class="ab-step ab-fade">
+        <div class="ab-step-left"><div class="ab-step-num">1</div><div class="ab-step-line"></div></div>
+        <div class="ab-step-right">
+          <div class="ab-step-title">Create your store in 30 seconds</div>
+          <p class="ab-step-desc">Sign up with your business name and WhatsApp number. You instantly get a permanent link — <strong>vendopage.com/yourname</strong>. No payment, no setup, no technical skills needed.</p>
+          <span class="ab-step-tag">Free forever</span>
+        </div>
+      </div>
+      <div class="ab-step ab-fade">
+        <div class="ab-step-left"><div class="ab-step-num">2</div><div class="ab-step-line"></div></div>
+        <div class="ab-step-right">
+          <div class="ab-step-title">Upload your whole catalogue at once</div>
+          <p class="ab-step-desc">Drop up to 50 product photos in one go — WhatsApp screenshots, camera shots, anything. Add a name, price, and description. Your store is live instantly.</p>
+          <span class="ab-step-tag">50 products per upload</span>
+        </div>
+      </div>
+      <div class="ab-step ab-fade">
+        <div class="ab-step-left"><div class="ab-step-num">3</div><div class="ab-step-line"></div></div>
+        <div class="ab-step-right">
+          <div class="ab-step-title">Share your link everywhere</div>
+          <p class="ab-step-desc">Post your store link on WhatsApp status, Instagram bio, Twitter, anywhere. Unlike status posts that vanish in 24 hours, your link is permanent. Buyers can always find your products.</p>
+          <span class="ab-step-tag">One link, all products</span>
+        </div>
+      </div>
+      <div class="ab-step ab-fade">
+        <div class="ab-step-left"><div class="ab-step-num">4</div><div class="ab-step-line"></div></div>
+        <div class="ab-step-right">
+          <div class="ab-step-title">Buyers order directly on WhatsApp</div>
+          <p class="ab-step-desc">On the free plan, buyers tap "Order on WhatsApp" and a pre-typed message opens instantly on their phone. Zero friction. No app needed.</p>
+          <span class="ab-step-tag">Zero friction ordering</span>
+        </div>
+      </div>
+      <div class="ab-step ab-fade">
+        <div class="ab-step-left"><div class="ab-step-num">5</div><div class="ab-step-line"></div></div>
+        <div class="ab-step-right">
+          <div class="ab-step-title">Enable Store Mode for direct payments</div>
+          <p class="ab-step-desc">Upgrade to Store Mode and accept payments directly on your page. Buyers pay securely at checkout — with or without escrow. You receive funds once delivery is confirmed.</p>
+          <span class="ab-step-tag">Escrow protected</span>
+        </div>
+      </div>
+      <div class="ab-step ab-fade">
+        <div class="ab-step-left"><div class="ab-step-num">6</div></div>
+        <div class="ab-step-right">
+          <div class="ab-step-title">Ship, track, and get paid</div>
+          <p class="ab-step-desc">Upload your courier tracking number or driver's phone number. Buyers receive tracking details by email. Once they confirm delivery, funds go straight to your bank account. If no response in 72 hours — auto-released.</p>
+          <span class="ab-step-tag">Auto-payout in 72hrs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TWO MODES -->
+<section class="ab-section-alt">
+  <div class="ab-container">
+    <div class="ab-section-head ab-fade">
+      <span class="ab-label">Two Ways to Sell</span>
+      <h2 class="ab-section-title">Use it as a catalogue.<br>Or as a full store.</h2>
+      <p class="ab-section-sub">Switch between modes any time from your dashboard.</p>
+    </div>
+    <div class="ab-modes-grid ab-fade">
+      <div class="ab-mode-card">
+        <div class="ab-mode-icon dark"><svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+        <span class="ab-mode-badge free">Free Plan</span>
+        <div class="ab-mode-title">Catalogue Mode</div>
+        <ul class="ab-mode-list">
+          <li>Permanent store link with all your products</li>
+          <li>Buyers browse and tap to order via WhatsApp</li>
+          <li>Pre-typed order messages sent automatically</li>
+          <li>You handle payment and delivery your own way</li>
+          <li>No transaction fees. Always free.</li>
+        </ul>
+      </div>
+      <div class="ab-mode-card">
+        <div class="ab-mode-icon green"><svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <span class="ab-mode-badge store">Store Mode</span>
+        <div class="ab-mode-title">Full Store Mode</div>
+        <ul class="ab-mode-list">
+          <li>Accept payments directly on your store page</li>
+          <li>Buyers choose: pay with escrow or pay direct</li>
+          <li>Buyer adds delivery address at checkout</li>
+          <li>You upload tracking number or driver contact</li>
+          <li>Buyer receives tracking by email automatically</li>
+          <li>Funds released to your bank after confirmed delivery</li>
+          <li>72-hour auto-release if buyer doesn't respond</li>
+          <li>Dispute resolution within 48 hours</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ESCROW EXPLAINER -->
+<section class="ab-section">
+  <div class="ab-container">
+    <div class="ab-section-head center ab-fade">
+      <span class="ab-label">Built-in Protection</span>
+      <h2 class="ab-section-title">How escrow keeps everyone safe.</h2>
+      <p class="ab-section-sub">Buying from a stranger online is scary. Escrow removes that fear — for both sides.</p>
+    </div>
+    <div class="ab-escrow-card ab-fade">
+      <div class="ab-escrow-header">
+        <div class="ab-escrow-shield"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div>
+          <h3>Vendopage Escrow</h3>
+          <p>Money held by Vendopage until both sides are satisfied</p>
+        </div>
+      </div>
+      <div class="ab-escrow-row done">
+        <div class="ab-escrow-num"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="ab-escrow-body"><h4>Buyer pays at checkout</h4><p>Payment secured via Paystack. Money goes into escrow — not to the seller yet.</p></div>
+      </div>
+      <div class="ab-escrow-row done">
+        <div class="ab-escrow-num"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="ab-escrow-body"><h4>Vendopage holds the funds</h4><p>Money sits safely with Vendopage. Seller sees the order but hasn't received anything yet.</p></div>
+      </div>
+      <div class="ab-escrow-row active">
+        <div class="ab-escrow-num">3</div>
+        <div class="ab-escrow-body"><h4>Seller ships and uploads tracking</h4><p>Seller ships the order and uploads courier tracking or driver's contact number to the dashboard.</p></div>
+      </div>
+      <div class="ab-escrow-row">
+        <div class="ab-escrow-num">4</div>
+        <div class="ab-escrow-body"><h4>Buyer receives tracking by email</h4><p>Vendopage automatically emails the buyer their tracking details so they can follow the delivery.</p></div>
+      </div>
+      <div class="ab-escrow-row">
+        <div class="ab-escrow-num">5</div>
+        <div class="ab-escrow-body"><h4>Buyer confirms delivery (or 72hr auto-release)</h4><p>Once the buyer confirms receipt, funds are released. If they don't respond in 72 hours, funds are released automatically to the seller.</p></div>
+      </div>
+      <div class="ab-escrow-row">
+        <div class="ab-escrow-num">6</div>
+        <div class="ab-escrow-body"><h4>Funds hit seller's bank account</h4><p>Payment lands directly in the seller's verified bank account. If there's a dispute, our team reviews within 48 hours and issues a fair resolution.</p></div>
+      </div>
     </div>
   </div>
 </section>
@@ -265,114 +756,49 @@
   <div class="ab-container">
     <div class="ab-section-head ab-fade">
       <span class="ab-label">What We Stand For</span>
-      <h2 class="ab-section-title">Built on three principles.</h2>
+      <h2 class="ab-section-title">Built on six principles.</h2>
     </div>
     <div class="ab-vals">
       <div class="ab-val-card ab-fade">
-        <div class="ab-val-icon">
-          <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <div class="ab-val-title">Simplicity First</div>
-        <div class="ab-val-desc">If you can send a WhatsApp message, you can run a VendoPage store. We strip away every unnecessary step so vendors focus on selling — not on software.</div>
+        <div class="ab-val-icon"><svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
+        <div class="ab-val-title">Permanence over posts</div>
+        <div class="ab-val-desc">Your products should outlive a 24-hour status. A vendor's catalogue should be as permanent as their shop front — accessible any time, any day.</div>
       </div>
       <div class="ab-val-card ab-fade">
-        <div class="ab-val-icon">
-          <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-        </div>
-        <div class="ab-val-title">Globally Inclusive</div>
-        <div class="ab-val-desc">VendoPage is built for every vendor in every country. Whether you're selling Ankara fabric in Accra or handmade ceramics in Jakarta — your business matters and your storefront should reflect that.</div>
+        <div class="ab-val-icon"><svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="ab-val-title">Trust without fear</div>
+        <div class="ab-val-desc">Buyers should never be afraid to buy from a vendor they don't know. Escrow means the money is safe until the product arrives. Period.</div>
       </div>
       <div class="ab-val-card ab-fade">
-        <div class="ab-val-icon">
-          <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-        </div>
-        <div class="ab-val-title">Vendor Success</div>
-        <div class="ab-val-desc">Our only metric is whether our vendors make more sales. Every feature we build, every design decision we make — it's in service of helping small businesses grow.</div>
+        <div class="ab-val-icon"><svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+        <div class="ab-val-title">Simple above all</div>
+        <div class="ab-val-desc">If you can send a WhatsApp message, you can run a Vendopage store. No laptops, no coding, no forms. Built for phone vendors, from the ground up.</div>
       </div>
       <div class="ab-val-card ab-fade">
-        <div class="ab-val-icon">
-          <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-        </div>
-        <div class="ab-val-title">Community-Driven</div>
-        <div class="ab-val-desc">We listen to vendors first. Our product roadmap is shaped by real feedback from real sellers — from the street market vendor to the growing boutique owner.</div>
+        <div class="ab-val-icon"><svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <div class="ab-val-title">Free to start</div>
+        <div class="ab-val-desc">Every vendor gets a permanent store link, unlimited products, and WhatsApp ordering — free, forever. Premium features exist for those who want more.</div>
       </div>
       <div class="ab-val-card ab-fade">
-        <div class="ab-val-icon">
-          <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-        </div>
-        <div class="ab-val-title">Mobile-Native</div>
-        <div class="ab-val-desc">Our vendors run their businesses from their phones. VendoPage is built mobile-first from the ground up — not an afterthought, not a shrunken desktop site.</div>
+        <div class="ab-val-icon"><svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg></div>
+        <div class="ab-val-title">Built for Africa & beyond</div>
+        <div class="ab-val-desc">We support 180+ currencies and auto-detect every buyer's location. Sellers in Lagos, buyers in London — both see prices in their own currency automatically.</div>
       </div>
       <div class="ab-val-card ab-fade">
-        <div class="ab-val-icon">
-          <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        </div>
-        <div class="ab-val-title">Always Accessible</div>
-        <div class="ab-val-desc">Free forever, for real. We believe every vendor deserves a professional presence regardless of budget. Our free tier isn't a trial — it's a promise.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- TIMELINE -->
-<section class="ab-section">
-  <div class="ab-container-sm">
-    <div class="ab-section-head ab-fade">
-      <span class="ab-label">How We Got Here</span>
-      <h2 class="ab-section-title">Our journey.</h2>
-      <p class="ab-section-sub">From a simple observation to a platform serving vendors worldwide.</p>
-    </div>
-    <div class="ab-timeline">
-      <div class="ab-timeline-item ab-fade">
-        <div class="ab-timeline-dot">
-          <svg width="16" height="16" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/></svg>
-        </div>
-        <div>
-          <div class="ab-timeline-year">The Observation</div>
-          <div class="ab-timeline-title">A vendor, a problem.</div>
-          <div class="ab-timeline-desc">We watched vendors spend hours every day re-uploading the same products to their WhatsApp status — only to have them disappear in 24 hours. Customers couldn't find products they saw the day before. Sales evaporated. The problem was clear.</div>
-        </div>
-      </div>
-      <div class="ab-timeline-item ab-fade">
-        <div class="ab-timeline-dot">
-          <svg width="16" height="16" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-        </div>
-        <div>
-          <div class="ab-timeline-year">The Build</div>
-          <div class="ab-timeline-title">Built for real workflows.</div>
-          <div class="ab-timeline-desc">We didn't build a generic ecommerce platform. We built specifically for how vendors actually work — phone cameras, WhatsApp screenshots, casual descriptions, and direct customer conversations. No complicated dashboards. No merchant accounts. Just a store that works.</div>
-        </div>
-      </div>
-      <div class="ab-timeline-item ab-fade">
-        <div class="ab-timeline-dot">
-          <svg width="16" height="16" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-        </div>
-        <div>
-          <div class="ab-timeline-year">The Launch</div>
-          <div class="ab-timeline-title">Vendors go live worldwide.</div>
-          <div class="ab-timeline-desc">VendoPage launched and vendors from multiple continents signed up within the first days. Fashion sellers in West Africa, food vendors in Southeast Asia, electronics dealers in South America — the problem we solved was universal.</div>
-        </div>
-      </div>
-      <div class="ab-timeline-item ab-fade">
-        <div class="ab-timeline-dot">
-          <svg width="16" height="16" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
-        </div>
-        <div>
-          <div class="ab-timeline-year">The Future</div>
-          <div class="ab-timeline-title">Scaling global social commerce.</div>
-          <div class="ab-timeline-desc">We're expanding features, languages, and payment integrations to serve the growing global market of mobile-first vendors. VendoPage is becoming the infrastructure layer for social commerce worldwide.</div>
-        </div>
+        <div class="ab-val-icon"><svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+        <div class="ab-val-title">Sellers get paid, always</div>
+        <div class="ab-val-desc">72-hour auto-release. Bank-verified payouts. No manual follow-up. When you deliver, you get paid. That's the promise.</div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- GLOBAL REACH -->
-<section class="ab-section-alt">
+<section class="ab-section">
   <div class="ab-container">
     <div class="ab-section-head center ab-fade">
       <span class="ab-label">Global by Design</span>
-      <h2 class="ab-section-title">VendoPage works in every country.</h2>
+      <h2 class="ab-section-title">Vendopage works in every country.</h2>
       <p class="ab-section-sub">Social commerce is a global phenomenon. Our platform is built for vendors everywhere — any currency, any category, any continent.</p>
     </div>
     <div class="ab-globe-grid">
@@ -380,30 +806,37 @@
       <div class="ab-globe-card ab-fade"><div class="ab-flag">🇬🇭</div><div><div class="ab-country-name">Ghana</div><div class="ab-country-cat">Beauty, Fashion, Crafts</div></div></div>
       <div class="ab-globe-card ab-fade"><div class="ab-flag">🇰🇪</div><div><div class="ab-country-name">Kenya</div><div class="ab-country-cat">Produce, Homeware, Tech</div></div></div>
       <div class="ab-globe-card ab-fade"><div class="ab-flag">🇿🇦</div><div><div class="ab-country-name">South Africa</div><div class="ab-country-cat">Fashion, Food, Services</div></div></div>
+      <div class="ab-globe-card ab-fade"><div class="ab-flag">🇬🇧</div><div><div class="ab-country-name">United Kingdom</div><div class="ab-country-cat">Fashion, Beauty, Goods</div></div></div>
       <div class="ab-globe-card ab-fade"><div class="ab-flag">🇵🇭</div><div><div class="ab-country-name">Philippines</div><div class="ab-country-cat">Beauty, Food, Crafts</div></div></div>
       <div class="ab-globe-card ab-fade"><div class="ab-flag">🇧🇩</div><div><div class="ab-country-name">Bangladesh</div><div class="ab-country-cat">Textiles, Fashion, Crafts</div></div></div>
       <div class="ab-globe-card ab-fade"><div class="ab-flag">🇧🇷</div><div><div class="ab-country-name">Brazil</div><div class="ab-country-cat">Fashion, Beauty, Food</div></div></div>
-      <div class="ab-globe-card ab-fade"><div class="ab-flag">🇮🇩</div><div><div class="ab-country-name">Indonesia</div><div class="ab-country-cat">Batik, Electronics, Food</div></div></div>
       <div class="ab-globe-card ab-fade"><div class="ab-flag">🇮🇳</div><div><div class="ab-country-name">India</div><div class="ab-country-cat">Textiles, Jewellery, Food</div></div></div>
-      <div class="ab-globe-card ab-fade"><div class="ab-flag">🇵🇰</div><div><div class="ab-country-name">Pakistan</div><div class="ab-country-cat">Fashion, Handicrafts, Food</div></div></div>
+      <div class="ab-globe-card ab-fade"><div class="ab-flag">🇦🇪</div><div><div class="ab-country-name">UAE</div><div class="ab-country-cat">Fashion, Beauty, Luxury</div></div></div>
       <div class="ab-globe-card ab-fade"><div class="ab-flag">🇪🇬</div><div><div class="ab-country-name">Egypt</div><div class="ab-country-cat">Fashion, Beauty, Homewares</div></div></div>
       <div class="ab-globe-card ab-fade"><div class="ab-flag">🌍</div><div><div class="ab-country-name">Everywhere Else</div><div class="ab-country-cat">Any business, anywhere</div></div></div>
     </div>
   </div>
 </section>
 
-<!-- INVESTOR CTA -->
+<!-- CTA -->
 <section class="ab-invest">
   <div class="ab-invest-inner">
-    <span class="ab-label" style="color:var(--primary);">For Investors & Partners</span>
-    <h2>Backing the infrastructure of global social commerce.</h2>
-    <p>The social commerce market is growing at an extraordinary rate. VendoPage is positioned at the intersection of mobile commerce, messaging platforms, and the informal economy — a market worth trillions globally. We're building the storefront layer for the next billion vendors.</p>
+    <span class="ab-label" style="color:var(--primary);">Get Started Free</span>
+    <h2>Your store.<br>Live in 30 seconds.</h2>
+    <p>No payment. No setup. No stress. Just a permanent link and real protection for every sale.</p>
     <div class="ab-invest-actions">
-      <a href="mailto:invest@vendopage.com" class="ab-invest-btn">
-        Get in Touch
-        <span class="arrow-circle"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-      </a>
-      <a href="{% url 'contact' %}" class="ab-invest-btn-ghost">Learn More</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'upload_product' %}" class="ab-invest-btn">
+          Add Products
+          <span class="arrow-circle"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </a>
+      {% else %}
+        <a href="{% url 'register' %}" class="ab-invest-btn">
+          Create your free store
+          <span class="arrow-circle"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+        </a>
+      {% endif %}
+      <a href="{% url 'contact' %}" class="ab-invest-btn-ghost">Talk to Us</a>
     </div>
   </div>
 </section>
@@ -412,9 +845,41 @@
 
 {% block extra_js %}
 <script>
+/* ── LETTER DROP on hero h1 ── */
+(function() {
+  const h1 = document.querySelector('.letter-drop');
+  if (!h1) return;
+  // wrap each character in .ld-char inside existing .ld-word spans
+  h1.querySelectorAll('.ld-word').forEach((word, wi) => {
+    const text = word.textContent;
+    word.innerHTML = '';
+    [...text].forEach((ch, ci) => {
+      const span = document.createElement('span');
+      span.className = 'ld-char';
+      span.textContent = ch === ' ' ? '\u00a0' : ch;
+      span.style.transitionDelay = ((wi * 6 + ci) * 0.035) + 's';
+      word.appendChild(span);
+    });
+  });
+
+  // trigger on scroll / immediate if in view
+  const trigger = () => {
+    const rect = h1.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.9) {
+      h1.classList.add('triggered');
+      window.removeEventListener('scroll', trigger);
+    }
+  };
+  window.addEventListener('scroll', trigger, { passive: true });
+  trigger();
+})();
+
+/* ── FADE IN on scroll ── */
 const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
-}, { threshold: 0.1 });
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+}, { threshold: 0.08 });
 document.querySelectorAll('.ab-fade').forEach(el => obs.observe(el));
 </script>
 {% endblock %}
