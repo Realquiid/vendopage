@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Terms of Service — VendoPage{% endblock %}
-{% block meta_description %}VendoPage Terms of Service. Read our terms, seller responsibilities, prohibited content rules, and how we handle accounts globally.{% endblock %}
+{% block title %}Terms of Service — Vendopage{% endblock %}
+{% block meta_description %}Vendopage Terms of Service. Read our terms covering vendor responsibilities, escrow payments, Store Mode, buyer protections, and how we handle accounts globally.{% endblock %}
 
 {% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --primary:#00C853; --primary-dark:#00a844; --primary-lt:#e8fff0;
@@ -13,37 +14,41 @@
 }
 
 [data-theme="dark"] .lg-hero,
-[data-theme="dark"] .lg-body { background:#141414; }
-[data-theme="dark"] .lg-sidebar-wrap { background:#1a1a1a; }
+[data-theme="dark"] .lg-body          { background:#141414; }
 [data-theme="dark"] .lg-hero h1,
 [data-theme="dark"] .lg-section-title,
-[data-theme="dark"] .lg-toc-title { color:#f0f0f0; }
+[data-theme="dark"] .lg-toc-title     { color:#f0f0f0; }
 [data-theme="dark"] .lg-hero-sub,
 [data-theme="dark"] .lg-section-body,
 [data-theme="dark"] .lg-section-body p,
 [data-theme="dark"] .lg-section-body li,
-[data-theme="dark"] .lg-toc-link { color:#a0a0a0; }
+[data-theme="dark"] .lg-toc-link      { color:#a0a0a0; }
 [data-theme="dark"] .lg-toc-link:hover,
 [data-theme="dark"] .lg-toc-link.active { color:var(--primary); }
-[data-theme="dark"] .lg-section { border-color:#2e2e2e; }
-[data-theme="dark"] .lg-highlight { background:#1e1e1e; border-color:#3a3a3a; }
+[data-theme="dark"] .lg-section       { border-color:#2e2e2e; }
+[data-theme="dark"] .lg-highlight     { background:#1e1e1e; border-color:#3a3a3a; }
 [data-theme="dark"] .lg-highlight-title { color:#f0f0f0; }
-[data-theme="dark"] .lg-badge { background:#1e1e1e; border-color:#2e2e2e; color:#a0a0a0; }
-[data-theme="dark"] .lg-toc { background:#1e1e1e; border-color:#2e2e2e; }
+[data-theme="dark"] .lg-badge         { background:#1e1e1e; border-color:#2e2e2e; color:#a0a0a0; }
+[data-theme="dark"] .lg-toc           { background:#1e1e1e; border-color:#2e2e2e; }
 
+/* ── HERO ── */
 .lg-hero {
   padding:90px 40px 60px; background:var(--bg);
   border-bottom:1.5px solid var(--border-c);
 }
 .lg-hero-inner { max-width:1080px; margin:0 auto; }
-.lg-label { display:inline-block; font-size:11px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; color:var(--primary); margin-bottom:16px; }
+.lg-label {
+  display:inline-block; font-size:11px; font-weight:700;
+  letter-spacing:2.5px; text-transform:uppercase;
+  color:var(--primary); margin-bottom:16px;
+}
 .lg-hero h1 {
   font-family:'Syne',sans-serif; font-weight:800;
   font-size:clamp(30px,5vw,56px); letter-spacing:-2px;
   color:var(--text); margin-bottom:16px; line-height:1.05;
 }
-.lg-hero-sub { font-size:15px; color:var(--text-muted); line-height:1.65; }
-.lg-hero-meta { display:flex; gap:16px; margin-top:20px; flex-wrap:wrap; }
+.lg-hero-sub { font-size:15px; color:var(--text-muted); line-height:1.65; max-width:640px; }
+.lg-hero-meta { display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; }
 .lg-badge {
   display:inline-flex; align-items:center; gap:6px;
   padding:5px 12px; background:var(--bg-alt);
@@ -51,24 +56,30 @@
   font-size:12px; color:var(--text-muted); font-weight:500;
 }
 
-.lg-layout { max-width:1080px; margin:0 auto; padding:60px 40px; display:grid; grid-template-columns:220px 1fr; gap:60px; align-items:start; }
-
-/* SIDEBAR TOC */
+/* ── LAYOUT ── */
+.lg-layout {
+  max-width:1080px; margin:0 auto; padding:60px 40px;
+  display:grid; grid-template-columns:220px 1fr; gap:60px; align-items:start;
+}
 .lg-sidebar-wrap { position:sticky; top:88px; }
 .lg-toc {
   background:var(--bg); border:1.5px solid var(--border-c);
   border-radius:var(--radius-lg); padding:20px 0; overflow:hidden;
 }
-.lg-toc-title { font-family:'Syne',sans-serif; font-weight:700; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text); padding:0 20px 12px; border-bottom:1px solid var(--border-c); margin-bottom:8px; }
+.lg-toc-title {
+  font-family:'Syne',sans-serif; font-weight:700; font-size:11px;
+  letter-spacing:2px; text-transform:uppercase; color:var(--text);
+  padding:0 20px 12px; border-bottom:1px solid var(--border-c); margin-bottom:8px;
+}
 .lg-toc-link {
   display:block; padding:8px 20px; font-size:13px; font-weight:500;
   color:var(--text-muted); text-decoration:none;
   transition:color .15s, background .15s; border-left:2px solid transparent;
 }
-.lg-toc-link:hover { color:var(--primary); background:var(--primary-lt); }
+.lg-toc-link:hover  { color:var(--primary); background:var(--primary-lt); }
 .lg-toc-link.active { color:var(--primary); border-left-color:var(--primary); background:var(--primary-lt); }
 
-/* CONTENT */
+/* ── CONTENT ── */
 .lg-section { padding:36px 0; border-bottom:1.5px solid var(--border-c); }
 .lg-section:last-child { border-bottom:none; }
 .lg-section-title {
@@ -84,20 +95,34 @@
 .lg-section-body li { margin-bottom:7px; line-height:1.7; }
 .lg-section-body a { color:var(--primary); text-decoration:none; }
 .lg-section-body a:hover { text-decoration:underline; }
+.lg-section-body strong { color:var(--text); }
 
 .lg-highlight {
   background:var(--primary-lt); border-left:3px solid var(--primary);
   border-radius:0 var(--radius) var(--radius) 0;
   padding:16px 20px; margin:20px 0;
 }
-.lg-highlight-title { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--text); margin-bottom:6px; }
+.lg-highlight-title {
+  font-family:'Syne',sans-serif; font-weight:700; font-size:13px;
+  color:var(--text); margin-bottom:6px;
+}
 .lg-highlight p { font-size:13px; color:var(--text-muted); margin:0; line-height:1.7; }
+
+.lg-warn {
+  background:rgba(245,158,11,.08); border-left:3px solid #f59e0b;
+  border-radius:0 var(--radius) var(--radius) 0;
+  padding:16px 20px; margin:20px 0;
+}
+.lg-warn-title { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:#92400e; margin-bottom:6px; }
+[data-theme="dark"] .lg-warn { background:rgba(245,158,11,.06); }
+[data-theme="dark"] .lg-warn-title { color:#fbbf24; }
+.lg-warn p { font-size:13px; color:var(--text-muted); margin:0; line-height:1.7; }
 
 .lg-body { background:var(--bg); }
 
 @media(max-width:900px) {
   .lg-layout { grid-template-columns:1fr; gap:0; padding:40px 20px; }
-  .lg-hero { padding:64px 20px 48px; }
+  .lg-hero   { padding:64px 20px 48px; }
   .lg-sidebar-wrap { position:static; margin-bottom:32px; }
 }
 </style>
@@ -109,15 +134,19 @@
   <div class="lg-hero-inner">
     <span class="lg-label">Legal</span>
     <h1>Terms of Service</h1>
-    <p class="lg-hero-sub">These terms govern your use of VendoPage. Please read them carefully — they apply to vendors, buyers, and visitors in every country.</p>
+    <p class="lg-hero-sub">These terms govern your use of Vendopage — including the free catalogue, Store Mode payments, escrow protection, and all related services. They apply to vendors, buyers, and visitors in every country.</p>
     <div class="lg-hero-meta">
       <span class="lg-badge">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Last updated: January 27, 2026
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Last updated: May 2026
       </span>
       <span class="lg-badge">
         <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
         Applies globally
+      </span>
+      <span class="lg-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Escrow protected
       </span>
     </div>
   </div>
@@ -134,8 +163,12 @@
         <a class="lg-toc-link" href="#eligibility">Eligibility</a>
         <a class="lg-toc-link" href="#accounts">Account Responsibilities</a>
         <a class="lg-toc-link" href="#sellers">Seller Responsibilities</a>
+        <a class="lg-toc-link" href="#buyers">Buyer Responsibilities</a>
         <a class="lg-toc-link" href="#prohibited">Prohibited Content</a>
-        <a class="lg-toc-link" href="#payments">Payments & Transactions</a>
+        <a class="lg-toc-link" href="#payments">Payments & Store Mode</a>
+        <a class="lg-toc-link" href="#escrow">Escrow Service</a>
+        <a class="lg-toc-link" href="#delivery">Delivery & Tracking</a>
+        <a class="lg-toc-link" href="#disputes">Disputes & Refunds</a>
         <a class="lg-toc-link" href="#ip">Intellectual Property</a>
         <a class="lg-toc-link" href="#termination">Account Termination</a>
         <a class="lg-toc-link" href="#liability">Limitation of Liability</a>
@@ -150,11 +183,11 @@
       <div class="lg-section" id="agreement">
         <h2 class="lg-section-title">Agreement to Terms</h2>
         <div class="lg-section-body">
-          <p>By accessing or using VendoPage ("the Platform", "we", "us", "our"), you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these terms, please do not use VendoPage.</p>
-          <p>These terms apply to all users of the platform including vendors, buyers, and visitors, in every country. VendoPage is a global platform — these terms are governed by applicable law in your jurisdiction to the extent required.</p>
+          <p>By accessing or using Vendopage ("the Platform", "we", "us", "our"), you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, please do not use Vendopage.</p>
+          <p>These terms apply to all users of the platform — vendors, buyers, and visitors — in every country. Vendopage is operated by Vendopage Global Ventures.</p>
           <div class="lg-highlight">
-            <div class="lg-highlight-title">Simple version</div>
-            <p>Using VendoPage means you've read and accepted these rules. We've tried to write them in plain language.</p>
+            <div class="lg-highlight-title">Plain English version</div>
+            <p>Using Vendopage means you've read and accepted these rules. We've written them as clearly as we can. If something isn't clear, message us — we'll explain it.</p>
           </div>
         </div>
       </div>
@@ -162,50 +195,64 @@
       <div class="lg-section" id="eligibility">
         <h2 class="lg-section-title">Eligibility</h2>
         <div class="lg-section-body">
-          <p>You must be at least 18 years old to create a VendoPage account and operate as a seller. Buyers of any age may browse public store pages, but purchases are made directly through WhatsApp between buyer and seller — VendoPage has no involvement in those transactions.</p>
-          <p>By creating an account, you represent and warrant that you are 18 or older, and that you have the legal right and capacity to enter into these terms in your country.</p>
+          <p>You must be at least 18 years old to create a Vendopage vendor account, accept payments, or use Store Mode. Buyers of any age may browse public store pages.</p>
+          <p>By creating an account, you confirm that you are 18 or older and have the legal right and capacity to enter into these terms in your country. If you are opening a Store Mode account, you also confirm that the bank account provided belongs to you or your registered business.</p>
         </div>
       </div>
 
       <div class="lg-section" id="accounts">
         <h2 class="lg-section-title">Account Responsibilities</h2>
         <div class="lg-section-body">
-          <p>When you create a VendoPage account, you are responsible for:</p>
+          <p>When you create a Vendopage account, you are responsible for:</p>
           <ul>
-            <li>Providing accurate and truthful account information (business name, email address, contact details)</li>
-            <li>Keeping your account credentials secure and not sharing your password</li>
+            <li>Providing accurate and truthful information — business name, email address, WhatsApp number, and bank details (for Store Mode)</li>
+            <li>Keeping your login credentials secure and not sharing your password</li>
             <li>All activity that takes place under your account</li>
-            <li>Notifying us immediately at <a href="mailto:support@vendopage.com">support@vendopage.com</a> if you suspect unauthorised access</li>
+            <li>Notifying us immediately at <a href="mailto:support@vendopage.com">support@vendopage.com</a> or on WhatsApp at <a href="https://wa.me/2347017820434">+234 701 782 0434</a> if you suspect unauthorised access</li>
           </ul>
-          <p>You may not create multiple accounts to circumvent suspensions, impersonate another person or business, or use VendoPage on behalf of a third party without their authorisation.</p>
+          <p>You may not create multiple accounts to evade suspensions, impersonate another person or business, or use Vendopage on behalf of a third party without their authorisation.</p>
           <h3>Your store URL</h3>
-          <p>Your store URL (vendopage.com/yourname) is chosen at registration and is associated with your account. VendoPage reserves the right to reclaim URLs that are inactive, used to impersonate, or violate these terms.</p>
+          <p>Your store URL (vendopage.com/yourname) is chosen at registration and is permanently associated with your account. Vendopage reserves the right to reclaim URLs that are inactive for extended periods, used to impersonate, or in violation of these terms.</p>
         </div>
       </div>
 
       <div class="lg-section" id="sellers">
         <h2 class="lg-section-title">Seller Responsibilities</h2>
         <div class="lg-section-body">
-          <p>As a vendor on VendoPage, you agree to the following:</p>
+          <p>As a vendor on Vendopage, you agree to:</p>
           <ul>
             <li>Only list products or services you have the legal right to sell in your country</li>
-            <li>Provide accurate product descriptions, photos, and pricing — no misleading claims</li>
-            <li>Honour the terms of any sale you agree to with a customer</li>
-            <li>Handle customer disputes, refunds, and deliveries directly — VendoPage is not a party to your transactions</li>
-            <li>Comply with all applicable local, national, and international laws regarding your products and business operations</li>
-            <li>Not use VendoPage to collect personal data from buyers beyond what is necessary for the transaction</li>
+            <li>Provide accurate product descriptions, real photos, and honest pricing — no misleading claims</li>
+            <li>Honour the terms of every sale you agree to with a buyer</li>
+            <li>Ship orders promptly and upload a valid tracking number or driver's contact to the dashboard</li>
+            <li>Comply with all applicable local, national, and international laws governing your products and business</li>
+            <li>Not use Vendopage to collect buyer data beyond what is necessary to fulfil an order</li>
           </ul>
           <div class="lg-highlight">
-            <div class="lg-highlight-title">Important</div>
-            <p>VendoPage is a storefront platform. All transactions happen directly between you and your buyers via WhatsApp. We do not process payments, hold funds, or take commissions. You are fully responsible for your sales.</p>
+            <div class="lg-highlight-title">Store Mode sellers</div>
+            <p>When you enable Store Mode and accept escrow payments, you additionally agree that funds will be held by Vendopage until delivery is confirmed by the buyer or auto-released after 72 hours. You must ship within a reasonable time after payment and provide valid tracking details. Failure to do so may result in a refund to the buyer.</p>
           </div>
+        </div>
+      </div>
+
+      <div class="lg-section" id="buyers">
+        <h2 class="lg-section-title">Buyer Responsibilities</h2>
+        <div class="lg-section-body">
+          <p>As a buyer on Vendopage, you agree to:</p>
+          <ul>
+            <li>Provide an accurate delivery address at checkout</li>
+            <li>Confirm delivery promptly once your order arrives — funds are held until you do (or 72 hours auto-release)</li>
+            <li>Not raise fraudulent disputes or falsely claim non-delivery</li>
+            <li>Contact the seller or Vendopage support if an issue arises before initiating a chargeback with your bank</li>
+          </ul>
+          <p>Buyers who repeatedly raise fraudulent disputes may have their access to Vendopage purchases restricted.</p>
         </div>
       </div>
 
       <div class="lg-section" id="prohibited">
         <h2 class="lg-section-title">Prohibited Content</h2>
         <div class="lg-section-body">
-          <p>The following content is strictly prohibited on VendoPage, regardless of country or jurisdiction:</p>
+          <p>The following is strictly prohibited on Vendopage, regardless of country:</p>
           <h3>Illegal goods and services</h3>
           <ul>
             <li>Narcotics, controlled substances, or drug paraphernalia</li>
@@ -215,15 +262,15 @@
           </ul>
           <h3>Harmful content</h3>
           <ul>
-            <li>Adult, explicit, or pornographic content</li>
-            <li>Content that exploits minors in any form</li>
+            <li>Adult, explicit, or pornographic content of any kind</li>
+            <li>Any content that exploits, sexualises, or endangers minors</li>
             <li>Content promoting violence, hatred, or discrimination</li>
             <li>Misleading health or medical claims</li>
           </ul>
           <h3>Intellectual property violations</h3>
           <ul>
-            <li>Products infringing trademarks, copyrights, or patents</li>
             <li>Counterfeit branded goods or replicas sold as genuine</li>
+            <li>Products infringing trademarks, copyrights, or patents</li>
             <li>Unauthorised use of other businesses' branding or materials</li>
           </ul>
           <p>Violation of these rules will result in immediate account suspension and may be reported to relevant authorities.</p>
@@ -231,70 +278,129 @@
       </div>
 
       <div class="lg-section" id="payments">
-        <h2 class="lg-section-title">Payments & Transactions</h2>
+        <h2 class="lg-section-title">Payments & Store Mode</h2>
         <div class="lg-section-body">
-          <p>VendoPage does not process payments. All transactions occur directly between vendors and their customers outside of the platform — typically via WhatsApp communication, bank transfer, mobile money, or other local payment methods.</p>
-          <p>VendoPage is not responsible for:</p>
+          <p>Vendopage operates in two modes:</p>
+          <h3>Free Catalogue Mode</h3>
+          <p>In Catalogue Mode, buyers contact vendors directly via WhatsApp to complete purchases. Vendopage is not involved in these transactions — payment, delivery, and any disputes are handled entirely between the vendor and buyer. Vendopage takes no commission and processes no payments in this mode.</p>
+          <h3>Store Mode (paid payments)</h3>
+          <p>In Store Mode, vendors can accept direct payments on their Vendopage store. Payments are processed securely via Paystack. Vendopage acts as an intermediary holding funds in escrow until delivery is confirmed. By enabling Store Mode, you agree to:</p>
           <ul>
-            <li>Payment disputes between vendors and buyers</li>
-            <li>Failed deliveries, lost orders, or product quality issues</li>
-            <li>Fraud perpetrated by any party in a transaction</li>
-            <li>Currency exchange rates or international transaction fees</li>
+            <li>Providing a verified Nigerian bank account for payouts</li>
+            <li>Paystack's terms of service for payment processing</li>
+            <li>Vendopage's escrow terms as described below</li>
+            <li>Any applicable transaction or service fees as communicated in your dashboard</li>
           </ul>
-          <p>Vendors using VendoPage are responsible for any applicable taxes, duties, or fees in their jurisdiction related to their sales.</p>
+          <div class="lg-warn">
+            <div class="lg-warn-title">Important — taxes and duties</div>
+            <p>Vendors are solely responsible for any taxes, VAT, duties, or regulatory fees applicable to their sales in their jurisdiction. Vendopage does not collect or remit taxes on your behalf.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg-section" id="escrow">
+        <h2 class="lg-section-title">Escrow Service</h2>
+        <div class="lg-section-body">
+          <p>When a buyer pays via escrow in Store Mode, the following applies:</p>
+          <ul>
+            <li><strong>Funds held:</strong> Payment is received by Vendopage and held in escrow — not transferred to the seller — until delivery is confirmed or the 72-hour auto-release period expires.</li>
+            <li><strong>Seller obligation:</strong> The seller must ship the order and upload a valid courier tracking number or driver's contact number to the dashboard within a reasonable time.</li>
+            <li><strong>Buyer confirmation:</strong> Once the buyer receives and confirms their order, funds are released to the seller's verified bank account.</li>
+            <li><strong>72-hour auto-release:</strong> If the buyer does not respond within 72 hours of the seller marking the order as delivered, funds are automatically released to the seller.</li>
+            <li><strong>Direct payment option:</strong> Buyers may also choose to pay the seller directly (outside escrow). In this case, Vendopage holds no funds and is not responsible for the outcome of the transaction.</li>
+          </ul>
+          <div class="lg-highlight">
+            <div class="lg-highlight-title">Escrow only covers payments made through Vendopage</div>
+            <p>Escrow protection only applies to payments made directly on the Vendopage platform using Store Mode. Payments made via bank transfer, mobile money, or any method outside the platform are not covered by Vendopage escrow.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg-section" id="delivery">
+        <h2 class="lg-section-title">Delivery & Tracking</h2>
+        <div class="lg-section-body">
+          <p>For Store Mode orders, sellers are required to:</p>
+          <ul>
+            <li>Ship the order within a reasonable time after receiving payment confirmation</li>
+            <li>Upload a courier tracking number or driver's phone number to the order dashboard</li>
+          </ul>
+          <p>Once tracking details are uploaded, Vendopage automatically sends delivery tracking information to the buyer's registered email address so they can follow their order.</p>
+          <p>Vendopage is not a courier or logistics provider. We do not arrange or guarantee delivery. We are not liable for delays, lost packages, or damage caused by third-party couriers or drivers.</p>
+        </div>
+      </div>
+
+      <div class="lg-section" id="disputes">
+        <h2 class="lg-section-title">Disputes & Refunds</h2>
+        <div class="lg-section-body">
+          <p>If a buyer has not received their order, or the item received does not match the listing, they may open a dispute before confirming delivery. Vendopage will:</p>
+          <ul>
+            <li>Review the dispute within 48 hours</li>
+            <li>Request evidence from both parties (photos, tracking records, messages)</li>
+            <li>Issue a fair resolution — either releasing funds to the seller or refunding the buyer</li>
+          </ul>
+          <p>Because funds are held in escrow, the buyer's money has not been sent to the seller at the time of a dispute. This means refunds can be issued promptly when the buyer's claim is valid.</p>
+          <div class="lg-warn">
+            <div class="lg-warn-title">Disputes must be raised before confirming delivery</div>
+            <p>Once a buyer confirms delivery, the transaction is considered complete and funds are released to the seller. Disputes cannot be raised after this point through Vendopage. Please inspect your order before confirming.</p>
+          </div>
+          <p>For free Catalogue Mode transactions (handled outside the platform), Vendopage cannot mediate disputes and is not responsible for outcomes.</p>
         </div>
       </div>
 
       <div class="lg-section" id="ip">
         <h2 class="lg-section-title">Intellectual Property</h2>
         <div class="lg-section-body">
-          <p>You retain ownership of all content you upload to VendoPage — including product photos, descriptions, and store information. By uploading content, you grant VendoPage a non-exclusive, worldwide, royalty-free licence to display your content on the platform for the purpose of operating your store.</p>
-          <p>VendoPage's own branding, interface design, code, and platform features are protected intellectual property. You may not copy, reproduce, or distribute any part of VendoPage's proprietary assets without express written permission.</p>
+          <p>You retain ownership of all content you upload to Vendopage — including product photos, descriptions, and store information. By uploading content, you grant Vendopage a non-exclusive, worldwide, royalty-free licence to display your content on the platform for the purpose of operating your store.</p>
+          <p>Vendopage's branding, interface design, code, and platform features are protected intellectual property. You may not copy, reproduce, or distribute any part of Vendopage's proprietary assets without express written permission.</p>
         </div>
       </div>
 
       <div class="lg-section" id="termination">
         <h2 class="lg-section-title">Account Termination</h2>
         <div class="lg-section-body">
-          <p>You may delete your account at any time from your account settings. Upon deletion, your store page and product listings will be removed.</p>
-          <p>VendoPage reserves the right to suspend or permanently terminate accounts that:</p>
+          <p>You may delete your account at any time from your account settings. Upon deletion, your store page and product listings will be removed. Any pending escrow payouts will be processed first before account deletion is finalised.</p>
+          <p>Vendopage reserves the right to suspend or permanently terminate accounts that:</p>
           <ul>
             <li>Violate these Terms of Service</li>
-            <li>Engage in fraud, spam, or harmful activity</li>
+            <li>Engage in fraud, scamming, or harmful activity</li>
             <li>List prohibited content</li>
-            <li>Receive sustained reports of misconduct from buyers</li>
-            <li>Are inactive for an extended period (we will provide reasonable notice)</li>
+            <li>Fail to fulfil escrow orders without valid reason</li>
+            <li>Receive sustained, verified reports of misconduct from buyers</li>
+            <li>Provide false bank account or identity information for payouts</li>
           </ul>
-          <p>We will make reasonable efforts to notify you before terminating your account unless the violation is severe or time-sensitive.</p>
+          <p>We will make reasonable efforts to notify you before terminating your account unless the violation is severe, involves fraud, or puts buyers at risk.</p>
         </div>
       </div>
 
       <div class="lg-section" id="liability">
         <h2 class="lg-section-title">Limitation of Liability</h2>
         <div class="lg-section-body">
-          <p>VendoPage is provided "as is" and "as available" without warranties of any kind, either express or implied. We do not warrant that the platform will be uninterrupted, error-free, or completely secure.</p>
-          <p>To the maximum extent permitted by applicable law, VendoPage and its team shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the platform, including but not limited to lost revenue, lost data, or business interruption.</p>
-          <p>Nothing in these terms excludes or limits liability for death or personal injury caused by negligence, or for fraud or fraudulent misrepresentation, where such exclusion is prohibited by applicable law.</p>
+          <p>Vendopage is provided "as is" and "as available" without warranties of any kind, either express or implied. We do not warrant that the platform will be uninterrupted, error-free, or completely secure at all times.</p>
+          <p>To the maximum extent permitted by applicable law, Vendopage and its team shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the platform — including lost revenue, lost data, or business interruption.</p>
+          <p>Our liability for escrow transactions is limited to the amount of funds actually held in escrow for the specific transaction in question. We are not liable for losses arising from a buyer's or seller's own actions, fraud by third parties, courier failures, or events outside our reasonable control.</p>
+          <p>Nothing in these terms excludes liability for fraud, gross negligence, or anything that cannot be excluded by applicable law in your jurisdiction.</p>
         </div>
       </div>
 
       <div class="lg-section" id="changes">
         <h2 class="lg-section-title">Changes to Terms</h2>
         <div class="lg-section-body">
-          <p>We may update these Terms of Service from time to time. When we make significant changes, we will notify registered users by email and update the "last updated" date at the top of this page.</p>
-          <p>Your continued use of VendoPage after changes take effect constitutes your acceptance of the revised terms. If you disagree with any changes, you may delete your account.</p>
+          <p>We may update these Terms of Service from time to time. When we make significant changes, we will notify registered users by email and update the date at the top of this page.</p>
+          <p>Your continued use of Vendopage after changes take effect constitutes acceptance of the revised terms. If you disagree with any changes, you may delete your account before they take effect.</p>
         </div>
       </div>
 
       <div class="lg-section" id="contact">
         <h2 class="lg-section-title">Contact</h2>
         <div class="lg-section-body">
-          <p>If you have questions about these Terms of Service, please contact us:</p>
+          <p>If you have questions about these Terms of Service, please contact us through any of the following:</p>
           <ul>
-            <li>General support: <a href="mailto:support@vendopage.com">support@vendopage.com</a></li>
-            <li>Legal enquiries: <a href="mailto:legal@vendopage.com">legal@vendopage.com</a></li>
+            <li>WhatsApp (fastest): <a href="https://wa.me/2347017820434">+234 701 782 0434</a></li>
+            <li>Support email: <a href="mailto:support@vendopage.com">support@vendopage.com</a></li>
+            <li>General enquiries: <a href="mailto:vendopageglobalventures@gmail.com">vendopageglobalventures@gmail.com</a></li>
+            <li>Contact form: <a href="{% url 'contact' %}">vendopage.com/contact</a></li>
           </ul>
-          <p>You can also use our <a href="{% url 'contact' %}">contact form</a> to reach the right team.</p>
+          <p>We aim to respond to all legal and terms-related enquiries within 5 business days.</p>
         </div>
       </div>
 
