@@ -269,12 +269,7 @@ class PaystackPayment:
             logger.error(f"[TRANSFER API] RequestException — {e}")
             return {"status": False, "message": str(e)}
  
-
     def create_transfer_recipient(self, bank_account) -> dict:
-        """
-        Register a seller's bank account as a Paystack transfer recipient.
-        Saves the recipient_code back to the bank_account model.
-        """
         payload = {
             "type":           "nuban",
             "name":           bank_account.account_name,
@@ -282,12 +277,14 @@ class PaystackPayment:
             "bank_code":      bank_account.bank_code,
             "currency":       "NGN",
         }
+        logger.error(f"CREATING RECIPIENT — payload: {payload}")  # ← add
 
         try:
             resp = requests.post(
                 f"{self.BASE_URL}/transferrecipient",
                 json=payload, headers=self._headers(), timeout=30
             )
+            logger.error(f"RECIPIENT RESPONSE: {resp.status_code} | {resp.text}")  # ← add
             resp.raise_for_status()
             data = resp.json()
 
@@ -295,10 +292,6 @@ class PaystackPayment:
                 recipient_code = data['data']['recipient_code']
                 bank_account.recipient_code = recipient_code
                 bank_account.save(update_fields=['recipient_code'])
-                logger.info(
-                    "Transfer recipient created for %s: %s",
-                    bank_account.seller.business_name, recipient_code
-                )
                 return {"status": "success", "recipient_code": recipient_code}
 
             return {"status": "error", "message": data.get("message", "Unknown")}
@@ -306,6 +299,43 @@ class PaystackPayment:
         except requests.exceptions.RequestException as e:
             logger.error("Paystack create_recipient error: %s", e)
             return {"status": "error", "message": str(e)}
+
+    # def create_transfer_recipient(self, bank_account) -> dict:
+    #     """
+    #     Register a seller's bank account as a Paystack transfer recipient.
+    #     Saves the recipient_code back to the bank_account model.
+    #     """
+    #     payload = {
+    #         "type":           "nuban",
+    #         "name":           bank_account.account_name,
+    #         "account_number": bank_account.account_number,
+    #         "bank_code":      bank_account.bank_code,
+    #         "currency":       "NGN",
+    #     }
+
+    #     try:
+    #         resp = requests.post(
+    #             f"{self.BASE_URL}/transferrecipient",
+    #             json=payload, headers=self._headers(), timeout=30
+    #         )
+    #         resp.raise_for_status()
+    #         data = resp.json()
+
+    #         if data.get('status'):
+    #             recipient_code = data['data']['recipient_code']
+    #             bank_account.recipient_code = recipient_code
+    #             bank_account.save(update_fields=['recipient_code'])
+    #             logger.info(
+    #                 "Transfer recipient created for %s: %s",
+    #                 bank_account.seller.business_name, recipient_code
+    #             )
+    #             return {"status": "success", "recipient_code": recipient_code}
+
+    #         return {"status": "error", "message": data.get("message", "Unknown")}
+
+    #     except requests.exceptions.RequestException as e:
+    #         logger.error("Paystack create_recipient error: %s", e)
+    #         return {"status": "error", "message": str(e)}
 
     def check_balance(self) -> dict:
         """
