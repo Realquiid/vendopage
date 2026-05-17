@@ -51,8 +51,8 @@ urlpatterns = [
     path('dashboard/orders/<str:order_ref>/ship/', views.mark_shipped, name='mark_shipped'),
 
     # ── Webhooks ────────────────────────────────────
-    path('webhook/paystack/', views.paystack_webhook, name='paystack_webhook'),
-    path('webhook/paystack/order/', views.paystack_order_webhook, name='paystack_order_webhook'),
+    path('webhook/flutterwave/', views.flutterwave_webhook, name='flutterwave_webhook'),
+    path('webhook/flutterwave/order/', views.flutterwave_order_webhook, name='flutterwave_order_webhook'),
     # ── Admin — core ─────────────────────────────────────────
     path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('admin-dashboard/sellers/', views.admin_sellers, name='admin_sellers'),
