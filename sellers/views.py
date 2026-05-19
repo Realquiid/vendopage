@@ -82,32 +82,154 @@ def terms(request):
 def contact(request):
     return render(request, 'contact.html')
 
-
 def home(request):
-    featured_sellers = Seller.objects.filter(
-        is_featured=True, is_active=True, is_staff=False, is_superuser=False
-    ).annotate(
-        product_count=Count('products', filter=Q(
-            products__is_archived=False, products__is_sold_out=False
-        ))
-    ).filter(product_count__gte=5).order_by('-product_count')[:4]
+    """
+    Homepage — seller cards removed.
+    Only non-seller content (hero, how-it-works, etc.) is shown here.
+    """
+    return render(request, 'home.html', {})
 
-    sellers = Seller.objects.filter(
+
+def sellers_directory(request):
+    """
+    /stores/ — dedicated sellers directory page.
+
+    Priority order:
+      1. Featured + Premium  (top of page, own section)
+      2. Premium only         (second section)
+      3. Everyone else        (alphabetical / product count)
+
+    Supports:
+      ?category=fashion       — filter by category slug
+      ?q=chioma               — search by business name
+    """
+    active_category = request.GET.get('category', '').strip().lower()
+    search_q        = request.GET.get('q', '').strip()
+
+    # Base queryset: active, non-staff sellers with at least 1 product
+    base_qs = Seller.objects.filter(
         is_active=True, is_staff=False, is_superuser=False
     ).annotate(
-        product_count=Count('products', filter=Q(
-            products__is_archived=False, products__is_sold_out=False
-        ))
-    ).filter(product_count__gte=5).exclude(
-        id__in=featured_sellers.values_list('id', flat=True)
-    ).order_by('-product_count')[:20]
+        product_count=Count(
+            'products',
+            filter=Q(products__is_archived=False, products__is_sold_out=False)
+        )
+    ).filter(product_count__gte=1)
 
-    return render(request, 'home.html', {
-        'featured_sellers': featured_sellers,
-        'sellers': sellers,
+    # Apply search
+    if search_q:
+        base_qs = base_qs.filter(
+            Q(business_name__icontains=search_q) |
+            Q(bio__icontains=search_q)
+        )
+
+    # Apply category filter
+    if active_category:
+        base_qs = base_qs.filter(category=active_category)
+
+    # ── Build category filter list with counts ──────────────────────────────
+    CATEGORY_MAP = {
+        'fashion':     'Fashion & Apparel',
+        'beauty':      'Beauty & Cosmetics',
+        'electronics': 'Electronics & Gadgets',
+        'food':        'Food & Beverages',
+        'home':        'Home & Garden',
+        'sports':      'Sports & Fitness',
+        'health':      'Health & Wellness',
+        'other':       'Other',
+    }
+
+    all_sellers_base = Seller.objects.filter(
+        is_active=True, is_staff=False, is_superuser=False
+    ).annotate(
+        product_count=Count(
+            'products',
+            filter=Q(products__is_archived=False, products__is_sold_out=False)
+        )
+    ).filter(product_count__gte=1)
+
+    categories = []
+    for slug, label in CATEGORY_MAP.items():
+        cnt = all_sellers_base.filter(category=slug).count()
+        if cnt > 0:
+            categories.append({'slug': slug, 'label': label, 'count': cnt})
+
+    # ── Priority sections (only on unfiltered all-sellers view) ─────────────
+    featured_sellers = []
+    premium_sellers  = []
+    regular_sellers  = []
+    sellers_to_show  = []   # used when category/search is active
+
+    total_count   = all_sellers_base.count()
+    premium_count = all_sellers_base.filter(
+        subscription_type='premium'
+    ).count()
+
+    now = timezone.now()
+
+    if not active_category and not search_q:
+        # Section 1 — Featured
+        featured_sellers = list(
+            base_qs.filter(is_featured=True).order_by('-product_count')[:8]
+        )
+        featured_ids = [s.id for s in featured_sellers]
+
+        # Section 2 — Premium (non-featured, active subscription)
+        premium_sellers = list(
+            base_qs.filter(
+                subscription_type='premium'
+            ).filter(
+                Q(subscription_expires__isnull=True) |
+                Q(subscription_expires__gt=now)
+            ).exclude(
+                id__in=featured_ids
+            ).order_by('-product_count')[:20]
+        )
+        premium_ids = [s.id for s in premium_sellers]
+
+        # Section 3 — Everyone else
+        regular_sellers = list(
+            base_qs.exclude(
+                id__in=featured_ids + premium_ids
+            ).order_by('-product_count')[:60]
+        )
+
+        # `sellers` = combined for template length check
+        sellers = featured_sellers + premium_sellers + regular_sellers
+
+    else:
+        # Filtered view — premium + featured float to top, then by product count
+        from django.db.models import Case, When, IntegerField
+        sellers_to_show = list(
+            base_qs.annotate(
+                priority=Case(
+                    When(is_featured=True, subscription_type='premium', then=0),
+                    When(is_featured=True,                              then=1),
+                    When(subscription_type='premium',                   then=2),
+                    default=3,
+                    output_field=IntegerField(),
+                )
+            ).order_by('priority', '-product_count')[:80]
+        )
+        sellers = sellers_to_show
+
+    # Active category label (for breadcrumb text)
+    active_category_label = CATEGORY_MAP.get(active_category, '') if active_category else ''
+
+    return render(request, 'sellers_directory.html', {
+        'sellers':               sellers,
+        'featured_sellers':      featured_sellers,
+        'premium_sellers':       premium_sellers,
+        'regular_sellers':       regular_sellers,
+        'sellers_to_show':       sellers_to_show,
+        'categories':            categories,
+        'active_category':       active_category,
+        'active_category_label': active_category_label,
+        'search_q':              search_q,
+        'total_count':           total_count,
+        'premium_count':         premium_count,
+        'category_count':        len(categories),
     })
-
-
 def seller_page(request, slug):
     seller = get_object_or_404(Seller, slug=slug, is_active=True)
 

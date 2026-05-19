@@ -25,7 +25,7 @@ urlpatterns = [
     path('dashboard/settings/update-watermark/', views.update_watermark, name='update_watermark'),
     path('dashboard/settings/payout/', views.update_payout_account, name='update_payout_account'),
     path('dashboard/settings/store-mode/', views.toggle_store_mode, name='toggle_store_mode'),
-
+    path('stores/', views.sellers_directory, name='sellers_directory'),
     # ── Product API ──────────────────────────────────────────
     path('api/product/<int:product_id>/archive/', views.archive_product, name='archive_product'),
     path('api/product/<int:product_id>/reactivate/', views.reactivate_product, name='reactivate_product'),

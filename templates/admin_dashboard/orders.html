@@ -87,7 +87,7 @@
   <form method="GET" style="display:flex;gap:10px;align-items:center;flex:1;flex-wrap:wrap;">
     <input type="hidden" name="status" value="{{ status_filter }}">
     <input type="text" name="search" value="{{ request.GET.search }}"
-      placeholder="Order ref, buyer name, email, Paystack ref…"
+      placeholder="Order ref, buyer name, email, Flutterwave ref…"
       class="form-input" style="max-width:320px;">
     <button type="submit" class="btn btn-amber btn-sm">Search</button>
     <a href="{% url 'admin_orders' %}" class="btn btn-ghost btn-sm">Clear</a>
@@ -210,7 +210,7 @@
             </div>
             {% if order.flutterwave_tx_ref %}
             <div class="mono muted" style="font-size:11px;margin-top:12px;">
-              Paystack ref: {{ order.flutterwave_tx_ref }} · {{ order.flutterwave_tx_id }}
+              Flutterwave ref: {{ order.flutterwave_tx_ref }} · {{ order.flutterwave_tx_id }}
             </div>
             {% endif %}
           </div>

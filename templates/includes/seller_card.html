@@ -1,0 +1,78 @@
+{% comment %}
+  Reusable seller card for the directory.
+  Context vars: seller, is_premium (optional), is_featured (optional)
+{% endcomment %}
+{% load static %}
+
+<a href="{% url 'seller_page' seller.slug %}"
+   class="sc{% if seller.is_subscribed or is_premium %} is-premium{% endif %}{% if seller.is_featured or is_featured %} is-featured{% endif %}">
+
+  <!-- Cover / Banner area -->
+  <div class="sc-cover">
+    {% if seller.profile_picture %}
+      <img class="sc-cover-img"
+           src="{{ seller.profile_picture.url }}"
+           alt="{{ seller.business_name }}">
+    {% else %}
+      <!-- Colorful gradient fallback — coloured by JS via data-seller-name -->
+      <div class="sc-avatar-fallback" data-seller-name="{{ seller.business_name }}">
+        {{ seller.business_name|first|upper }}
+      </div>
+    {% endif %}
+
+    <!-- Floating badges -->
+    <div class="sc-badges">
+      {% if seller.is_featured or is_featured %}
+        <span class="sc-badge sc-badge-featured">
+          <svg width="8" height="8" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Featured
+        </span>
+      {% endif %}
+      {% if seller.is_subscribed or is_premium %}
+        <span class="sc-badge sc-badge-premium">
+          <svg width="8" height="8" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Premium
+        </span>
+      {% endif %}
+    </div>
+
+    <!-- Profile picture overlay -->
+    <div class="sc-pic-wrap">
+      {% if seller.profile_picture %}
+        <img src="{{ seller.profile_picture.url }}" alt="{{ seller.business_name }}">
+      {% else %}
+        <div class="sc-pic-initial" data-seller-name="{{ seller.business_name }}">
+          {{ seller.business_name|first|upper }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Card Body -->
+  <div class="sc-body">
+    <div class="sc-name-row">
+      <span class="sc-name">{{ seller.business_name }}</span>
+      {% if seller.is_subscribed or is_premium %}
+        <span class="sc-verified" title="Verified Premium Seller">
+          <svg width="9" height="9" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </span>
+      {% endif %}
+    </div>
+
+    <div class="sc-cat">
+      <span class="sc-cat-dot"></span>
+      {{ seller.get_category_display|default:"General" }}
+    </div>
+
+    <div class="sc-footer">
+      <span class="sc-count">
+        <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+        {{ seller.product_count }} product{% if seller.product_count != 1 %}s{% endif %}
+      </span>
+      <span class="sc-cta">
+        Visit
+        <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </span>
+    </div>
+  </div>
+</a>
