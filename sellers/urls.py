@@ -8,7 +8,9 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
-
+    
+    path('verify-email/pending/', views.verify_email_pending, name='verify_email_pending'),
+    path('verify-email/<str:token>/', views.verify_email, name='verify_email'),
     # ── Dashboard ────────────────────────────────────────────
     path('dashboard/', views.dashboard, name='dashboard'),
     path('dashboard/upload/', views.upload_product, name='upload_product'),
@@ -34,6 +36,7 @@ urlpatterns = [
     path('api/product/<int:product_id>/mark-sold-out/', views.mark_sold_out, name='mark_sold_out'),
     path('api/product/<int:product_id>/mark-available/', views.mark_available, name='mark_available'),
     path('api/product/<int:product_id>/track-whatsapp/', views.track_whatsapp_click, name='track_whatsapp_click'),
+    path('onboarding/', views.onboarding, name='onboarding'),
 
     # ── ESCROW — Buyer flow ──────────────────────────────────
     path('order/<slug:slug>/cart/', views.cart_view, name='cart'),

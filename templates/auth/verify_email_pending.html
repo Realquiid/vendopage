@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Check your email — VendoPage</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  min-height: 100vh;
+  background: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  display: grid;
+  grid-template-columns: 1fr 480px;
+}
+
+/* ── LEFT PANEL ── */
+.left {
+  background: #0A0A0A;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+}
+.blob-1 {
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(0,200,83,.28) 0%, transparent 70%);
+  top: -80px; left: -80px;
+  animation: bf1 8s ease-in-out infinite;
+}
+.blob-2 {
+  width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(0,200,83,.18) 0%, transparent 70%);
+  bottom: 120px; right: -40px;
+  animation: bf2 10s ease-in-out infinite;
+}
+@keyframes bf1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,20px)} }
+@keyframes bf2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-30px)} }
+.grid-overlay {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.left-content {
+  position: relative; z-index: 2;
+  text-align: center; padding: 40px;
+}
+.envelope {
+  width: 72px; height: 72px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 28px;
+  animation: iconFloat 4s ease-in-out infinite;
+}
+@keyframes iconFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+.left-content h2 {
+  font-size: 32px; font-weight: 800;
+  color: #fff; letter-spacing: -1px;
+  line-height: 1.2; margin-bottom: 12px;
+}
+.left-content h2 span { color: #00C853; }
+.left-content p {
+  font-size: 14px;
+  color: rgba(255,255,255,.45);
+  line-height: 1.7; max-width: 300px; margin: 0 auto;
+}
+
+/* ── RIGHT PANEL ── */
+.right {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 48px;
+  background: #fff;
+}
+.right-inner { max-width: 360px; width: 100%; margin: 0 auto; }
+
+.wordmark {
+  font-size: 18px; font-weight: 800;
+  color: #0A0A0A; letter-spacing: -.4px;
+  margin-bottom: 40px; display: block;
+  text-decoration: none;
+}
+.wordmark span { color: #00C853; }
+
+.icon-wrap {
+  width: 56px; height: 56px;
+  background: #f0fdf4;
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px;
+}
+
+h1 {
+  font-size: 26px; font-weight: 800;
+  color: #0A0A0A; letter-spacing: -.7px;
+  line-height: 1.2; margin-bottom: 8px;
+}
+
+.sub {
+  font-size: 14px; color: #666;
+  line-height: 1.7; margin-bottom: 32px;
+}
+
+.info-box {
+  background: #f7f7f7;
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 28px;
+}
+.info-box p {
+  font-size: 13px; color: #555;
+  line-height: 1.7; margin: 0;
+}
+.info-box p + p { margin-top: 8px; }
+.info-box strong { color: #0A0A0A; font-weight: 700; }
+
+.back-link {
+  display: block; text-align: center;
+  font-size: 13px; color: #999;
+  text-decoration: none; margin-top: 4px;
+}
+.back-link:hover { color: #0A0A0A; }
+
+/* ── MOBILE ── */
+@media (max-width: 860px) {
+  body { grid-template-columns: 1fr; }
+  .left {
+    min-height: 200px;
+    padding: 40px 28px;
+  }
+  .right { padding: 36px 24px 40px; }
+}
+</style>
+</head>
+<body>
+
+<!-- LEFT -->
+<div class="left">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="grid-overlay"></div>
+  <div class="left-content">
+    <div class="envelope">
+      <svg width="32" height="32" fill="none" stroke="#00C853" stroke-width="1.8" viewBox="0 0 24 24">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+    </div>
+    <h2>Almost <span>there.</span></h2>
+    <p>One tap and your store goes live. Check your inbox for the verification link.</p>
+  </div>
+</div>
+
+<!-- RIGHT -->
+<div class="right">
+  <div class="right-inner">
+
+    <a href="/" class="wordmark">Vendo<span>Page</span></a>
+
+    <div class="icon-wrap">
+      <svg width="24" height="24" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+    </div>
+
+    <h1>Check your email</h1>
+    <p class="sub">We sent a verification link to your email address. Click it to activate your account and complete setup.</p>
+
+    <div class="info-box">
+      <p><strong>Can't find it?</strong> Check your spam or junk folder.</p>
+      <p>The link expires in <strong>48 hours</strong>. After that, you'll need to register again.</p>
+    </div>
+
+    <a href="/register/" class="back-link">← Back to registration</a>
+
+  </div>
+</div>
+
+</body>
+</html>

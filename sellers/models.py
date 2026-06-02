@@ -55,6 +55,8 @@ class Seller(AbstractUser):
     weekly_page_views = models.IntegerField(default=0)
     weekly_whatsapp_clicks = models.IntegerField(default=0)
     last_analytics_reset = models.DateTimeField(default=timezone.now)
+    email_verified     = models.BooleanField(default=False)
+    email_verify_token = models.CharField(max_length=64, blank=True, null=True)
     
     def save(self, *args, **kwargs):
         if self.email:

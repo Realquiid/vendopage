@@ -24,6 +24,7 @@ from decimal import Decimal, InvalidOperation
 import uuid
 import json
 from sellers.email import (
+    send_verification_email,
     send_password_reset_email,
     send_welcome_email,
     send_first_product_email,
@@ -698,7 +699,69 @@ def upgrade_to_premium(request):
         messages.error(request, 'Payment initialization failed. Please try again.')
         return redirect('subscription')
     return redirect('subscription')
-
+ 
+@login_required
+def onboarding(request):
+    """
+    Post-registration onboarding flow.
+    Step 1 → category picker
+    Step 2 → logo / profile picture (optional)
+    Done   → celebration screen → dashboard
+    """
+    from django.conf import settings as django_settings
+ 
+    cloudinary_cloud_name   = getattr(django_settings, 'CLOUDINARY_CLOUD_NAME', '')
+    cloudinary_upload_preset = getattr(django_settings, 'CLOUDINARY_UPLOAD_PRESET', 'ml_default')
+ 
+    seller = request.user
+ 
+    # ── POST: handle each step ──────────────────────────────────────────────
+    if request.method == 'POST':
+        step = request.POST.get('step', '')
+ 
+        if step == 'category':
+            category = request.POST.get('category', '').strip()
+            if category:
+                seller.category = category
+                seller.save(update_fields=['category'])
+            # Always advance to step 2
+            return redirect(f"{request.path}?step=2")
+ 
+        elif step == 'profile_picture':
+            url = request.POST.get('profile_picture_url', '').strip()
+            if url and url.startswith('https://res.cloudinary.com/'):
+                # Extract public_id from URL (same logic as update_profile_picture view)
+                try:
+                    parts = url.split('/upload/')
+                    if len(parts) > 1:
+                        path = parts[1]
+                        path_parts = path.split('/')
+                        if path_parts[0].startswith('v') and path_parts[0][1:].isdigit():
+                            path_parts = path_parts[1:]
+                        public_id = '/'.join(path_parts).rsplit('.', 1)[0]
+                    else:
+                        public_id = url
+                    seller.profile_picture = public_id
+                    seller.save(update_fields=['profile_picture'])
+                except Exception as e:
+                    logger.error(f"Onboarding pic save error: {e}")
+            return redirect(f"{request.path}?step=done")
+ 
+        elif step == 'skip_picture':
+            return redirect(f"{request.path}?step=done")
+ 
+    # ── GET: render correct step ─────────────────────────────────────────────
+    step_param = request.GET.get('step', '1')
+    try:
+        step = int(step_param)
+    except (ValueError, TypeError):
+        step = step_param  # 'done'
+ 
+    return render(request, 'onboarding.html', {
+        'step':                    step,
+        'cloudinary_cloud_name':   cloudinary_cloud_name,
+        'cloudinary_upload_preset': cloudinary_upload_preset,
+    })
 
 @login_required
 def verify_payment(request):
@@ -963,17 +1026,23 @@ def register_view(request):
                 category=category, country_code=country_code,
                 currency_code=currency_code, currency_symbol=currency_symbol,
                 subscription_type='free',
+                is_active=False,  # blocked until email verified
             )
-            login(request, seller)
+
+            token = uuid.uuid4().hex
+            seller.email_verify_token = token
+            seller.save(update_fields=['email_verify_token'])
+
             try:
-                send_welcome_email(
+                send_verification_email(
                     to_email=seller.email,
                     business_name=seller.business_name,
-                    store_url=_store_url(seller),
+                    verify_url=f"https://www.vendopage.com/verify-email/{token}/",
                 )
             except Exception as e:
-                logger.error(f"Welcome email failed: {e}")
-            return redirect('dashboard')
+                logger.error(f"Verification email failed: {e}")
+
+            return redirect('verify_email_pending')
 
         except IntegrityError as e:
             err = str(e)
@@ -995,6 +1064,34 @@ def register_view(request):
 
     return render(request, 'register.html', {'active_tab': 'register'})
 
+def verify_email_pending(request):
+    return render(request, 'auth/verify_email_pending.html')
+
+
+def verify_email(request, token):
+    try:
+        seller = Seller.objects.get(email_verify_token=token, is_active=False)
+    except Seller.DoesNotExist:
+        messages.error(request, 'Invalid or already used verification link.')
+        return redirect('login')
+
+    seller.is_active           = True
+    seller.email_verified      = True
+    seller.email_verify_token  = None
+    seller.save(update_fields=['is_active', 'email_verified', 'email_verify_token'])
+
+    login(request, seller)
+
+    try:
+        send_welcome_email(
+            to_email=seller.email,
+            business_name=seller.business_name,
+            store_url=_store_url(seller),
+        )
+    except Exception as e:
+        logger.error(f"Welcome email failed: {e}")
+
+    return redirect('onboarding')
 
 # ─────────────────────────────────────────────
 # DASHBOARD

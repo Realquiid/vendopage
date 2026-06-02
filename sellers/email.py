@@ -234,6 +234,16 @@ def send_reengagement_email(to_email, business_name, store_url, days_inactive=5)
         html_content=html,
     )
 
+def send_verification_email(to_email, business_name, verify_url):
+    html = _render('email_verification.html', {
+        'business_name': business_name,
+        'verify_url':    verify_url,
+    })
+    return send_email_via_brevo(
+        to_email=to_email,
+        subject='Verify your Vendopage account',
+        html_content=html,
+    )
 
 # ─────────────────────────────────────────────
 # 7. ORDER CONFIRMED  →  BUYER only
