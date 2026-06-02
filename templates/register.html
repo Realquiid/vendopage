@@ -418,7 +418,7 @@ main { display: block; }
 
 @media (max-width: 480px) {
   .auth-left { padding: 32px 20px 28px; }
-  .auth-right { padding: 28px 20px 36px; }
+  .auth-right { padding: 28px 20px 36px; display: none; }
   .auth-left-text h2 { font-size: 22px; letter-spacing: -1px; }
   .auth-stats { gap: 16px; margin-top: 20px; }
 }
@@ -492,7 +492,6 @@ main { display: block; }
   <div class="auth-right">
     <div class="auth-right-inner">
 
-      <!-- <a href="{% url 'home' %}" class="auth-wordmark">Vendo<span>Page</span></a> -->
 
       <div id="authHl" class="auth-hl">
         {% if active_tab == 'login' %}Welcome <span class="hl-green">back.</span>

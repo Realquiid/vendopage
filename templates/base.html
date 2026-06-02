@@ -581,6 +581,28 @@ s0.parentNode.insertBefore(s1,s0);
   {% include 'includes/footer.html' %}
 {% endblock %}
 
+<!-- Global Website Translation Widget (Bottom-Left Placement) -->
+<div class="gtranslate_wrapper" style="position:fixed; bottom:20px; left:20px; z-index:9999;"></div>
+<script>
+  window.gtranslateSettings = {
+    "default_language": "en",
+    "detect_browser_language": true, // Auto-detects the visitor's country language instantly
+    "wrapper_selector": ".gtranslate_wrapper",
+    "flag_size": 24,
+    "flag_style": "3d",
+    "alt_flags": { "en": "usa" },
+    // This includes every major spoken language across all countries globally
+    "languages": [
+      "en", "fr", "es", "de", "it", "pt", "ru", "zh-CN", "zh-TW", "ja", "ko", "ar", 
+      "hi", "bn", "pa", "ur", "te", "mr", "ta", "gu", "kn", "ml", "ha", "yo", "ig", 
+      "sw", "am", "so", "zu", "xh", "tr", "fa", "he", "vi", "th", "id", "ms", "fil", 
+      "nl", "pl", "uk", "ro", "el", "hu", "cs", "sv", "no", "da", "fi", "bg", "hr", 
+      "sr", "sk", "sl", "lt", "lv", "et", "is", "ga", "cy", "gd", "mt", "af", "sq"
+    ]
+  }
+</script>
+<script src="https://gtranslate.net" defer></script>
+
 <script>
 /* ── TOAST ENGINE ── */
 (function() {
