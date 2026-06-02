@@ -3,7 +3,7 @@ Django settings for config project.
 """
 
 from pathlib import Path
-from decouple import config
+from decouple import config, Csv
 import dj_database_url
 import os
 import cloudinary
@@ -13,27 +13,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='your-secret-key-here')
 
-
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 AUTH_USER_MODEL = 'sellers.Seller'
 
-ALLOWED_HOSTS = [
-    'vendopage.com',
-    'www.vendopage.com',
-    'localhost',
-    '127.0.0.1',
-    '.railway.app',
-   
-]
+# Dynamically parse values from your .env file
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
-# CSRF Trusted Origins (required for Railway)
-CSRF_TRUSTED_ORIGINS = [
-    'https://vendopage.com',
-    'https://www.vendopage.com',
-    'https://*.railway.app',
-   
-]
+# Dynamically parse CSRF trusted URLs from your .env file
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='http://localhost:8000', cast=Csv())
 
 # Application definition
 INSTALLED_APPS = [
@@ -47,8 +35,6 @@ INSTALLED_APPS = [
     'products',
     'cloudinary_storage',
     'cloudinary',
-
-
 ]
 
 # MIDDLEWARE - COMBINED (WhiteNoise + Django required middleware)
@@ -140,9 +126,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Security settings for production
-# Security settings for production
 if not DEBUG:
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # ADD THIS FIRST
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -156,7 +141,6 @@ FLUTTERWAVE_SECRET_KEY = config('FLUTTERWAVE_SECRET_KEY', default='')
 FLW_ENCRYPTION_KEY = config('FLW_ENCRYPTION_KEY', default='')
 FLW_SECRET_HASH = config('FLW_SECRET_HASH', default='')
 
-  
 TEMPLATES[0]['OPTIONS']['context_processors'] += [
     'sellers.context_processors.admin_badge_counts',
 ]
@@ -167,7 +151,6 @@ CLOUDINARY_STORAGE = {
     'API_SECRET': config('CLOUDINARY_API_SECRET'),
 }
 
-
 cloudinary.config(
     cloud_name = config('CLOUDINARY_CLOUD_NAME'),
     api_key    = config('CLOUDINARY_API_KEY'),
@@ -175,7 +158,6 @@ cloudinary.config(
     secure     = True
 )
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-
 
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='smtp-relay.brevo.com')
@@ -192,7 +174,6 @@ BREVO_API_KEY = config('BREVO_API_KEY', default='')
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'home'
-
 
 LOGGING = {
     'version': 1,
@@ -221,4 +202,3 @@ LOGGING = {
         },
     },
 }
- 
