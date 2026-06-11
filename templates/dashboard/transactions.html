@@ -894,9 +894,9 @@
 
 <!-- Embed order data for drawer JS -->
 <script>
-const ORDERS_DATA = {
+const ORDERS_DATA = {};
   {% for order in orders %}
-  '{{ order.order_ref }}': {
+ORDERS_DATA['{{ order.order_ref }}'] = {
     ref: '{{ order.order_ref|slice:":8"|upper }}',
     buyer_name: '{{ order.buyer_name|escapejs }}',
     buyer_email: '{{ order.buyer_email|escapejs }}',
@@ -924,13 +924,13 @@ const ORDERS_DATA = {
         qty: {{ item.quantity }},
         price: '{{ item.price|floatformat:0 }}',
         image: '{{ item.product_image_url|default:""|escapejs }}'
-      }{% if not forloop.last %},{% endif %}
+      }
+      {% if not forloop.last %},{% endif %}
       {% endfor %}
     ],
     detail_url: '{% url "vendor_order_detail" order.order_ref %}'
-  }{% if not forloop.last %},{% endif %}
+  };
   {% endfor %}
-};
 
 const STATUS_MAP = {
   'paid':         { label: 'In Escrow',       cls: 'badge-escrow'   },
@@ -939,7 +939,7 @@ const STATUS_MAP = {
   'completed':    { label: 'Paid Out',        cls: 'badge-paid'     },
   'disputed':     { label: 'Disputed',        cls: 'badge-disputed' },
   'refunded':     { label: 'Refunded',        cls: 'badge-refunded' },
-  'FAILED_PAYOUT':{ label: 'Retrying',        cls: 'badge-failed'   },
+  'FAILED_PAYOUT': { label: 'Retrying',       cls: 'badge-failed'   },
 };
 
 function openDrawer(ref) {
