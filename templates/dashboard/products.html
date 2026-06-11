@@ -1,0 +1,755 @@
+{% extends 'base.html' %}
+{% load cdn_tags %}
+{% load static %}
+
+{% block title %}Products — Vendopage{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══════════════════════════════════════════════════
+   VENDOPAGE PRODUCTS PAGE
+   Consistent with dashboard: Cabinet Grotesk, var(--font-b),
+   var(--green), #0D0D0D bg, #1A1A18 cards
+══════════════════════════════════════════════════ */
+
+.vp-dash {
+  background: #0D0D0D;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: 100px;
+}
+
+.vp-dash::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 72px 72px;
+  pointer-events: none; z-index: 0;
+}
+
+.vp-dash::after {
+  content: '';
+  position: fixed;
+  width: 500px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,135,61,.1) 0%, transparent 65%);
+  top: -100px; right: -100px;
+  pointer-events: none; z-index: 0;
+}
+
+.vp-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative; z-index: 1;
+}
+
+/* ── TOP BAR ── */
+.vp-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28px 0 0;
+  margin-bottom: 32px;
+}
+.vp-page-eyebrow {
+  font-family: var(--font-b);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--green);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 6px;
+}
+.vp-page-eyebrow-line { width: 20px; height: 1.5px; background: var(--green); }
+.vp-page-title {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: clamp(24px, 3vw, 36px);
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  color: #F5F4F0; line-height: 1.1;
+}
+.vp-page-sub {
+  font-size: 14px; color: rgba(245,244,240,.35);
+  margin-top: 4px; font-weight: 400;
+}
+.vp-topbar-right {
+  display: flex; align-items: center; gap: 10px;
+}
+.vp-icon-btn {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; text-decoration: none;
+  color: rgba(245,244,240,.6);
+  transition: all .18s;
+}
+.vp-icon-btn:hover {
+  border-color: var(--green); color: var(--green);
+  background: rgba(0,135,61,.08);
+}
+.vp-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--green);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 15px; font-weight: 800; color: #0D0D0D;
+  border: 1.5px solid rgba(0,200,83,.3);
+  text-decoration: none;
+}
+
+/* ── ADD PRODUCT CTA ── */
+.vp-add-cta {
+  background: #1A1A18;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 20px;
+  padding: 24px 28px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  gap: 20px; margin-bottom: 20px;
+  position: relative; overflow: hidden;
+  flex-wrap: wrap;
+}
+.vp-add-cta::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,200,83,.5), transparent);
+}
+.vp-add-cta-left { display: flex; align-items: center; gap: 16px; }
+.vp-add-cta-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: rgba(0,135,61,.1);
+  border: 1px solid rgba(0,135,61,.2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.vp-add-cta h3 {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 17px; font-weight: 800;
+  letter-spacing: -.3px; color: #F5F4F0; margin-bottom: 3px;
+}
+.vp-add-cta p { font-size: 13px; color: rgba(245,244,240,.35); }
+.vp-btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 22px; border-radius: var(--r-pill);
+  font-family: var(--font-b); font-size: 13px; font-weight: 700;
+  cursor: pointer; text-decoration: none; border: none;
+  background: #F5F4F0; color: #0D0D0D;
+  transition: all .2s; flex-shrink: 0;
+}
+.vp-btn-primary:hover { background: #fff; transform: translateY(-2px); }
+
+/* ── STATS STRIP ── */
+.vp-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.vp-stat-mini {
+  background: #1A1A18;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.vp-stat-mini-label {
+  font-family: var(--font-b);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: rgba(245,244,240,.3); margin-bottom: 8px;
+}
+.vp-stat-mini-value {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 26px; font-weight: 800;
+  letter-spacing: -1px; color: #F5F4F0; line-height: 1;
+}
+.vp-stat-mini-value.green { color: var(--green); }
+.vp-stat-mini-value.amber { color: #FBBF24; }
+.vp-stat-mini-value.muted { color: rgba(245,244,240,.3); }
+
+/* ── FILTER + SEARCH ROW ── */
+.vp-filter-row {
+  display: flex; align-items: center;
+  gap: 10px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.vp-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.vp-tab {
+  padding: 7px 16px; border-radius: var(--r-pill);
+  border: 1.5px solid rgba(245,244,240,.1);
+  background: transparent;
+  font-family: var(--font-b); font-size: 12px; font-weight: 700;
+  color: rgba(245,244,240,.35);
+  cursor: pointer; transition: all .18s;
+  display: flex; align-items: center; gap: 6px;
+}
+.vp-tab:hover { color: rgba(245,244,240,.7); border-color: rgba(245,244,240,.25); }
+.vp-tab.active { background: #F5F4F0; color: #0D0D0D; border-color: #F5F4F0; }
+.vp-tab-count {
+  font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 100px;
+}
+.vp-tab.active .vp-tab-count { background: rgba(0,0,0,.15); color: #0D0D0D; }
+.vp-tab:not(.active) .vp-tab-count { background: rgba(255,255,255,.08); color: rgba(245,244,240,.3); }
+
+.vp-search {
+  flex: 1; min-width: 200px; max-width: 320px;
+  display: flex; align-items: center; gap: 8px;
+  background: #1A1A18;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--r-pill);
+  padding: 8px 16px;
+  transition: border-color .18s;
+}
+.vp-search:focus-within { border-color: rgba(0,200,83,.3); }
+.vp-search input {
+  background: none; border: none; outline: none;
+  font-family: var(--font-b); font-size: 13px; font-weight: 500;
+  color: #F5F4F0; flex: 1;
+}
+.vp-search input::placeholder { color: rgba(245,244,240,.2); }
+.vp-search svg { flex-shrink: 0; opacity: .3; }
+
+/* ── PRODUCTS GRID ── */
+.vp-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.vp-product-card {
+  background: #1A1A18;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: border-color .2s, transform .2s;
+  position: relative;
+}
+.vp-product-card:hover {
+  border-color: rgba(0,200,83,.25);
+  transform: translateY(-3px);
+}
+.vp-card-img {
+  aspect-ratio: 1;
+  background: rgba(255,255,255,.03);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.vp-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.vp-card-img-placeholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; opacity: .4;
+}
+.vp-card-badge {
+  position: absolute; top: 8px; left: 8px;
+  font-family: var(--font-b);
+  font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .8px;
+  padding: 3px 8px; border-radius: var(--r-pill);
+}
+.vp-card-badge.live     { background: rgba(0,135,61,.15); border: 1px solid rgba(0,135,61,.25); color: var(--green); }
+.vp-card-badge.soldout  { background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.2); color: #f87171; }
+.vp-card-badge.archived { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); color: rgba(245,244,240,.4); }
+.vp-card-img-count {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(0,0,0,.5); color: #F5F4F0;
+  font-family: var(--font-b); font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 100px;
+  display: flex; align-items: center; gap: 3px;
+}
+.vp-sold-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center;
+}
+.vp-sold-label {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 12px; font-weight: 800;
+  color: #F5F4F0; letter-spacing: 2px;
+  background: rgba(0,0,0,.6); padding: 4px 12px; border-radius: 4px;
+}
+.vp-card-body { padding: 14px 16px 16px; }
+.vp-card-name {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: #F5F4F0; letter-spacing: -.2px;
+  margin-bottom: 2px;
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4;
+}
+.vp-card-meta {
+  font-size: 11px; color: rgba(245,244,240,.25);
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.vp-card-price {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 15px; font-weight: 800;
+  color: var(--green); margin-bottom: 12px; letter-spacing: -.3px;
+}
+.vp-card-price.no-price {
+  color: rgba(245,244,240,.2); font-weight: 400; font-size: 12px;
+  font-family: var(--font-b);
+}
+.vp-card-actions { display: flex; gap: 5px; }
+.vp-card-btn {
+  flex: 1; padding: 8px 4px; border-radius: 8px;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
+  font-family: var(--font-b); font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: all .18s;
+  color: rgba(245,244,240,.5);
+  display: flex; align-items: center; justify-content: center; gap: 3px;
+}
+.vp-card-btn:hover {
+  border-color: rgba(245,244,240,.3);
+  background: rgba(255,255,255,.08);
+  color: #F5F4F0;
+}
+.vp-card-btn.danger:hover {
+  border-color: rgba(248,113,113,.4);
+  background: rgba(248,113,113,.08);
+  color: #f87171;
+}
+.vp-card-btn.success {
+  color: var(--green);
+  border-color: rgba(0,135,61,.25);
+  background: rgba(0,135,61,.06);
+}
+.vp-card-btn.success:hover {
+  border-color: var(--green);
+  background: rgba(0,135,61,.12);
+}
+
+/* ── EMPTY STATE ── */
+.vp-empty {
+  grid-column: 1 / -1;
+  text-align: center; padding: 80px 20px;
+}
+.vp-empty-icon {
+  width: 64px; height: 64px; border-radius: 20px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin: 0 auto 20px;
+}
+.vp-empty h3 {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 18px; font-weight: 800;
+  letter-spacing: -.5px; color: rgba(245,244,240,.6);
+  margin-bottom: 6px;
+}
+.vp-empty p { font-size: 13px; color: rgba(245,244,240,.25); margin-bottom: 24px; }
+
+/* ── CONFIRM MODAL ── */
+.confirm-modal { position:fixed; inset:0; z-index:600; display:none; align-items:center; justify-content:center; padding:20px; }
+.confirm-modal.active { display:flex; }
+.confirm-overlay { position:absolute; inset:0; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); }
+.confirm-box {
+  position:relative; z-index:1;
+  background: #1A1A18;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius:20px; padding:32px 28px; max-width:380px; width:100%;
+  box-shadow: 0 40px 80px rgba(0,0,0,.6);
+  text-align:center; animation:popIn .2s ease;
+}
+@keyframes popIn { from{transform:scale(.95);opacity:0} to{transform:scale(1);opacity:1} }
+.confirm-emoji { font-size:40px; margin-bottom:12px; display:block; }
+.confirm-box h3 {
+  font-family:'Cabinet Grotesk',sans-serif; font-weight:800; font-size:20px;
+  letter-spacing:-.5px; color:#F5F4F0; margin-bottom:8px;
+}
+.confirm-box p { font-size:14px; color:rgba(245,244,240,.4); line-height:1.6; margin-bottom:24px; }
+.confirm-btns { display:flex; gap:10px; }
+.confirm-cancel {
+  flex:1; padding:12px; border-radius:var(--r-pill);
+  border:1px solid rgba(255,255,255,.12); background:transparent;
+  font-family:var(--font-b); font-size:14px; font-weight:700;
+  cursor:pointer; transition:all .18s; color:rgba(245,244,240,.5);
+}
+.confirm-cancel:hover { border-color:rgba(245,244,240,.3); color:#F5F4F0; }
+.confirm-go {
+  flex:1; padding:12px; border-radius:var(--r-pill); border:none;
+  background:#F5F4F0; color:#0D0D0D;
+  font-family:var(--font-b); font-size:14px; font-weight:700;
+  cursor:pointer; transition:all .18s;
+}
+.confirm-go:hover { background:#fff; }
+.confirm-go.danger { background:#f87171; color:#fff; }
+.confirm-go.success { background:var(--green); color:#0D0D0D; }
+
+/* ── BOTTOM NAV ── */
+.vp-bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(13,13,13,.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 16px;
+  height: 72px;
+  z-index: 200;
+}
+.vp-nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 20px; border-radius: 12px;
+  cursor: pointer; transition: all .18s;
+  background: none; border: none;
+  color: rgba(245,244,240,.25);
+  text-decoration: none; flex: 1;
+}
+.vp-nav-item:hover { color: rgba(245,244,240,.5); }
+.vp-nav-item.active { color: var(--green); }
+.vp-nav-item svg {
+  width: 22px; height: 22px;
+  stroke: currentColor; fill: none; stroke-width: 1.8;
+}
+.vp-nav-label {
+  font-family: var(--font-b);
+  font-size: 10px; font-weight: 700; letter-spacing: .3px;
+}
+.vp-nav-add {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #F5F4F0; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .2s;
+  margin-top: -14px; flex-shrink: 0; text-decoration: none;
+  box-shadow: 0 8px 24px rgba(245,244,240,.15);
+}
+.vp-nav-add:hover {
+  background: #fff; transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(245,244,240,.2);
+}
+.vp-nav-add svg {
+  width: 22px; height: 22px;
+  stroke: #0D0D0D; fill: none; stroke-width: 2.5;
+}
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:90px; left:50%; transform:translateX(-50%);
+  background:#F5F4F0; color:#0D0D0D;
+  padding:10px 22px; border-radius:100px;
+  font-family:var(--font-b); font-size:13px; font-weight:700;
+  z-index:900; opacity:0; pointer-events:none;
+  transition:opacity .3s; white-space:nowrap;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.toast.show { opacity:1; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px) {
+  .vp-inner { padding: 0 16px; }
+  .vp-products-grid { grid-template-columns: repeat(2,1fr); gap:10px; }
+  .vp-stats-strip { grid-template-columns: repeat(2,1fr); }
+  .vp-filter-row { flex-direction: column; align-items: flex-start; }
+  .vp-search { max-width: 100%; width: 100%; }
+}
+@media(max-width:400px) {
+  .vp-products-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="vp-dash">
+<div class="vp-inner">
+
+  <!-- ── TOP BAR ── -->
+  <div class="vp-topbar">
+    <div>
+      <div class="vp-page-eyebrow">
+        <span class="vp-page-eyebrow-line"></span>
+        Your catalog
+      </div>
+      <h1 class="vp-page-title">Products</h1>
+      <p class="vp-page-sub">{{ active_count }} live · {{ sold_out_count }} sold out · {{ archived_count }} archived</p>
+    </div>
+    <div class="vp-topbar-right">
+      <a href="{% url 'dashboard' %}" class="vp-icon-btn" title="Back to dashboard">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </a>
+      <a href="{% url 'settings' %}" class="vp-avatar" title="Settings">
+        {% if user.profile_picture %}
+          <img src="{{ user.profile_picture.url }}" alt="{{ user.business_name }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+        {% else %}
+          {{ user.business_name|first|upper }}
+        {% endif %}
+      </a>
+    </div>
+  </div>
+
+  <!-- ── ADD PRODUCT CTA ── -->
+  <div class="vp-add-cta">
+    <div class="vp-add-cta-left">
+      <div class="vp-add-cta-icon">
+        <svg width="22" height="22" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      <div>
+        <h3>Add a new product</h3>
+        <p>Upload photos, set a price, and it goes live immediately</p>
+      </div>
+    </div>
+    <a href="{% url 'upload_product' %}" class="vp-btn-primary">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Product
+    </a>
+  </div>
+
+  <!-- ── QUICK STATS ── -->
+  <div class="vp-stats-strip">
+    <div class="vp-stat-mini">
+      <div class="vp-stat-mini-label">Live</div>
+      <div class="vp-stat-mini-value green">{{ active_count }}</div>
+    </div>
+    <div class="vp-stat-mini">
+      <div class="vp-stat-mini-label">Sold Out</div>
+      <div class="vp-stat-mini-value amber">{{ sold_out_count }}</div>
+    </div>
+    <div class="vp-stat-mini">
+      <div class="vp-stat-mini-label">Archived</div>
+      <div class="vp-stat-mini-value muted">{{ archived_count }}</div>
+    </div>
+    <div class="vp-stat-mini">
+      <div class="vp-stat-mini-label">Total Views</div>
+      <div class="vp-stat-mini-value">{{ total_product_views|default:"0" }}</div>
+    </div>
+  </div>
+
+  <!-- ── FILTER + SEARCH ── -->
+  <div class="vp-filter-row">
+    <div class="vp-tabs">
+      <button class="vp-tab active" onclick="filterProducts('active', this)">
+        Live <span class="vp-tab-count">{{ active_count }}</span>
+      </button>
+      <button class="vp-tab" onclick="filterProducts('soldout', this)">
+        Sold Out <span class="vp-tab-count">{{ sold_out_count }}</span>
+      </button>
+      <button class="vp-tab" onclick="filterProducts('archived', this)">
+        Archived <span class="vp-tab-count">{{ archived_count }}</span>
+      </button>
+      <button class="vp-tab" onclick="filterProducts('all', this)">
+        All <span class="vp-tab-count">{{ total_count }}</span>
+      </button>
+    </div>
+    <div class="vp-search">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" placeholder="Search products…" oninput="searchProducts(this.value)">
+    </div>
+  </div>
+
+  <!-- ── PRODUCTS GRID ── -->
+  <div class="vp-products-grid" id="productsGrid">
+    {% for product in products %}
+      {% if product.is_archived %}{% with pstatus="archived" %}
+      <div class="vp-product-card" data-status="{{ pstatus }}" data-id="{{ product.id }}" data-name="{{ product.description|lower|default:'' }}">
+      {% endwith %}{% elif product.is_sold_out %}{% with pstatus="soldout" %}
+      <div class="vp-product-card" data-status="{{ pstatus }}" data-id="{{ product.id }}" data-name="{{ product.description|lower|default:'' }}">
+      {% endwith %}{% else %}{% with pstatus="active" %}
+      <div class="vp-product-card" data-status="{{ pstatus }}" data-id="{{ product.id }}" data-name="{{ product.description|lower|default:'' }}">
+      {% endwith %}{% endif %}
+
+        <div class="vp-card-img">
+          {% with product.get_primary_image as primary %}
+            {% if primary %}
+              <img src="{{ primary.image_url|cdn_url:400 }}" alt="Product" loading="lazy">
+            {% else %}
+              <div class="vp-card-img-placeholder">📦</div>
+            {% endif %}
+          {% endwith %}
+          {% if product.is_archived %}
+            <span class="vp-card-badge archived">Archived</span>
+          {% elif product.is_sold_out %}
+            <span class="vp-card-badge soldout">Sold Out</span>
+            <div class="vp-sold-overlay"><span class="vp-sold-label">SOLD OUT</span></div>
+          {% else %}
+            <span class="vp-card-badge live">Live</span>
+          {% endif %}
+          {% if product.images.count > 1 %}
+          <span class="vp-card-img-count">
+            <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            {{ product.images.count }}
+          </span>
+          {% endif %}
+        </div>
+
+        <div class="vp-card-body">
+          {% if product.description %}
+            <div class="vp-card-name">{{ product.description|truncatewords:10 }}</div>
+          {% else %}
+            <div class="vp-card-name" style="color:rgba(245,244,240,.2);font-weight:400;">No description</div>
+          {% endif %}
+          <div class="vp-card-meta">
+            {{ product.created_at|date:"M d" }}
+            {% if product.views %}· {{ product.views }} views{% endif %}
+          </div>
+          {% if product.price %}
+            <div class="vp-card-price">{{ user.currency_symbol|default:"₦" }}{{ product.price|floatformat:0 }}</div>
+          {% else %}
+            <div class="vp-card-price no-price">No price set</div>
+          {% endif %}
+          <div class="vp-card-actions">
+            {% if not product.is_archived %}
+              <button onclick="archiveProduct({{ product.id }})" class="vp-card-btn" title="Archive">
+                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+                Archive
+              </button>
+            {% else %}
+              <button onclick="reactivateProduct({{ product.id }})" class="vp-card-btn success" title="Reactivate">
+                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                Restore
+              </button>
+            {% endif %}
+            <button onclick="deleteProduct({{ product.id }})" class="vp-card-btn danger" title="Delete">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+              Del
+            </button>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="vp-empty">
+        <div class="vp-empty-icon">📦</div>
+        <h3>No products yet</h3>
+        <p>Start by adding your first product to your catalog</p>
+        <a href="{% url 'upload_product' %}" class="vp-btn-primary" style="display:inline-flex;">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Your First Product
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- No results message (hidden by default) -->
+  <div id="noResults" style="display:none; grid-column:1/-1; text-align:center; padding:60px 20px;">
+    <div style="font-size:32px; margin-bottom:12px;">🔍</div>
+    <p style="font-family:'Cabinet Grotesk',sans-serif; font-size:16px; font-weight:700; color:rgba(245,244,240,.4); letter-spacing:-.3px;">No products match your search</p>
+  </div>
+
+</div><!-- /vp-inner -->
+
+<!-- ── BOTTOM NAV ── -->
+<nav class="vp-bottom-nav">
+  <a href="{% url 'dashboard' %}" class="vp-nav-item">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span class="vp-nav-label">Home</span>
+  </a>
+  <a href="{% url 'vendor_orders' %}" class="vp-nav-item">
+    <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    <span class="vp-nav-label">Orders</span>
+  </a>
+  <a href="{% url 'upload_product' %}" class="vp-nav-add" aria-label="Add product">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </a>
+  <a href="{% url 'seller_transactions' %}" class="vp-nav-item">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+    <span class="vp-nav-label">Payouts</span>
+  </a>
+  <a href="{% url 'vendor_products' %}" class="vp-nav-item active">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    <span class="vp-nav-label">Products</span>
+  </a>
+</nav>
+
+</div><!-- /vp-dash -->
+
+<!-- ── CONFIRM MODAL ── -->
+<div class="confirm-modal" id="confirmModal">
+  <div class="confirm-overlay" onclick="closeConfirm()"></div>
+  <div class="confirm-box">
+    <span class="confirm-emoji" id="confirmEmoji">⚠️</span>
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <p id="confirmMsg">This action will be applied.</p>
+    <div class="confirm-btns">
+      <button class="confirm-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="confirm-go" id="confirmGo" onclick="runConfirmedAction()">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+{% block footer %}{% endblock %}
+
+<script>
+const CSRF = '{{ csrf_token }}';
+
+function showToast(msg, duration=2200) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ── Filter tabs ──
+function filterProducts(status, btnEl) {
+  document.querySelectorAll('.vp-tab').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  const cards = document.querySelectorAll('.vp-product-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const s = card.dataset.status;
+    const show = status === 'all' || s === status;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+  // Re-apply search if active
+  const q = document.getElementById('searchInput').value;
+  if (q) searchProducts(q);
+}
+
+// ── Search ──
+function searchProducts(query) {
+  const q = query.trim().toLowerCase();
+  const cards = document.querySelectorAll('.vp-product-card');
+  // Which tab is active?
+  const activeTab = document.querySelector('.vp-tab.active');
+  const activeStatus = activeTab ? activeTab.getAttribute('onclick').match(/'([^']+)'/)?.[1] : 'all';
+  let visible = 0;
+  cards.forEach(card => {
+    const s = card.dataset.status;
+    const name = card.dataset.name || '';
+    const statusMatch = activeStatus === 'all' || s === activeStatus;
+    const nameMatch = !q || name.includes(q);
+    const show = statusMatch && nameMatch;
+    card.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('noResults').style.display = visible === 0 ? 'block' : 'none';
+}
+
+// ── Confirm modal ──
+let _pendingId=null, _pendingAction=null, _pendingMethod='POST';
+function showConfirm({id,action,method='POST',emoji,title,msg,btnClass='',btnText='Confirm'}) {
+  _pendingId=id; _pendingAction=action; _pendingMethod=method;
+  document.getElementById('confirmEmoji').textContent = emoji;
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmMsg').textContent   = msg;
+  const go = document.getElementById('confirmGo');
+  go.className = 'confirm-go ' + btnClass;
+  go.textContent = btnText;
+  document.getElementById('confirmModal').classList.add('active');
+}
+function closeConfirm() {
+  document.getElementById('confirmModal').classList.remove('active');
+  _pendingId = null; _pendingAction = null;
+}
+async function runConfirmedAction() {
+  const go = document.getElementById('confirmGo');
+  const orig = go.textContent; go.textContent = 'Processing…'; go.disabled = true;
+  try {
+    const res = await fetch(`/api/product/${_pendingId}/${_pendingAction}/`, {
+      method: _pendingMethod, headers: { 'X-CSRFToken': CSRF }
+    });
+    if (res.ok) { go.textContent = '✓ Done!'; setTimeout(() => location.reload(), 500); }
+    else throw new Error();
+  } catch { go.textContent = orig; go.disabled = false; showToast('⚠️ Something went wrong.'); }
+}
+
+function archiveProduct(id) { showConfirm({id, action:'archive', emoji:'📦', title:'Archive product?', msg:'Hidden from your store. You can restore it anytime.', btnText:'Archive'}); }
+function reactivateProduct(id) { showConfirm({id, action:'reactivate', emoji:'🔄', title:'Restore product?', msg:'This product will be visible in your catalog again.', btnClass:'success', btnText:'Restore'}); }
+function deleteProduct(id) { showConfirm({id, action:'delete', method:'DELETE', emoji:'🗑️', title:'Delete permanently?', msg:'This cannot be undone. The product and all its images will be permanently deleted.', btnClass:'danger', btnText:'Delete Forever'}); }
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeConfirm(); });
+</script>
+{% endblock %}

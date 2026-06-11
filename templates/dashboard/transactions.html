@@ -7,20 +7,37 @@
 <style>
 /* ══════════════════════════════════════════════════
    VENDOPAGE TRANSACTIONS PAGE
-   Same token system as dashboard:
-   #0D0D0D bg · #1A1A18 cards · var(--green)=#00873D
-   Cabinet Grotesk headings · Satoshi/var(--font-b) body
+   Theme-aware: uses base.html tokens + local aliases
 ══════════════════════════════════════════════════ */
 
+:root{
+  --vp-card:#FFFFFF;
+  --vp-card-2:#FAFAF9;
+  --vp-text:#0D0D0D;
+  --vp-text-soft:rgba(13,13,13,.45);
+  --vp-text-faint:rgba(13,13,13,.28);
+  --vp-border:#E5E7EB;
+  --vp-bg:#F6F6F4;
+}
+[data-theme="dark"]{
+  --vp-card:#1A1A18;
+  --vp-card-2:#151515;
+  --vp-text:#F5F4F0;
+  --vp-text-soft:rgba(245,244,240,.45);
+  --vp-text-faint:rgba(245,244,240,.25);
+  --vp-border:rgba(255,255,255,.07);
+  --vp-bg:#0D0D0D;
+}
+
 .vp-tx {
-  background: #0D0D0D;
+  background: var(--vp-bg);
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
   padding-bottom: 100px;
 }
 
-/* Background grid — same as dashboard */
+/* Background grid */
 .vp-tx::before {
   content: '';
   position: fixed; inset: 0;
@@ -30,6 +47,8 @@
   background-size: 72px 72px;
   pointer-events: none; z-index: 0;
 }
+[data-theme="light"] .vp-tx::before { display:none; }
+
 .vp-tx::after {
   content: '';
   position: fixed;
@@ -57,12 +76,12 @@
   font-family: var(--font-b);
   font-size: 12px; font-weight: 700;
   letter-spacing: .5px;
-  color: rgba(245,244,240,.3);
+  color: var(--vp-text-faint);
   text-decoration: none;
   transition: color .18s;
   margin-bottom: 16px;
 }
-.vp-tx-back:hover { color: rgba(245,244,240,.7); }
+.vp-tx-back:hover { color: var(--vp-text-soft); }
 .vp-tx-back svg { stroke: currentColor; }
 .vp-page-eyebrow {
   font-family: var(--font-b);
@@ -78,12 +97,12 @@
   font-size: clamp(28px, 3.5vw, 42px);
   font-weight: 800;
   letter-spacing: -2px;
-  color: #F5F4F0;
+  color: var(--vp-text);
   line-height: 1.05;
 }
 .vp-page-sub {
   font-size: 14px;
-  color: rgba(245,244,240,.3);
+  color: var(--vp-text-faint);
   margin-top: 6px;
   font-weight: 400;
 }
@@ -96,14 +115,14 @@
   margin-bottom: 24px;
 }
 .vp-tx-sum-card {
-  background: #1A1A18;
-  border: 1px solid rgba(255,255,255,.07);
+  background: var(--vp-card);
+  border: 1px solid var(--vp-border);
   border-radius: 16px;
   padding: 20px 22px;
   position: relative; overflow: hidden;
   transition: border-color .2s;
 }
-.vp-tx-sum-card:hover { border-color: rgba(255,255,255,.14); }
+.vp-tx-sum-card:hover { border-color: var(--vp-text-faint); }
 .vp-tx-sum-card.highlight {
   border-color: rgba(0,135,61,.2);
 }
@@ -116,14 +135,14 @@
   font-family: var(--font-b);
   font-size: 10px; font-weight: 700;
   letter-spacing: 1.5px; text-transform: uppercase;
-  color: rgba(245,244,240,.3);
+  color: var(--vp-text-faint);
   margin-bottom: 10px;
 }
 .vp-sum-amount {
   font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 26px; font-weight: 800;
   letter-spacing: -1px;
-  color: #F5F4F0; line-height: 1;
+  color: var(--vp-text); line-height: 1;
 }
 .vp-sum-amount.green { color: var(--green); }
 .vp-sum-amount.amber { color: #FBBF24; }
@@ -131,7 +150,7 @@
 .vp-sum-amount.red   { color: #f87171; }
 .vp-sum-count {
   font-size: 12px; font-weight: 500;
-  color: rgba(245,244,240,.25);
+  color: var(--vp-text-faint);
   margin-top: 6px;
   display: flex; align-items: center; gap: 6px;
 }
@@ -151,29 +170,29 @@
 .vp-tx-tab {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 8px 16px; border-radius: 100px;
-  border: 1.5px solid rgba(245,244,240,.1);
+  border: 1.5px solid var(--vp-border);
   background: transparent;
   font-family: var(--font-b); font-size: 12px; font-weight: 700;
-  color: rgba(245,244,240,.35);
+  color: var(--vp-text-soft);
   cursor: pointer; transition: all .18s;
   text-decoration: none;
 }
 .vp-tx-tab:hover {
-  color: rgba(245,244,240,.7);
-  border-color: rgba(245,244,240,.25);
+  color: var(--vp-text);
+  border-color: var(--vp-text-soft);
 }
 .vp-tx-tab.active {
-  background: #F5F4F0; color: #0D0D0D;
-  border-color: #F5F4F0;
+  background: var(--vp-text); color: var(--vp-bg);
+  border-color: var(--vp-text);
 }
 .vp-tx-tab-cnt {
   font-size: 10px; font-weight: 700;
-  background: rgba(0,0,0,.12); color: inherit;
+  background: rgba(127,127,127,.15); color: inherit;
   padding: 1px 6px; border-radius: 100px;
 }
 .vp-tx-tab:not(.active) .vp-tx-tab-cnt {
-  background: rgba(255,255,255,.08);
-  color: rgba(245,244,240,.3);
+  background: rgba(127,127,127,.12);
+  color: var(--vp-text-faint);
 }
 
 /* ── ESCROW INFO CHIP ── */
@@ -183,14 +202,14 @@
   background: rgba(0,135,61,.06);
   border: 1px solid rgba(0,135,61,.18);
   font-family: var(--font-b); font-size: 12px; font-weight: 600;
-  color: rgba(0,200,83,.7);
+  color: var(--green);
   margin-bottom: 20px;
 }
 
 /* ── TRANSACTION TABLE ── */
 .vp-tx-table-wrap {
-  background: #1A1A18;
-  border: 1px solid rgba(255,255,255,.07);
+  background: var(--vp-card);
+  border: 1px solid var(--vp-border);
   border-radius: 20px;
   overflow: hidden;
   position: relative;
@@ -206,14 +225,14 @@
   display: grid;
   grid-template-columns: 2.2fr 1fr 1.1fr 1.1fr 120px 90px;
   padding: 12px 24px;
-  background: rgba(0,0,0,.25);
-  border-bottom: 1px solid rgba(255,255,255,.05);
+  background: rgba(127,127,127,.06);
+  border-bottom: 1px solid var(--vp-border);
 }
 .vp-tx-thead span {
   font-family: var(--font-b);
   font-size: 10px; font-weight: 700;
   letter-spacing: 1px; text-transform: uppercase;
-  color: rgba(245,244,240,.2);
+  color: var(--vp-text-faint);
 }
 
 /* Transaction row */
@@ -222,38 +241,38 @@
   grid-template-columns: 2.2fr 1fr 1.1fr 1.1fr 120px 90px;
   align-items: center;
   padding: 18px 24px;
-  border-bottom: 1px solid rgba(255,255,255,.045);
+  border-bottom: 1px solid var(--vp-border);
   transition: background .15s;
   cursor: pointer;
   text-decoration: none; color: inherit;
 }
 .vp-tx-row:last-child { border-bottom: none; }
-.vp-tx-row:hover { background: rgba(255,255,255,.025); }
+.vp-tx-row:hover { background: rgba(127,127,127,.04); }
 
 /* Row: buyer column */
 .vp-tx-buyer {
   font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 15px; font-weight: 700;
-  letter-spacing: -.3px; color: #F5F4F0;
+  letter-spacing: -.3px; color: var(--vp-text);
 }
 .vp-tx-ref {
   font-family: monospace; font-size: 11px;
-  color: rgba(245,244,240,.25); margin-top: 2px;
+  color: var(--vp-text-faint); margin-top: 2px;
   display: flex; align-items: center; gap: 8px;
 }
 .vp-tx-ref-copy {
   background: none; border: none; padding: 0; cursor: pointer;
-  color: rgba(245,244,240,.2); transition: color .15s;
+  color: var(--vp-text-faint); transition: color .15s;
   display: inline-flex; align-items: center;
 }
 .vp-tx-ref-copy:hover { color: var(--green); }
 
 /* Row: items */
 .vp-tx-items {
-  font-size: 13px; color: rgba(245,244,240,.4);
+  font-size: 13px; color: var(--vp-text-soft);
 }
 .vp-tx-items-list {
-  font-size: 11px; color: rgba(245,244,240,.25);
+  font-size: 11px; color: var(--vp-text-faint);
   margin-top: 2px; max-width: 140px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -262,10 +281,10 @@
 .vp-tx-amount {
   font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 15px; font-weight: 700;
-  color: #F5F4F0;
+  color: var(--vp-text);
 }
 .vp-tx-fee-note {
-  font-size: 11px; color: rgba(245,244,240,.25);
+  font-size: 11px; color: var(--vp-text-faint);
   margin-top: 2px;
 }
 
@@ -277,9 +296,9 @@
 }
 .vp-tx-payout.green { color: var(--green); }
 .vp-tx-payout.amber { color: #FBBF24; }
-.vp-tx-payout.muted { color: rgba(245,244,240,.3); }
+.vp-tx-payout.muted { color: var(--vp-text-faint); }
 .vp-tx-eta {
-  font-size: 11px; color: rgba(245,244,240,.25);
+  font-size: 11px; color: var(--vp-text-faint);
   margin-top: 2px; display: flex; align-items: center; gap: 4px;
 }
 .vp-tx-eta-dot {
@@ -289,7 +308,7 @@
   flex-shrink: 0;
 }
 
-/* Status badges — same pattern as dashboard */
+/* Status badges */
 .vp-tx-badge {
   display: inline-flex; align-items: center; gap: 5px;
   font-family: var(--font-b);
@@ -311,19 +330,19 @@
   padding: 7px 14px; border-radius: 100px;
   font-family: var(--font-b); font-size: 11px; font-weight: 700;
   cursor: pointer; text-decoration: none;
-  border: 1px solid rgba(255,255,255,.1);
-  background: transparent; color: rgba(245,244,240,.4);
+  border: 1px solid var(--vp-border);
+  background: transparent; color: var(--vp-text-soft);
   transition: all .18s; white-space: nowrap;
 }
 .vp-tx-view-btn:hover {
-  border-color: rgba(255,255,255,.25);
-  color: rgba(245,244,240,.8);
-  background: rgba(255,255,255,.04);
+  border-color: var(--vp-text-soft);
+  color: var(--vp-text);
+  background: rgba(127,127,127,.06);
 }
 
 /* ETA Progress bar */
 .vp-tx-prog {
-  height: 2px; background: rgba(255,255,255,.05);
+  height: 2px; background: rgba(127,127,127,.15);
   border-radius: 2px; margin-top: 10px; overflow: hidden;
 }
 .vp-tx-prog-fill { height: 100%; border-radius: 2px; }
@@ -343,8 +362,8 @@
 .vp-tx-drawer-panel {
   position: relative; z-index: 1;
   width: 100%; max-width: 480px; height: 100vh;
-  background: #141414;
-  border-left: 1px solid rgba(255,255,255,.08);
+  background: var(--vp-card-2);
+  border-left: 1px solid var(--vp-border);
   overflow-y: auto;
   animation: slideInRight .28s cubic-bezier(.4,0,.2,1);
 }
@@ -355,23 +374,23 @@
 .vp-drawer-head {
   display: flex; align-items: center; justify-content: space-between;
   padding: 24px 24px 20px;
-  border-bottom: 1px solid rgba(255,255,255,.07);
-  position: sticky; top: 0; background: #141414; z-index: 2;
+  border-bottom: 1px solid var(--vp-border);
+  position: sticky; top: 0; background: var(--vp-card-2); z-index: 2;
 }
 .vp-drawer-title {
   font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 18px; font-weight: 800;
-  letter-spacing: -.5px; color: #F5F4F0;
+  letter-spacing: -.5px; color: var(--vp-text);
 }
 .vp-drawer-close {
   width: 32px; height: 32px; border-radius: 50%;
-  border: 1px solid rgba(255,255,255,.1);
-  background: rgba(255,255,255,.04);
+  border: 1px solid var(--vp-border);
+  background: rgba(127,127,127,.08);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
-  font-size: 18px; color: rgba(245,244,240,.5);
+  font-size: 18px; color: var(--vp-text-soft);
   transition: all .18s;
 }
-.vp-drawer-close:hover { background: #F5F4F0; color: #0D0D0D; border-color: #F5F4F0; }
+.vp-drawer-close:hover { background: var(--vp-text); color: var(--vp-bg); border-color: var(--vp-text); }
 .vp-drawer-body { padding: 24px; }
 
 /* Drawer: sections */
@@ -382,41 +401,41 @@
   font-family: var(--font-b);
   font-size: 10px; font-weight: 700;
   letter-spacing: 1.5px; text-transform: uppercase;
-  color: rgba(245,244,240,.25);
+  color: var(--vp-text-faint);
   margin-bottom: 12px;
 }
 .vp-drawer-row {
   display: flex; align-items: flex-start; justify-content: space-between;
   padding: 10px 0;
-  border-bottom: 1px solid rgba(255,255,255,.05);
+  border-bottom: 1px solid var(--vp-border);
   gap: 12px;
 }
 .vp-drawer-row:last-child { border-bottom: none; }
 .vp-drawer-row-label {
-  font-size: 13px; color: rgba(245,244,240,.4); font-weight: 500;
+  font-size: 13px; color: var(--vp-text-soft); font-weight: 500;
 }
 .vp-drawer-row-val {
   font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 14px; font-weight: 700;
-  color: #F5F4F0; text-align: right;
+  color: var(--vp-text); text-align: right;
 }
 .vp-drawer-row-val.green { color: var(--green); }
 .vp-drawer-row-val.amber { color: #FBBF24; }
-.vp-drawer-row-val.muted { color: rgba(245,244,240,.3); font-weight: 400; font-size: 13px; font-family: var(--font-b); }
-.vp-drawer-row-val.mono { font-family: monospace; font-size: 12px; font-weight: 400; color: rgba(245,244,240,.4); }
+.vp-drawer-row-val.muted { color: var(--vp-text-faint); font-weight: 400; font-size: 13px; font-family: var(--font-b); }
+.vp-drawer-row-val.mono { font-family: monospace; font-size: 12px; font-weight: 400; color: var(--vp-text-soft); }
 
 /* Fee breakdown highlight box */
 .vp-fee-box {
-  background: rgba(0,0,0,.3);
-  border: 1px solid rgba(255,255,255,.06);
+  background: rgba(127,127,127,.06);
+  border: 1px solid var(--vp-border);
   border-radius: 12px;
   padding: 16px;
 }
 .vp-fee-line {
   display: flex; justify-content: space-between;
   padding: 7px 0;
-  font-size: 13px; color: rgba(245,244,240,.5);
-  border-bottom: 1px solid rgba(255,255,255,.05);
+  font-size: 13px; color: var(--vp-text-soft);
+  border-bottom: 1px solid var(--vp-border);
 }
 .vp-fee-line:last-child { border-bottom: none; }
 .vp-fee-line.total {
@@ -429,27 +448,27 @@
 .vp-drawer-item {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid rgba(255,255,255,.05);
+  border-bottom: 1px solid var(--vp-border);
 }
 .vp-drawer-item:last-child { border-bottom: none; }
 .vp-drawer-item-img {
   width: 44px; height: 44px; border-radius: 10px;
-  background: rgba(255,255,255,.05);
+  background: rgba(127,127,127,.08);
   display: flex; align-items: center; justify-content: center;
   font-size: 20px; flex-shrink: 0; overflow: hidden;
 }
 .vp-drawer-item-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
 .vp-drawer-item-name {
-  font-size: 13px; font-weight: 600; color: #F5F4F0;
+  font-size: 13px; font-weight: 600; color: var(--vp-text);
   flex: 1; line-height: 1.4;
 }
 .vp-drawer-item-meta {
-  font-size: 11px; color: rgba(245,244,240,.3); margin-top: 2px;
+  font-size: 11px; color: var(--vp-text-faint); margin-top: 2px;
 }
 .vp-drawer-item-price {
   font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 14px; font-weight: 800;
-  color: #F5F4F0; text-align: right; flex-shrink: 0;
+  color: var(--vp-text); text-align: right; flex-shrink: 0;
 }
 
 /* ── EMPTY STATE ── */
@@ -458,20 +477,20 @@
 }
 .vp-tx-empty-icon {
   width: 64px; height: 64px; border-radius: 20px;
-  background: rgba(255,255,255,.04);
-  border: 1px solid rgba(255,255,255,.07);
+  background: rgba(127,127,127,.06);
+  border: 1px solid var(--vp-border);
   display: flex; align-items: center; justify-content: center;
   font-size: 28px; margin: 0 auto 20px;
 }
 .vp-tx-empty h3 {
   font-family: 'Cabinet Grotesk', sans-serif;
   font-size: 20px; font-weight: 800;
-  letter-spacing: -.5px; color: rgba(245,244,240,.5);
+  letter-spacing: -.5px; color: var(--vp-text-soft);
   margin-bottom: 8px;
 }
-.vp-tx-empty p { font-size: 14px; color: rgba(245,244,240,.25); line-height: 1.6; }
+.vp-tx-empty p { font-size: 14px; color: var(--vp-text-faint); line-height: 1.6; }
 
-/* ── BOTTOM NAV — same as dashboard ── */
+/* ── BOTTOM NAV (mobile) ── */
 .vp-bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
   background: rgba(13,13,13,.95);
@@ -506,74 +525,107 @@
 }
 .vp-nav-add svg { width: 22px; height: 22px; stroke: #0D0D0D; fill: none; stroke-width: 2.5; }
 
-/* ── SIDEBAR (desktop) ── */
+/* ── SIDEBAR (desktop) — fixed dark, theme-independent ── */
 @media (min-width: 900px) {
+
   .vp-bottom-nav { display: none; }
-  .vp-sidebar {
-    position: fixed; left: 0; top: 0; bottom: 0;
-    width: 220px;
-    background: #0D0D0D;
-    border-right: 1px solid rgba(255,255,255,.07);
-    display: flex; flex-direction: column;
-    padding: 32px 0;
-    z-index: 100;
+
+  .vp-sidebar{
+    position:fixed; left:0; top:0; bottom:0;
+    width:248px;
+    background:#0D0D0D;
+    display:flex; flex-direction:column;
+    padding:22px 16px;
+    z-index:100;
+    gap:6px;
   }
-  .vp-tx { margin-left: 220px; padding-bottom: 40px; }
-  .vp-sidebar-logo {
-    font-family: 'Cabinet Grotesk', sans-serif;
-    font-size: 20px; font-weight: 800;
-    letter-spacing: -1px; color: #F5F4F0;
-    padding: 0 24px 32px;
-    border-bottom: 1px solid rgba(255,255,255,.07);
-    display: flex; align-items: center; gap: 8px;
-    text-decoration: none;
+
+  .vp-tx{ margin-left:248px; padding-bottom: 40px; }
+
+  .vp-sb-logo{
+    display:flex; align-items:center;
+    padding:8px 10px 22px;
+    text-decoration:none;
   }
-  .vp-sidebar-logo-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px rgba(0,200,83,.5);
+
+  .vp-sb-nav{
+    display:flex; flex-direction:column; gap:2px;
+    flex:1;
   }
-  .vp-sidebar-nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 2px; }
-  .vp-sidebar-item {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 12px; border-radius: 10px;
-    font-family: var(--font-b); font-size: 13px; font-weight: 600;
-    color: rgba(245,244,240,.35);
-    text-decoration: none; transition: all .18s;
-    cursor: pointer; border: none; background: none;
+
+  .vp-sb-item{
+    display:flex; align-items:center; gap:12px;
+    padding:11px 14px; border-radius:12px;
+    font-family:var(--font-b); font-size:13.5px; font-weight:600;
+    color:rgba(245,244,240,.45);
+    text-decoration:none;
+    transition:all .15s;
   }
-  .vp-sidebar-item:hover { color: rgba(245,244,240,.7); background: rgba(255,255,255,.04); }
-  .vp-sidebar-item.active { color: #F5F4F0; background: rgba(255,255,255,.07); }
-  .vp-sidebar-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; }
-  .vp-sidebar-add {
-    margin: 12px; padding: 11px;
-    background: #F5F4F0; color: #0D0D0D;
-    border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;
-    font-family: var(--font-b); font-size: 13px; font-weight: 700;
-    text-decoration: none; transition: all .18s;
+  .vp-sb-item svg{
+    width:18px; height:18px;
+    stroke:currentColor; fill:none; stroke-width:1.8;
+    flex-shrink:0;
   }
-  .vp-sidebar-add:hover { background: #fff; }
-  .vp-sidebar-bottom { padding: 12px; border-top: 1px solid rgba(255,255,255,.07); }
-  .vp-sidebar-avatar {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px; border-radius: 10px;
-    text-decoration: none; transition: background .18s;
+  .vp-sb-item:hover{
+    color:#F5F4F0;
+    background:rgba(255,255,255,.05);
   }
-  .vp-sidebar-avatar:hover { background: rgba(255,255,255,.04); }
-  .vp-sidebar-avi {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: var(--green);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Cabinet Grotesk', sans-serif;
-    font-size: 13px; font-weight: 800; color: #0D0D0D;
-    flex-shrink: 0; overflow: hidden;
+  .vp-sb-item.active{
+    color:#0D0D0D;
+    background:#F5F4F0;
   }
-  .vp-sidebar-avi img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-  .vp-sidebar-name {
-    font-family: var(--font-b); font-size: 13px; font-weight: 600;
-    color: rgba(245,244,240,.6);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+
+  .vp-sb-add{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    margin:14px 0 8px;
+    padding:12px;
+    border-radius:12px;
+    border:1.5px dashed rgba(255,255,255,.12);
+    font-family:var(--font-b); font-size:13px; font-weight:700;
+    color:rgba(245,244,240,.4);
+    text-decoration:none;
+    transition:all .15s;
   }
+  .vp-sb-add:hover{
+    border-color:var(--green);
+    color:var(--green);
+  }
+
+  .vp-sb-profile{
+    display:flex; align-items:center; gap:10px;
+    padding:10px; border-radius:12px;
+    border-top:1px solid rgba(255,255,255,.07);
+    margin-top:6px; padding-top:16px;
+    text-decoration:none;
+    transition:background .15s;
+  }
+  .vp-sb-profile:hover{ background:rgba(255,255,255,.04); }
+
+  .vp-sb-avi{
+    width:36px; height:36px; border-radius:50%;
+    background:var(--green);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cabinet Grotesk',sans-serif;
+    font-size:14px; font-weight:800; color:#fff;
+    flex-shrink:0; overflow:hidden;
+  }
+  .vp-sb-avi img{ width:100%; height:100%; object-fit:cover; }
+
+  .vp-sb-profile-text{ overflow:hidden; }
+  .vp-sb-profile-name{
+    font-family:var(--font-b); font-size:13px; font-weight:700;
+    color:#F5F4F0;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .vp-sb-profile-email{
+    font-size:11px; color:rgba(245,244,240,.3);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+
+}
+
+@media (max-width:899px){
+  .vp-sidebar{ display:none; }
 }
 
 /* ── TOAST ── */
@@ -590,7 +642,6 @@
 
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
-  .vp-sidebar { display: none; }
   .vp-tx-thead { display: none; }
   .vp-tx-row {
     grid-template-columns: 1fr auto;
@@ -613,48 +664,59 @@
 
 <!-- ── DESKTOP SIDEBAR ── -->
 <aside class="vp-sidebar">
-  <a href="{% url 'dashboard' %}" class="vp-sidebar-logo">
-    <span class="vp-sidebar-logo-dot"></span>
-    Vendopage
+
+  <a href="{% url 'dashboard' %}" class="vp-sb-logo">
+    <img src="{% static 'images/logo-white.png' %}" alt="Vendopage" style="height:28px;width:auto;">
   </a>
-  <nav class="vp-sidebar-nav">
-    <a href="{% url 'dashboard' %}" class="vp-sidebar-item">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Dashboard
+
+  <nav class="vp-sb-nav">
+
+    <a href="{% url 'dashboard' %}" class="vp-sb-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>Dashboard</span>
     </a>
-    <a href="{% url 'vendor_orders' %}" class="vp-sidebar-item">
-      <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-      Orders
+
+    <a href="{% url 'vendor_orders' %}" class="vp-sb-item {% if request.resolver_match.url_name == 'vendor_orders' %}active{% endif %}">
+      <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1.5"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span>Orders</span>
     </a>
-    <a href="{% url 'seller_transactions' %}" class="vp-sidebar-item active">
+
+    <a href="{% url 'seller_transactions' %}" class="vp-sb-item {% if request.resolver_match.url_name == 'seller_transactions' %}active{% endif %}">
       <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-      Payouts
+      <span>Payouts</span>
     </a>
-    <a href="{% url 'upload_product' %}" class="vp-sidebar-item">
+
+    <a href="{% url 'upload_product' %}" class="vp-sb-item {% if request.resolver_match.url_name == 'upload_product' %}active{% endif %}">
       <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      Products
+      <span>Products</span>
     </a>
-    <a href="{% url 'settings' %}" class="vp-sidebar-item">
+
+    <a href="{% url 'settings' %}" class="vp-sb-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      Settings
+      <span>Settings</span>
     </a>
+
   </nav>
-  <a href="{% url 'upload_product' %}" class="vp-sidebar-add">
+
+  <a href="{% url 'upload_product' %}" class="vp-sb-add">
     <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Add Product
   </a>
-  <div class="vp-sidebar-bottom">
-    <a href="{% url 'settings' %}" class="vp-sidebar-avatar">
-      <div class="vp-sidebar-avi">
-        {% if user.profile_picture %}
-          <img src="{{ user.profile_picture.url }}" alt="{{ user.business_name }}">
-        {% else %}
-          {{ user.business_name|first|upper }}
-        {% endif %}
-      </div>
-      <span class="vp-sidebar-name">{{ user.business_name|truncatechars:20 }}</span>
-    </a>
-  </div>
+
+  <a href="{% url 'settings' %}" class="vp-sb-profile">
+    <div class="vp-sb-avi">
+      {% if user.profile_picture %}
+        <img src="{{ user.profile_picture.url }}" alt="{{ user.business_name }}">
+      {% else %}
+        {{ user.business_name|first|upper }}
+      {% endif %}
+    </div>
+    <div class="vp-sb-profile-text">
+      <div class="vp-sb-profile-name">{{ user.business_name|truncatechars:18 }}</div>
+      <div class="vp-sb-profile-email">{{ user.email|truncatechars:22 }}</div>
+    </div>
+  </a>
+
 </aside>
 
 <!-- ── MAIN ── -->
@@ -675,10 +737,6 @@
       <h1 class="vp-page-title">Transactions</h1>
       <p class="vp-page-sub">Every sale, fee, and payout — all in one place</p>
     </div>
-    <a href="{% url 'dashboard' %}" class="vp-tx-back" style="margin-top:0;align-self:flex-start;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-      Dashboard
-    </a>
   </div>
 
   <!-- SUMMARY CARDS -->
@@ -797,7 +855,7 @@
           {% elif order.status == 'refunded' %}
             <div class="vp-tx-payout muted">Refunded</div>
           {% else %}
-            <div class="vp-tx-payout" style="color:rgba(245,244,240,.3);">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
+            <div class="vp-tx-payout muted">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
             <div class="vp-tx-eta">Waiting for delivery</div>
           {% endif %}
         </div>
@@ -819,7 +877,7 @@
           {% elif order.status == 'FAILED_PAYOUT' %}
             <span class="vp-tx-badge badge-failed"><span class="vp-tx-badge-dot"></span>Retrying</span>
           {% else %}
-            <span class="vp-tx-badge" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(245,244,240,.4);">
+            <span class="vp-tx-badge" style="background:rgba(127,127,127,.1);border:1px solid var(--vp-border);color:var(--vp-text-soft);">
               <span class="vp-tx-badge-dot"></span>{{ order.get_status_display }}
             </span>
           {% endif %}
@@ -884,14 +942,14 @@
       <button class="vp-drawer-close" onclick="closeDrawer()">×</button>
     </div>
     <div class="vp-drawer-body" id="drawerBody">
-      <div style="text-align:center;padding:60px 0;color:rgba(245,244,240,.25);">
+      <div style="text-align:center;padding:60px 0;color:var(--vp-text-faint);">
         <div style="font-size:32px;margin-bottom:12px;">⏳</div>
         <div style="font-family:var(--font-b);font-size:13px;">Loading order...</div>
       </div>
     </div>
   </div>
 </div>
-
+{% block footer %}{% endblock %}
 <!-- Embed order data for drawer JS -->
 <script>
 const ORDERS_DATA = {};
@@ -949,7 +1007,6 @@ function openDrawer(ref) {
   document.body.style.overflow = 'hidden';
 
   const st = STATUS_MAP[d.status] || { label: d.status, cls: '' };
-  const payoutColor = d.status === 'completed' ? 'green' : d.status === 'RECEIVED' ? 'amber' : 'muted';
 
   let itemsHtml = d.items.map(item => `
     <div class="vp-drawer-item">
@@ -971,15 +1028,15 @@ function openDrawer(ref) {
   if (d.status === 'RECEIVED' && d.payout_eta) {
     payoutNote = `<div class="vp-tx-eta" style="margin-top:6px;"><span class="vp-tx-eta-dot"></span>Expected by ${d.payout_eta}</div>`;
   } else if (d.status === 'completed' && d.payout_at) {
-    payoutNote = `<div style="font-size:12px;color:rgba(245,244,240,.25);margin-top:4px;">Sent ${d.payout_at}</div>`;
+    payoutNote = `<div style="font-size:12px;color:var(--vp-text-faint);margin-top:4px;">Sent ${d.payout_at}</div>`;
   }
 
   document.getElementById('drawerBody').innerHTML = `
     <div class="vp-drawer-section">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div>
-          <div style="font-family:'Cabinet Grotesk',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;color:#F5F4F0;">#${d.ref}</div>
-          <div style="font-size:12px;color:rgba(245,244,240,.25);margin-top:3px;">${d.created_at}</div>
+          <div style="font-family:'Cabinet Grotesk',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--vp-text);">#${d.ref}</div>
+          <div style="font-size:12px;color:var(--vp-text-faint);margin-top:3px;">${d.created_at}</div>
         </div>
         <span class="vp-tx-badge ${st.cls}">
           <span class="vp-tx-badge-dot"></span>${st.label}
@@ -990,10 +1047,10 @@ function openDrawer(ref) {
     <div class="vp-drawer-section">
       <div class="vp-drawer-section-label">Buyer Info</div>
       <div class="vp-fee-box">
-        <div class="vp-fee-line"><span>Name</span><span style="color:#F5F4F0;font-weight:600;">${d.buyer_name}</span></div>
-        <div class="vp-fee-line"><span>Email</span><span style="color:rgba(245,244,240,.5);font-size:12px;font-family:monospace;">${d.buyer_email}</span></div>
-        <div class="vp-fee-line"><span>Phone</span><span style="color:rgba(245,244,240,.5);">${d.buyer_phone}</span></div>
-        <div class="vp-fee-line last-child" style="border:none"><span>Delivery</span><span style="color:rgba(245,244,240,.5);text-align:right;max-width:200px;">${d.delivery_address}${d.delivery_city ? ', ' + d.delivery_city : ''}</span></div>
+        <div class="vp-fee-line"><span>Name</span><span style="color:var(--vp-text);font-weight:600;">${d.buyer_name}</span></div>
+        <div class="vp-fee-line"><span>Email</span><span style="color:var(--vp-text-soft);font-size:12px;font-family:monospace;">${d.buyer_email}</span></div>
+        <div class="vp-fee-line"><span>Phone</span><span style="color:var(--vp-text-soft);">${d.buyer_phone}</span></div>
+        <div class="vp-fee-line" style="border:none"><span>Delivery</span><span style="color:var(--vp-text-soft);text-align:right;max-width:200px;">${d.delivery_address}${d.delivery_city ? ', ' + d.delivery_city : ''}</span></div>
       </div>
     </div>
 
@@ -1016,8 +1073,8 @@ function openDrawer(ref) {
     <div class="vp-drawer-section">
       <div class="vp-drawer-section-label">Delivery</div>
       <div class="vp-fee-box">
-        ${d.courier_name ? `<div class="vp-fee-line"><span>Courier</span><span style="color:#F5F4F0;">${d.courier_name}</span></div>` : ''}
-        ${d.tracking_info ? `<div class="vp-fee-line" style="border:none"><span>Tracking</span><span style="color:rgba(245,244,240,.5);font-family:monospace;font-size:12px;">${d.tracking_info}</span></div>` : ''}
+        ${d.courier_name ? `<div class="vp-fee-line"><span>Courier</span><span style="color:var(--vp-text);">${d.courier_name}</span></div>` : ''}
+        ${d.tracking_info ? `<div class="vp-fee-line" style="border:none"><span>Tracking</span><span style="color:var(--vp-text-soft);font-family:monospace;font-size:12px;">${d.tracking_info}</span></div>` : ''}
       </div>
     </div>
     ` : ''}
@@ -1026,14 +1083,14 @@ function openDrawer(ref) {
     <div class="vp-drawer-section">
       <div class="vp-drawer-section-label">Transaction IDs</div>
       <div class="vp-fee-box">
-        ${d.flutterwave_tx_id ? `<div class="vp-fee-line"><span>Payment ID</span><span style="font-family:monospace;font-size:11px;color:rgba(245,244,240,.35);">${d.flutterwave_tx_id}</span></div>` : ''}
-        ${d.flutterwave_transfer_id ? `<div class="vp-fee-line" style="border:none"><span>Transfer ID</span><span style="font-family:monospace;font-size:11px;color:rgba(245,244,240,.35);">${d.flutterwave_transfer_id}</span></div>` : ''}
+        ${d.flutterwave_tx_id ? `<div class="vp-fee-line"><span>Payment ID</span><span style="font-family:monospace;font-size:11px;color:var(--vp-text-faint);">${d.flutterwave_tx_id}</span></div>` : ''}
+        ${d.flutterwave_transfer_id ? `<div class="vp-fee-line" style="border:none"><span>Transfer ID</span><span style="font-family:monospace;font-size:11px;color:var(--vp-text-faint);">${d.flutterwave_transfer_id}</span></div>` : ''}
       </div>
     </div>
     ` : ''}
 
     <div style="margin-top:8px;padding-top:8px;">
-      <a href="${d.detail_url}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:12px;background:#F5F4F0;color:#0D0D0D;font-family:var(--font-b);font-size:14px;font-weight:700;text-decoration:none;transition:background .18s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='#F5F4F0'">
+      <a href="${d.detail_url}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:12px;background:var(--vp-text);color:var(--vp-bg);font-family:var(--font-b);font-size:14px;font-weight:700;text-decoration:none;transition:opacity .18s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
         Open Full Order Page →
       </a>
     </div>

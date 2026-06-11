@@ -1,0 +1,93 @@
+
+{% load static %}
+
+<!-- ══ DESKTOP SIDEBAR ══ -->
+<aside class="vp-sidebar">
+
+  <a href="{% url 'dashboard' %}" class="vp-sb-logo">
+    <img src="{% static 'images/logo-white.png' %}" alt="Vendopage" style="height:28px;width:auto;">
+  </a>
+
+  <nav class="vp-sb-nav">
+
+    <a href="{% url 'dashboard' %}"
+       class="vp-sb-item {% if active_nav == 'dashboard' %}active{% endif %}">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>Dashboard</span>
+    </a>
+
+    <a href="{% url 'vendor_orders' %}"
+       class="vp-sb-item {% if active_nav == 'orders' %}active{% endif %}">
+      <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1.5"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span>Orders</span>
+    </a>
+
+    <a href="{% url 'vendor_products' %}"
+       class="vp-sb-item {% if active_nav == 'products' %}active{% endif %}">
+      <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      <span>Products</span>
+    </a>
+
+    <a href="{% url 'seller_transactions' %}"
+       class="vp-sb-item {% if active_nav == 'payouts' %}active{% endif %}">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <span>Payouts</span>
+    </a>
+
+    <a href="{% url 'settings' %}"
+       class="vp-sb-item {% if active_nav == 'settings' %}active{% endif %}">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span>Settings</span>
+    </a>
+
+  </nav>
+
+  <a href="{% url 'upload_product' %}" class="vp-sb-add">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Add Product
+  </a>
+
+  <a href="{% url 'settings' %}" class="vp-sb-profile">
+    <div class="vp-sb-avi">
+      {% if user.profile_picture %}
+        <img src="{{ user.profile_picture.url }}" alt="{{ user.business_name }}">
+      {% else %}
+        {{ user.business_name|first|upper }}
+      {% endif %}
+    </div>
+    <div class="vp-sb-profile-text">
+      <div class="vp-sb-profile-name">{{ user.business_name|truncatechars:18 }}</div>
+      <div class="vp-sb-profile-email">{{ user.email|truncatechars:22 }}</div>
+    </div>
+  </a>
+
+</aside>
+
+<!-- ══ MOBILE BOTTOM NAV ══ -->
+<nav class="vp-bottom-nav">
+  <a href="{% url 'dashboard' %}"
+     class="vp-nav-item {% if active_nav == 'dashboard' %}active{% endif %}">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span class="vp-nav-label">Home</span>
+  </a>
+  <a href="{% url 'vendor_orders' %}"
+     class="vp-nav-item {% if active_nav == 'orders' %}active{% endif %}">
+    <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    <span class="vp-nav-label">Orders</span>
+  </a>
+  <a href="{% url 'upload_product' %}" class="vp-nav-add" aria-label="Add product">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </a>
+  <a href="{% url 'seller_transactions' %}"
+     class="vp-nav-item {% if active_nav == 'payouts' %}active{% endif %}">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+    <span class="vp-nav-label">Payouts</span>
+  </a>
+  <a href="{% url 'vendor_products' %}"
+     class="vp-nav-item {% if active_nav == 'products' %}active{% endif %}">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+    <span class="vp-nav-label">Products</span>
+  </a>
+</nav>

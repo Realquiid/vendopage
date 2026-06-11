@@ -1657,6 +1657,28 @@ def initiate_payment(request, slug):
     messages.error(request, 'Payment could not be started. Please try again.')
     return redirect('checkout', slug=slug)
 
+@login_required
+def vendor_products(request):
+    seller = request.user
+    from django.db.models import Sum
+ 
+    active_products   = Product.objects.filter(seller=seller, is_archived=False, is_sold_out=False).prefetch_related('images')
+    sold_out_products = Product.objects.filter(seller=seller, is_archived=False, is_sold_out=True).prefetch_related('images')
+    archived_products = Product.objects.filter(seller=seller, is_archived=True).prefetch_related('images')
+    all_products      = Product.objects.filter(seller=seller).prefetch_related('images').order_by('-created_at')
+ 
+    total_product_views = Product.objects.filter(seller=seller).aggregate(
+        total=Sum('views')
+    )['total'] or 0
+ 
+    return render(request, 'dashboard/products.html', {
+        'products':           all_products,
+        'active_count':       active_products.count(),
+        'sold_out_count':     sold_out_products.count(),
+        'archived_count':     archived_products.count(),
+        'total_count':        all_products.count(),
+        'total_product_views': total_product_views,
+    })
 
 def order_confirmation(request):
     tx_ref         = request.GET.get('tx_ref', '')

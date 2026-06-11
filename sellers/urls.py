@@ -37,6 +37,7 @@ urlpatterns = [
     path('api/product/<int:product_id>/mark-available/', views.mark_available, name='mark_available'),
     path('api/product/<int:product_id>/track-whatsapp/', views.track_whatsapp_click, name='track_whatsapp_click'),
     path('onboarding/', views.onboarding, name='onboarding'),
+    path('dashboard/products/', views.vendor_products, name='vendor_products'),
 
     path('dashboard/transactions/', views.seller_transactions, name='seller_transactions'),
 

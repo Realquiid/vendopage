@@ -102,6 +102,172 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* ════════════════════════════════════════════════════
+   VendoPage shared nav — paste into base.html <style>
+   or a shared dashboard.css file
+   ════════════════════════════════════════════════════ */
+
+/* ── SIDEBAR (desktop ≥900px) ── */
+.vp-sidebar {
+  position: fixed; left: 0; top: 0; bottom: 0;
+  width: 248px;
+  background: #0D0D0D;
+  display: flex; flex-direction: column;
+  padding: 22px 16px;
+  z-index: 100;
+  gap: 6px;
+  border-right: 1px solid rgba(255,255,255,.06);
+}
+
+/* Push page content right on desktop */
+.vp-has-sidebar {
+  margin-left: 248px;
+}
+
+.vp-sb-logo {
+  display: flex; align-items: center;
+  padding: 8px 10px 22px;
+  text-decoration: none;
+}
+
+.vp-sb-nav {
+  display: flex; flex-direction: column;
+  gap: 2px; flex: 1;
+}
+
+.vp-sb-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 14px; border-radius: 12px;
+  font-family: var(--font-b); font-size: 13.5px; font-weight: 600;
+  color: rgba(245,244,240,.45);
+  text-decoration: none;
+  transition: all .15s;
+}
+.vp-sb-item svg {
+  width: 18px; height: 18px;
+  stroke: currentColor; fill: none; stroke-width: 1.8;
+  flex-shrink: 0;
+}
+.vp-sb-item:hover {
+  color: #F5F4F0;
+  background: rgba(255,255,255,.05);
+}
+.vp-sb-item.active {
+  color: #0D0D0D;
+  background: #F5F4F0;
+}
+
+/* Dashed "Add Product" button in sidebar */
+.vp-sb-add {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin: 14px 0 8px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px dashed rgba(255,255,255,.12);
+  font-family: var(--font-b); font-size: 13px; font-weight: 700;
+  color: rgba(245,244,240,.4);
+  text-decoration: none;
+  transition: all .15s;
+}
+.vp-sb-add:hover {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+/* Profile footer in sidebar */
+.vp-sb-profile {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 10px 10px;
+  border-top: 1px solid rgba(255,255,255,.07);
+  text-decoration: none;
+  border-radius: 12px;
+  transition: background .15s;
+}
+.vp-sb-profile:hover { background: rgba(255,255,255,.04); }
+
+.vp-sb-avi {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--green);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 14px; font-weight: 800; color: #0D0D0D;
+  flex-shrink: 0; overflow: hidden;
+}
+.vp-sb-avi img { width: 100%; height: 100%; object-fit: cover; }
+
+.vp-sb-profile-text { overflow: hidden; }
+.vp-sb-profile-name {
+  font-family: var(--font-b); font-size: 13px; font-weight: 700;
+  color: #F5F4F0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.vp-sb-profile-email {
+  font-size: 11px; color: rgba(245,244,240,.3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── BOTTOM NAV (mobile <900px) ── */
+.vp-bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(13,13,13,.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 16px;
+  height: 72px;
+  z-index: 200;
+}
+
+.vp-nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 16px; border-radius: 12px;
+  cursor: pointer; transition: all .18s;
+  background: none; border: none;
+  color: rgba(245,244,240,.25);
+  text-decoration: none; flex: 1;
+}
+.vp-nav-item:hover { color: rgba(245,244,240,.5); }
+.vp-nav-item.active { color: var(--green); }
+.vp-nav-item svg {
+  width: 22px; height: 22px;
+  stroke: currentColor; fill: none; stroke-width: 1.8;
+}
+.vp-nav-label {
+  font-family: var(--font-b);
+  font-size: 10px; font-weight: 700; letter-spacing: .3px;
+}
+
+/* Centre + button */
+.vp-nav-add {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #F5F4F0; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .2s;
+  margin-top: -14px; flex-shrink: 0; text-decoration: none;
+  box-shadow: 0 8px 24px rgba(245,244,240,.15);
+}
+.vp-nav-add:hover {
+  background: #fff; transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(245,244,240,.2);
+}
+.vp-nav-add svg {
+  width: 22px; height: 22px;
+  stroke: #0D0D0D; fill: none; stroke-width: 2.5;
+}
+
+/* ── RESPONSIVE VISIBILITY ── */
+@media (min-width: 900px) {
+  /* Hide bottom nav on desktop */
+  .vp-bottom-nav { display: none; }
+}
+
+@media (max-width: 899px) {
+  /* Hide sidebar on mobile */
+  .vp-sidebar { display: none; }
+  /* Remove sidebar offset on mobile */
+  .vp-has-sidebar { margin-left: 0; }
+}
+
   /* ══════════════════════════════════════
      TOAST
   ══════════════════════════════════════ */
