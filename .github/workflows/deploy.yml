@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -20,8 +21,19 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
             cd /var/www/vendopage
-            git pull origin main
+
+            git fetch origin
+            git reset --hard origin/main
+
             source venv/bin/activate
+
+            pip install -r requirements.txt
+
+            python manage.py migrate --noinput
             python manage.py collectstatic --noinput
+
             sudo systemctl restart gunicorn
-            sudo supervisorctl restart celery-worker celery-beat
+            sudo systemctl restart nginx
+
+            sudo supervisorctl restart celery-worker
+            sudo supervisorctl restart celery-beat
