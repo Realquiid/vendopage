@@ -1,198 +1,481 @@
+
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Orders — Dashboard{% endblock %}
+{% block title %}Orders — Vendopage{% endblock %}
 
 {% block extra_css %}
 <style>
-.orders-page { background:var(--light); min-height:calc(100vh - 64px); padding:40px 20px 80px; }
-.orders-inner { max-width:1100px; margin:0 auto; }
 
-.page-header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:32px; flex-wrap:wrap; }
-.page-header h1 { font-family:var(--font-d); font-weight:800; font-size:26px; letter-spacing:-1px; margin:0; }
-.page-header-sub { font-size:13px; color:var(--gray); margin-top:3px; }
+/* ─────────────────────────────────────
+   THEME TOKENS
+───────────────────────────────────── */
 
-/* Stats */
-.orders-stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin-bottom:28px; }
-.ostat { background:var(--white); border:1px solid var(--border); border-radius:14px; padding:18px 20px; transition:border-color .2s; }
-.ostat:hover { border-color:var(--green); }
-.ostat-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--gray); margin-bottom:6px; }
-.ostat-value { font-family:var(--font-d); font-weight:800; font-size:28px; letter-spacing:-1px; color:var(--dark); }
-.ostat-value.urgent { color:#c2410c; }
-
-/* Filter tabs */
-.filter-row { display:flex; align-items:center; gap:6px; margin-bottom:20px; flex-wrap:wrap; }
-.ftab { padding:7px 16px; border-radius:var(--r-pill); border:1px solid var(--border); background:var(--white); font-family:var(--font-b); font-size:13px; font-weight:500; cursor:pointer; color:var(--gray); transition:all .18s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; }
-.ftab:hover { color:var(--dark); border-color:var(--dark); }
-.ftab.active { background:var(--dark); color:var(--white); border-color:var(--dark); }
-.ftab-badge { padding:1px 7px; border-radius:100px; font-size:11px; background:rgba(255,255,255,.2); color:inherit; }
-.ftab:not(.active) .ftab-badge { background:var(--light); color:var(--gray); }
-
-/* Orders table */
-.orders-table { background:var(--white); border:1px solid var(--border); border-radius:20px; overflow:hidden; }
-
-.table-head {
-  display:grid;
-  grid-template-columns: 2fr 1fr 1.2fr 1.2fr 1fr 130px;
-  padding:11px 20px;
-  background:var(--light);
-  border-bottom:1px solid var(--border);
-  font-size:11px; font-weight:700; text-transform:uppercase;
-  letter-spacing:.5px; color:var(--gray);
-  align-items:center;
+:root{
+  --bg:#F6F6F4;
+  --card:#FFFFFF;
+  --card-2:#FAFAF9;
+  --text:#0D0D0D;
+  --muted:#6B7280;
+  --border:#E5E7EB;
+  --green:#00873D;
+  --blue:#2563EB;
+  --amber:#F59E0B;
+  --red:#DC2626;
 }
 
-.order-row {
-  display:grid;
-  grid-template-columns: 2fr 1fr 1.2fr 1.2fr 1fr 130px;
-  padding:14px 20px;
-  border-bottom:1px solid var(--border);
+[data-theme="dark"]{
+  --bg:#0D0D0D;
+  --card:#1A1A18;
+  --card-2:#151515;
+  --text:#F5F4F0;
+  --muted:rgba(245,244,240,.4);
+  --border:rgba(255,255,255,.07);
+}
+
+/* ─────────────────────────────────────
+   PAGE
+───────────────────────────────────── */
+
+.vp-orders{
+  background:var(--bg);
+  min-height:100vh;
+  padding-bottom:60px;
+  position:relative;
+  overflow-x:hidden;
+}
+
+.vp-orders::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size:72px 72px;
+  pointer-events:none;
+}
+
+.vp-orders-inner{
+  max-width:1100px;
+  margin:0 auto;
+  padding:32px;
+  position:relative;
+  z-index:2;
+}
+
+/* ─────────────────────────────────────
+   HEADER
+───────────────────────────────────── */
+
+.vp-orders-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+  flex-wrap:wrap;
+  margin-bottom:28px;
+}
+
+.vp-orders-eyebrow{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  color:var(--green);
+  font-weight:700;
+  margin-bottom:10px;
+}
+
+.vp-orders-title{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:42px;
+  font-weight:800;
+  letter-spacing:-2px;
+  color:var(--text);
+  line-height:1;
+}
+
+.vp-orders-sub{
+  margin-top:8px;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.vp-back-btn{
+  display:inline-flex;
   align-items:center;
+  gap:8px;
+  padding:10px 16px;
+  border-radius:100px;
+  border:1px solid var(--border);
+  background:var(--card);
+  text-decoration:none;
+  color:var(--text);
+  font-size:13px;
+  font-weight:700;
+  transition:.18s;
+}
+
+.vp-back-btn:hover{
+  transform:translateY(-1px);
+}
+
+/* ─────────────────────────────────────
+   SUMMARY CARDS
+───────────────────────────────────── */
+
+.vp-order-stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:12px;
+  margin-bottom:24px;
+}
+
+.vp-stat{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:22px;
+}
+
+.vp-stat-label{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:var(--muted);
+  margin-bottom:12px;
+  font-weight:700;
+}
+
+.vp-stat-value{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:30px;
+  font-weight:800;
+  color:var(--text);
+  line-height:1;
+}
+
+.vp-stat-value.green{ color:var(--green); }
+.vp-stat-value.blue{ color:var(--blue); }
+.vp-stat-value.amber{ color:var(--amber); }
+.vp-stat-value.red{ color:var(--red); }
+
+/* ─────────────────────────────────────
+   FILTERS
+───────────────────────────────────── */
+
+.vp-tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+
+.vp-tab{
+  padding:9px 16px;
+  border-radius:100px;
+  border:1px solid var(--border);
+  background:var(--card);
+  text-decoration:none;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+  transition:.18s;
+}
+
+.vp-tab.active{
+  background:var(--text);
+  color:var(--bg);
+  border-color:var(--text);
+}
+
+/* ─────────────────────────────────────
+   TABLE
+───────────────────────────────────── */
+
+.vp-orders-table{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:22px;
+  overflow:hidden;
+}
+
+.vp-orders-head-row{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr 1fr 120px;
+  padding:14px 24px;
+  border-bottom:1px solid var(--border);
+  background:var(--card-2);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:var(--muted);
+  font-weight:700;
+}
+
+.vp-order-row{
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr 1fr 120px;
+  align-items:center;
+  padding:18px 24px;
+  border-bottom:1px solid var(--border);
+  transition:.15s;
   text-decoration:none;
   color:inherit;
-  transition:background .15s;
-  gap:0;
 }
-.order-row:last-child { border-bottom:none; }
-.order-row:hover { background:var(--light); }
 
-.buyer-name { font-weight:700; font-size:14px; margin-bottom:2px; color:var(--dark); }
-.order-ref-txt { font-size:11px; color:var(--gray-lt); font-family:monospace; }
-.order-item-count { font-size:13px; color:var(--gray); }
-.order-amount-col { font-weight:700; font-size:14px; color:var(--dark); }
-.order-date-col { font-size:12px; color:var(--gray-lt); }
-
-/* Status pill */
-.status-pill {
-  display:inline-flex; align-items:center; gap:5px;
-  padding:4px 10px; border-radius:100px;
-  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;
-  white-space:nowrap;
+.vp-order-row:last-child{
+  border-bottom:none;
 }
-.sp-paid      { background:#fff7ed; color:#c2410c; }
-.sp-shipped   { background:#eff6ff; color:#1d4ed8; }
-.sp-delivered,
-.sp-completed { background:#f0fdf4; color:#15803d; }
-.sp-disputed  { background:#fef2f2; color:#b91c1c; }
-.sp-refunded  { background:#faf5ff; color:#7c3aed; }
-.s-dot { width:6px; height:6px; border-radius:50%; background:currentColor; opacity:.7; flex-shrink:0; }
 
-/* Row action buttons */
-.row-actions {
-  display:flex; gap:6px; justify-content:flex-end; align-items:center;
+.vp-order-row:hover{
+  background:rgba(127,127,127,.04);
 }
-.row-btn {
-  display:inline-flex; align-items:center; justify-content:center; gap:5px;
-  padding:6px 12px; border-radius:var(--r-pill);
-  font-family:var(--font-b); font-size:12px; font-weight:600;
-  cursor:pointer; text-decoration:none; border:none;
-  transition:all .18s; white-space:nowrap; line-height:1;
+
+/* buyer */
+
+.vp-buyer{
+  font-weight:700;
+  font-size:15px;
+  color:var(--text);
 }
-.rb-ship { background:var(--dark); color:#fff; }
-.rb-ship:hover { background:#333; }
-.rb-view { background:var(--light); color:var(--dark); border:1px solid var(--border); }
-.rb-view:hover { border-color:var(--dark); background:var(--dark); color:#fff; }
 
-/* Empty */
-.empty-orders-state { padding:80px 40px; text-align:center; }
-.empty-orders-state h3 { font-family:var(--font-d); font-weight:700; font-size:20px; margin:16px 0 8px; color:var(--dark); }
-.empty-orders-state p { font-size:14px; color:var(--gray-lt); }
+.vp-ref{
+  margin-top:3px;
+  font-size:11px;
+  color:var(--muted);
+  font-family:monospace;
+}
 
-/* Dark mode */
-[data-theme="dark"] .orders-table,
-[data-theme="dark"] .ostat { background:#1e1e1e; border-color:#2e2e2e; }
-[data-theme="dark"] .table-head { background:#161616; border-color:#2a2a2a; }
-[data-theme="dark"] .order-row { border-color:#2a2a2a; color:#f0f0f0; }
-[data-theme="dark"] .order-row:hover { background:#252525; }
-[data-theme="dark"] .buyer-name { color:#f0f0f0; }
-[data-theme="dark"] .order-amount-col { color:#f0f0f0; }
-[data-theme="dark"] .ostat-value { color:#f0f0f0; }
-[data-theme="dark"] .rb-view { background:#2a2a2a; color:#f0f0f0; border-color:#3a3a3a; }
-[data-theme="dark"] .rb-view:hover { background:var(--dark); border-color:var(--dark); color:#fff; }
-[data-theme="dark"] .ftab { background:#1e1e1e; border-color:#2e2e2e; color:#aaa; }
-[data-theme="dark"] .ftab:hover { color:#f0f0f0; border-color:#f0f0f0; }
-[data-theme="dark"] .ftab:not(.active) .ftab-badge { background:#2a2a2a; color:#aaa; }
+/* amount */
 
-/* Mobile */
-@media(max-width:900px) {
-  .table-head { display:none; }
-  .order-row {
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto;
-    gap:8px 12px;
-    padding:14px 16px;
+.vp-amount{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:16px;
+  font-weight:800;
+  color:var(--text);
+}
+
+/* badge */
+
+.vp-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:5px 10px;
+  border-radius:100px;
+  font-size:10px;
+  text-transform:uppercase;
+  font-weight:700;
+  letter-spacing:.5px;
+}
+
+.badge-paid{
+  background:rgba(37,99,235,.1);
+  color:var(--blue);
+}
+
+.badge-shipped{
+  background:rgba(245,158,11,.1);
+  color:var(--amber);
+}
+
+.badge-completed{
+  background:rgba(0,135,61,.12);
+  color:var(--green);
+}
+
+.badge-disputed{
+  background:rgba(220,38,38,.1);
+  color:var(--red);
+}
+
+/* buttons */
+
+.vp-action{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 14px;
+  border-radius:100px;
+  border:1px solid var(--border);
+  text-decoration:none;
+  font-size:12px;
+  font-weight:700;
+  transition:.18s;
+}
+
+.vp-action.ship{
+  background:var(--text);
+  color:var(--bg);
+  border-color:var(--text);
+}
+
+.vp-action.view{
+  background:var(--card);
+  color:var(--text);
+}
+
+.vp-action:hover{
+  transform:translateY(-1px);
+}
+
+/* empty */
+
+.vp-empty{
+  padding:90px 30px;
+  text-align:center;
+}
+
+.vp-empty h3{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:22px;
+  font-weight:800;
+  color:var(--text);
+  margin-bottom:10px;
+}
+
+.vp-empty p{
+  color:var(--muted);
+  font-size:14px;
+}
+
+/* mobile */
+
+@media(max-width:900px){
+
+  .vp-orders-inner{
+    padding:20px 16px;
   }
-  .order-item-count { display:none; }
-  .order-date-col { display:none; }
-  .row-actions { justify-content:flex-start; }
+
+  .vp-orders-head-row{
+    display:none;
+  }
+
+  .vp-order-row{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  .vp-order-actions{
+    display:flex;
+  }
+
+  .vp-orders-title{
+    font-size:34px;
+  }
+
 }
-@media(max-width:480px) {
-  .orders-stats { grid-template-columns:1fr 1fr; }
-}
+
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="orders-page">
-<div class="orders-inner">
 
-  <div class="page-header">
+<div class="vp-orders">
+<div class="vp-orders-inner">
+
+  <!-- HEADER -->
+
+  <div class="vp-orders-head">
+
     <div>
-      <h1>📦 Orders</h1>
-      <p class="page-header-sub">Manage and fulfill your customer orders</p>
+      <div class="vp-orders-eyebrow">
+        ORDER MANAGEMENT
+      </div>
+
+      <h1 class="vp-orders-title">
+        Orders
+      </h1>
+
+      <div class="vp-orders-sub">
+        Manage and fulfill customer purchases
+      </div>
     </div>
-    <a href="{% url 'dashboard' %}" class="btn btn-secondary">
-      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      Dashboard
+
+    <a href="{% url 'dashboard' %}" class="vp-back-btn">
+      ← Dashboard
     </a>
+
   </div>
 
-  <!-- Stats -->
-  <div class="orders-stats">
-    <div class="ostat">
-      <div class="ostat-label">Total Orders</div>
-      <div class="ostat-value">{{ counts.all }}</div>
+  <!-- STATS -->
+
+  <div class="vp-order-stats">
+
+    <div class="vp-stat">
+      <div class="vp-stat-label">Total Orders</div>
+      <div class="vp-stat-value">
+        {{ counts.all }}
+      </div>
     </div>
-    <div class="ostat">
-      <div class="ostat-label">Need to Ship</div>
-      <div class="ostat-value urgent">{{ counts.paid }}</div>
+
+    <div class="vp-stat">
+      <div class="vp-stat-label">To Ship</div>
+      <div class="vp-stat-value blue">
+        {{ counts.paid }}
+      </div>
     </div>
-    <div class="ostat">
-      <div class="ostat-label">In Transit</div>
-      <div class="ostat-value">{{ counts.shipped }}</div>
+
+    <div class="vp-stat">
+      <div class="vp-stat-label">Shipped</div>
+      <div class="vp-stat-value amber">
+        {{ counts.shipped }}
+      </div>
     </div>
-    <div class="ostat">
-      <div class="ostat-label">Disputed</div>
-      <div class="ostat-value {% if counts.disputed %}urgent{% endif %}">{{ counts.disputed }}</div>
+
+    <div class="vp-stat">
+      <div class="vp-stat-label">Completed</div>
+      <div class="vp-stat-value green">
+        {{ counts.completed }}
+      </div>
     </div>
-    <div class="ostat">
-      <div class="ostat-label">Completed</div>
-      <div class="ostat-value">{{ counts.completed }}</div>
+
+    <div class="vp-stat">
+      <div class="vp-stat-label">Disputed</div>
+      <div class="vp-stat-value red">
+        {{ counts.disputed }}
+      </div>
     </div>
+
   </div>
 
-  <!-- Filter Tabs -->
-  <div class="filter-row">
-    <a href="?status=" class="ftab {% if not status_filter %}active{% endif %}">
-      All <span class="ftab-badge">{{ counts.all }}</span>
+  <!-- FILTERS -->
+
+  <div class="vp-tabs">
+
+    <a href="?status="
+       class="vp-tab {% if not status_filter %}active{% endif %}">
+      All
     </a>
-    <a href="?status=paid" class="ftab {% if status_filter == 'paid' %}active{% endif %}">
-      🔴 To Ship <span class="ftab-badge">{{ counts.paid }}</span>
+
+    <a href="?status=paid"
+       class="vp-tab {% if status_filter == 'paid' %}active{% endif %}">
+      To Ship
     </a>
-    <a href="?status=shipped" class="ftab {% if status_filter == 'shipped' %}active{% endif %}">
-      🔵 Shipped <span class="ftab-badge">{{ counts.shipped }}</span>
+
+    <a href="?status=shipped"
+       class="vp-tab {% if status_filter == 'shipped' %}active{% endif %}">
+      Shipped
     </a>
-    <a href="?status=disputed" class="ftab {% if status_filter == 'disputed' %}active{% endif %}">
-      ⚠️ Disputed <span class="ftab-badge">{{ counts.disputed }}</span>
+
+    <a href="?status=completed"
+       class="vp-tab {% if status_filter == 'completed' %}active{% endif %}">
+      Completed
     </a>
-    <a href="?status=completed" class="ftab {% if status_filter == 'completed' %}active{% endif %}">
-      ✅ Done <span class="ftab-badge">{{ counts.completed }}</span>
+
+    <a href="?status=disputed"
+       class="vp-tab {% if status_filter == 'disputed' %}active{% endif %}">
+      Disputed
     </a>
+
   </div>
 
-  <!-- Table -->
-  <div class="orders-table">
-    <div class="table-head">
+  <!-- TABLE -->
+
+  <div class="vp-orders-table">
+
+    <div class="vp-orders-head-row">
       <span>Buyer</span>
       <span>Items</span>
       <span>Amount</span>
@@ -202,43 +485,111 @@
     </div>
 
     {% if orders %}
+
       {% for order in orders %}
-      <div class="order-row" style="cursor:pointer;" onclick="window.location='{% url 'vendor_order_detail' order.order_ref %}'">
+
+      <div class="vp-order-row">
+
+        <!-- buyer -->
+
         <div>
-          <div class="buyer-name">{{ order.buyer_name }}</div>
-          <div class="order-ref-txt">#{{ order.order_ref|slice:":8"|upper }}</div>
+          <div class="vp-buyer">
+            {{ order.buyer_name }}
+          </div>
+
+          <div class="vp-ref">
+            #{{ order.order_ref|slice:":8"|upper }}
+          </div>
         </div>
-        <div class="order-item-count">{{ order.items.count }} item{{ order.items.count|pluralize }}</div>
-        <div class="order-amount-col">{{ order.currency }} {{ order.subtotal|floatformat:0 }}</div>
+
+        <!-- items -->
+
         <div>
-          <span class="status-pill sp-{{ order.status }}">
-            <span class="s-dot"></span>
-            {{ order.get_status_display }}
-          </span>
+          {{ order.items.count }} item{{ order.items.count|pluralize }}
         </div>
-        <div class="order-date-col">{{ order.created_at|date:"M d, H:i" }}</div>
-        <div class="row-actions" onclick="event.stopPropagation()">
+
+        <!-- amount -->
+
+        <div class="vp-amount">
+          {{ order.currency }} {{ order.subtotal|floatformat:0 }}
+        </div>
+
+        <!-- status -->
+
+        <div>
+
+          {% if order.status == 'paid' %}
+            <span class="vp-badge badge-paid">
+              To Ship
+            </span>
+
+          {% elif order.status == 'shipped' %}
+            <span class="vp-badge badge-shipped">
+              Shipped
+            </span>
+
+          {% elif order.status == 'completed' %}
+            <span class="vp-badge badge-completed">
+              Completed
+            </span>
+
+          {% elif order.status == 'disputed' %}
+            <span class="vp-badge badge-disputed">
+              Disputed
+            </span>
+          {% endif %}
+
+        </div>
+
+        <!-- date -->
+
+        <div>
+          {{ order.created_at|date:"M d, H:i" }}
+        </div>
+
+        <!-- action -->
+
+        <div class="vp-order-actions">
+
           {% if order.status == 'paid' or order.status == 'disputed' %}
-          <a href="{% url 'mark_shipped' order.order_ref %}" class="row-btn rb-ship">
-            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+
+          <a href="{% url 'mark_shipped' order.order_ref %}"
+             class="vp-action ship">
             Ship
           </a>
+
           {% else %}
-          <a href="{% url 'vendor_order_detail' order.order_ref %}" class="row-btn rb-view">View</a>
+
+          <a href="{% url 'vendor_order_detail' order.order_ref %}"
+             class="vp-action view">
+            View
+          </a>
+
           {% endif %}
+
         </div>
+
       </div>
+
       {% endfor %}
+
     {% else %}
-      <div class="empty-orders-state">
-        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto 16px;display:block;"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+
+      <div class="vp-empty">
         <h3>No orders yet</h3>
-        <p>When customers purchase from your store, orders will appear here.</p>
+        <p>
+          When customers purchase from your store,
+          orders will appear here.
+        </p>
       </div>
+
     {% endif %}
+
   </div>
 
 </div>
 </div>
+
 {% block footer %}{% endblock %}
 {% endblock %}
+```

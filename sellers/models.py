@@ -134,15 +134,18 @@ class VendorBankAccount(models.Model):
 
 # ── Order ────────────────────────────────────────────────────
 class Order(models.Model):
+
     STATUS_CHOICES = [
-        ('pending',   'Pending Payment'),      # payment not yet confirmed
-        ('paid',      'Paid — Awaiting Shipment'),
-        ('shipped',   'Shipped'),
-        ('delivered', 'Delivered'),            # buyer confirmed receipt
-        ('disputed',  'Disputed'),
-        ('refunded',  'Refunded'),
-        ('completed', 'Completed'),            # payout released to vendor
-    ]
+    ('pending',       'Pending Payment'),
+    ('paid',          'Paid — Awaiting Shipment'),
+    ('shipped',       'Shipped'),
+    ('RECEIVED',      'Received — Awaiting 24h Payout'),   # ← buyer confirmed, buffer running
+    ('delivered',     'Delivered'),                         # direct pay or legacy
+    ('disputed',      'Disputed'),
+    ('refunded',      'Refunded'),
+    ('FAILED_PAYOUT', 'Payout Failed — Retrying Tomorrow'),  # ← cron retry queue
+    ('completed',     'Completed — Paid Out'),
+]
 
     order_ref        = models.CharField(max_length=100, unique=True, default=uuid.uuid4)
     seller           = models.ForeignKey(

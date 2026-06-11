@@ -1,0 +1,1065 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+{% block title %}Transactions — Vendopage{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══════════════════════════════════════════════════
+   VENDOPAGE TRANSACTIONS PAGE
+   Same token system as dashboard:
+   #0D0D0D bg · #1A1A18 cards · var(--green)=#00873D
+   Cabinet Grotesk headings · Satoshi/var(--font-b) body
+══════════════════════════════════════════════════ */
+
+.vp-tx {
+  background: #0D0D0D;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  padding-bottom: 100px;
+}
+
+/* Background grid — same as dashboard */
+.vp-tx::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 72px 72px;
+  pointer-events: none; z-index: 0;
+}
+.vp-tx::after {
+  content: '';
+  position: fixed;
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,135,61,.08) 0%, transparent 65%);
+  top: -150px; right: -150px;
+  pointer-events: none; z-index: 0;
+}
+
+.vp-tx-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative; z-index: 1;
+}
+
+/* ── PAGE HEADER ── */
+.vp-tx-header {
+  padding: 32px 0 28px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+}
+.vp-tx-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-b);
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .5px;
+  color: rgba(245,244,240,.3);
+  text-decoration: none;
+  transition: color .18s;
+  margin-bottom: 16px;
+}
+.vp-tx-back:hover { color: rgba(245,244,240,.7); }
+.vp-tx-back svg { stroke: currentColor; }
+.vp-page-eyebrow {
+  font-family: var(--font-b);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--green);
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 8px;
+}
+.vp-page-eyebrow-line { width: 20px; height: 1.5px; background: var(--green); }
+.vp-page-title {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 800;
+  letter-spacing: -2px;
+  color: #F5F4F0;
+  line-height: 1.05;
+}
+.vp-page-sub {
+  font-size: 14px;
+  color: rgba(245,244,240,.3);
+  margin-top: 6px;
+  font-weight: 400;
+}
+
+/* ── SUMMARY CARDS ── */
+.vp-tx-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.vp-tx-sum-card {
+  background: #1A1A18;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 16px;
+  padding: 20px 22px;
+  position: relative; overflow: hidden;
+  transition: border-color .2s;
+}
+.vp-tx-sum-card:hover { border-color: rgba(255,255,255,.14); }
+.vp-tx-sum-card.highlight {
+  border-color: rgba(0,135,61,.2);
+}
+.vp-tx-sum-card.highlight::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,200,83,.4), transparent);
+}
+.vp-sum-label {
+  font-family: var(--font-b);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(245,244,240,.3);
+  margin-bottom: 10px;
+}
+.vp-sum-amount {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 26px; font-weight: 800;
+  letter-spacing: -1px;
+  color: #F5F4F0; line-height: 1;
+}
+.vp-sum-amount.green { color: var(--green); }
+.vp-sum-amount.amber { color: #FBBF24; }
+.vp-sum-amount.blue  { color: #60a5fa; }
+.vp-sum-amount.red   { color: #f87171; }
+.vp-sum-count {
+  font-size: 12px; font-weight: 500;
+  color: rgba(245,244,240,.25);
+  margin-top: 6px;
+  display: flex; align-items: center; gap: 6px;
+}
+.vp-sum-count::before {
+  content: ''; width: 12px; height: 1px;
+  background: currentColor; opacity: .5;
+}
+
+/* ── FILTER TABS ── */
+.vp-tx-tabs-wrap {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.vp-tx-tabs {
+  display: flex; gap: 4px; flex-wrap: wrap;
+}
+.vp-tx-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 100px;
+  border: 1.5px solid rgba(245,244,240,.1);
+  background: transparent;
+  font-family: var(--font-b); font-size: 12px; font-weight: 700;
+  color: rgba(245,244,240,.35);
+  cursor: pointer; transition: all .18s;
+  text-decoration: none;
+}
+.vp-tx-tab:hover {
+  color: rgba(245,244,240,.7);
+  border-color: rgba(245,244,240,.25);
+}
+.vp-tx-tab.active {
+  background: #F5F4F0; color: #0D0D0D;
+  border-color: #F5F4F0;
+}
+.vp-tx-tab-cnt {
+  font-size: 10px; font-weight: 700;
+  background: rgba(0,0,0,.12); color: inherit;
+  padding: 1px 6px; border-radius: 100px;
+}
+.vp-tx-tab:not(.active) .vp-tx-tab-cnt {
+  background: rgba(255,255,255,.08);
+  color: rgba(245,244,240,.3);
+}
+
+/* ── ESCROW INFO CHIP ── */
+.vp-escrow-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 100px;
+  background: rgba(0,135,61,.06);
+  border: 1px solid rgba(0,135,61,.18);
+  font-family: var(--font-b); font-size: 12px; font-weight: 600;
+  color: rgba(0,200,83,.7);
+  margin-bottom: 20px;
+}
+
+/* ── TRANSACTION TABLE ── */
+.vp-tx-table-wrap {
+  background: #1A1A18;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+.vp-tx-table-wrap::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,200,83,.3), transparent);
+}
+
+/* Table header */
+.vp-tx-thead {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr 1.1fr 1.1fr 120px 90px;
+  padding: 12px 24px;
+  background: rgba(0,0,0,.25);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.vp-tx-thead span {
+  font-family: var(--font-b);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: rgba(245,244,240,.2);
+}
+
+/* Transaction row */
+.vp-tx-row {
+  display: grid;
+  grid-template-columns: 2.2fr 1fr 1.1fr 1.1fr 120px 90px;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid rgba(255,255,255,.045);
+  transition: background .15s;
+  cursor: pointer;
+  text-decoration: none; color: inherit;
+}
+.vp-tx-row:last-child { border-bottom: none; }
+.vp-tx-row:hover { background: rgba(255,255,255,.025); }
+
+/* Row: buyer column */
+.vp-tx-buyer {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 15px; font-weight: 700;
+  letter-spacing: -.3px; color: #F5F4F0;
+}
+.vp-tx-ref {
+  font-family: monospace; font-size: 11px;
+  color: rgba(245,244,240,.25); margin-top: 2px;
+  display: flex; align-items: center; gap: 8px;
+}
+.vp-tx-ref-copy {
+  background: none; border: none; padding: 0; cursor: pointer;
+  color: rgba(245,244,240,.2); transition: color .15s;
+  display: inline-flex; align-items: center;
+}
+.vp-tx-ref-copy:hover { color: var(--green); }
+
+/* Row: items */
+.vp-tx-items {
+  font-size: 13px; color: rgba(245,244,240,.4);
+}
+.vp-tx-items-list {
+  font-size: 11px; color: rgba(245,244,240,.25);
+  margin-top: 2px; max-width: 140px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Row: fee breakdown */
+.vp-tx-amount {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 15px; font-weight: 700;
+  color: #F5F4F0;
+}
+.vp-tx-fee-note {
+  font-size: 11px; color: rgba(245,244,240,.25);
+  margin-top: 2px;
+}
+
+/* Row: payout column */
+.vp-tx-payout {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 15px; font-weight: 800;
+  letter-spacing: -.5px;
+}
+.vp-tx-payout.green { color: var(--green); }
+.vp-tx-payout.amber { color: #FBBF24; }
+.vp-tx-payout.muted { color: rgba(245,244,240,.3); }
+.vp-tx-eta {
+  font-size: 11px; color: rgba(245,244,240,.25);
+  margin-top: 2px; display: flex; align-items: center; gap: 4px;
+}
+.vp-tx-eta-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #FBBF24;
+  animation: livePulse 2s infinite;
+  flex-shrink: 0;
+}
+
+/* Status badges — same pattern as dashboard */
+.vp-tx-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-b);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .5px; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 100px;
+}
+.vp-tx-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.badge-escrow    { background: rgba(96,165,250,.1); border: 1px solid rgba(96,165,250,.2); color: #60a5fa; }
+.badge-received  { background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.2); color: #FBBF24; }
+.badge-paid      { background: rgba(0,135,61,.12); border: 1px solid rgba(0,135,61,.2); color: var(--green); }
+.badge-disputed  { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.2); color: #f87171; }
+.badge-refunded  { background: rgba(167,139,250,.1); border: 1px solid rgba(167,139,250,.2); color: #a78bfa; }
+.badge-failed    { background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.2); color: #f87171; }
+
+/* Action button (view) */
+.vp-tx-view-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 7px 14px; border-radius: 100px;
+  font-family: var(--font-b); font-size: 11px; font-weight: 700;
+  cursor: pointer; text-decoration: none;
+  border: 1px solid rgba(255,255,255,.1);
+  background: transparent; color: rgba(245,244,240,.4);
+  transition: all .18s; white-space: nowrap;
+}
+.vp-tx-view-btn:hover {
+  border-color: rgba(255,255,255,.25);
+  color: rgba(245,244,240,.8);
+  background: rgba(255,255,255,.04);
+}
+
+/* ETA Progress bar */
+.vp-tx-prog {
+  height: 2px; background: rgba(255,255,255,.05);
+  border-radius: 2px; margin-top: 10px; overflow: hidden;
+}
+.vp-tx-prog-fill { height: 100%; border-radius: 2px; }
+.prog-amber { background: #FBBF24; }
+.prog-green { background: var(--green); }
+
+/* ── ORDER DETAIL DRAWER (slide-in) ── */
+.vp-tx-drawer {
+  position: fixed; inset: 0; z-index: 400;
+  display: none; align-items: flex-end; justify-content: flex-end;
+}
+.vp-tx-drawer.open { display: flex; }
+.vp-tx-drawer-bg {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(4px);
+}
+.vp-tx-drawer-panel {
+  position: relative; z-index: 1;
+  width: 100%; max-width: 480px; height: 100vh;
+  background: #141414;
+  border-left: 1px solid rgba(255,255,255,.08);
+  overflow-y: auto;
+  animation: slideInRight .28s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+.vp-drawer-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  position: sticky; top: 0; background: #141414; z-index: 2;
+}
+.vp-drawer-title {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 18px; font-weight: 800;
+  letter-spacing: -.5px; color: #F5F4F0;
+}
+.vp-drawer-close {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.04);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: rgba(245,244,240,.5);
+  transition: all .18s;
+}
+.vp-drawer-close:hover { background: #F5F4F0; color: #0D0D0D; border-color: #F5F4F0; }
+.vp-drawer-body { padding: 24px; }
+
+/* Drawer: sections */
+.vp-drawer-section {
+  margin-bottom: 24px;
+}
+.vp-drawer-section-label {
+  font-family: var(--font-b);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: rgba(245,244,240,.25);
+  margin-bottom: 12px;
+}
+.vp-drawer-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  gap: 12px;
+}
+.vp-drawer-row:last-child { border-bottom: none; }
+.vp-drawer-row-label {
+  font-size: 13px; color: rgba(245,244,240,.4); font-weight: 500;
+}
+.vp-drawer-row-val {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: #F5F4F0; text-align: right;
+}
+.vp-drawer-row-val.green { color: var(--green); }
+.vp-drawer-row-val.amber { color: #FBBF24; }
+.vp-drawer-row-val.muted { color: rgba(245,244,240,.3); font-weight: 400; font-size: 13px; font-family: var(--font-b); }
+.vp-drawer-row-val.mono { font-family: monospace; font-size: 12px; font-weight: 400; color: rgba(245,244,240,.4); }
+
+/* Fee breakdown highlight box */
+.vp-fee-box {
+  background: rgba(0,0,0,.3);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 12px;
+  padding: 16px;
+}
+.vp-fee-line {
+  display: flex; justify-content: space-between;
+  padding: 7px 0;
+  font-size: 13px; color: rgba(245,244,240,.5);
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.vp-fee-line:last-child { border-bottom: none; }
+.vp-fee-line.total {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 16px; font-weight: 800;
+  color: var(--green); padding-top: 12px; margin-top: 4px;
+}
+
+/* Item row in drawer */
+.vp-drawer-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+}
+.vp-drawer-item:last-child { border-bottom: none; }
+.vp-drawer-item-img {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: rgba(255,255,255,.05);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0; overflow: hidden;
+}
+.vp-drawer-item-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+.vp-drawer-item-name {
+  font-size: 13px; font-weight: 600; color: #F5F4F0;
+  flex: 1; line-height: 1.4;
+}
+.vp-drawer-item-meta {
+  font-size: 11px; color: rgba(245,244,240,.3); margin-top: 2px;
+}
+.vp-drawer-item-price {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 14px; font-weight: 800;
+  color: #F5F4F0; text-align: right; flex-shrink: 0;
+}
+
+/* ── EMPTY STATE ── */
+.vp-tx-empty {
+  text-align: center; padding: 80px 20px;
+}
+.vp-tx-empty-icon {
+  width: 64px; height: 64px; border-radius: 20px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin: 0 auto 20px;
+}
+.vp-tx-empty h3 {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: 20px; font-weight: 800;
+  letter-spacing: -.5px; color: rgba(245,244,240,.5);
+  margin-bottom: 8px;
+}
+.vp-tx-empty p { font-size: 14px; color: rgba(245,244,240,.25); line-height: 1.6; }
+
+/* ── BOTTOM NAV — same as dashboard ── */
+.vp-bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(13,13,13,.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 16px; height: 72px; z-index: 200;
+}
+.vp-nav-item {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 20px; border-radius: 12px;
+  cursor: pointer; transition: all .18s;
+  background: none; border: none;
+  color: rgba(245,244,240,.25);
+  text-decoration: none; flex: 1;
+}
+.vp-nav-item:hover { color: rgba(245,244,240,.5); }
+.vp-nav-item.active { color: var(--green); }
+.vp-nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.vp-nav-label { font-family: var(--font-b); font-size: 10px; font-weight: 700; letter-spacing: .3px; }
+.vp-nav-add {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #F5F4F0; border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .2s;
+  margin-top: -14px; flex-shrink: 0; text-decoration: none;
+  box-shadow: 0 8px 24px rgba(245,244,240,.15);
+}
+.vp-nav-add:hover {
+  background: #fff; transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(245,244,240,.2);
+}
+.vp-nav-add svg { width: 22px; height: 22px; stroke: #0D0D0D; fill: none; stroke-width: 2.5; }
+
+/* ── SIDEBAR (desktop) ── */
+@media (min-width: 900px) {
+  .vp-bottom-nav { display: none; }
+  .vp-sidebar {
+    position: fixed; left: 0; top: 0; bottom: 0;
+    width: 220px;
+    background: #0D0D0D;
+    border-right: 1px solid rgba(255,255,255,.07);
+    display: flex; flex-direction: column;
+    padding: 32px 0;
+    z-index: 100;
+  }
+  .vp-tx { margin-left: 220px; padding-bottom: 40px; }
+  .vp-sidebar-logo {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 20px; font-weight: 800;
+    letter-spacing: -1px; color: #F5F4F0;
+    padding: 0 24px 32px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    display: flex; align-items: center; gap: 8px;
+    text-decoration: none;
+  }
+  .vp-sidebar-logo-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(0,200,83,.5);
+  }
+  .vp-sidebar-nav { flex: 1; padding: 20px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .vp-sidebar-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 10px;
+    font-family: var(--font-b); font-size: 13px; font-weight: 600;
+    color: rgba(245,244,240,.35);
+    text-decoration: none; transition: all .18s;
+    cursor: pointer; border: none; background: none;
+  }
+  .vp-sidebar-item:hover { color: rgba(245,244,240,.7); background: rgba(255,255,255,.04); }
+  .vp-sidebar-item.active { color: #F5F4F0; background: rgba(255,255,255,.07); }
+  .vp-sidebar-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; }
+  .vp-sidebar-add {
+    margin: 12px; padding: 11px;
+    background: #F5F4F0; color: #0D0D0D;
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: var(--font-b); font-size: 13px; font-weight: 700;
+    text-decoration: none; transition: all .18s;
+  }
+  .vp-sidebar-add:hover { background: #fff; }
+  .vp-sidebar-bottom { padding: 12px; border-top: 1px solid rgba(255,255,255,.07); }
+  .vp-sidebar-avatar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    text-decoration: none; transition: background .18s;
+  }
+  .vp-sidebar-avatar:hover { background: rgba(255,255,255,.04); }
+  .vp-sidebar-avi {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--green);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cabinet Grotesk', sans-serif;
+    font-size: 13px; font-weight: 800; color: #0D0D0D;
+    flex-shrink: 0; overflow: hidden;
+  }
+  .vp-sidebar-avi img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+  .vp-sidebar-name {
+    font-family: var(--font-b); font-size: 13px; font-weight: 600;
+    color: rgba(245,244,240,.6);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+}
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: #F5F4F0; color: #0D0D0D;
+  padding: 10px 22px; border-radius: 100px;
+  font-family: var(--font-b); font-size: 13px; font-weight: 700;
+  z-index: 900; opacity: 0; pointer-events: none;
+  transition: opacity .3s; white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.toast.show { opacity: 1; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .vp-sidebar { display: none; }
+  .vp-tx-thead { display: none; }
+  .vp-tx-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+    gap: 6px 0; padding: 16px 18px;
+  }
+  .vp-tx-items, .vp-tx-fee-note { display: none; }
+  .vp-tx-inner { padding: 0 16px; }
+  .vp-tx-drawer-panel { max-width: 100%; width: 100%; }
+}
+@media (max-width: 480px) {
+  .vp-tx-summary { grid-template-columns: 1fr 1fr; }
+}
+
+@keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── DESKTOP SIDEBAR ── -->
+<aside class="vp-sidebar">
+  <a href="{% url 'dashboard' %}" class="vp-sidebar-logo">
+    <span class="vp-sidebar-logo-dot"></span>
+    Vendopage
+  </a>
+  <nav class="vp-sidebar-nav">
+    <a href="{% url 'dashboard' %}" class="vp-sidebar-item">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+    <a href="{% url 'vendor_orders' %}" class="vp-sidebar-item">
+      <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      Orders
+    </a>
+    <a href="{% url 'seller_transactions' %}" class="vp-sidebar-item active">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Payouts
+    </a>
+    <a href="{% url 'upload_product' %}" class="vp-sidebar-item">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Products
+    </a>
+    <a href="{% url 'settings' %}" class="vp-sidebar-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </a>
+  </nav>
+  <a href="{% url 'upload_product' %}" class="vp-sidebar-add">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Product
+  </a>
+  <div class="vp-sidebar-bottom">
+    <a href="{% url 'settings' %}" class="vp-sidebar-avatar">
+      <div class="vp-sidebar-avi">
+        {% if user.profile_picture %}
+          <img src="{{ user.profile_picture.url }}" alt="{{ user.business_name }}">
+        {% else %}
+          {{ user.business_name|first|upper }}
+        {% endif %}
+      </div>
+      <span class="vp-sidebar-name">{{ user.business_name|truncatechars:20 }}</span>
+    </a>
+  </div>
+</aside>
+
+<!-- ── MAIN ── -->
+<div class="vp-tx">
+<div class="vp-tx-inner">
+
+  <!-- PAGE HEADER -->
+  <div class="vp-tx-header">
+    <div>
+      <a href="{% url 'dashboard' %}" class="vp-tx-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Dashboard
+      </a>
+      <div class="vp-page-eyebrow">
+        <span class="vp-page-eyebrow-line"></span>
+        Payout Ledger
+      </div>
+      <h1 class="vp-page-title">Transactions</h1>
+      <p class="vp-page-sub">Every sale, fee, and payout — all in one place</p>
+    </div>
+    <a href="{% url 'dashboard' %}" class="vp-tx-back" style="margin-top:0;align-self:flex-start;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </a>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="vp-tx-summary">
+    <div class="vp-tx-sum-card highlight">
+      <div class="vp-sum-label">Total Paid Out</div>
+      <div class="vp-sum-amount green">
+        {{ user.currency_symbol|default:"₦" }}{{ summary.total_paid_out|default:0|floatformat:0 }}
+      </div>
+      <div class="vp-sum-count">{{ summary.count_completed|default:0 }} completed order{{ summary.count_completed|default:0|pluralize }}</div>
+    </div>
+    <div class="vp-tx-sum-card">
+      <div class="vp-sum-label">In Escrow</div>
+      <div class="vp-sum-amount blue">
+        {{ user.currency_symbol|default:"₦" }}{{ summary.total_pending|default:0|floatformat:0 }}
+      </div>
+      <div class="vp-sum-count">{{ summary.count_pending|default:0 }} order{{ summary.count_pending|default:0|pluralize }} in transit</div>
+    </div>
+    <div class="vp-tx-sum-card">
+      <div class="vp-sum-label">Buyer Confirmed</div>
+      <div class="vp-sum-amount amber">
+        {{ user.currency_symbol|default:"₦" }}{{ summary.total_in_buffer|default:0|floatformat:0 }}
+      </div>
+      <div class="vp-sum-count">{{ summary.count_received|default:0 }} releasing tonight</div>
+    </div>
+    {% if summary.total_failed %}
+    <div class="vp-tx-sum-card">
+      <div class="vp-sum-label">Payout Retrying</div>
+      <div class="vp-sum-amount red">
+        {{ user.currency_symbol|default:"₦" }}{{ summary.total_failed|floatformat:0 }}
+      </div>
+      <div class="vp-sum-count">{{ summary.count_failed }} order{{ summary.count_failed|pluralize }} retrying</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ESCROW INFO CHIP -->
+  <div class="vp-escrow-chip">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Payouts run every night at 2 AM · 5% platform fee is deducted automatically
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="vp-tx-tabs-wrap">
+    <div class="vp-tx-tabs">
+      {% for tab_key, tab_label in tab_map %}
+      <a href="?status={{ tab_key }}"
+         class="vp-tx-tab {% if status_filter == tab_key %}active{% endif %}">
+        {{ tab_label }}
+        <span class="vp-tx-tab-cnt">{{ tab_counts|get_item:tab_key|default:0 }}</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- TRANSACTION TABLE -->
+  <div class="vp-tx-table-wrap" style="margin-top:16px;">
+    <div class="vp-tx-thead">
+      <span>Buyer</span>
+      <span>Items</span>
+      <span>Order Total</span>
+      <span>Your Payout</span>
+      <span>Status</span>
+      <span></span>
+    </div>
+
+    {% if orders %}
+      {% for order in orders %}
+      <div class="vp-tx-row"
+           onclick="openDrawer('{{ order.order_ref }}')"
+           data-ref="{{ order.order_ref }}">
+
+        <!-- Buyer -->
+        <div>
+          <div class="vp-tx-buyer">{{ order.buyer_name }}</div>
+          <div class="vp-tx-ref">
+            #{{ order.order_ref|slice:":8"|upper }}
+            <button class="vp-tx-ref-copy"
+                    onclick="event.stopPropagation(); copyRef('{{ order.order_ref|slice:':8'|upper }}')"
+                    title="Copy ref">
+              <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            </button>
+            · {{ order.created_at|date:"M d, H:i" }}
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div class="vp-tx-items">
+          {{ order.items.count }} item{{ order.items.count|pluralize }}
+          <div class="vp-tx-items-list">
+            {% for item in order.items.all|slice:":2" %}{{ item.product_name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% if order.items.count > 2 %} +{{ order.items.count|add:"-2" }} more{% endif %}
+          </div>
+        </div>
+
+        <!-- Order total -->
+        <div>
+          <div class="vp-tx-amount">{{ order.currency }} {{ order.subtotal|floatformat:0 }}</div>
+          <div class="vp-tx-fee-note">- {{ order.platform_fee|floatformat:0 }} fee</div>
+        </div>
+
+        <!-- Payout -->
+        <div>
+          {% if order.status == 'completed' and order.payout_triggered %}
+            <div class="vp-tx-payout green">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
+            <div class="vp-tx-eta">Paid out {{ order.payout_at|date:"M d" }}</div>
+          {% elif order.status == 'RECEIVED' %}
+            <div class="vp-tx-payout amber">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
+            <div class="vp-tx-eta">
+              <span class="vp-tx-eta-dot"></span>
+              {% if order.payout_eta %}by {{ order.payout_eta|date:"D g A" }}{% else %}Tonight 2 AM{% endif %}
+            </div>
+            <div class="vp-tx-prog"><div class="vp-tx-prog-fill prog-amber" style="width:{{ order.payout_progress|default:50 }}%"></div></div>
+          {% elif order.status == 'FAILED_PAYOUT' %}
+            <div class="vp-tx-payout" style="color:#f87171;">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
+            <div class="vp-tx-eta" style="color:#f87171;">Retrying tonight</div>
+          {% elif order.status == 'refunded' %}
+            <div class="vp-tx-payout muted">Refunded</div>
+          {% else %}
+            <div class="vp-tx-payout" style="color:rgba(245,244,240,.3);">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
+            <div class="vp-tx-eta">Waiting for delivery</div>
+          {% endif %}
+        </div>
+
+        <!-- Status badge -->
+        <div>
+          {% if order.status == 'paid' %}
+            <span class="vp-tx-badge badge-escrow"><span class="vp-tx-badge-dot"></span>Escrow</span>
+          {% elif order.status == 'shipped' %}
+            <span class="vp-tx-badge badge-escrow"><span class="vp-tx-badge-dot"></span>Shipped</span>
+          {% elif order.status == 'RECEIVED' %}
+            <span class="vp-tx-badge badge-received"><span class="vp-tx-badge-dot"></span>Confirmed</span>
+          {% elif order.status == 'completed' %}
+            <span class="vp-tx-badge badge-paid"><span class="vp-tx-badge-dot"></span>Paid Out</span>
+          {% elif order.status == 'disputed' %}
+            <span class="vp-tx-badge badge-disputed"><span class="vp-tx-badge-dot"></span>Disputed</span>
+          {% elif order.status == 'refunded' %}
+            <span class="vp-tx-badge badge-refunded"><span class="vp-tx-badge-dot"></span>Refunded</span>
+          {% elif order.status == 'FAILED_PAYOUT' %}
+            <span class="vp-tx-badge badge-failed"><span class="vp-tx-badge-dot"></span>Retrying</span>
+          {% else %}
+            <span class="vp-tx-badge" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(245,244,240,.4);">
+              <span class="vp-tx-badge-dot"></span>{{ order.get_status_display }}
+            </span>
+          {% endif %}
+        </div>
+
+        <!-- Action -->
+        <div onclick="event.stopPropagation()">
+          <a href="{% url 'vendor_order_detail' order.order_ref %}" class="vp-tx-view-btn">
+            Details →
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="vp-tx-empty">
+        <div class="vp-tx-empty-icon">💸</div>
+        <h3>No transactions yet</h3>
+        <p>
+          {% if status_filter == 'paid_out' %}You haven't received any payouts yet — keep selling!
+          {% elif status_filter == 'pending' %}No orders currently in escrow.
+          {% elif status_filter == 'received' %}No orders confirmed by buyers yet.
+          {% elif status_filter == 'disputed' %}No disputed orders — great news!
+          {% else %}When buyers place orders, your transactions will appear here.{% endif %}
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+</div><!-- /vp-tx-inner -->
+
+<!-- ── BOTTOM NAV (mobile) ── -->
+<nav class="vp-bottom-nav">
+  <a href="{% url 'dashboard' %}" class="vp-nav-item">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span class="vp-nav-label">Home</span>
+  </a>
+  <a href="{% url 'vendor_orders' %}" class="vp-nav-item">
+    <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+    <span class="vp-nav-label">Orders</span>
+  </a>
+  <a href="{% url 'upload_product' %}" class="vp-nav-add">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </a>
+  <a href="{% url 'seller_transactions' %}" class="vp-nav-item active">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+    <span class="vp-nav-label">Payouts</span>
+  </a>
+  <a href="{% url 'settings' %}" class="vp-nav-item">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+    <span class="vp-nav-label">Settings</span>
+  </a>
+</nav>
+
+</div><!-- /vp-tx -->
+
+<!-- ── ORDER DETAIL DRAWER ── -->
+<div class="vp-tx-drawer" id="txDrawer">
+  <div class="vp-tx-drawer-bg" onclick="closeDrawer()"></div>
+  <div class="vp-tx-drawer-panel" id="drawerPanel">
+    <div class="vp-drawer-head">
+      <span class="vp-drawer-title">Order Details</span>
+      <button class="vp-drawer-close" onclick="closeDrawer()">×</button>
+    </div>
+    <div class="vp-drawer-body" id="drawerBody">
+      <div style="text-align:center;padding:60px 0;color:rgba(245,244,240,.25);">
+        <div style="font-size:32px;margin-bottom:12px;">⏳</div>
+        <div style="font-family:var(--font-b);font-size:13px;">Loading order...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Embed order data for drawer JS -->
+<script>
+const ORDERS_DATA = {
+  {% for order in orders %}
+  '{{ order.order_ref }}': {
+    ref: '{{ order.order_ref|slice:":8"|upper }}',
+    buyer_name: '{{ order.buyer_name|escapejs }}',
+    buyer_email: '{{ order.buyer_email|escapejs }}',
+    buyer_phone: '{{ order.buyer_phone|escapejs }}',
+    delivery_address: '{{ order.delivery_address|escapejs }}',
+    delivery_city: '{{ order.delivery_city|escapejs }}',
+    currency: '{{ order.currency|escapejs }}',
+    subtotal: '{{ order.subtotal|floatformat:0 }}',
+    platform_fee: '{{ order.platform_fee|floatformat:0 }}',
+    vendor_payout: '{{ order.vendor_payout|floatformat:0 }}',
+    status: '{{ order.status }}',
+    payment_type: '{{ order.payment_type }}',
+    created_at: '{{ order.created_at|date:"M d, Y · H:i" }}',
+    paid_at: '{{ order.paid_at|date:"M d, Y · H:i" }}',
+    payout_at: '{% if order.payout_at %}{{ order.payout_at|date:"M d, Y · H:i" }}{% endif %}',
+    payout_eta: '{% if order.payout_eta %}{{ order.payout_eta|date:"D, M d · g A" }}{% endif %}',
+    flutterwave_tx_id: '{{ order.flutterwave_tx_id|default:""|escapejs }}',
+    flutterwave_transfer_id: '{{ order.flutterwave_transfer_id|default:""|escapejs }}',
+    tracking_info: '{{ order.tracking_info|default:""|escapejs }}',
+    courier_name: '{{ order.courier_name|default:""|escapejs }}',
+    items: [
+      {% for item in order.items.all %}
+      {
+        name: '{{ item.product_name|escapejs }}',
+        qty: {{ item.quantity }},
+        price: '{{ item.price|floatformat:0 }}',
+        image: '{{ item.product_image_url|default:""|escapejs }}'
+      }{% if not forloop.last %},{% endif %}
+      {% endfor %}
+    ],
+    detail_url: '{% url "vendor_order_detail" order.order_ref %}'
+  }{% if not forloop.last %},{% endif %}
+  {% endfor %}
+};
+
+const STATUS_MAP = {
+  'paid':         { label: 'In Escrow',       cls: 'badge-escrow'   },
+  'shipped':      { label: 'Shipped',         cls: 'badge-escrow'   },
+  'RECEIVED':     { label: 'Buyer Confirmed', cls: 'badge-received' },
+  'completed':    { label: 'Paid Out',        cls: 'badge-paid'     },
+  'disputed':     { label: 'Disputed',        cls: 'badge-disputed' },
+  'refunded':     { label: 'Refunded',        cls: 'badge-refunded' },
+  'FAILED_PAYOUT':{ label: 'Retrying',        cls: 'badge-failed'   },
+};
+
+function openDrawer(ref) {
+  const d = ORDERS_DATA[ref];
+  if (!d) return;
+  document.getElementById('txDrawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const st = STATUS_MAP[d.status] || { label: d.status, cls: '' };
+  const payoutColor = d.status === 'completed' ? 'green' : d.status === 'RECEIVED' ? 'amber' : 'muted';
+
+  let itemsHtml = d.items.map(item => `
+    <div class="vp-drawer-item">
+      <div class="vp-drawer-item-img">
+        ${item.image
+          ? `<img src="${item.image}" alt="${item.name}" loading="lazy">`
+          : '📦'
+        }
+      </div>
+      <div style="flex:1">
+        <div class="vp-drawer-item-name">${item.name}</div>
+        <div class="vp-drawer-item-meta">Qty: ${item.qty}</div>
+      </div>
+      <div class="vp-drawer-item-price">${d.currency} ${(parseInt(item.price) * item.qty).toLocaleString()}</div>
+    </div>
+  `).join('');
+
+  let payoutNote = '';
+  if (d.status === 'RECEIVED' && d.payout_eta) {
+    payoutNote = `<div class="vp-tx-eta" style="margin-top:6px;"><span class="vp-tx-eta-dot"></span>Expected by ${d.payout_eta}</div>`;
+  } else if (d.status === 'completed' && d.payout_at) {
+    payoutNote = `<div style="font-size:12px;color:rgba(245,244,240,.25);margin-top:4px;">Sent ${d.payout_at}</div>`;
+  }
+
+  document.getElementById('drawerBody').innerHTML = `
+    <div class="vp-drawer-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <div style="font-family:'Cabinet Grotesk',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;color:#F5F4F0;">#${d.ref}</div>
+          <div style="font-size:12px;color:rgba(245,244,240,.25);margin-top:3px;">${d.created_at}</div>
+        </div>
+        <span class="vp-tx-badge ${st.cls}">
+          <span class="vp-tx-badge-dot"></span>${st.label}
+        </span>
+      </div>
+    </div>
+
+    <div class="vp-drawer-section">
+      <div class="vp-drawer-section-label">Buyer Info</div>
+      <div class="vp-fee-box">
+        <div class="vp-fee-line"><span>Name</span><span style="color:#F5F4F0;font-weight:600;">${d.buyer_name}</span></div>
+        <div class="vp-fee-line"><span>Email</span><span style="color:rgba(245,244,240,.5);font-size:12px;font-family:monospace;">${d.buyer_email}</span></div>
+        <div class="vp-fee-line"><span>Phone</span><span style="color:rgba(245,244,240,.5);">${d.buyer_phone}</span></div>
+        <div class="vp-fee-line last-child" style="border:none"><span>Delivery</span><span style="color:rgba(245,244,240,.5);text-align:right;max-width:200px;">${d.delivery_address}${d.delivery_city ? ', ' + d.delivery_city : ''}</span></div>
+      </div>
+    </div>
+
+    <div class="vp-drawer-section">
+      <div class="vp-drawer-section-label">Items (${d.items.length})</div>
+      ${itemsHtml}
+    </div>
+
+    <div class="vp-drawer-section">
+      <div class="vp-drawer-section-label">Fee Breakdown</div>
+      <div class="vp-fee-box">
+        <div class="vp-fee-line"><span>Order total</span><span>${d.currency} ${parseInt(d.subtotal).toLocaleString()}</span></div>
+        <div class="vp-fee-line"><span>Platform fee (5%)</span><span style="color:#f87171;">− ${d.currency} ${parseInt(d.platform_fee).toLocaleString()}</span></div>
+        <div class="vp-fee-line total"><span>Your payout</span><span>${d.currency} ${parseInt(d.vendor_payout).toLocaleString()}</span></div>
+      </div>
+      ${payoutNote}
+    </div>
+
+    ${d.tracking_info || d.courier_name ? `
+    <div class="vp-drawer-section">
+      <div class="vp-drawer-section-label">Delivery</div>
+      <div class="vp-fee-box">
+        ${d.courier_name ? `<div class="vp-fee-line"><span>Courier</span><span style="color:#F5F4F0;">${d.courier_name}</span></div>` : ''}
+        ${d.tracking_info ? `<div class="vp-fee-line" style="border:none"><span>Tracking</span><span style="color:rgba(245,244,240,.5);font-family:monospace;font-size:12px;">${d.tracking_info}</span></div>` : ''}
+      </div>
+    </div>
+    ` : ''}
+
+    ${d.flutterwave_tx_id || d.flutterwave_transfer_id ? `
+    <div class="vp-drawer-section">
+      <div class="vp-drawer-section-label">Transaction IDs</div>
+      <div class="vp-fee-box">
+        ${d.flutterwave_tx_id ? `<div class="vp-fee-line"><span>Payment ID</span><span style="font-family:monospace;font-size:11px;color:rgba(245,244,240,.35);">${d.flutterwave_tx_id}</span></div>` : ''}
+        ${d.flutterwave_transfer_id ? `<div class="vp-fee-line" style="border:none"><span>Transfer ID</span><span style="font-family:monospace;font-size:11px;color:rgba(245,244,240,.35);">${d.flutterwave_transfer_id}</span></div>` : ''}
+      </div>
+    </div>
+    ` : ''}
+
+    <div style="margin-top:8px;padding-top:8px;">
+      <a href="${d.detail_url}" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:12px;background:#F5F4F0;color:#0D0D0D;font-family:var(--font-b);font-size:14px;font-weight:700;text-decoration:none;transition:background .18s;" onmouseover="this.style.background='#fff'" onmouseout="this.style.background='#F5F4F0'">
+        Open Full Order Page →
+      </a>
+    </div>
+  `;
+}
+
+function closeDrawer() {
+  document.getElementById('txDrawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function copyRef(ref) {
+  navigator.clipboard.writeText(ref).catch(() => {});
+  showToast('✓ Ref copied: #' + ref);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeDrawer();
+});
+</script>
+
+<div class="toast" id="toast"></div>
+{% endblock %}

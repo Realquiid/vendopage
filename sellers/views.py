@@ -960,7 +960,130 @@ def upload_products_batch(request):
         logger.error(f"Batch upload error: {str(e)}\n{traceback.format_exc()}")
         return JsonResponse({'success': False, 'error': 'Failed to save. Please try again.'}, status=500)
 
+# def register_view(request):
+#     if request.method == 'POST':
+#         username = (
+#             request.session.get('guest_username') or
+#             request.POST.get('username', '')
+#         ).strip().lower()
 
+#         business_name = (
+#             request.session.get('guest_business_name') or
+#             request.POST.get('business_name', '')
+#         ).strip()
+
+#         if not username and business_name:
+#             import re
+#             username = re.sub(
+#                 r'[^a-z0-9]',
+#                 '_',
+#                 business_name.lower()
+#             ).strip('_')[:28]
+
+#         if username and Seller.objects.filter(username__iexact=username).exists():
+#             if not request.session.get('guest_username'):
+#                 username = f"{username[:25]}_{random.randint(10,99)}"
+
+#         email = request.POST.get('email', '').strip().lower()
+#         password = request.POST.get('password', '')
+#         whatsapp_number = request.POST.get('whatsapp_number', '').strip()
+#         country_code = request.POST.get('country_code', '+234').strip()
+#         currency_code = request.POST.get('currency_code', 'NGN').strip()
+#         currency_symbol = request.POST.get('currency_symbol', '₦').strip()
+#         category = request.POST.get('category', 'other')
+
+#         full_whatsapp = (
+#             country_code + whatsapp_number
+#             if country_code and not whatsapp_number.startswith('+')
+#             else whatsapp_number
+#         )
+
+#         errors = []
+
+#         if not all([username, email, password, business_name, whatsapp_number]):
+#             errors.append('All fields are required')
+
+#         if username and Seller.objects.filter(username__iexact=username).exists():
+#             errors.append(f'Username "{username}" is already taken.')
+
+#         if email and Seller.objects.filter(email__iexact=email).exists():
+#             errors.append(f'Email "{email}" is already registered.')
+
+#         if full_whatsapp and Seller.objects.filter(
+#             whatsapp_number=full_whatsapp
+#         ).exists():
+#             errors.append('WhatsApp number is already registered.')
+
+#         if email and ('@' not in email or '.' not in email.split('@')[1]):
+#             errors.append('Please enter a valid email address.')
+
+#         if password and len(password) < 6:
+#             errors.append('Password must be at least 6 characters long.')
+
+#         if errors:
+#             return render(request, 'register.html', {
+#                 'errors': errors,
+#                 'active_tab': 'register',
+#                 'email': email,
+#                 'business_name': business_name,
+#                 'username': username,
+#                 'whatsapp_number': whatsapp_number,
+#                 'category': category,
+#             })
+
+#         try:
+#             seller = Seller.objects.create_user(
+#                 username=username,
+#                 email=email,
+#                 password=password,
+#                 business_name=business_name,
+#                 whatsapp_number=full_whatsapp,
+#                 category=category,
+#                 country_code=country_code,
+#                 currency_code=currency_code,
+#                 currency_symbol=currency_symbol,
+#                 subscription_type='free',
+
+#                 # LOCAL DEV ONLY
+#                 is_active=True,
+#                 email_verified=True,
+#             )
+
+#             login(request, seller)
+
+#             return redirect('onboarding')
+
+#         except IntegrityError as e:
+#             err = str(e)
+
+#             if 'username' in err:
+#                 errors.append('Username is already taken')
+#             elif 'email' in err:
+#                 errors.append('Email is already registered')
+#             elif 'whatsapp' in err:
+#                 errors.append('WhatsApp number is already registered')
+#             else:
+#                 errors.append(f'Registration failed: {err}')
+
+#             return render(request, 'register.html', {
+#                 'errors': errors,
+#                 'active_tab': 'register',
+#                 'email': email,
+#                 'business_name': business_name,
+#                 'username': username,
+#                 'whatsapp_number': whatsapp_number,
+#                 'category': category,
+#             })
+
+#     return render(request, 'register.html', {
+#         'active_tab': 'register'
+#     })
+# def verify_email_pending(request):
+#     return redirect('register')
+
+
+# def verify_email(request, token):
+#     return redirect('register')
 # ─────────────────────────────────────────────
 # REGISTER
 # ─────────────────────────────────────────────
@@ -1111,23 +1234,77 @@ def dashboard(request):
     share_message      = f"🛍️ Check out my product catalog!\n\n{seller.business_name}\n\n{catalog_url}\n\n✨ Browse all my products anytime!"
     whatsapp_share_url = f"https://wa.me/?text={urllib.parse.quote(share_message)}"
 
+    # ── Time-based greeting (done in Python — Django templates can't do elif inside with) ──
+    hour = timezone.localtime(timezone.now()).hour
+    if hour < 12:
+        time_greeting = "Good morning"
+        time_icon     = "☀️"
+    elif hour < 17:
+        time_greeting = "Good afternoon"
+        time_icon     = "🌤️"
+    elif hour < 21:
+        time_greeting = "Good evening"
+        time_icon     = "🌆"
+    else:
+        time_greeting = "Night owl"
+        time_icon     = "🌙"
+
+    # ── Order stats ──────────────────────────────────────────────────────────
     recent_orders    = []
     total_orders     = 0
     pending_orders   = 0
     total_earnings   = Decimal('0')
     pending_earnings = Decimal('0')
+    buffer_earnings  = Decimal('0')
+    payout_queue     = []
 
     if getattr(seller, 'store_mode', False):
-        active_statuses  = ['paid', 'shipped', 'delivered', 'disputed', 'completed']
+        active_statuses  = ['paid', 'shipped', 'delivered', 'disputed', 'completed', 'RECEIVED']
         recent_orders    = Order.objects.filter(seller=seller, status__in=active_statuses).order_by('-created_at')[:5]
         total_orders     = Order.objects.filter(seller=seller, status__in=active_statuses).count()
         pending_orders   = Order.objects.filter(seller=seller, status__in=['paid', 'disputed']).count()
+
         total_earnings   = Order.objects.filter(
             seller=seller, status__in=['delivered', 'completed'], payout_triggered=True,
         ).aggregate(total=Sum('vendor_payout'))['total'] or Decimal('0')
+
         pending_earnings = Order.objects.filter(
             seller=seller, status__in=['paid', 'shipped', 'disputed'], payment_type='escrow',
         ).aggregate(total=Sum('vendor_payout'))['total'] or Decimal('0')
+
+        # RECEIVED orders in the 24h buffer — pays out tonight
+        buffer_earnings = Order.objects.filter(
+            seller=seller, status='RECEIVED', payout_triggered=False,
+        ).aggregate(total=Sum('vendor_payout'))['total'] or Decimal('0')
+
+        # Payout queue: confirmed before midnight today, oldest first, max 5
+        today_midnight = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        raw_queue = list(
+            Order.objects.filter(
+                seller=seller,
+                status='RECEIVED',
+                delivered_at__lt=today_midnight,
+                payout_triggered=False,
+            ).order_by('delivered_at')[:5]
+        )
+
+        # Annotate each order with payout ETA and progress bar % for the template
+        now = timezone.now()
+        for order in raw_queue:
+            if order.delivered_at:
+                from datetime import timedelta
+                earliest  = order.delivered_at + timedelta(hours=24)
+                candidate = earliest.replace(hour=2, minute=0, second=0, microsecond=0)
+                if candidate < earliest:
+                    candidate += timedelta(days=1)
+                order.payout_eta      = candidate
+                total_wait            = (candidate - order.delivered_at).total_seconds()
+                elapsed               = (now - order.delivered_at).total_seconds()
+                order.payout_progress = min(95, int((elapsed / total_wait) * 100)) if total_wait > 0 else 50
+            else:
+                order.payout_eta      = None
+                order.payout_progress = 50
+        payout_queue = raw_queue
 
     platform_settings = PlatformSettings.get()
 
@@ -1147,10 +1324,13 @@ def dashboard(request):
         'pending_orders':       pending_orders,
         'total_earnings':       total_earnings,
         'pending_earnings':     pending_earnings,
+        'buffer_earnings':      buffer_earnings,
+        'payout_queue':         payout_queue,
+        'time_greeting':        time_greeting,
+        'time_icon':            time_icon,
         'platform_fee_percent': platform_settings.transaction_fee_percent,
         'premium_price':        platform_settings.premium_monthly_price,
     })
-
 
 # ─────────────────────────────────────────────
 # STORE MODE — TOGGLE + PAYOUT ACCOUNT
@@ -1206,6 +1386,127 @@ def update_payout_account(request):
     messages.success(request, 'Payout account saved.')
     return redirect('settings')
 
+# ─────────────────────────────────────────────────────────────────────────────
+# ADD THIS VIEW to sellers/views.py
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+def seller_transactions(request):
+    """
+    Full transaction/payout ledger for the logged-in seller.
+
+    Shows every order with:
+      - Full buyer info
+      - Line items (products, qty, price)
+      - Fee breakdown (subtotal, 5% platform fee, their payout amount)
+      - Payout status with live countdown for RECEIVED orders
+      - Flutterwave transfer ID once paid
+      - Dispute / refund flags
+
+    Filterable by status tab so sellers can trust what's pending vs cleared.
+    """
+    seller        = request.user
+    status_filter = request.GET.get('status', 'all')
+
+    # All orders for this seller, newest first
+    orders_qs = (
+        Order.objects
+        .filter(seller=seller)
+        .prefetch_related('items')
+        .order_by('-created_at')
+    )
+
+    # Tab filter
+    if status_filter == 'pending':
+        # Money is in escrow — buyer hasn't confirmed yet
+        orders_qs = orders_qs.filter(status__in=['paid', 'shipped'])
+    elif status_filter == 'received':
+        # Buyer confirmed — waiting for 24h buffer + cron
+        orders_qs = orders_qs.filter(status='RECEIVED')
+    elif status_filter == 'paid_out':
+        orders_qs = orders_qs.filter(status='completed', payout_triggered=True)
+    elif status_filter == 'failed':
+        orders_qs = orders_qs.filter(status='FAILED_PAYOUT')
+    elif status_filter == 'disputed':
+        orders_qs = orders_qs.filter(status='disputed')
+    elif status_filter == 'refunded':
+        orders_qs = orders_qs.filter(status='refunded')
+    # 'all' → no filter
+
+    orders = list(orders_qs[:100])
+
+    # Annotate each order with a human-readable payout_eta for RECEIVED orders
+    # so the template can show "Payout expected by Wed 2 AM"
+    now = timezone.now()
+    for order in orders:
+        if order.status == 'RECEIVED' and order.delivered_at:
+            # Payout runs at 2 AM daily; earliest it can run is 24h after delivered_at
+            from datetime import timedelta
+            earliest_payout = order.delivered_at + timedelta(hours=24)
+            # Roll to next 2 AM after earliest_payout
+            candidate = earliest_payout.replace(hour=2, minute=0, second=0, microsecond=0)
+            if candidate < earliest_payout:
+                candidate += timedelta(days=1)
+            order.payout_eta      = candidate
+            order.hours_remaining = max(0, int((candidate - now).total_seconds() / 3600))
+        else:
+            order.payout_eta      = None
+            order.hours_remaining = None
+
+    # Aggregate summary cards
+    from django.db.models import Sum, Count
+    summary = Order.objects.filter(seller=seller).aggregate(
+        total_paid_out   = Sum('vendor_payout', filter=__import__(
+            'django.db.models', fromlist=['Q']).Q(
+            status='completed', payout_triggered=True)),
+        total_pending    = Sum('vendor_payout', filter=__import__(
+            'django.db.models', fromlist=['Q']).Q(
+            status__in=['paid', 'shipped'])),
+        total_in_buffer  = Sum('vendor_payout', filter=__import__(
+            'django.db.models', fromlist=['Q']).Q(status='RECEIVED')),
+        total_failed     = Sum('vendor_payout', filter=__import__(
+            'django.db.models', fromlist=['Q']).Q(status='FAILED_PAYOUT')),
+        count_completed  = Count('id', filter=__import__(
+            'django.db.models', fromlist=['Q']).Q(
+            status='completed', payout_triggered=True)),
+        count_pending    = Count('id', filter=__import__(
+            'django.db.models', fromlist=['Q']).Q(
+            status__in=['paid', 'shipped'])),
+        count_received   = Count('id', filter=__import__(
+            'django.db.models', fromlist=['Q']).Q(status='RECEIVED')),
+        count_failed     = Count('id', filter=__import__(
+            'django.db.models', fromlist=['Q']).Q(status='FAILED_PAYOUT')),
+    )
+
+    # Tab counts for the filter bar
+    tab_counts = {
+        'all':      Order.objects.filter(seller=seller).count(),
+        'pending':  Order.objects.filter(seller=seller, status__in=['paid', 'shipped']).count(),
+        'received': Order.objects.filter(seller=seller, status='RECEIVED').count(),
+        'paid_out': Order.objects.filter(seller=seller, status='completed', payout_triggered=True).count(),
+        'failed':   Order.objects.filter(seller=seller, status='FAILED_PAYOUT').count(),
+        'disputed': Order.objects.filter(seller=seller, status='disputed').count(),
+        'refunded': Order.objects.filter(seller=seller, status='refunded').count(),
+    }
+
+    TAB_MAP = [
+        ('all',      'All Orders'),
+        ('pending',  'In Escrow'),
+        ('received', 'Buyer Confirmed'),
+        ('paid_out', 'Paid Out'),
+        ('failed',   'Payout Retrying'),
+        ('disputed', 'Disputed'),
+        ('refunded', 'Refunded'),
+    ]
+
+    return render(request, 'dashboard/transactions.html', {
+        'orders':        orders,
+        'status_filter': status_filter,
+        'tab_counts':    tab_counts,
+        'summary':       summary,
+        'now':           now,
+        'tab_map':       TAB_MAP,
+    })
 
 # ─────────────────────────────────────────────
 # CART + CHECKOUT
@@ -1479,14 +1780,33 @@ def order_detail(request, order_ref):
 @require_http_methods(["POST"])
 def confirm_receipt(request, order_ref):
     order = get_object_or_404(Order, order_ref=order_ref)
+ 
     if order.status not in ('shipped',):
         messages.error(request, 'This order cannot be confirmed yet.')
         return redirect('order_detail', order_ref=order_ref)
-    order.status       = 'delivered'
+ 
+    # Stamp the confirmation time — this is when the 24h T+1 buffer starts
     order.delivered_at = timezone.now()
-    order.save()
-    _trigger_payout(order)
+ 
+    if order.payment_type == 'direct':
+        # Direct pay: no escrow, release immediately
+        order.status = 'delivered'
+        order.save(update_fields=['status', 'delivered_at', 'updated_at'])
+        _trigger_payout(order)
+    else:
+        # Escrow pay: set RECEIVED — the daily cron at 2 AM will check if
+        # 24h have passed AND our Flutterwave balance is funded, then pays out.
+        # The seller gets paid the night AFTER the buyer confirms receipt.
+        order.status = 'RECEIVED'
+        order.save(update_fields=['status', 'delivered_at', 'updated_at'])
+        # updated_at is auto-stamped here — this is what process_payouts filters on
+ 
+    messages.success(
+        request,
+        '✅ Thank you for confirming! The seller will be paid within 24 hours.'
+    )
     return redirect('order_detail', order_ref=order_ref)
+ 
 
 
 @require_http_methods(["GET", "POST"])
@@ -1728,23 +2048,33 @@ def _trigger_payout(order):
 def auto_release_expired_orders():
     now     = timezone.now()
     expired = Order.objects.filter(
-        status='shipped', auto_release_at__lte=now, payout_triggered=False,
+        status='shipped',
+        auto_release_at__lte=now,
+        payout_triggered=False,
     )
     for order in expired:
         logger.info(f"Auto-releasing order {order.order_ref}")
-        order.status       = 'delivered'
         order.delivered_at = now
-        order.save()
-        _trigger_payout(order)
+ 
+        if order.payment_type == 'direct':
+            order.status = 'delivered'
+            order.save(update_fields=['status', 'delivered_at', 'updated_at'])
+            _trigger_payout(order)
+        else:
+            # Escrow: stamp RECEIVED, let the daily cron pay it out
+            order.status = 'RECEIVED'
+            order.save(update_fields=['status', 'delivered_at', 'updated_at'])
+ 
         try:
             send_order_auto_released_buyer(
-                to_email=order.buyer_email, buyer_name=order.buyer_name,
+                to_email=order.buyer_email,
+                buyer_name=order.buyer_name,
                 order_ref=str(order.order_ref)[:8].upper(),
                 seller_name=order.seller.business_name,
             )
         except Exception as e:
             logger.error(f"Auto-release buyer email failed for order {order.order_ref}: {e}")
-
+ 
 
 # ─────────────────────────────────────────────
 # BANK PROXY APIs

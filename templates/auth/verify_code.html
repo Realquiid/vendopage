@@ -1,114 +1,211 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/auth.css' %}">
-{% endblock %}  
-{% block title %}Verify Code - VendoPage{% endblock %}
+{% block title %}Verify Code — VendoPage{% endblock %}
 
 {% block content %}
-<div class="auth-page-simple">
-    <div class="auth-container-simple">
-        <div class="auth-logo">
-            <div class="logo-icon-large">🔒</div>
-        </div>
-        
-        <div class="auth-header">
-            <h1>Enter Verification Code</h1>
-            <p class="text-muted">We sent a 5-digit code to your email. Enter it below to continue.</p>
-        </div>
-        
-        <form method="POST" class="auth-form" id="codeForm">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                <label class="form-label">5-Digit Code</label>
-                <div class="code-input-group">
-                    <input type="text" maxlength="1" class="code-input" id="code1" required autofocus>
-                    <input type="text" maxlength="1" class="code-input" id="code2" required>
-                    <input type="text" maxlength="1" class="code-input" id="code3" required>
-                    <input type="text" maxlength="1" class="code-input" id="code4" required>
-                    <input type="text" maxlength="1" class="code-input" id="code5" required>
-                </div>
-                <input type="hidden" name="code" id="fullCode">
-            </div>
-            
-            {% if messages %}
-                {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                    </svg>
-                    {{ message }}
-                </div>
-                {% endfor %}
-            {% endif %}
-            
-            <button type="submit" class="btn btn-primary btn-full btn-lg">
-                Verify Code
-            </button>
-        </form>
-        
-        <div class="auth-footer-simple">
-            <a href="{% url 'forgot_password' %}" class="resend-link">Didn't receive code? Resend</a>
-        </div>
+<style>
+.sp-page {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: var(--light);
+}
+[data-theme="dark"] .sp-page { background: #111; }
+
+.sp-card {
+  width: 100%;
+  max-width: 400px;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 40px 36px;
+  box-shadow: 0 4px 32px rgba(0,0,0,.06);
+  animation: spIn .3s cubic-bezier(.22,1,.36,1);
+}
+[data-theme="dark"] .sp-card { background: #1a1a1a; border-color: #2e2e2e; }
+@keyframes spIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+.sp-icon {
+  width: 48px; height: 48px;
+  background: rgba(0,200,83,.1);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+}
+.sp-icon svg { color: #00C853; }
+
+.sp-title {
+  font-family: var(--font-d);
+  font-size: 22px; font-weight: 800;
+  letter-spacing: -.5px; color: var(--dark);
+  margin-bottom: 6px;
+}
+[data-theme="dark"] .sp-title { color: #f0f0f0; }
+
+.sp-sub {
+  font-size: 13px; color: var(--gray);
+  line-height: 1.6; margin-bottom: 28px;
+}
+
+.sp-label {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: var(--gray); margin-bottom: 10px;
+}
+
+/* OTP inputs */
+.otp-row {
+  display: flex; gap: 10px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.otp-input {
+  width: 52px; height: 56px;
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  text-align: center;
+  font-family: var(--font-d);
+  font-size: 22px; font-weight: 800;
+  color: var(--dark);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+  caret-color: #00C853;
+}
+[data-theme="dark"] .otp-input { background: #222; border-color: #333; color: #f0f0f0; }
+.otp-input:focus {
+  border-color: #00C853;
+  box-shadow: 0 0 0 3px rgba(0,200,83,.1);
+}
+.otp-input.filled {
+  border-color: #00C853;
+  background: rgba(0,200,83,.04);
+}
+[data-theme="dark"] .otp-input.filled { background: rgba(0,200,83,.08); }
+
+.sp-alert {
+  border-radius: 9px;
+  padding: 10px 13px;
+  font-size: 13px; line-height: 1.5;
+  margin-bottom: 16px;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.sp-alert-error { background: #fff5f5; border: 1px solid #fecaca; color: #b91c1c; }
+.sp-alert-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; }
+[data-theme="dark"] .sp-alert-error { background: rgba(185,28,28,.12); border-color: rgba(185,28,28,.25); color: #fca5a5; }
+[data-theme="dark"] .sp-alert-success { background: rgba(21,128,61,.12); border-color: rgba(21,128,61,.25); color: #86efac; }
+
+.sp-btn {
+  width: 100%; padding: 13px;
+  background: #00C853; color: #fff;
+  border: none; border-radius: 10px;
+  font-family: var(--font-b); font-size: 14px; font-weight: 700;
+  cursor: pointer; letter-spacing: .1px;
+  transition: background .18s, transform .15s;
+}
+.sp-btn:hover { background: #00a844; transform: translateY(-1px); }
+.sp-btn:active { transform: none; }
+.sp-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+.sp-resend {
+  display: block; text-align: center;
+  margin-top: 18px;
+  font-size: 13px; color: var(--gray);
+}
+.sp-resend a {
+  color: #00C853; font-weight: 600;
+  text-decoration: none;
+}
+.sp-resend a:hover { text-decoration: underline; }
+</style>
+
+<div class="sp-page">
+  <div class="sp-card">
+
+    <div class="sp-icon">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect x="5" y="2" width="14" height="20" rx="2"/>
+        <line x1="12" y1="18" x2="12.01" y2="18"/>
+      </svg>
     </div>
+
+    <div class="sp-title">Check your email</div>
+    <p class="sp-sub">We sent a 5-digit code to your email. Enter it below to continue.</p>
+
+    {% if messages %}
+      {% for message in messages %}
+      <div class="sp-alert {% if message.tags == 'success' %}sp-alert-success{% else %}sp-alert-error{% endif %}">
+        {% if message.tags == 'success' %}
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;margin-top:1px"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+        {% else %}
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20" style="flex-shrink:0;margin-top:1px"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+        {% endif %}
+        {{ message }}
+      </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST" id="codeForm">
+      {% csrf_token %}
+      <label class="sp-label">5-digit code</label>
+      <div class="otp-row">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="c1" autocomplete="one-time-code">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="c2">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="c3">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="c4">
+        <input type="text" inputmode="numeric" maxlength="1" class="otp-input" id="c5">
+      </div>
+      <input type="hidden" name="code" id="fullCode">
+      <button type="submit" class="sp-btn" id="verifyBtn" disabled>Verify code</button>
+    </form>
+
+    <p class="sp-resend">Didn't get it? <a href="{% url 'forgot_password' %}">Resend code</a></p>
+
+  </div>
 </div>
 
 <script>
-const inputs = document.querySelectorAll('.code-input');
-const form = document.getElementById('codeForm');
-const fullCodeInput = document.getElementById('fullCode');
+(function(){
+  const inputs = Array.from(document.querySelectorAll('.otp-input'));
+  const fullCode = document.getElementById('fullCode');
+  const btn = document.getElementById('verifyBtn');
+  const form = document.getElementById('codeForm');
 
-inputs.forEach((input, index) => {
-    input.addEventListener('input', (e) => {
-        const value = e.target.value;
-        
-        // Only allow numbers
-        if (!/^\d$/.test(value)) {
-            e.target.value = '';
-            return;
-        }
-        
-        // Move to next input
-        if (value && index < inputs.length - 1) {
-            inputs[index + 1].focus();
-        }
-        
-        // Update hidden input
-        updateFullCode();
-    });
-    
-    input.addEventListener('keydown', (e) => {
-        // Move to previous input on backspace
-        if (e.key === 'Backspace' && !e.target.value && index > 0) {
-            inputs[index - 1].focus();
-        }
-    });
-    
-    input.addEventListener('paste', (e) => {
-        e.preventDefault();
-        const pasteData = e.clipboardData.getData('text').replace(/\D/g, '');
-        
-        if (pasteData.length === 5) {
-            pasteData.split('').forEach((char, i) => {
-                if (inputs[i]) {
-                    inputs[i].value = char;
-                }
-            });
-            inputs[4].focus();
-            updateFullCode();
-        }
-    });
-});
+  function sync() {
+    const val = inputs.map(i => i.value).join('');
+    fullCode.value = val;
+    inputs.forEach(i => i.classList.toggle('filled', i.value !== ''));
+    btn.disabled = val.length < 5;
+    if (val.length === 5) form.submit();
+  }
 
-function updateFullCode() {
-    const code = Array.from(inputs).map(input => input.value).join('');
-    fullCodeInput.value = code;
-    
-    // Auto-submit when all 5 digits are entered
-    if (code.length === 5) {
-        form.submit();
-    }
-}
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('input', e => {
+      const v = e.target.value.replace(/\D/g, '');
+      e.target.value = v.slice(-1);
+      if (v && idx < 4) inputs[idx + 1].focus();
+      sync();
+    });
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+        inputs[idx - 1].focus();
+      }
+    });
+    inp.addEventListener('paste', e => {
+      e.preventDefault();
+      const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 5);
+      digits.split('').forEach((d, i) => { if (inputs[i]) inputs[i].value = d; });
+      inputs[Math.min(digits.length, 4)].focus();
+      sync();
+    });
+  });
+
+  document.getElementById('c1').focus();
+})();
 </script>
 {% endblock %}
+
+{% block footer %}{% endblock %}

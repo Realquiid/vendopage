@@ -1,374 +1,445 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block title %}Set Up Your Store — VendoPage{% endblock %}
+{% block header %}{% endblock %}
 
 {% block extra_css %}
 <style>
+/* ── PAGE ── */
 .ob-page {
-  min-height: calc(100vh - 64px);
-  background: var(--light);
-  display: flex; align-items: center; justify-content: center;
-  padding: 28px 20px;
+  min-height: calc(100vh - var(--nav-h));
+  background: var(--surface);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px 60px;
 }
-[data-theme="dark"] .ob-page { background: #111; }
+.auth-logo {
+  display: flex; align-items: center;
+  text-decoration: none; margin-bottom: 32px;
+}
+.auth-logo img { height: 40px; width: auto; display: block; }
+.auth-logo .logo-dark  { display: block; }
+.auth-logo .logo-light { display: none; }
 
-.ob-card {
+.ob-wrap {
+  width: 100%;
+  max-width: 560px;
+  animation: obIn .35s cubic-bezier(.22,1,.36,1);
+}
+@keyframes obIn { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── HEADER ── */
+.ob-header { margin-bottom: 28px; }
+
+.ob-wordmark {
+  font-family: var(--font-d);
+  font-size: 15px; font-weight: 800;
+  color: var(--ink); letter-spacing: -.3px;
+  margin-bottom: 20px; display: block;
+  text-decoration: none;
+}
+.ob-wordmark span { color: var(--green-pop); }
+
+.ob-title {
+  font-family: var(--font-d);
+  font-size: 24px; font-weight: 800;
+  letter-spacing: -.6px; color: var(--ink);
+  margin-bottom: 5px;
+}
+.ob-sub {
+  font-size: 14px; color: var(--muted);
+  line-height: 1.55;
+}
+
+/* ── STEP: CATEGORY GRID ── */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.cat-card {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color .18s, transform .15s, box-shadow .18s;
+  aspect-ratio: 1 / 1.05;
+  background: var(--border);
+}
+.cat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+}
+.cat-card.selected {
+  border-color: var(--green-pop);
+  box-shadow: 0 0 0 3px rgba(0,200,83,.15);
+}
+.cat-card input[type="radio"] {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+
+.cat-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .3s;
+}
+.cat-card:hover .cat-img { transform: scale(1.04); }
+
+.cat-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.72) 0%, rgba(0,0,0,.1) 55%, transparent 100%);
+}
+
+.cat-label {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 10px 8px 9px;
+  font-family: var(--font-b);
+  font-size: 11px; font-weight: 700;
+  color: #fff;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.cat-tick {
+  position: absolute;
+  top: 7px; right: 7px;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--green-pop);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0;
+  transform: scale(.6);
+  transition: opacity .18s, transform .18s;
+}
+.cat-card.selected .cat-tick {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── ACTIONS ── */
+.ob-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.ob-skip {
+  font-size: 13px; color: var(--muted-lt);
+  background: none; border: none;
+  cursor: pointer; font-family: var(--font-b);
+  padding: 0; text-decoration: underline;
+  transition: color .15s;
+}
+.ob-skip:hover { color: var(--muted); }
+
+.ob-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 28px;
+  background: var(--green-pop); color: #fff;
+  border: none; border-radius: 100px;
+  font-family: var(--font-b); font-size: 14px; font-weight: 700;
+  cursor: pointer;
+  transition: background .18s, transform .15s;
+}
+.ob-btn:hover { background: var(--green); transform: translateY(-1px); }
+.ob-btn:active { transform: none; }
+.ob-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+/* ── STEP 2: LOGO UPLOAD ── */
+.pic-step {
   background: var(--white);
   border: 1.5px solid var(--border);
   border-radius: 20px;
-  width: 100%; max-width: 480px;
-  overflow: hidden;
-  box-shadow: 0 8px 48px rgba(0,0,0,.08);
-  animation: obIn .35s cubic-bezier(.22,1,.36,1);
-}
-[data-theme="dark"] .ob-card { background: #1a1a1a; border-color: #2e2e2e; }
-@keyframes obIn { from{opacity:0;transform:translateY(16px) scale(.98)} to{opacity:1;transform:translateY(0) scale(1)} }
-
-/* Progress */
-.ob-progress { height: 3px; background: var(--border); position: relative; overflow: hidden; }
-[data-theme="dark"] .ob-progress { background: #2e2e2e; }
-.ob-progress-fill {
-  position: absolute; top:0; left:0; height:100%;
-  background: var(--green); border-radius: 0 3px 3px 0;
-  transition: width .45s cubic-bezier(.4,0,.2,1);
+  padding: 36px 32px;
+  box-shadow: var(--sh-sm);
 }
 
-/* Head */
-.ob-head { padding: 28px 32px 0; }
-.ob-step-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-.ob-step-pill {
-  background: var(--green-lt); color: var(--green-dk);
-  font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
-  text-transform: uppercase; padding: 3px 10px; border-radius: 100px;
-  border: 1px solid rgba(0,200,83,.2);
+.pic-center {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 20px; padding: 8px 0 24px;
 }
-[data-theme="dark"] .ob-step-pill { background: rgba(0,200,83,.12); color: #00e676; border-color: rgba(0,200,83,.25); }
-.ob-dots { display: flex; gap: 5px; }
-.ob-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background .25s, transform .25s; }
-[data-theme="dark"] .ob-dot { background: #333; }
-.ob-dot.active { background: var(--green); transform: scale(1.3); }
-.ob-dot.done   { background: var(--green); }
 
-.ob-title { font-family: var(--font-d); font-size: 20px; font-weight: 800; letter-spacing: -.5px; color: var(--dark); margin-bottom: 5px; }
-[data-theme="dark"] .ob-title { color: #f0f0f0; }
-.ob-sub  { font-size: 13px; color: var(--gray); line-height: 1.55; margin-bottom: 22px; }
-
-/* Body */
-.ob-body { padding: 0 32px 4px; }
-.ob-step { display: none; }
-.ob-step.active { display: block; }
-
-/* Category Grid */
-.cat-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 9px; margin-bottom: 4px; }
-.cat-tile {
-  display: flex; align-items: center; gap: 11px;
-  padding: 13px 14px;
-  background: var(--light); border: 1.5px solid var(--border);
-  border-radius: 11px; cursor: pointer;
-  transition: border-color .18s, background .18s, transform .13s;
-  position: relative;
-}
-[data-theme="dark"] .cat-tile { background: #222; border-color: #333; }
-.cat-tile:hover { border-color: var(--green); background: var(--green-lt); transform: translateY(-1px); }
-[data-theme="dark"] .cat-tile:hover { background: rgba(0,200,83,.08); border-color: var(--green); }
-.cat-tile.selected { border-color: var(--green); background: var(--green-lt); box-shadow: 0 0 0 3px rgba(0,200,83,.1); }
-[data-theme="dark"] .cat-tile.selected { background: rgba(0,200,83,.12); }
-.cat-tile input[type="radio"] { position: absolute; opacity:0; width:0; height:0; }
-.cat-icon {
-  width: 34px; height: 34px; border-radius: 8px; font-size: 18px; line-height:1;
-  background: #fff; display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 1px 4px rgba(0,0,0,.07); flex-shrink: 0; transition: transform .18s;
-}
-[data-theme="dark"] .cat-icon { background: #2a2a2a; }
-.cat-tile.selected .cat-icon { transform: scale(1.05); }
-.cat-name { font-size: 12px; font-weight: 600; color: var(--dark); line-height: 1.3; flex:1; }
-[data-theme="dark"] .cat-name { color: #f0f0f0; }
-.cat-check {
-  width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid var(--border);
-  background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  transition: all .18s;
-}
-[data-theme="dark"] .cat-check { background: #333; border-color: #444; }
-.cat-tile.selected .cat-check { background: var(--green); border-color: var(--green); }
-.cat-check svg { display: none; }
-.cat-tile.selected .cat-check svg { display: block; }
-
-/* Profile pic */
-.pic-area { display:flex; flex-direction:column; align-items:center; gap:16px; padding: 8px 0 20px; }
-.pic-preview-wrap { position:relative; cursor:pointer; }
-.pic-preview {
-  width: 88px; height: 88px; border-radius: 50%;
-  background: var(--green);
+.pic-avatar {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  background: var(--green-pop);
   display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-d); font-weight: 800; font-size: 32px; color: #fff;
-  overflow: hidden; border: 3px solid var(--border);
+  font-family: var(--font-d); font-size: 36px; font-weight: 800; color: #fff;
+  overflow: hidden;
+  border: 3px solid var(--border);
+  cursor: pointer;
+  position: relative;
   transition: border-color .2s;
 }
-[data-theme="dark"] .pic-preview { border-color: #333; }
-.pic-preview img { width:100%; height:100%; object-fit:cover; display:block; }
-.pic-overlay {
-  position:absolute; inset:0; border-radius:50%;
-  background: rgba(0,0,0,.42);
-  display:flex; align-items:center; justify-content:center;
-  opacity:0; transition: opacity .2s;
+.pic-avatar:hover { border-color: var(--green-pop); }
+.pic-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pic-avatar-hover {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: rgba(0,0,0,.4);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity .2s;
 }
-.pic-preview-wrap:hover .pic-overlay { opacity:1; }
-.pic-preview-wrap:hover .pic-preview  { border-color: var(--green); }
+.pic-avatar:hover .pic-avatar-hover { opacity: 1; }
+
+#picFileInput { display: none; }
+
 .pic-upload-btn {
-  display:inline-flex; align-items:center; gap:7px;
-  padding: 9px 18px;
-  background: var(--light); border: 1.5px solid var(--border);
-  border-radius: 100px; cursor:pointer;
-  font-family: var(--font-b); font-size:13px; font-weight:600;
-  color: var(--dark); transition: border-color .18s, background .18s;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 100px; cursor: pointer;
+  font-family: var(--font-b); font-size: 13px; font-weight: 600;
+  color: var(--ink); transition: border-color .18s, background .18s;
 }
-[data-theme="dark"] .pic-upload-btn { background:#222; border-color:#333; color:#f0f0f0; }
-.pic-upload-btn:hover { border-color: var(--green); background: var(--green-lt); }
-[data-theme="dark"] .pic-upload-btn:hover { background: rgba(0,200,83,.1); }
-.pic-uploading { display:none; align-items:center; gap:8px; font-size:13px; color:var(--gray); }
-.pic-spinner { width:16px; height:16px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--green); animation: spin .7s linear infinite; }
-@keyframes spin { to{transform:rotate(360deg)} }
-.pic-skip { font-size:12px; color:var(--gray-lt); background:none; border:none; cursor:pointer; font-family:var(--font-b); transition:color .15s; padding:0; }
-.pic-skip:hover { color:var(--gray); }
+.pic-upload-btn:hover { border-color: var(--green-pop); background: var(--green-lt); }
 
-/* Done step */
-.ob-done { text-align:center; padding: 8px 0 12px; }
-.ob-done-emoji { font-size:52px; line-height:1; margin-bottom:14px; animation: pop .5s cubic-bezier(.34,1.56,.64,1); }
+.pic-uploading {
+  display: none; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--muted);
+}
+.pic-spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid var(--border); border-top-color: var(--green-pop);
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── DONE ── */
+.ob-done {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 40px 32px 36px;
+  text-align: center;
+  box-shadow: var(--sh-sm);
+}
+
+.ob-done-emoji {
+  font-size: 48px; line-height: 1; margin-bottom: 16px;
+  animation: pop .5s cubic-bezier(.34,1.56,.64,1);
+  display: block;
+}
 @keyframes pop { from{transform:scale(.4);opacity:0} to{transform:scale(1);opacity:1} }
-.ob-done h2 { font-family:var(--font-d); font-size:22px; font-weight:800; letter-spacing:-.5px; color:var(--dark); margin-bottom:8px; }
-[data-theme="dark"] .ob-done h2 { color:#f0f0f0; }
-.ob-done p { font-size:13px; color:var(--gray); line-height:1.6; margin-bottom:20px; }
+
+.ob-done h2 {
+  font-family: var(--font-d); font-size: 22px; font-weight: 800;
+  letter-spacing: -.5px; color: var(--ink); margin-bottom: 8px;
+}
+.ob-done p { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 22px; }
+
 .ob-done-link {
-  display:inline-flex; align-items:center; gap:8px;
-  background: var(--light); border:1.5px solid var(--border);
-  border-radius:9px; padding:10px 14px;
-  font-size:13px; font-weight:600; color:var(--dark);
-  margin-bottom:20px; word-break:break-all;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 10px; padding: 10px 16px;
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  margin-bottom: 24px; word-break: break-all; text-align: left;
 }
-[data-theme="dark"] .ob-done-link { background:#222; border-color:#333; color:#f0f0f0; }
-.ob-done-link svg { color:var(--green); flex-shrink:0; }
-.ob-btn-go {
-  width:100%; padding:13px;
-  background:var(--green); color:#fff;
-  border:none; border-radius:10px; cursor:pointer;
-  font-family:var(--font-b); font-size:14px; font-weight:700;
-  transition:background .18s; display:block; text-decoration:none; text-align:center;
-}
-.ob-btn-go:hover { background:var(--green-dk); }
+.ob-done-link svg { color: var(--green-pop); flex-shrink: 0; }
 
-/* Footer */
-.ob-footer {
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-  padding: 20px 32px 28px;
-  border-top: 1px solid var(--border);
+.ob-go {
+  display: block; width: 100%; padding: 13px;
+  background: var(--green-pop); color: #fff;
+  border: none; border-radius: 10px;
+  font-family: var(--font-b); font-size: 14px; font-weight: 700;
+  text-decoration: none; text-align: center;
+  transition: background .18s;
 }
-[data-theme="dark"] .ob-footer { border-color:#2e2e2e; }
-.ob-btn-back {
-  display:flex; align-items:center; gap:6px;
-  padding:9px 16px;
-  background:none; border:1.5px solid var(--border);
-  border-radius:100px; cursor:pointer;
-  font-family:var(--font-b); font-size:13px; font-weight:600;
-  color:var(--gray); transition:all .18s;
-}
-[data-theme="dark"] .ob-btn-back { border-color:#333; color:#888; }
-.ob-btn-back:hover { color:var(--dark); border-color:var(--dark); }
-[data-theme="dark"] .ob-btn-back:hover { color:#f0f0f0; border-color:#666; }
-.ob-btn-next {
-  display:flex; align-items:center; gap:8px;
-  padding:11px 24px;
-  background:var(--green); color:#fff;
-  border:none; border-radius:100px; cursor:pointer;
-  font-family:var(--font-b); font-size:14px; font-weight:700;
-  transition:background .18s, transform .15s;
-  flex:1; justify-content:center; max-width:200px;
-}
-.ob-btn-next:hover { background:var(--green-dk); transform:translateY(-1px); }
-.ob-btn-next:active { transform:none; }
-.ob-btn-next:disabled { opacity:.4; cursor:not-allowed; transform:none; }
-.ob-skip { font-size:12px; color:var(--gray-lt); background:none; border:none; cursor:pointer; font-family:var(--font-b); padding:0; text-decoration:underline; }
-.ob-skip:hover { color:var(--gray); }
+.ob-go:hover { background: var(--green); }
 
-@media (max-width:520px) {
-  .ob-head  { padding:22px 20px 0; }
-  .ob-body  { padding:0 20px 4px; }
-  .ob-footer { padding:16px 20px 22px; }
-  .cat-grid { gap:7px; }
-  .cat-tile { padding:11px 11px; gap:9px; }
-  .cat-icon { width:30px; height:30px; font-size:16px; }
-  .cat-name { font-size:11px; }
+/* ── BACK BTN ── */
+.ob-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 16px;
+  background: none; border: 1.5px solid var(--border);
+  border-radius: 100px; cursor: pointer;
+  font-family: var(--font-b); font-size: 13px; font-weight: 600;
+  color: var(--muted); transition: all .18s; margin-bottom: 20px;
+}
+.ob-back:hover { color: var(--ink); border-color: var(--ink); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 480px) {
+  .ob-page { padding: 28px 16px 48px; }
+  .cat-grid { grid-template-columns: repeat(4, 1fr); gap: 7px; }
+  .cat-label { font-size: 10px; padding: 8px 5px 7px; }
+  .pic-step { padding: 28px 20px; }
+  .ob-done { padding: 32px 20px 28px; }
+}
+@media (max-width: 360px) {
+  .cat-grid { grid-template-columns: repeat(3, 1fr); }
 }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="ob-page">
-<div class="ob-card">
+<div class="ob-wrap">
 
-  <div class="ob-progress">
-    <div class="ob-progress-fill" id="obFill" style="width:{% if step == 2 %}66{% elif step == 'done' %}100{% else %}33{% endif %}%"></div>
-  </div>
 
-  <!-- ── STEP 1: CATEGORY ── -->
-  <div id="step1" class="ob-step {% if step != 2 and step != 'done' %}active{% endif %}">
-    <div class="ob-head">
-      <div class="ob-step-row">
-        <span class="ob-step-pill">Step 1 of 2</span>
-        <div class="ob-dots">
-          <div class="ob-dot {% if step != 2 and step != 'done' %}active{% else %}done{% endif %}"></div>
-          <div class="ob-dot {% if step == 'done' %}done{% endif %}"></div>
-        </div>
-      </div>
+    <a href="/" class="auth-logo">
+      <img class="logo-dark"  src="{% static 'images/logoo.png' %}"      alt="Vendopage">
+      <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage">
+    </a>
+
+  <!-- ════ STEP 1: CATEGORY ════ -->
+  <div id="step1" {% if step == 2 or step == 'done' %}style="display:none"{% endif %}>
+    <div class="ob-header">
       <div class="ob-title">What do you sell?</div>
-      <p class="ob-sub">Pick your category. Buyers use this to find your store.</p>
+      <p class="ob-sub">Pick your main category — buyers use this to find your store.</p>
     </div>
-    <div class="ob-body">
-      <form id="catForm" method="POST" action="{% url 'onboarding' %}">
-        {% csrf_token %}
-        <input type="hidden" name="step" value="category">
-        <input type="hidden" name="category" id="catInput" value="">
-        <div class="cat-grid">
-          <label class="cat-tile" data-val="fashion" onclick="selectCat(this,'fashion')">
-            <input type="radio" name="_r" value="fashion">
-            <div class="cat-icon">👗</div>
-            <span class="cat-name">Fashion &amp; Apparel</span>
-            <div class="cat-check"><svg width="9" height="9" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </label>
-          <label class="cat-tile" data-val="beauty" onclick="selectCat(this,'beauty')">
-            <input type="radio" name="_r" value="beauty">
-            <div class="cat-icon">💄</div>
-            <span class="cat-name">Beauty &amp; Cosmetics</span>
-            <div class="cat-check"><svg width="9" height="9" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </label>
-          <label class="cat-tile" data-val="electronics" onclick="selectCat(this,'electronics')">
-            <input type="radio" name="_r" value="electronics">
-            <div class="cat-icon">📱</div>
-            <span class="cat-name">Electronics &amp; Gadgets</span>
-            <div class="cat-check"><svg width="9" height="9" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </label>
-          <label class="cat-tile" data-val="food" onclick="selectCat(this,'food')">
-            <input type="radio" name="_r" value="food">
-            <div class="cat-icon">🍔</div>
-            <span class="cat-name">Food &amp; Beverages</span>
-            <div class="cat-check"><svg width="9" height="9" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </label>
-          <label class="cat-tile" data-val="home" onclick="selectCat(this,'home')">
-            <input type="radio" name="_r" value="home">
-            <div class="cat-icon">🏠</div>
-            <span class="cat-name">Home &amp; Garden</span>
-            <div class="cat-check"><svg width="9" height="9" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </label>
-          <label class="cat-tile" data-val="health" onclick="selectCat(this,'health')">
-            <input type="radio" name="_r" value="health">
-            <div class="cat-icon">🌿</div>
-            <span class="cat-name">Health &amp; Wellness</span>
-            <div class="cat-check"><svg width="9" height="9" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </label>
-          <label class="cat-tile" data-val="sports" onclick="selectCat(this,'sports')">
-            <input type="radio" name="_r" value="sports">
-            <div class="cat-icon">⚽</div>
-            <span class="cat-name">Sports &amp; Fitness</span>
-            <div class="cat-check"><svg width="9" height="9" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </label>
-          <label class="cat-tile" data-val="other" onclick="selectCat(this,'other')">
-            <input type="radio" name="_r" value="other">
-            <div class="cat-icon">🛍️</div>
-            <span class="cat-name">Other</span>
-            <div class="cat-check"><svg width="9" height="9" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
-          </label>
-        </div>
-      </form>
-    </div>
-    <div class="ob-footer">
-      <button type="button" class="ob-skip" onclick="skipCat()">Skip for now</button>
-      <button type="button" class="ob-btn-next" id="catNext" disabled onclick="document.getElementById('catForm').submit()">
-        Continue
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
-    </div>
+
+    <form id="catForm" method="POST" action="{% url 'onboarding' %}">
+      {% csrf_token %}
+      <input type="hidden" name="step" value="category">
+      <input type="hidden" name="category" id="catInput" value="">
+
+      <div class="cat-grid">
+        <label class="cat-card" data-val="fashion" onclick="selectCat(this,'fashion')">
+          <input type="radio" name="_r" value="fashion">
+          <img class="cat-img" src="https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=300&q=80&auto=format&fit=crop" alt="Fashion" loading="lazy">
+          <div class="cat-overlay"></div>
+          <div class="cat-label">Fashion</div>
+          <div class="cat-tick"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </label>
+
+        <label class="cat-card" data-val="beauty" onclick="selectCat(this,'beauty')">
+          <input type="radio" name="_r" value="beauty">
+          <img class="cat-img" src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300&q=80&auto=format&fit=crop" alt="Beauty" loading="lazy">
+          <div class="cat-overlay"></div>
+          <div class="cat-label">Beauty</div>
+          <div class="cat-tick"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </label>
+
+        <label class="cat-card" data-val="electronics" onclick="selectCat(this,'electronics')">
+          <input type="radio" name="_r" value="electronics">
+          <img class="cat-img" src="https://images.unsplash.com/photo-1498049794561-7780e7231661?w=300&q=80&auto=format&fit=crop" alt="Electronics" loading="lazy">
+          <div class="cat-overlay"></div>
+          <div class="cat-label">Electronics</div>
+          <div class="cat-tick"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </label>
+
+        <label class="cat-card" data-val="food" onclick="selectCat(this,'food')">
+          <input type="radio" name="_r" value="food">
+          <img class="cat-img" src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=300&q=80&auto=format&fit=crop" alt="Food" loading="lazy">
+          <div class="cat-overlay"></div>
+          <div class="cat-label">Food</div>
+          <div class="cat-tick"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </label>
+
+        <label class="cat-card" data-val="home" onclick="selectCat(this,'home')">
+          <input type="radio" name="_r" value="home">
+          <img class="cat-img" src="https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&q=80&auto=format&fit=crop" alt="Home" loading="lazy">
+          <div class="cat-overlay"></div>
+          <div class="cat-label">Home</div>
+          <div class="cat-tick"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </label>
+
+        <label class="cat-card" data-val="health" onclick="selectCat(this,'health')">
+          <input type="radio" name="_r" value="health">
+          <img class="cat-img" src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=300&q=80&auto=format&fit=crop" alt="Health" loading="lazy">
+          <div class="cat-overlay"></div>
+          <div class="cat-label">Health</div>
+          <div class="cat-tick"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </label>
+
+        <label class="cat-card" data-val="sports" onclick="selectCat(this,'sports')">
+          <input type="radio" name="_r" value="sports">
+          <img class="cat-img" src="https://images.unsplash.com/photo-1517649763962-0c623066013b?w=300&q=80&auto=format&fit=crop" alt="Sports" loading="lazy">
+          <div class="cat-overlay"></div>
+          <div class="cat-label">Sports</div>
+          <div class="cat-tick"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </label>
+
+        <label class="cat-card" data-val="other" onclick="selectCat(this,'other')">
+          <input type="radio" name="_r" value="other">
+          <img class="cat-img" src="https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=300&q=80&auto=format&fit=crop" alt="Other" loading="lazy">
+          <div class="cat-overlay"></div>
+          <div class="cat-label">Other</div>
+          <div class="cat-tick"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </label>
+      </div>
+
+      <div class="ob-actions">
+        <button type="button" class="ob-skip" onclick="skipCat()">Skip for now</button>
+        <button type="submit" class="ob-btn" id="catBtn" disabled>
+          Continue
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </form>
   </div>
 
-  <!-- ── STEP 2: LOGO / PROFILE PIC ── -->
-  <div id="step2" class="ob-step {% if step == 2 %}active{% endif %}">
-    <div class="ob-head">
-      <div class="ob-step-row">
-        <span class="ob-step-pill">Step 2 of 2</span>
-        <div class="ob-dots">
-          <div class="ob-dot done"></div>
-          <div class="ob-dot active"></div>
-        </div>
-      </div>
+  <!-- ════ STEP 2: LOGO ════ -->
+  <div id="step2" {% if step != 2 %}style="display:none"{% endif %}>
+    <button type="button" class="ob-back" onclick="goBack()">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back
+    </button>
+    <div class="ob-header">
       <div class="ob-title">Add a store logo</div>
-      <p class="ob-sub">A logo or photo makes your store look professional to buyers. Totally optional — you can always add it later in settings.</p>
+      <p class="ob-sub">A photo makes your store look professional. You can always add it later.</p>
     </div>
-    <div class="ob-body">
-      <div class="pic-area">
-        <div class="pic-preview-wrap" onclick="openCloudinary()">
-          <div class="pic-preview" id="picPreview">
-            {{ request.user.business_name|first|upper }}
-          </div>
-          <div class="pic-overlay">
-            <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+    <div class="pic-step">
+      <div class="pic-center">
+        <div class="pic-avatar" id="picAvatar" onclick="triggerFilePick()">
+          <span id="picInitial">{{ request.user.business_name|first|upper }}</span>
+          <div class="pic-avatar-hover">
+            <svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
           </div>
         </div>
-        <div style="text-align:center;">
-          <button type="button" class="pic-upload-btn" onclick="openCloudinary()">
+
+        <input type="file" id="picFileInput" accept="image/*" onchange="handleFileSelect(event)">
+
+        <div>
+          <button type="button" class="pic-upload-btn" onclick="triggerFilePick()">
             <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Upload Logo / Photo
+            Upload logo / photo
           </button>
-          <div class="pic-uploading" id="picUploading" style="margin-top:8px;justify-content:center;">
+          <div class="pic-uploading" id="picUploading" style="margin-top:10px;justify-content:center;">
             <div class="pic-spinner"></div>
             <span>Uploading…</span>
           </div>
-          <div style="margin-top:8px;">
-            <button type="button" class="pic-skip" onclick="finishOnboarding()">Skip, I'll add it later</button>
-          </div>
         </div>
       </div>
-      <form id="obPicForm" method="POST" action="{% url 'onboarding' %}" style="display:none;">
-        {% csrf_token %}
-        <input type="hidden" name="step" value="profile_picture">
-        <input type="hidden" name="profile_picture_url" id="obPicUrl" value="">
-      </form>
-      <form id="obSkipForm" method="POST" action="{% url 'onboarding' %}" style="display:none;">
-        {% csrf_token %}
-        <input type="hidden" name="step" value="skip_picture">
-      </form>
+
+      <div class="ob-actions">
+        <button type="button" class="ob-skip" onclick="finishOnboarding()">Skip, add it later</button>
+        <button type="button" class="ob-btn" id="picBtn" disabled onclick="document.getElementById('obPicForm').submit()">
+          Save &amp; finish
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
     </div>
-    <div class="ob-footer">
-      <button type="button" class="ob-btn-back" onclick="goBack()">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Back
-      </button>
-      <button type="button" class="ob-btn-next" id="picNext" disabled onclick="document.getElementById('obPicForm').submit()">
-        Save &amp; Finish
-        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
-    </div>
+
+    <form id="obPicForm" method="POST" action="{% url 'onboarding' %}" style="display:none;">
+      {% csrf_token %}
+      <input type="hidden" name="step" value="profile_picture">
+      <input type="hidden" name="profile_picture_url" id="obPicUrl" value="">
+    </form>
+    <form id="obSkipForm" method="POST" action="{% url 'onboarding' %}" style="display:none;">
+      {% csrf_token %}
+      <input type="hidden" name="step" value="skip_picture">
+    </form>
   </div>
 
-  <!-- ── DONE ── -->
-  <div id="stepDone" class="ob-step {% if step == 'done' %}active{% endif %}">
-    <div class="ob-head" style="padding-bottom:20px;">
-      <div class="ob-step-row">
-        <span class="ob-step-pill" style="background:#f0fdf4;color:#15803d;border-color:#bbf7d0;">All set!</span>
-        <div class="ob-dots"><div class="ob-dot done"></div><div class="ob-dot done"></div></div>
+  <!-- ════ DONE ════ -->
+  <div id="stepDone" {% if step != 'done' %}style="display:none"{% endif %}>
+    <div class="ob-done">
+      <span class="ob-done-emoji">🎉</span>
+      <h2>Your store is live!</h2>
+      <p>Share your link on WhatsApp, Instagram bio — anywhere buyers can find you.</p>
+      <div class="ob-done-link">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        vendopage.com/{{ request.user.slug }}
       </div>
+      <a href="{% url 'dashboard' %}" class="ob-go">Go to my Dashboard →</a>
     </div>
-    <div class="ob-body">
-      <div class="ob-done">
-        <div class="ob-done-emoji">🎉</div>
-        <h2>Your store is live!</h2>
-        <p>Share this link on WhatsApp status, Instagram bio — anywhere buyers can find you.</p>
-        <div class="ob-done-link">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-          vendopage.com/{{ request.user.slug }}
-        </div>
-        <a href="{% url 'dashboard' %}" class="ob-btn-go">Go to my Dashboard →</a>
-      </div>
-    </div>
-    <div style="height:28px;"></div>
   </div>
 
 </div>
@@ -378,71 +449,89 @@
 {% block footer %}{% endblock %}
 
 {% block extra_js %}
-<script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 <script>
-const CLOUD_NAME = '{{ cloudinary_cloud_name }}';
-const UPLOAD_PRESET = '{{ cloudinary_upload_preset }}';
-let picUrl = null, widget = null;
+const CLOUD_NAME    = '{{ cloudinary_cloud_name|default:"dqxlkie1i" }}';
+const UPLOAD_PRESET = '{{ cloudinary_upload_preset|default:"vendopage_unsigned" }}';
+let cloudWidget = null;
 
 function selectCat(tile, val) {
-  document.querySelectorAll('.cat-tile').forEach(t => t.classList.remove('selected'));
+  document.querySelectorAll('.cat-card').forEach(t => t.classList.remove('selected'));
   tile.classList.add('selected');
   document.getElementById('catInput').value = val;
-  document.getElementById('catNext').disabled = false;
+  document.getElementById('catBtn').disabled = false;
 }
-
 function skipCat() {
   document.getElementById('catInput').value = '';
   document.getElementById('catForm').submit();
 }
-
 function goBack() {
-  document.getElementById('step2').classList.remove('active');
-  document.getElementById('step1').classList.add('active');
-  document.getElementById('obFill').style.width = '33%';
+  document.getElementById('step2').style.display = 'none';
+  document.getElementById('step1').style.display = '';
 }
-
+function triggerFilePick() {
+  document.getElementById('picFileInput').click();
+}
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const avatar = document.getElementById('picAvatar');
+    avatar.innerHTML = `<img src="${ev.target.result}" alt="Logo"><div class="pic-avatar-hover"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
+  };
+  reader.readAsDataURL(file);
+  uploadToCloudinary(file);
+}
+function uploadToCloudinary(file) {
+  document.getElementById('picUploading').style.display = 'flex';
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, { method: 'POST', body: fd })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('picUploading').style.display = 'none';
+    if (data.secure_url) {
+      document.getElementById('obPicUrl').value = data.secure_url;
+      const btn = document.getElementById('picBtn');
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.style.cursor = 'pointer';
+    } else {
+      console.error('Cloudinary upload error:', data);
+      alert('Upload failed: ' + (data.error?.message || 'Unknown error. Check console.'));
+    }
+  })
+  .catch((err) => {
+    console.error('Cloudinary upload failed:', err);
+    document.getElementById('picUploading').style.display = 'none';
+    alert('Upload failed — check your internet connection and try again.');
+  });
+}
 function openCloudinary() {
-  if (!widget) {
-    widget = cloudinary.createUploadWidget({
-      cloudName: CLOUD_NAME,
-      uploadPreset: UPLOAD_PRESET,
-      cropping: true, croppingAspectRatio: 1,
-      showSkipCropButton: false,
-      multiple: false, maxFiles: 1,
-      sources: ['local','camera','url'],
-      resourceType: 'image',
-      clientAllowedFormats: ['jpg','jpeg','png','webp','heic'],
+  if (!cloudWidget) {
+    cloudWidget = cloudinary.createUploadWidget({
+      cloudName: CLOUD_NAME, uploadPreset: UPLOAD_PRESET,
+      cropping: true, croppingAspectRatio: 1, showSkipCropButton: false,
+      multiple: false, maxFiles: 1, sources: ['local', 'camera', 'url'],
+      resourceType: 'image', clientAllowedFormats: ['jpg','jpeg','png','webp','heic'],
       maxFileSize: 5000000,
-      styles: {
-        palette: {
-          window:'#FFFFFF', windowBorder:'#E8E8E4',
-          tabIcon:'#00C853', menuIcons:'#6B6B6B',
-          textDark:'#0A0A0A', textLight:'#FFFFFF',
-          link:'#00C853', action:'#00C853',
-          inactiveTabIcon:'#9B9B9B', error:'#FF4444',
-          inProgress:'#00C853', complete:'#00C853',
-          sourceBg:'#F7F7F5'
-        }
-      }
+      styles: { palette: { window:'#FFFFFF', windowBorder:'#E8E8E4', tabIcon:'#00C853', menuIcons:'#6B6B6B', textDark:'#0A0A0A', textLight:'#FFFFFF', link:'#00C853', action:'#00C853', inactiveTabIcon:'#9B9B9B', error:'#FF4444', inProgress:'#00C853', complete:'#00C853', sourceBg:'#F7F7F5' } }
     }, function(error, result) {
-      if (error) { document.getElementById('picUploading').style.display='none'; return; }
-      if (result && result.event === 'upload-added') {
-        document.getElementById('picUploading').style.display='flex';
-      }
+      if (error) { document.getElementById('picUploading').style.display = 'none'; return; }
+      if (result && result.event === 'upload-added') { document.getElementById('picUploading').style.display = 'flex'; }
       if (result && result.event === 'success') {
         const url = result.info.secure_url;
-        picUrl = url;
         document.getElementById('obPicUrl').value = url;
-        document.getElementById('picUploading').style.display='none';
-        document.getElementById('picPreview').innerHTML = `<img src="${url}" alt="Logo">`;
-        document.getElementById('picNext').disabled = false;
+        document.getElementById('picUploading').style.display = 'none';
+        const avatar = document.getElementById('picAvatar');
+        avatar.innerHTML = `<img src="${url}" alt="Logo"><div class="pic-avatar-hover"><svg width="18" height="18" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>`;
+        document.getElementById('picBtn').disabled = false;
       }
     });
   }
-  widget.open();
+  cloudWidget.open();
 }
-
 function finishOnboarding() {
   document.getElementById('obSkipForm').submit();
 }

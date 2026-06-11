@@ -1,1454 +1,974 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}VendoPage — Upload Once. Sell Forever.{% endblock %}
-{% block meta_description %}Upload 50 products in one click. Get your own store link instantly. Built for WhatsApp vendors.{% endblock %}
-{% block og_title %}VendoPage — Your Permanent WhatsApp Store{% endblock %}
-{% block og_description %}Upload once. Sell forever. Your products, your link, your store.{% endblock %}
+{% block title %}Vendopage — Your Store. One Link.{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+/* ══════════════════════════════════════
+   HOMEPAGE TOKENS
+══════════════════════════════════════ */
+main { display:block; }
 
-/* ─────────────────────────────────────────
-   DESIGN TOKENS
-───────────────────────────────────────── */
-:root {
-  --green:       #00C853;
-  --green-dark:  #00a844;
-  --green-dim:   rgba(0,200,83,.10);
-
-  --bg:          #ffffff;
-  --bg-alt:      #F6F6F3;
-  --text:        #0A0A0A;
-  --text-muted:  #6B6B6B;
-  --border:      #E5E5E0;
-
-  --font-d: 'Syne', sans-serif;
-  --font-b: 'DM Sans', sans-serif;
-
-  --radius-sm: 10px;
-  --radius:    14px;
-  --radius-lg: 20px;
-}
-
-[data-theme="dark"] {
-  --bg:         #111111;
-  --bg-alt:     #191919;
-  --text:       #F0F0F0;
-  --text-muted: #888888;
-  --border:     #2A2A2A;
-}
-
-/* ─────────────────────────────────────────
-   BASE RESETS
-───────────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: var(--font-b); background: var(--bg); color: var(--text); line-height: 1; }
-a { text-decoration: none; color: inherit; }
-button { font-family: var(--font-b); cursor: pointer; }
-img { display: block; max-width: 100%; }
-
-/* ─────────────────────────────────────────
-   LAYOUT HELPERS
-───────────────────────────────────────── */
-.wrap    { max-width: 1080px; margin: 0 auto; padding: 0 40px; }
-.wrap-sm { max-width:  780px; margin: 0 auto; padding: 0 40px; }
-.sec     { padding: 88px 0; background: var(--bg); }
-.sec-alt { padding: 88px 0; background: var(--bg-alt); }
-
-.sec-label {
-  display: block;
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 2.5px; text-transform: uppercase;
-  color: var(--green); margin-bottom: 12px;
-}
-.sec-title {
-  font-family: var(--font-d); font-weight: 800;
-  font-size: clamp(26px, 4vw, 46px);
-  letter-spacing: -1.5px; line-height: 1.08;
-  color: var(--text); margin-bottom: 14px;
-}
-.sec-sub {
-  font-size: 16px; color: var(--text-muted);
-  line-height: 1.65; max-width: 520px;
-}
-.sec-head          { margin-bottom: 52px; }
-.sec-head.center   { text-align: center; }
-.sec-head.center .sec-sub { margin: 0 auto; }
-
-/* Fade-in on scroll */
-.hp-fade { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s ease; }
-.hp-fade.visible   { opacity: 1; transform: translateY(0); }
-
-/* ─────────────────────────────────────────
-   ENTRY MODAL
-───────────────────────────────────────── */
-.overlay {
-  position: fixed; inset: 0; z-index: 900;
-  background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
-  display: flex; align-items: center; justify-content: center; padding: 20px;
-  opacity: 0; pointer-events: none; transition: opacity .25s;
-}
-.overlay.open { opacity: 1; pointer-events: auto; }
-
-.modal {
-  background: var(--bg); border-radius: var(--radius-lg);
-  width: 100%; max-width: 380px;
-  padding: 36px 28px 28px;
-  box-shadow: 0 32px 80px rgba(0,0,0,.22);
-  border: 1px solid var(--border);
-  transform: translateY(14px) scale(.97);
-  transition: transform .32s cubic-bezier(.22,1,.36,1);
-}
-.overlay.open .modal { transform: translateY(0) scale(1); }
-
-.modal h2 {
-  font-family: var(--font-d); font-weight: 800;
-  font-size: 20px; letter-spacing: -.4px;
-  color: var(--text); margin-bottom: 4px;
-}
-.modal > p { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; line-height: 1.5; }
-
-.em-group  { margin-bottom: 13px; }
-.em-label  { display: block; font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; }
-.em-input  {
-  width: 100%; padding: 11px 13px;
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-  font-family: var(--font-b); font-size: 14px; color: var(--text);
-  background: var(--bg); outline: none;
-  transition: border-color .2s, box-shadow .2s;
-}
-.em-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,200,83,.10); }
-.em-input::placeholder { color: var(--text-muted); opacity: .5; }
-.em-input.error { border-color: #f87171; }
-
-.slug-row {
-  display: flex; align-items: center;
-  border: 1.5px solid var(--border); border-radius: var(--radius-sm);
-  overflow: hidden; transition: border-color .2s, box-shadow .2s;
-}
-.slug-row:focus-within { border-color: var(--green); box-shadow: 0 0 0 3px rgba(0,200,83,.10); }
-.slug-prefix {
-  padding: 11px 8px 11px 13px;
-  font-size: 12px; color: var(--text-muted); font-weight: 500;
-  background: var(--bg-alt); white-space: nowrap; flex-shrink: 0;
-  border-right: 1px solid var(--border);
-}
-.slug-input {
-  flex: 1; padding: 11px 13px 11px 8px;
-  border: none; outline: none;
-  font-family: var(--font-b); font-size: 14px; color: var(--text);
-  background: transparent; min-width: 0;
-}
-.slug-input::placeholder { color: var(--text-muted); opacity: .5; }
-
-.em-hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
-.em-hint.taken     { color: #ef4444; }
-.em-hint.available { color: var(--green); }
-
-.em-submit {
-  width: 100%; padding: 13px; margin-top: 6px;
-  background: var(--text); color: var(--bg);
-  border: none; border-radius: var(--radius-sm);
-  font-family: var(--font-b); font-size: 14px; font-weight: 600;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: opacity .18s;
-}
-.em-submit:hover   { opacity: .85; }
-.em-submit:disabled { opacity: .45; cursor: not-allowed; }
-.em-spin {
-  width: 15px; height: 15px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.3); border-top-color: #fff;
-  animation: spin .7s linear infinite; display: none;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-.em-signin { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 14px; }
-.em-signin a { color: var(--green); font-weight: 600; }
-
-/* ─────────────────────────────────────────
+/* ══════════════════════════════════════
    HERO
-───────────────────────────────────────── */
+══════════════════════════════════════ */
 .hero {
-  padding: 112px 40px 96px;
-  background: var(--bg);
-  position: relative; overflow: hidden;
-}
-.hero::before {
-  content: ''; position: absolute;
-  top: -160px; right: -200px;
-  width: 640px; height: 640px;
-  background: radial-gradient(circle, rgba(0,200,83,.07) 0%, transparent 65%);
-  border-radius: 50%; pointer-events: none;
-}
-.hero-inner { max-width: 860px; margin: 0 auto; text-align: center; position: relative; z-index: 1; }
-
-.hero h1 {
-  font-family: var(--font-d); font-weight: 800;
-  font-size: clamp(40px, 7vw, 80px);
-  line-height: 1.0; letter-spacing: -3px;
-  color: var(--text); margin-bottom: 22px;
-}
-.hero h1 .accent { color: var(--green); }
-.hero-sub {
-  font-size: clamp(16px, 2.2vw, 19px); color: var(--text-muted);
-  max-width: 500px; margin: 0 auto 48px; line-height: 1.7;
-}
-.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-
-/* Button styles */
-.btn-primary {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 14px 26px;
-  background: var(--text); color: var(--bg);
-  border: none; border-radius: 100px;
-  font-family: var(--font-b); font-size: 15px; font-weight: 600;
-  transition: transform .22s, opacity .22s;
-}
-.btn-primary:hover { transform: translateY(-2px); opacity: .88; }
-.btn-arrow {
-  width: 26px; height: 26px; background: var(--green);
-  border-radius: 50%; display: inline-flex;
-  align-items: center; justify-content: center; flex-shrink: 0;
-}
-.btn-ghost {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 14px 24px; color: var(--text-muted);
-  font-size: 15px; font-weight: 500;
-  border: 1.5px solid var(--border); border-radius: 100px;
-  transition: all .22s; background: transparent;
-}
-.btn-ghost:hover { color: var(--text); border-color: var(--text); background: var(--bg-alt); }
-
-/* ─────────────────────────────────────────
-   PROOF BAR
-───────────────────────────────────────── */
-.proof-bar {
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
-  padding: 22px 0;
-  background: var(--bg-alt); overflow: hidden;
-}
-.proof-track {
-  display: flex; gap: 64px;
-  animation: proofScroll 22s linear infinite; width: max-content;
-}
-.proof-bar:hover .proof-track { animation-play-state: paused; }
-@keyframes proofScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-.proof-item { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
-.proof-num {
-  font-family: var(--font-d); font-weight: 800;
-  font-size: 28px; letter-spacing: -1px; color: var(--text);
-}
-.proof-lbl { font-size: 12px; color: var(--text-muted); line-height: 1.45; font-weight: 500; }
-.proof-div { width: 1px; height: 30px; background: var(--border); flex-shrink: 0; }
-
-.stores-cat-grid {
+  min-height: calc(100vh - 68px);
+  background: #0D0D0D;
+  position: relative;
+  overflow: hidden;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-.stores-cat-card {
-  display: flex; align-items: center; gap: 14px;
-  padding: 18px 20px;
-  background: var(--bg);
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
-  text-decoration: none;
-}
-.stores-cat-card:hover {
-  border-color: var(--green);
-  background: var(--green-dim);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,200,83,.08);
-}
-.stores-cat-all {
-  background: var(--text);
-  border-color: var(--text);
-}
-.stores-cat-all .stores-cat-name,
-.stores-cat-all .stores-cat-arrow { color: var(--bg) !important; }
-.stores-cat-all:hover { background: var(--green); border-color: var(--green); box-shadow: 0 8px 24px rgba(0,200,83,.25); }
- 
-.stores-cat-icon { font-size: 24px; flex-shrink: 0; line-height: 1; }
-.stores-cat-name {
-  flex: 1;
-  font-family: var(--font-d);
-  font-weight: 700; font-size: 13px;
-  color: var(--text);
-  line-height: 1.3;
-}
-.stores-cat-arrow {
-  flex-shrink: 0; color: var(--text-muted);
-  transition: transform .2s;
-}
-.stores-cat-card:hover .stores-cat-arrow { transform: translateX(3px); }
- 
-@media (max-width: 768px) {
-  .stores-cat-grid { grid-template-columns: repeat(2, 1fr); }
-}
-@media (max-width: 480px) {
-  .stores-cat-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-  .stores-cat-card { padding: 14px 14px; gap: 10px; }
-  .stores-cat-icon { font-size: 20px; }
-  .stores-cat-name { font-size: 12px; }
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  padding: 0 80px;
+  gap: 60px;
 }
 
-/* ─────────────────────────────────────────
-   LIVE STORES
-───────────────────────────────────────── */
-.sellers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
-.seller-card {
-  background: var(--bg); border: 1.5px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
-  display: block; transition: transform .2s, box-shadow .2s, border-color .2s;
-}
-.seller-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,.08); border-color: #bbb; }
-[data-theme="dark"] .seller-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,.4); border-color: #555; }
-.seller-img  { height: 100px; position: relative; overflow: hidden; background: var(--bg-alt); }
-.seller-img img { width: 100%; height: 100%; object-fit: cover; }
-.seller-fallback {
-  width: 100%; height: 100%; background: var(--text);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-d); font-weight: 800; font-size: 36px; color: var(--bg);
-}
-.seller-badge {
-  position: absolute; top: 8px; left: 8px;
-  background: var(--green); color: #fff;
-  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
-}
-.seller-body { padding: 13px 15px 15px; }
-.seller-name {
-  font-family: var(--font-d); font-weight: 700; font-size: 14px;
-  color: var(--text); margin-bottom: 3px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.seller-cat  { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
-.seller-count {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: var(--bg-alt); border-radius: 100px;
-  padding: 3px 10px; font-size: 11px; font-weight: 600; color: var(--text-muted);
-}
-.sublabel { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px; opacity: .6; }
-
-/* ─────────────────────────────────────────
-   HOW IT WORKS
-───────────────────────────────────────── */
-.steps-grid {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  border: 1.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden;
-}
-.step-card {
-  background: var(--bg); padding: 32px 26px;
-  position: relative; transition: background .22s;
-  border-right: 1px solid var(--border);
-}
-.step-card:last-child { border-right: none; }
-.step-card:hover { background: var(--bg-alt); }
-.step-card:hover .step-icon { background: var(--green); }
-.step-card:hover .step-arrow { background: var(--green-dim); border-color: var(--green); }
-.step-card:hover .step-arrow svg { stroke: var(--green); }
-
-.step-num {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--bg-alt); border: 1.5px solid var(--border);
-  font-family: var(--font-d); font-weight: 800; font-size: 10px;
-  color: var(--text-muted); margin-bottom: 18px;
-  transition: background .22s, border-color .22s, color .22s;
-}
-.step-card:hover .step-num { background: var(--green-dim); border-color: var(--green); color: var(--green-dark); }
-
-.step-icon {
-  width: 42px; height: 42px; background: var(--text);
-  border-radius: 11px; display: flex; align-items: center; justify-content: center;
-  margin-bottom: 16px; transition: background .22s;
-}
-.step-card h3 { font-family: var(--font-d); font-weight: 700; font-size: 16px; color: var(--text); margin-bottom: 8px; }
-.step-card p  { font-size: 13px; color: var(--text-muted); line-height: 1.75; }
-
-.step-arrow {
-  position: absolute; top: 32px; right: -13px; z-index: 2;
-  width: 24px; height: 24px; background: var(--bg);
-  border: 1.5px solid var(--border); border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; transition: all .22s;
-}
-.step-card:last-child .step-arrow { display: none; }
-
-/* progress dots */
-.steps-progress { display: flex; align-items: center; margin-bottom: 28px; }
-.prog-item { display: flex; align-items: center; flex: 1; }
-.prog-dot {
-  width: 9px; height: 9px; border-radius: 50%;
-  background: var(--green); flex-shrink: 0; position: relative;
-}
-.prog-dot::after {
-  content: ''; position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%,-50%);
-  width: 17px; height: 17px; border-radius: 50%;
-  border: 1.5px solid var(--green); opacity: 0;
-  animation: ripple 2s ease-out infinite;
-}
-.prog-item:nth-child(2) .prog-dot::after { animation-delay: .7s; }
-.prog-item:nth-child(3) .prog-dot::after { animation-delay: 1.4s; }
-@keyframes ripple { 0% { opacity: .6; transform: translate(-50%,-50%) scale(1); } 100% { opacity: 0; transform: translate(-50%,-50%) scale(2.5); } }
-.prog-line {
-  flex: 1; height: 2px;
-  background: linear-gradient(to right, var(--green), var(--border));
-  position: relative; overflow: hidden;
-}
-.prog-line::after {
-  content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-  background: linear-gradient(to right, transparent, rgba(0,200,83,.6), transparent);
-  animation: shimmer 2.4s ease-in-out infinite;
-}
-.prog-item:nth-child(2) .prog-line::after { animation-delay: .7s; }
-@keyframes shimmer { 0% { left: -100%; } 100% { left: 100%; } }
-.prog-item:last-child .prog-line { display: none; }
-
-/* Mobile carousel */
-.carousel-mobile { display: none; }
-.carousel-track-wrap { overflow: hidden; }
-.carousel-track { display: flex; transition: transform .38s cubic-bezier(.4,0,.2,1); }
-.carousel-slide {
-  flex: 0 0 100%; padding: 28px 22px;
-  background: var(--bg); border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg); min-height: 210px;
-}
-.carousel-controls { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 18px; }
-.carousel-dots { display: flex; gap: 6px; align-items: center; }
-.carousel-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--border); transition: background .22s, transform .22s; cursor: pointer;
-}
-.carousel-dot.active { background: var(--green); transform: scale(1.3); }
-.carousel-btn {
-  width: 32px; height: 32px; border-radius: 50%;
-  border: 1.5px solid var(--border); background: var(--bg);
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all .18s;
-}
-.carousel-btn:hover { border-color: var(--green); background: var(--green-dim); }
-.carousel-btn svg { stroke: var(--text-muted); transition: stroke .18s; }
-.carousel-btn:hover svg { stroke: var(--green); }
-
-/* ─────────────────────────────────────────
-   BENEFITS
-───────────────────────────────────────── */
-.benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 14px; }
-.benefit-card {
-  padding: 26px 22px; border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg); background: var(--bg);
-  transition: border-color .22s, transform .22s, box-shadow .22s;
-}
-.benefit-card:hover { border-color: var(--green); transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,200,83,.10); }
-.benefit-icon {
-  width: 44px; height: 44px; background: var(--green-dim);
-  border-radius: 11px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
-}
-.benefit-card h3 { font-family: var(--font-d); font-weight: 700; font-size: 15px; color: var(--text); margin-bottom: 8px; }
-.benefit-card p  { font-size: 13px; color: var(--text-muted); line-height: 1.72; }
-
-/* ─────────────────────────────────────────
-   CURRENCY DEMO
-───────────────────────────────────────── */
-.currency-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
-.currency-mockup {
-  background: var(--bg); border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg); overflow: hidden;
-  box-shadow: 0 24px 56px rgba(0,0,0,.08);
-}
-[data-theme="dark"] .currency-mockup { box-shadow: 0 24px 56px rgba(0,0,0,.4); }
-.currency-top {
-  padding: 16px 18px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 12px;
-}
-.currency-flag  { font-size: 26px; flex-shrink: 0; }
-.currency-detected { font-size: 11px; color: var(--text-muted); margin-bottom: 2px; }
-.currency-name  { font-size: 15px; font-weight: 600; color: var(--text); }
-.currency-badge {
-  margin-left: auto; background: var(--green-dim); color: var(--green);
-  font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px;
-}
-.currency-products { padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--bg-alt); }
-.cprod { background: var(--bg); border-radius: var(--radius-sm); overflow: hidden; }
-.cprod-img { height: 60px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-.cprod-body { padding: 7px 8px; }
-.cprod-name  { font-size: 10px; font-weight: 600; color: var(--text); }
-.cprod-price { font-size: 11px; color: var(--green); font-weight: 700; margin-top: 2px; }
-.currency-cta { margin: 0 12px 12px; background: var(--green); color: #fff; padding: 9px; border-radius: 8px; text-align: center; font-size: 11px; font-weight: 600; }
-
-.currency-picker { display: flex; flex-direction: column; gap: 8px; }
-.cpick {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px; border: 1.5px solid var(--border);
-  border-radius: var(--radius); cursor: pointer;
-  transition: border-color .18s, background .18s;
-}
-.cpick:hover, .cpick.active { border-color: var(--green); background: var(--green-dim); }
-.cpick-flag { font-size: 20px; flex-shrink: 0; }
-.cpick-country { font-size: 13px; font-weight: 500; color: var(--text); }
-.cpick-code    { font-size: 11px; color: var(--text-muted); }
-.cpick-sym     { font-size: 17px; font-weight: 600; color: var(--text-muted); margin-left: auto; }
-.cpick-check {
-  width: 18px; height: 18px; border-radius: 50%; background: var(--green);
-  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-  opacity: 0; transition: opacity .18s;
-}
-.cpick.active .cpick-check { opacity: 1; }
-.currency-note { font-size: 11px; color: var(--text-muted); margin-top: 10px; }
-
-/* ─────────────────────────────────────────
-   TRUST / SECURITY
-───────────────────────────────────────── */
-.trust-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
-.trust-card {
-  background: var(--bg); border: 1.5px solid var(--border);
-  border-radius: var(--radius-lg); padding: 24px 20px;
-  transition: border-color .2s, transform .2s;
-}
-.trust-card:hover { border-color: rgba(0,200,83,.4); transform: translateY(-3px); }
-.trust-icon {
-  width: 40px; height: 40px; border-radius: 10px;
-  background: var(--green-dim); display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
-}
-.trust-card h3 { font-family: var(--font-d); font-weight: 700; font-size: 14px; color: var(--text); margin-bottom: 7px; }
-.trust-card p  { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
-.trust-tag {
-  display: inline-flex; align-items: center; gap: 5px;
-  margin-top: 10px; background: var(--bg-alt);
-  border-radius: var(--radius-sm); padding: 3px 9px;
-  font-size: 10px; font-weight: 600; color: var(--text-muted);
+/* Noise texture overlay */
+.hero::before {
+  content:'';
+  position:absolute; inset:0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; z-index:1; opacity:0.5;
 }
 
-/* ─────────────────────────────────────────
-   ESCROW FLOW
-───────────────────────────────────────── */
-.escrow-flow { display: flex; align-items: flex-start; position: relative; margin-top: 48px; }
-.escrow-step { flex: 1; display: flex; flex-direction: column; align-items: center; text-align: center; position: relative; }
-.escrow-step::after {
-  content: ''; position: absolute; top: 20px; left: 50%; width: 100%; height: 1px;
-  background: var(--border);
+/* Subtle green radial glow */
+.hero-glow {
+  position:absolute;
+  width:700px; height:700px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(0,135,61,.14) 0%, transparent 65%);
+  top:-100px; right:-100px;
+  pointer-events:none; z-index:1;
 }
-.escrow-step:last-child::after { display: none; }
-.es-dot {
-  width: 40px; height: 40px; border-radius: 50%;
-  background: var(--bg-alt); border: 1.5px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  position: relative; z-index: 1; flex-shrink: 0;
-  font-size: 13px; font-weight: 700; color: var(--text-muted);
+.hero-glow-2 {
+  position:absolute;
+  width:400px; height:400px;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(0,135,61,.07) 0%, transparent 65%);
+  bottom:0; left:0;
+  pointer-events:none; z-index:1;
 }
-.escrow-step.done   .es-dot { background: var(--green-dim); border-color: rgba(0,200,83,.35); color: var(--green); }
-.escrow-step.active .es-dot { background: var(--green); border-color: var(--green); color: #fff; }
-.es-label { font-size: 12px; font-weight: 600; color: var(--text); margin-top: 10px; }
-.es-sub   { font-size: 11px; color: var(--text-muted); margin-top: 3px; max-width: 90px; line-height: 1.4; }
 
-.plan-legend { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 32px; }
-.plan-dot { width: 8px; height: 8px; border-radius: 50%; }
-.plan-label { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-muted); }
-
-/* ─────────────────────────────────────────
-   PHONE MOCKUP
-───────────────────────────────────────── */
-.phone-wrap { display: flex; justify-content: center; margin-top: 48px; }
-.phone {
-  width: 258px; background: var(--bg);
-  border-radius: 28px; overflow: hidden;
-  border: 2px solid var(--border);
-  box-shadow: 0 40px 80px rgba(0,0,0,.12);
-  animation: phoneFloat 5s ease-in-out infinite;
-}
-[data-theme="dark"] .phone { box-shadow: 0 40px 80px rgba(0,0,0,.5); }
-@keyframes phoneFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-.phone-header { background: var(--green); padding: 18px 18px 14px; color: #fff; }
-.phone-top { display: flex; align-items: center; gap: 10px; }
-.phone-avatar { width: 34px; height: 34px; background: rgba(255,255,255,.25); border-radius: 50%; }
-.phone-name   { font-weight: 700; font-size: 14px; }
-.phone-url    { font-size: 11px; opacity: .75; margin-top: 1px; }
-.phone-products { padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--bg-alt); }
-.phone-product  { background: var(--bg); border-radius: 8px; overflow: hidden; }
-.phone-img  { height: 68px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-.phone-info { padding: 7px 8px; }
-.phone-pname  { font-size: 10px; font-weight: 600; color: var(--text); }
-.phone-price  { font-size: 10px; color: var(--green); font-weight: 700; margin-top: 1px; }
-.phone-cta    { margin: 0 14px 14px; background: var(--green); color: #fff; padding: 9px; border-radius: 7px; text-align: center; font-size: 12px; font-weight: 600; }
-
-/* ─────────────────────────────────────────
-   PLATFORM STATS
-───────────────────────────────────────── */
-.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
-.stat-card  { background: var(--bg-alt); border-radius: var(--radius); padding: 22px 18px; }
-.stat-num   { font-family: var(--font-d); font-size: 30px; font-weight: 800; color: var(--text); letter-spacing: -1.5px; }
-.stat-label { font-size: 12px; color: var(--text-muted); margin-top: 5px; line-height: 1.45; }
-.stat-delta { font-size: 11px; color: var(--green); margin-top: 8px; display: flex; align-items: center; gap: 4px; font-weight: 500; }
-
-/* ─────────────────────────────────────────
-   CTA STRIP
-───────────────────────────────────────── */
-.hp-cta {
-  padding: 100px 40px; background: #0A0A0A;
-  text-align: center; position: relative; overflow: hidden;
-}
-.hp-cta::before {
-  content: ''; position: absolute; inset: 0;
+/* Grid lines */
+.hero-grid {
+  position:absolute; inset:0;
   background-image:
-    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-  background-size: 52px 52px;
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 72px 72px;
+  pointer-events:none; z-index:1;
 }
-.hp-cta > * { position: relative; z-index: 1; }
-.hp-cta .sec-label { color: var(--green); }
-.hp-cta h2 {
-  font-family: var(--font-d); font-weight: 800;
-  font-size: clamp(30px, 5.5vw, 58px); letter-spacing: -2px;
-  margin-bottom: 14px; color: #fff;
-}
-.hp-cta p  { font-size: 17px; color: rgba(255,255,255,.45); margin-bottom: 44px; }
-.btn-cta {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 14px 28px; background: var(--green); color: #fff;
-  border-radius: 100px; font-family: var(--font-b); font-size: 15px; font-weight: 600;
-  border: none; transition: background .22s, transform .22s;
-}
-.btn-cta:hover { background: var(--green-dark); transform: translateY(-2px); }
-.btn-cta .btn-arrow { background: rgba(255,255,255,.2); }
 
-/* ─────────────────────────────────────────
-   FAQ
-───────────────────────────────────────── */
-.faq-list { border: 1.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-.faq-item { border-bottom: 1px solid var(--border); }
-.faq-item:last-child { border-bottom: none; }
-.faq-q {
-  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  padding: 20px 24px; background: none; border: none;
-  font-family: var(--font-d); font-size: 15px; font-weight: 600;
-  color: var(--text); cursor: pointer; text-align: left;
-  transition: background .18s, color .18s;
+.hero-left {
+  position:relative; z-index:2;
+  padding: 100px 0;
 }
-.faq-q:hover { background: var(--bg-alt); color: var(--green); }
-.faq-icon { flex-shrink: 0; color: var(--text-muted); transition: transform .3s, color .18s; }
-.faq-item.open .faq-q { background: var(--bg-alt); color: var(--green); }
-.faq-item.open .faq-icon { transform: rotate(180deg); color: var(--green); }
-.faq-a { max-height: 0; overflow: hidden; transition: max-height .38s ease; background: var(--bg-alt); }
-.faq-item.open .faq-a { max-height: 400px; }
-.faq-a p { padding: 0 24px 20px; font-size: 14px; color: var(--text-muted); line-height: 1.8; }
 
-/* ─────────────────────────────────────────
+.hero-eyebrow {
+  display:inline-flex; align-items:center; gap:10px;
+  margin-bottom:32px;
+  opacity:0; /* GSAP animates this */
+}
+.hero-eyebrow-line {
+  width:32px; height:1.5px;
+  background: var(--green);
+}
+.hero-eyebrow-text {
+  font-family: var(--font-b);
+  font-size:12px; font-weight:600;
+  letter-spacing:2.5px; text-transform:uppercase;
+  color:var(--green);
+}
+
+.hero-headline {
+  font-family: 'Cabinet Grotesk', sans-serif;
+  font-size: clamp(56px, 5.5vw, 88px);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -3px;
+  color: #F5F4F0;
+  margin-bottom: 28px;
+  opacity:0; /* GSAP */
+}
+.hero-headline .line-2 {
+  color: var(--green);
+  display:block;
+}
+
+.hero-sub {
+  font-size: 17px;
+  line-height: 1.75;
+  color: rgba(245,244,240,.45);
+  max-width: 440px;
+  margin-bottom: 48px;
+  font-weight: 400;
+  opacity:0;
+}
+
+.hero-ctas {
+  display:flex; gap:12px; align-items:center;
+  margin-bottom:52px;
+  opacity:0;
+}
+
+/* Black pill button with green dot */
+.btn-hero-primary {
+  display:inline-flex; align-items:center; gap:10px;
+  padding: 14px 28px;
+  background: #F5F4F0;
+  color: #0D0D0D;
+  border-radius:var(--r-pill);
+  font-family:var(--font-b); font-size:12px; font-weight:700;
+  border:none; cursor:pointer; text-decoration:none;
+  transition:all .2s; letter-spacing:0.2px;
+}
+.btn-hero-primary:hover {
+  background:#fff;
+  transform:translateY(-2px);
+  box-shadow:0 12px 32px rgba(245,244,240,.15);
+}
+.btn-hero-primary .dot {
+  width:8px; height:8px; border-radius:50%;
+  background:var(--green); flex-shrink:0;
+  box-shadow:0 0 8px rgba(0,200,83,.5);
+}
+
+.btn-hero-ghost {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:14px 24px;
+  background:transparent;
+  color:rgba(245,244,240,.5);
+  border-radius:var(--r-pill);
+  font-family:var(--font-b); font-size:14px; font-weight:500;
+  border:1.5px solid rgba(245,244,240,.12);
+  cursor:pointer; text-decoration:none;
+  transition:all .2s;
+}
+.btn-hero-ghost:hover {
+  color:rgba(245,244,240,.9);
+  border-color:rgba(245,244,240,.3);
+}
+
+.hero-trust {
+  display:flex; align-items:center; gap:20px;
+  flex-wrap:wrap;
+  opacity:0;
+}
+.hero-trust-item {
+  display:flex; align-items:center; gap:7px;
+  font-size:13px; font-weight:500;
+  color:rgba(245,244,240,.3);
+}
+.hero-trust-item::before {
+  content:'';
+  width:5px; height:5px; border-radius:50%;
+  background:var(--green); flex-shrink:0;
+}
+
+/* ── HERO RIGHT (phone) ── */
+.hero-right {
+  position:relative; z-index:2;
+  display:flex; align-items:center; justify-content:center;
+  padding: 80px 0;
+  opacity:0;
+}
+
+.phone-wrap { position:relative; }
+
+.phone-ring {
+  position:absolute;
+  border-radius:50%;
+  border:1px solid rgba(0,135,61,.15);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+}
+.ring-1 { width:360px; height:360px; }
+.ring-2 { width:480px; height:480px; border-color:rgba(0,135,61,.07); }
+
+.phone {
+  width:256px; height:510px;
+  background:#161616;
+  border-radius:40px;
+  border:1.5px solid rgba(255,255,255,.1);
+  overflow:hidden; position:relative;
+  box-shadow:
+    0 60px 120px rgba(0,0,0,.6),
+    0 0 0 1px rgba(255,255,255,.04);
+}
+.phone-bar {
+  position:absolute; top:0; left:50%;
+  transform:translateX(-50%);
+  width:88px; height:26px;
+  background:#161616;
+  border-radius:0 0 18px 18px;
+  z-index:10;
+}
+
+.phone-screen {
+  height:100%; padding-top:32px;
+  background:#F5F4F0;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+
+.store-header {
+  background:#0D0D0D; padding:14px 14px 16px;
+}
+.store-row { display:flex; align-items:center; gap:10px; }
+.store-avi {
+  width:38px; height:38px; border-radius:50%;
+  background:var(--green); display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
+}
+.store-name { font-family:'Cabinet Grotesk',sans-serif; font-size:11px; font-weight:700; color:#fff; }
+.store-url  { font-size:9px; color:rgba(0,200,83,.8); font-weight:500; margin-top:1px; }
+.store-live { display:flex; align-items:center; gap:4px; font-size:9px; color:rgba(255,255,255,.4); margin-left:auto; }
+.store-live-dot { width:5px; height:5px; border-radius:50%; background:#00C853; animation:livePulse 2s infinite; }
+
+.escrow-strip {
+  background:rgba(0,135,61,.06);
+  border-bottom:1px solid rgba(0,135,61,.1);
+  padding:6px 12px; display:flex; align-items:center; gap:6px;
+}
+.escrow-strip-icon { font-size:10px; }
+.escrow-strip-text { font-size:8.5px; color:var(--green); font-weight:600; }
+
+.product-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:7px; padding:10px; flex:1;
+}
+.p-card { background:#fff; border-radius:9px; overflow:hidden; box-shadow:0 1px 6px rgba(0,0,0,.06); }
+.p-img  { height:60px; display:flex; align-items:center; justify-content:center; font-size:24px; }
+.p-body { padding:5px 7px 6px; }
+.p-name  { font-size:7.5px; font-weight:600; color:#333; margin-bottom:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.p-price { font-size:9.5px; font-weight:700; color:var(--green); }
+.p-btn   { width:100%; background:#0D0D0D; color:#fff; font-size:7.5px; font-weight:700; padding:5px 0; border:none; cursor:pointer; }
+
+/* Floating chips */
+.chip {
+  position:absolute; background:#fff;
+  border-radius:12px; padding:10px 14px;
+  box-shadow:0 16px 48px rgba(0,0,0,.28);
+  min-width:140px;
+}
+.chip-1 { top:50px; right:-70px; animation:float1 3.2s ease-in-out infinite; }
+.chip-2 { bottom:70px; left:-80px; animation:float2 3.8s ease-in-out infinite; }
+.chip-lbl { font-size:9px; color:#888; font-weight:500; margin-bottom:3px; }
+.chip-val { font-family:'Cabinet Grotesk',sans-serif; font-size:15px; font-weight:800; color:#0D0D0D; }
+.chip-sub { font-size:9px; color:var(--green); font-weight:600; margin-top:2px; }
+.chip-ico { font-size:18px; margin-bottom:3px; }
+
+@keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:.2} }
+@keyframes float1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-9px)} }
+@keyframes float2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(9px)} }
+
+/* ══════════════════════════════════════
+   TICKER (scrolling logos / social proof)
+══════════════════════════════════════ */
+.ticker-wrap {
+  background:#0D0D0D;
+  border-top:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(255,255,255,.06);
+  padding:16px 0;
+  overflow:hidden;
+}
+.ticker-inner {
+  display:flex; gap:60px; white-space:nowrap;
+  animation:ticker 20s linear infinite;
+}
+.ticker-item {
+  display:flex; align-items:center; gap:10px;
+  font-size:13px; font-weight:600;
+  color:rgba(245,244,240,.3);
+  flex-shrink:0; letter-spacing:0.5px;
+}
+.ticker-dot { width:4px; height:4px; border-radius:50%; background:var(--green); }
+@keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ══════════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════════ */
+.how {
+  background: var(--surface);
+  padding: 120px 80px;
+}
+.section-label {
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:11px; font-weight:700; letter-spacing:2.5px;
+  text-transform:uppercase; color:var(--green);
+  margin-bottom:20px;
+}
+.section-label-line { width:24px; height:1.5px; background:var(--green); }
+
+.how-header {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:40px; align-items:end;
+  margin-bottom:80px;
+}
+.how-title {
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:clamp(36px,4vw,56px);
+  font-weight:800; letter-spacing:-2px;
+  line-height:1.05; color:var(--ink);
+}
+.how-desc {
+  font-size:16px; line-height:1.75;
+  color:var(--muted); max-width:380px;
+}
+
+.steps {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:2px; /* tight grid lines */
+}
+.step {
+  padding:48px 40px;
+  border:1px solid var(--border);
+  position:relative; overflow:hidden;
+  transition:background .2s;
+}
+.step:hover { background:var(--surface-2); }
+.step-num {
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:80px; font-weight:800;
+  color:var(--border);
+  line-height:1; margin-bottom:32px;
+  transition:color .2s;
+}
+.step:hover .step-num { color:var(--green); opacity:.3; }
+.step-icon {
+  width:48px; height:48px; border-radius:var(--r-md);
+  background:var(--green-lt); border:1px solid rgba(0,135,61,.15);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; margin-bottom:20px;
+}
+[data-theme="dark"] .step-icon { background:rgba(0,135,61,.12); }
+.step-title {
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:20px; font-weight:700; letter-spacing:-0.5px;
+  color:var(--ink); margin-bottom:10px;
+}
+.step-desc { font-size:14px; line-height:1.7; color:var(--muted); }
+
+/* ══════════════════════════════════════
+   FEATURES / FOR SELLERS
+══════════════════════════════════════ */
+.features {
+  background:#0D0D0D;
+  padding:120px 80px;
+  position:relative; overflow:hidden;
+}
+.features-bg-text {
+  position:absolute;
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:200px; font-weight:800;
+  color:rgba(255,255,255,.02);
+  top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  white-space:nowrap; pointer-events:none;
+  letter-spacing:-8px;
+}
+.features-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:60px; align-items:center;
+  position:relative; z-index:2;
+}
+.features-left {}
+.features-title {
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:clamp(32px,3.5vw,52px);
+  font-weight:800; letter-spacing:-2px;
+  line-height:1.05; color:#F5F4F0;
+  margin-bottom:48px;
+}
+.feature-list { display:flex; flex-direction:column; gap:0; }
+.feature-item {
+  display:flex; align-items:flex-start; gap:20px;
+  padding:24px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  cursor:pointer;
+  transition:all .2s;
+}
+.feature-item:first-child { border-top:1px solid rgba(255,255,255,.06); }
+.feature-item:hover .feature-item-icon { background:var(--green); }
+.feature-item-icon {
+  width:40px; height:40px; border-radius:var(--r-md);
+  background:rgba(255,255,255,.07);
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px; flex-shrink:0;
+  transition:background .2s;
+}
+.feature-item-title {
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:16px; font-weight:700;
+  color:#F5F4F0; margin-bottom:4px; letter-spacing:-0.3px;
+}
+.feature-item-desc { font-size:13px; line-height:1.65; color:rgba(245,244,240,.4); }
+
+/* Right side: big visual card */
+.features-right {
+  display:flex; align-items:center; justify-content:center;
+}
+.feature-card {
+  background:#1A1A18; border:1px solid rgba(255,255,255,.08);
+  border-radius:24px; padding:40px; width:100%; max-width:420px;
+  position:relative; overflow:hidden;
+}
+.feature-card::before {
+  content:'';
+  position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(0,200,83,.4), transparent);
+}
+.fc-top {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:28px;
+}
+.fc-badge {
+  font-size:11px; font-weight:700; letter-spacing:1px;
+  text-transform:uppercase; color:var(--green);
+  background:rgba(0,135,61,.12); border:1px solid rgba(0,135,61,.2);
+  padding:4px 12px; border-radius:var(--r-pill);
+}
+.fc-amount {
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:36px; font-weight:800;
+  color:#F5F4F0; letter-spacing:-1.5px;
+  margin-bottom:4px;
+}
+.fc-label { font-size:12px; color:rgba(245,244,240,.35); font-weight:500; margin-bottom:28px; }
+
+.escrow-flow {
+  display:flex; flex-direction:column; gap:0;
+}
+.ef-step {
+  display:flex; align-items:center; gap:14px;
+  padding:14px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);
+}
+.ef-step:last-child { border-bottom:none; }
+.ef-num {
+  width:28px; height:28px; border-radius:50%;
+  background:rgba(0,135,61,.15); border:1px solid rgba(0,135,61,.25);
+  color:var(--green); font-size:12px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.ef-text { font-size:13px; color:rgba(245,244,240,.55); font-weight:500; }
+.ef-status {
+  margin-left:auto; font-size:10px; font-weight:700;
+  padding:3px 9px; border-radius:var(--r-pill); flex-shrink:0;
+}
+.ef-done { background:rgba(0,135,61,.15); color:var(--green); }
+.ef-hold { background:rgba(245,158,11,.12); color:#FBBF24; }
+.ef-wait { background:rgba(245,244,240,.06); color:rgba(245,244,240,.3); }
+
+/* ══════════════════════════════════════
+   FOR BUYERS
+══════════════════════════════════════ */
+.buyers {
+  background: var(--surface);
+  padding: 120px 80px;
+}
+.buyers-grid {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:60px; align-items:center;
+}
+.buyers-right {}
+.buyers-title {
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:clamp(32px,3.5vw,52px);
+  font-weight:800; letter-spacing:-2px;
+  line-height:1.05; color:var(--ink);
+  margin-bottom:20px;
+}
+.buyers-desc {
+  font-size:16px; line-height:1.75;
+  color:var(--muted); margin-bottom:40px;
+}
+.buyer-points { display:flex; flex-direction:column; gap:16px; }
+.buyer-point {
+  display:flex; align-items:flex-start; gap:14px;
+  padding:20px; border-radius:var(--r-lg);
+  border:1.5px solid var(--border);
+  transition:border-color .2s, background .2s;
+}
+.buyer-point:hover { border-color:var(--green); background:var(--green-lt); }
+[data-theme="dark"] .buyer-point:hover { background:rgba(0,135,61,.06); }
+.bp-icon {
+  width:36px; height:36px; border-radius:var(--r-md);
+  background:var(--surface-2); display:flex; align-items:center; justify-content:center;
+  font-size:16px; flex-shrink:0;
+}
+.bp-title { font-family:'Cabinet Grotesk',sans-serif; font-size:14px; font-weight:700; color:var(--ink); margin-bottom:3px; }
+.bp-desc  { font-size:13px; line-height:1.6; color:var(--muted); }
+
+/* Left side visual — stat cards */
+.buyers-left {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.stat-card {
+  background:var(--white); border:1.5px solid var(--border);
+  border-radius:var(--r-lg); padding:28px 24px;
+  transition:border-color .2s, transform .2s;
+}
+.stat-card:hover { border-color:var(--green); transform:translateY(-3px); }
+.stat-card.span2 { grid-column:1/-1; }
+[data-theme="dark"] .stat-card { background:var(--surface-2); }
+.sc-num {
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:40px; font-weight:800; letter-spacing:-2px;
+  color:var(--ink); line-height:1; margin-bottom:6px;
+}
+.sc-num span { color:var(--green); }
+.sc-label { font-size:13px; color:var(--muted); font-weight:500; line-height:1.5; }
+.sc-icon { font-size:28px; margin-bottom:12px; display:block; }
+
+/* ══════════════════════════════════════
+   CTA BANNER
+══════════════════════════════════════ */
+.cta-banner {
+  background:#0D0D0D;
+  padding:100px 80px;
+  position:relative; overflow:hidden;
+  text-align:center;
+}
+.cta-banner::before {
+  content:'';
+  position:absolute;
+  width:600px; height:600px; border-radius:50%;
+  background:radial-gradient(circle, rgba(0,135,61,.2) 0%, transparent 65%);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  pointer-events:none;
+}
+.cta-title {
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:clamp(40px,5vw,72px);
+  font-weight:800; letter-spacing:-3px;
+  line-height:1.0; color:#F5F4F0;
+  margin-bottom:20px; position:relative; z-index:2;
+}
+.cta-title span { color:var(--green); }
+.cta-sub {
+  font-size:17px; color:rgba(245,244,240,.4);
+  max-width:480px; margin:0 auto 40px; line-height:1.7;
+  position:relative; z-index:2;
+}
+.cta-buttons {
+  display:flex; justify-content:center; gap:12px;
+  flex-wrap:wrap; position:relative; z-index:2;
+}
+
+/* ══════════════════════════════════════
    RESPONSIVE
-───────────────────────────────────────── */
-@media (max-width: 900px) {
-  .trust-grid { grid-template-columns: repeat(2, 1fr); }
-  .currency-grid { grid-template-columns: 1fr; gap: 36px; }
+══════════════════════════════════════ */
+@media (max-width:1024px) {
+  .hero         { padding:0 48px; }
+  .how          { padding:100px 48px; }
+  .features     { padding:100px 48px; }
+  .buyers       { padding:100px 48px; }
+  .cta-banner   { padding:80px 48px; }
 }
 
-@media (max-width: 768px) {
-  .wrap, .wrap-sm { padding: 0 20px; }
-  .hero { padding: 72px 20px 60px; }
-  .sec, .sec-alt { padding: 60px 0; }
-  .hp-cta { padding: 72px 20px; }
-  .sellers-grid  { grid-template-columns: repeat(2, 1fr); }
-  .steps-grid, .steps-progress { display: none; }
-  .carousel-mobile { display: block; }
-  .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .trust-grid { grid-template-columns: 1fr; }
-  .escrow-flow { flex-direction: column; gap: 16px; }
-  .escrow-step::after { display: none; }
+@media (max-width:860px) {
+  .hero { grid-template-columns:1fr; padding:80px 28px 60px; gap:0; }
+  .hero-left { padding:60px 0 0; }
+  .hero-right { display:none; }
+
+  .how-header { grid-template-columns:1fr; }
+  .steps { grid-template-columns:1fr; gap:0; }
+
+  .features-grid { grid-template-columns:1fr; }
+  .features-right { display:none; }
+
+  .buyers-grid { grid-template-columns:1fr; }
+  .buyers-left { order:-1; grid-template-columns:1fr 1fr; }
+
+  .how, .features, .buyers, .cta-banner { padding:80px 28px; }
 }
 
-@media (max-width: 560px) {
-  .hero-actions { flex-direction: column; align-items: stretch; }
-  .btn-primary, .btn-ghost { justify-content: center; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
+@media (max-width:480px) {
+  .hero { padding:60px 20px 50px; }
+  .how, .features, .buyers, .cta-banner { padding:60px 20px; }
+  .buyers-left { grid-template-columns:1fr; }
+  .cta-buttons { flex-direction:column; align-items:center; }
 }
-
-
-@media (max-width: 768px) {
- 
-  /* Switch from horizontal row to vertical stepper */
-  .escrow-flow {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    margin-top: 36px;
-  }
- 
-  /* Each step becomes a horizontal row */
-  .escrow-step {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    text-align: left;
-    gap: 16px;
-    padding: 16px 20px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    position: relative;
-  }
-  .escrow-step:last-child {
-    border-bottom: none;
-  }
- 
-  /* Remove the horizontal pseudo-line — we use border-bottom instead */
-  .escrow-step::after {
-    display: none !important;
-  }
- 
-  /* Left: vertical connector line */
-  .escrow-step:not(:last-child)::before {
-    content: '';
-    position: absolute;
-    left: 30px; /* centers under the 40px dot */
-    bottom: -1px;
-    width: 2px;
-    height: 100%;
-    background: var(--border);
-    z-index: 0;
-    display: none; /* handled by border-bottom */
-  }
- 
-  /* Dot stays its size, doesn't shrink */
-  .es-dot {
-    flex-shrink: 0;
-    width: 40px; height: 40px;
-    position: relative; z-index: 1;
-  }
- 
-  /* Active step gets a green left border accent */
-  .escrow-step.active {
-    background: rgba(0,200,83,.04);
-    border-left: 3px solid var(--green);
-  }
-  .escrow-step.done {
-    background: var(--bg);
-    border-left: 3px solid transparent;
-  }
- 
-  /* Text block beside the dot */
-  .es-text {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .es-label {
-    font-size: 13px;
-    font-weight: 700;
-    margin-top: 0;
-    color: var(--text);
-  }
-  .es-sub {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-top: 0;
-    max-width: none;
-    line-height: 1.4;
-  }
- 
-  /* Step number badge top-right */
-  .es-step-num {
-    margin-left: auto;
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--text-muted);
-    background: var(--bg-alt);
-    padding: 2px 8px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    flex-shrink: 0;
-  }
- 
-  /* Legend below the flow */
-  .plan-legend {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    margin-top: 24px;
-    padding: 16px 20px;
-    background: var(--bg-alt);
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-lg);
-  }
-  .plan-label {
-    font-size: 13px;
-  }
-}
- 
-/* Extra small screens */
-@media (max-width: 380px) {
-  .escrow-step {
-    padding: 14px 16px;
-    gap: 12px;
-  }
-  .es-dot {
-    width: 36px; height: 36px;
-    font-size: 12px;
-  }
-  .es-label { font-size: 12px; }
-}
-
 </style>
 {% endblock %}
 
 {% block content %}
 
+<!-- ══════════════════════════════════════
+     HERO
+══════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow-2"></div>
+  <div class="hero-grid"></div>
 
-<section class="hero">
-  <div class="hero-inner">
-    <h1>Upload 50 Products<br><span class="accent">in 1 Click.</span></h1>
-    <p class="hero-sub">Turn your WhatsApp catalogue into a permanent store link. Share it everywhere. Sell instantly.</p>
-    <div class="hero-actions">
-      {% if user.is_authenticated %}
-        <a href="{% url 'upload_product' %}" class="btn-primary">
-          Add Products
-          <span class="btn-arrow"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-        </a>
-        <a href="/{{ user.slug }}" target="_blank" class="btn-ghost">View my store</a>
-      {% else %}
-       <a href="{% url 'register' %}" class="btn-primary">
-          Create your free store
-          <span class="btn-arrow"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-        </a>
-        <a href="#how" class="btn-ghost">See how it works</a>
-      {% endif %}
+  <div class="hero-left">
+    <div class="hero-eyebrow" id="heroEyebrow">
+      <div class="hero-eyebrow-line"></div>
+      <span class="hero-eyebrow-text">🇳🇬 Built for Nigerian sellers</span>
+    </div>
+
+    <h1 class="hero-headline" id="heroHeadline">
+      Your store.
+      <span class="line-2">One link.</span>
+    </h1>
+
+    <p class="hero-sub" id="heroSub">
+      Stop posting on WhatsApp status every day. Get your own store link, receive payments safely with escrow, and let buyers shop from anywhere.
+    </p>
+
+    <div class="hero-ctas" id="heroCtas">
+    {% if user.is_authenticated %}
+      <!-- Shown ONLY to sellers who are already logged in -->
+      <a href="{% url 'upload_product' %}" class="btn-hero-primary">
+        <span class="dot"></span>
+        Upload Product
+      </a>
+    {% else %}
+      <!-- Shown to guests/unregistered visitors -->
+      <a href="{% url 'register' %}" class="btn-hero-primary">
+        <span class="dot"></span>
+        Start Selling — Free
+      </a>
+    {% endif %}
+    
+    <a href="#how" class="btn-hero-ghost">
+      See how it works →
+    </a>
+  </div>
+
+
+    <div class="hero-trust" id="heroTrust">
+      <span class="hero-trust-item">Free to start</span>
+      <span class="hero-trust-item">Escrow protected</span>
+      <span class="hero-trust-item">No tech skills needed</span>
+    </div>
+  </div>
+
+  <!-- Phone mockup -->
+  <div class="hero-right" id="heroRight">
+    <div class="phone-wrap">
+      <div class="phone-ring ring-1"></div>
+      <div class="phone-ring ring-2"></div>
+
+      <div class="phone">
+        <div class="phone-bar"></div>
+        <div class="phone-screen">
+          <div class="store-header">
+            <div class="store-row">
+              <div class="store-avi">👗</div>
+              <div>
+                <div class="store-name">Adaeze's Boutique</div>
+                <div class="store-url">vendopage.com.ng/adaeze</div>
+              </div>
+              <div class="store-live"><div class="store-live-dot"></div>Live</div>
+            </div>
+          </div>
+          <div class="escrow-strip">
+            <span class="escrow-strip-icon">🔒</span>
+            <span class="escrow-strip-text">Escrow protected — money held until delivery</span>
+          </div>
+          <div class="product-grid">
+            <div class="p-card"><div class="p-img" style="background:#FFF5F0">👗</div><div class="p-body"><div class="p-name">Ankara Dress</div><div class="p-price">₦8,500</div></div><button class="p-btn">Buy Now</button></div>
+            <div class="p-card"><div class="p-img" style="background:#F0FFF5">👜</div><div class="p-body"><div class="p-name">Leather Bag</div><div class="p-price">₦12,000</div></div><button class="p-btn">Buy Now</button></div>
+            <div class="p-card"><div class="p-img" style="background:#F5F0FF">👠</div><div class="p-body"><div class="p-name">Block Heels</div><div class="p-price">₦6,200</div></div><button class="p-btn">Buy Now</button></div>
+            <div class="p-card"><div class="p-img" style="background:#FFF8F0">🧣</div><div class="p-body"><div class="p-name">Silk Scarf</div><div class="p-price">₦3,500</div></div><button class="p-btn">Buy Now</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chip chip-1">
+        <div class="chip-ico">💸</div>
+        <div class="chip-lbl">Payment received</div>
+        <div class="chip-val">₦8,500</div>
+        <div class="chip-sub">✓ Escrow released</div>
+      </div>
+      <div class="chip chip-2">
+        <div class="chip-ico">📦</div>
+        <div class="chip-lbl">New order</div>
+        <div class="chip-val">Ankara Dress</div>
+        <div class="chip-sub">Delivery in progress →</div>
+      </div>
     </div>
   </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════
-     PROOF BAR
-════════════════════════════════════════ -->
-<div class="proof-bar">
-  <div class="proof-track" id="proofTrack">
-    <div class="proof-item"><span class="proof-num">50+</span><span class="proof-lbl">Products<br>per upload</span></div>
-    <div class="proof-div"></div>
-    <div class="proof-item"><span class="proof-num">0</span><span class="proof-lbl">Coding<br>required</span></div>
-    <div class="proof-div"></div>
-    <div class="proof-item"><span class="proof-num">30s</span><span class="proof-lbl">Store live<br>in seconds</span></div>
-    <div class="proof-div"></div>
-    <div class="proof-item"><span class="proof-num">100%</span><span class="proof-lbl">WhatsApp<br>friendly</span></div>
-    <div class="proof-div"></div>
-    <div class="proof-item"><span class="proof-num">180+</span><span class="proof-lbl">Countries<br>supported</span></div>
-    <div class="proof-div"></div>
-    <div class="proof-item"><span class="proof-num">Free</span><span class="proof-lbl">Always<br>forever</span></div>
+<!-- ── TICKER ── -->
+<div class="ticker-wrap">
+  <div class="ticker-inner">
+    {% for item in "12345678"|make_list %}
+    <div class="ticker-item"><span class="ticker-dot"></span>Free to start</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Escrow protected payments</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Your store link, your brand</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Delivery tracking built-in</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Sell without daily posting</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Nigeria's safest marketplace</div>
+    {% endfor %}
   </div>
 </div>
 
-<section class="sec" id="stores">
-  <div class="wrap">
- 
-    <div class="sec-head hp-fade">
-      <span class="sec-label">Live Stores</span>
-      <h2 class="sec-title">Real vendors.<br>Real products.</h2>
-      <p class="sec-sub">Browse hundreds of verified sellers across fashion, food, beauty, electronics and more.</p>
-    </div>
- 
-    {# ── Category Preview Cards (static, no DB query needed) ── #}
-    <div class="stores-cat-grid hp-fade">
- 
-      <a href="{% url 'sellers_directory' %}?category=fashion" class="stores-cat-card">
-        <div class="stores-cat-icon">👗</div>
-        <div class="stores-cat-name">Fashion &amp; Apparel</div>
-        <div class="stores-cat-arrow">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
- 
-      <a href="{% url 'sellers_directory' %}?category=beauty" class="stores-cat-card">
-        <div class="stores-cat-icon">💄</div>
-        <div class="stores-cat-name">Beauty &amp; Cosmetics</div>
-        <div class="stores-cat-arrow">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
- 
-      <a href="{% url 'sellers_directory' %}?category=food" class="stores-cat-card">
-        <div class="stores-cat-icon">🍔</div>
-        <div class="stores-cat-name">Food &amp; Beverages</div>
-        <div class="stores-cat-arrow">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
- 
-      <a href="{% url 'sellers_directory' %}?category=electronics" class="stores-cat-card">
-        <div class="stores-cat-icon">📱</div>
-        <div class="stores-cat-name">Electronics &amp; Gadgets</div>
-        <div class="stores-cat-arrow">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
- 
-      <a href="{% url 'sellers_directory' %}?category=health" class="stores-cat-card">
-        <div class="stores-cat-icon">🌿</div>
-        <div class="stores-cat-name">Health &amp; Wellness</div>
-        <div class="stores-cat-arrow">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
- 
-      <a href="{% url 'sellers_directory' %}" class="stores-cat-card stores-cat-all">
-        <div class="stores-cat-icon">🏪</div>
-        <div class="stores-cat-name">Browse All Stores</div>
-        <div class="stores-cat-arrow">
-          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </div>
-      </a>
- 
-    </div>{# end .stores-cat-grid #}
- 
-    <div style="text-align:center;margin-top:36px;" class="hp-fade">
-      <a href="{% url 'sellers_directory' %}" class="btn-primary" style="display:inline-flex;">
-        Browse All Vendors
-        <span class="btn-arrow">
-          <svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        </span>
-      </a>
-    </div>
- 
-  </div>
-</section>
- 
-<!-- ═══════════════════════════════════════
+<!-- ══════════════════════════════════════
      HOW IT WORKS
-════════════════════════════════════════ -->
-<section class="sec-alt" id="how">
-  <div class="wrap">
-    <div class="sec-head hp-fade">
-      <span class="sec-label">The Flow</span>
-      <h2 class="sec-title">3 steps to your store</h2>
-      <p class="sec-sub">No technical skills needed. If you can send a WhatsApp message, you can build your store.</p>
-    </div>
+══════════════════════════════════════ -->
+<section class="how" id="how">
+  <div class="section-label">
+    <span class="section-label-line"></span>
+    How It Works
+  </div>
 
-    <!-- Desktop: progress dots -->
-    <div class="steps-progress">
-      <div class="prog-item"><div class="prog-dot"></div><div class="prog-line"></div></div>
-      <div class="prog-item"><div class="prog-dot"></div><div class="prog-line"></div></div>
-      <div class="prog-item"><div class="prog-dot"></div><div class="prog-line"></div></div>
-    </div>
+  <div class="how-header">
+    <h2 class="how-title">Simple.<br>Fast.<br>Powerful.</h2>
+    <p class="how-desc">Getting your store live takes less than two minutes. No technical knowledge. No credit card. Just your products and your link.</p>
+  </div>
 
-    <!-- Desktop grid -->
-    <div class="steps-grid">
-      <div class="step-card hp-fade">
-        <div class="step-num">01</div>
-        <div class="step-icon"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
-        <h3>Upload your photos</h3>
-        <p>Drop all your product photos at once. WhatsApp screenshots, camera shots — anything works. Up to 50 at a time.</p>
-        <div class="step-arrow"><svg width="10" height="10" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-      <div class="step-card hp-fade">
-        <div class="step-num">02</div>
-        <div class="step-icon"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
-        <h3>Add descriptions &amp; prices</h3>
-        <p>Type naturally — name, price, size. Just like a WhatsApp message. No complicated forms or spreadsheets.</p>
-        <div class="step-arrow"><svg width="10" height="10" fill="none" stroke="var(--text-muted)" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-      <div class="step-card hp-fade">
-        <div class="step-num">03</div>
-        <div class="step-icon"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
-        <h3>Share your link</h3>
-        <p>Get <strong>vendopage.com/yourname</strong>. Post it on WhatsApp status, Instagram bio, anywhere buyers can see it.</p>
-      </div>
+  <div class="steps">
+    <div class="step gsap-reveal">
+      <div class="step-num">01</div>
+      <div class="step-icon">📝</div>
+      <div class="step-title">Create your free account</div>
+      <p class="step-desc">Sign up in 30 seconds. Enter your business name, WhatsApp number, and email. Your store link is generated instantly.</p>
     </div>
-
-    <!-- Mobile carousel -->
-    <div class="carousel-mobile">
-      <div class="carousel-track-wrap">
-        <div class="carousel-track" id="carouselTrack">
-          <div class="carousel-slide">
-            <div class="step-num">01</div>
-            <div class="step-icon" style="margin-top:12px;"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
-            <h3 style="font-family:var(--font-d);font-weight:700;font-size:17px;color:var(--text);margin:14px 0 8px;">Upload your photos</h3>
-            <p style="font-size:14px;color:var(--text-muted);line-height:1.75;">Drop all your product photos at once. WhatsApp screenshots, camera shots — anything works. Up to 50 at a time.</p>
-          </div>
-          <div class="carousel-slide">
-            <div class="step-num">02</div>
-            <div class="step-icon" style="margin-top:12px;"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
-            <h3 style="font-family:var(--font-d);font-weight:700;font-size:17px;color:var(--text);margin:14px 0 8px;">Add descriptions &amp; prices</h3>
-            <p style="font-size:14px;color:var(--text-muted);line-height:1.75;">Type naturally — name, price, size. Just like you would in a WhatsApp message. No complicated forms.</p>
-          </div>
-          <div class="carousel-slide">
-            <div class="step-num">03</div>
-            <div class="step-icon" style="margin-top:12px;"><svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
-            <h3 style="font-family:var(--font-d);font-weight:700;font-size:17px;color:var(--text);margin:14px 0 8px;">Share your link</h3>
-            <p style="font-size:14px;color:var(--text-muted);line-height:1.75;">Get your permanent store link — <strong>vendopage.com/yourname</strong>. Post it anywhere buyers can find you.</p>
-          </div>
-        </div>
-      </div>
-      <div class="carousel-controls">
-        <button class="carousel-btn" id="carouselPrev"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
-        <div class="carousel-dots">
-          <div class="carousel-dot active" data-idx="0"></div>
-          <div class="carousel-dot" data-idx="1"></div>
-          <div class="carousel-dot" data-idx="2"></div>
-        </div>
-        <button class="carousel-btn" id="carouselNext"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></button>
-      </div>
+    <div class="step gsap-reveal">
+      <div class="step-num">02</div>
+      <div class="step-icon">📸</div>
+      <div class="step-title">Upload your products</div>
+      <p class="step-desc">Add photos, prices, and descriptions. Upload up to 50 products at once. Your store is live the moment you save.</p>
+    </div>
+    <div class="step gsap-reveal">
+      <div class="step-num">03</div>
+      <div class="step-icon">🔗</div>
+      <div class="step-title">Share your one link</div>
+      <p class="step-desc">Copy your personal store URL and share it on WhatsApp, Instagram, Twitter — anywhere. Buyers browse and order directly.</p>
     </div>
   </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════
-     BENEFITS
-════════════════════════════════════════ -->
-<section class="sec">
-  <div class="wrap">
-    <div class="sec-head hp-fade">
-      <span class="sec-label">Why Vendopage</span>
-      <h2 class="sec-title">Built for how vendors<br>actually work</h2>
-    </div>
-    <div class="benefits-grid">
-      <div class="benefit-card hp-fade">
-        <div class="benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
-        <h3>Bulk Upload</h3>
-        <p>Stop posting one product at a time. Upload your whole catalogue in one go — 50 products in under a minute.</p>
+<!-- ══════════════════════════════════════
+     FOR SELLERS (Features)
+══════════════════════════════════════ -->
+<section class="features" id="sellers">
+  <div class="features-bg-text">SELL</div>
+  <div class="features-grid">
+    <div class="features-left">
+      <div class="section-label" style="color:rgba(0,200,83,.8);">
+        <span class="section-label-line" style="background:rgba(0,200,83,.8);"></span>
+        For Sellers
       </div>
-      <div class="benefit-card hp-fade">
-        <div class="benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></div>
-        <h3>Permanent Link</h3>
-        <p>Your store lives forever at your personal link. No expiry. No disappearing statuses. Always accessible.</p>
-      </div>
-      <div class="benefit-card hp-fade">
-        <div class="benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
-        <h3>WhatsApp Orders</h3>
-        <p>Buyers click "Order on WhatsApp" and a pre-typed message opens instantly on their phone. Zero friction.</p>
-      </div>
-      <div class="benefit-card hp-fade">
-        <div class="benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
-        <h3>Mobile-First</h3>
-        <p>Designed for phone vendors. Upload, manage, and share entirely from your phone. No laptop needed.</p>
-      </div>
-      <div class="benefit-card hp-fade">
-        <div class="benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
-        <h3>Instant Setup</h3>
-        <p>No forms, no payment integration, no technical skills. Your store is live in under 30 seconds.</p>
-      </div>
-      <div class="benefit-card hp-fade">
-        <div class="benefit-icon"><svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
-        <h3>Inventory Control</h3>
-        <p>Mark items sold out, archive old products, or delete them entirely — all from your dashboard in one tap.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════════════════
-     PHONE MOCKUP — WHAT BUYERS SEE
-════════════════════════════════════════ -->
-<section class="sec-alt">
-  <div class="wrap">
-    <div class="sec-head center hp-fade">
-      <span class="sec-label">Live Preview</span>
-      <h2 class="sec-title">What your buyers see</h2>
-      <p class="sec-sub">A clean, fast store they can browse and order from instantly — no app needed.</p>
-    </div>
-    <div class="phone-wrap">
-      <div class="phone">
-        <div class="phone-header">
-          <div class="phone-top">
-            <div class="phone-avatar"></div>
-            <div>
-              <div class="phone-name">Chioma Fashion</div>
-              <div class="phone-url">vendopage.com/chioma</div>
-            </div>
-          </div>
-        </div>
-        <div class="phone-products">
-          <div class="phone-product"><div class="phone-img">👗</div><div class="phone-info"><div class="phone-pname">Ankara Gown</div><div class="phone-price">₦18,000</div></div></div>
-          <div class="phone-product"><div class="phone-img">👜</div><div class="phone-info"><div class="phone-pname">Leather Bag</div><div class="phone-price">₦12,500</div></div></div>
-          <div class="phone-product"><div class="phone-img">👠</div><div class="phone-info"><div class="phone-pname">Block Heels</div><div class="phone-price">₦9,000</div></div></div>
-          <div class="phone-product"><div class="phone-img">💍</div><div class="phone-info"><div class="phone-pname">Gold Set</div><div class="phone-price">₦7,000</div></div></div>
-        </div>
-        <div class="phone-cta">Order on WhatsApp</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════════════════
-     CURRENCY AUTO-DETECTION
-════════════════════════════════════════ -->
-<section class="sec">
-  <div class="wrap">
-    <div class="sec-head hp-fade">
-      <span class="sec-label">Works Everywhere</span>
-      <h2 class="sec-title">Your store auto-detects<br>every buyer's currency</h2>
-      <p class="sec-sub">Buyers in Ghana see cedis. Buyers in London see pounds. Buyers in Dubai see dirhams. Automatically — no setup needed.</p>
-    </div>
-    <div class="currency-grid hp-fade">
-      <!-- Mockup -->
-      <div class="currency-mockup">
-        <div class="currency-top">
-          <div class="currency-flag" id="liveFlag">🇳🇬</div>
+      <h2 class="features-title">Everything you<br>need to sell online.</h2>
+      <div class="feature-list">
+        <div class="feature-item gsap-fade">
+          <div class="feature-item-icon">🔗</div>
           <div>
-            <div class="currency-detected">Auto-detected currency</div>
-            <div class="currency-name" id="liveCurrencyName">Nigerian Naira (₦)</div>
+            <div class="feature-item-title">One personal store link</div>
+            <div class="feature-item-desc">Share one URL everywhere instead of posting individual products on WhatsApp status every day.</div>
           </div>
-          <div class="currency-badge">Live</div>
         </div>
-        <div class="currency-products">
-          <div class="cprod"><div class="cprod-img">👗</div><div class="cprod-body"><div class="cprod-name">Ankara Gown</div><div class="cprod-price" id="cp1">₦18,000</div></div></div>
-          <div class="cprod"><div class="cprod-img">👜</div><div class="cprod-body"><div class="cprod-name">Leather Bag</div><div class="cprod-price" id="cp2">₦12,500</div></div></div>
-          <div class="cprod"><div class="cprod-img">👠</div><div class="cprod-body"><div class="cprod-name">Block Heels</div><div class="cprod-price" id="cp3">₦9,000</div></div></div>
-          <div class="cprod"><div class="cprod-img">💍</div><div class="cprod-body"><div class="cprod-name">Gold Set</div><div class="cprod-price" id="cp4">₦7,000</div></div></div>
+        <div class="feature-item gsap-fade">
+          <div class="feature-item-icon">🔒</div>
+          <div>
+            <div class="feature-item-title">Escrow payments</div>
+            <div class="feature-item-desc">Buyers pay upfront, money is held safely, you get paid after delivery is confirmed. Zero risk.</div>
+          </div>
         </div>
-        <div class="currency-cta">Order on WhatsApp</div>
+        <div class="feature-item gsap-fade">
+          <div class="feature-item-icon">🗂️</div>
+          <div>
+            <div class="feature-item-title">Catalog or store mode</div>
+            <div class="feature-item-desc">Use it as a free product catalog, or switch to store mode to accept direct payments into your account.</div>
+          </div>
+        </div>
+        <div class="feature-item gsap-fade">
+          <div class="feature-item-icon">📦</div>
+          <div>
+            <div class="feature-item-title">Delivery tracking</div>
+            <div class="feature-item-desc">Upload your courier tracking number or driver's contact. Buyers get notified automatically by email.</div>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <!-- Picker -->
-      <div>
-        <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Try switching to a different country:</p>
-        <div class="currency-picker">
-          <div class="cpick active" data-flag="🇳🇬" data-name="Nigerian Naira (₦)" data-sym="₦" data-rates="18000,12500,9000,7000" onclick="switchCurrency(this)">
-            <div class="cpick-flag">🇳🇬</div><div><div class="cpick-country">Nigeria</div><div class="cpick-code">NGN</div></div>
-            <div class="cpick-sym">₦</div>
-            <div class="cpick-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <div class="features-right">
+      <div class="feature-card gsap-reveal">
+        <div class="fc-top">
+          <span class="fc-badge">Escrow Active</span>
+          <span style="font-size:22px;">🔒</span>
+        </div>
+        <div class="fc-amount">₦8,500</div>
+        <div class="fc-label">Held securely until delivery confirmed</div>
+        <div class="escrow-flow">
+          <div class="ef-step">
+            <div class="ef-num">1</div>
+            <div class="ef-text">Buyer placed order</div>
+            <span class="ef-status ef-done">Done</span>
           </div>
-          <div class="cpick" data-flag="🇬🇧" data-name="British Pound (£)" data-sym="£" data-rates="11,7.50,5.40,4.20" onclick="switchCurrency(this)">
-            <div class="cpick-flag">🇬🇧</div><div><div class="cpick-country">United Kingdom</div><div class="cpick-code">GBP</div></div>
-            <div class="cpick-sym">£</div>
-            <div class="cpick-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ef-step">
+            <div class="ef-num">2</div>
+            <div class="ef-text">Payment held in escrow</div>
+            <span class="ef-status ef-done">Done</span>
           </div>
-          <div class="cpick" data-flag="🇦🇪" data-name="UAE Dirham (د.إ)" data-sym="د.إ" data-rates="52,36,26,20" onclick="switchCurrency(this)">
-            <div class="cpick-flag">🇦🇪</div><div><div class="cpick-country">United Arab Emirates</div><div class="cpick-code">AED</div></div>
-            <div class="cpick-sym">د.إ</div>
-            <div class="cpick-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ef-step">
+            <div class="ef-num">3</div>
+            <div class="ef-text">Seller ships item</div>
+            <span class="ef-status ef-hold">In Progress</span>
           </div>
-          <div class="cpick" data-flag="🇬🇭" data-name="Ghanaian Cedi (GH₵)" data-sym="GH₵" data-rates="175,120,87,68" onclick="switchCurrency(this)">
-            <div class="cpick-flag">🇬🇭</div><div><div class="cpick-country">Ghana</div><div class="cpick-code">GHS</div></div>
-            <div class="cpick-sym">GH₵</div>
-            <div class="cpick-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ef-step">
+            <div class="ef-num">4</div>
+            <div class="ef-text">Buyer confirms delivery</div>
+            <span class="ef-status ef-wait">Pending</span>
           </div>
-          <div class="cpick" data-flag="🇺🇸" data-name="US Dollar ($)" data-sym="$" data-rates="14,9.50,6.80,5.30" onclick="switchCurrency(this)">
-            <div class="cpick-flag">🇺🇸</div><div><div class="cpick-country">United States</div><div class="cpick-code">USD</div></div>
-            <div class="cpick-sym">$</div>
-            <div class="cpick-check"><svg width="10" height="10" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="ef-step">
+            <div class="ef-num">5</div>
+            <div class="ef-text">Seller receives payment</div>
+            <span class="ef-status ef-wait">Pending</span>
           </div>
         </div>
-        <p class="currency-note">Detected from buyer's IP automatically — 180+ countries supported</p>
       </div>
     </div>
   </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════
-     TRUST & SECURITY
-════════════════════════════════════════ -->
-<section class="sec-alt">
-  <div class="wrap">
-    <div class="sec-head hp-fade">
-      <span class="sec-label">Built-in Protection</span>
-      <h2 class="sec-title">Every sale is protected.<br>For buyers and sellers.</h2>
-      <p class="sec-sub">From first click to final payout — your money, your products, and your reputation are secured.</p>
-    </div>
-    <div class="trust-grid">
-      <div class="trust-card hp-fade">
-        <div class="trust-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <h3>Escrow protection</h3>
-        <p>Payment is held securely until the buyer confirms they received their order. No more "sent and ghosted."</p>
-        <span class="trust-tag"><svg width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Powered by Flutterwave</span>
+<!-- ══════════════════════════════════════
+     FOR BUYERS
+══════════════════════════════════════ -->
+<section class="buyers" id="buyers">
+  <div class="buyers-grid">
+    <div class="buyers-left">
+      <div class="stat-card gsap-reveal">
+        <span class="sc-icon">🔒</span>
+        <div class="sc-num">100<span>%</span></div>
+        <div class="sc-label">Of payments protected by escrow</div>
       </div>
-      <div class="trust-card hp-fade">
-        <div class="trust-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-        <h3>Auto-release in 72hrs</h3>
-        <p>If the buyer doesn't respond within 72 hours after delivery, funds are automatically released to the vendor.</p>
-        <span class="trust-tag">Zero manual follow-up</span>
+      <div class="stat-card gsap-reveal">
+        <span class="sc-icon">⚡</span>
+        <div class="sc-num">72<span>h</span></div>
+        <div class="sc-label">Auto-release if no dispute raised</div>
       </div>
-      <div class="trust-card hp-fade">
-        <div class="trust-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
-        <h3>Dispute resolution</h3>
-        <p>If something goes wrong, buyers can raise a dispute. Our team reviews it and releases funds fairly.</p>
-        <span class="trust-tag">Reviewed within 48hrs</span>
-      </div>
-      <div class="trust-card hp-fade">
-        <div class="trust-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-        <h3>Verified payout</h3>
-        <p>Vendor bank accounts are verified before any payout is sent. Your earnings land in the right account.</p>
-        <span class="trust-tag">Bank-verified accounts</span>
-      </div>
-      <div class="trust-card hp-fade">
-        <div class="trust-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
-        <h3>Verified reviews</h3>
-        <p>Only buyers who completed a real purchase can leave a review. No fake ratings — ever.</p>
-        <span class="trust-tag">Order-linked only</span>
-      </div>
-      <div class="trust-card hp-fade">
-        <div class="trust-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-        <h3>Premium badge</h3>
-        <p>Premium vendors get a verified badge on their store. Buyers know exactly who they're dealing with.</p>
-        <span class="trust-tag">Builds buyer confidence</span>
+      <div class="stat-card span2 gsap-reveal">
+        <span class="sc-icon">🛡️</span>
+        <div class="sc-num">₦<span>0</span></div>
+        <div class="sc-label">Lost to scams on Vendopage — ever</div>
       </div>
     </div>
-  </div>
-</section>
 
-
-<!-- ═══════════════════════════════════════
-     ESCROW ORDER FLOW
-════════════════════════════════════════ -->
-<section class="sec">
-  <div class="wrap">
-    <div class="sec-head center hp-fade">
-      <span class="sec-label">How Payments Work</span>
-      <h2 class="sec-title">From order to payout —<br>fully protected</h2>
-      <p class="sec-sub">Enable Store Mode and accept direct payments on your page. Every naira held safely until delivery is confirmed.</p>
-    </div>
- 
-    <div class="escrow-flow hp-fade">
- 
-      <div class="escrow-step done">
-        <div class="es-dot">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <div class="buyers-right">
+      <div class="section-label">
+        <span class="section-label-line"></span>
+        For Buyers
+      </div>
+      <h2 class="buyers-title">Shop with confidence.<br>Every time.</h2>
+      <p class="buyers-desc">Vendopage's escrow system means you never lose money to a bad seller. Your payment is protected from the moment you order.</p>
+      <div class="buyer-points">
+        <div class="buyer-point gsap-fade">
+          <div class="bp-icon">💳</div>
+          <div>
+            <div class="bp-title">Pay safely with escrow</div>
+            <div class="bp-desc">Your money is held securely. The seller only gets paid after you confirm you received your item.</div>
+          </div>
         </div>
-        <div class="es-text">
-          <div class="es-label">Buyer pays</div>
-          <div class="es-sub">Secured via Flutterwave</div>
+        <div class="buyer-point gsap-fade">
+          <div class="bp-icon">📍</div>
+          <div>
+            <div class="bp-title">Track your delivery</div>
+            <div class="bp-desc">You receive the courier tracking number or driver contact by email. Always know where your item is.</div>
+          </div>
         </div>
-        <span class="es-step-num">01</span>
-      </div>
- 
-      <div class="escrow-step done">
-        <div class="es-dot">
-          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="buyer-point gsap-fade">
+          <div class="bp-icon">⚖️</div>
+          <div>
+            <div class="bp-title">Open a dispute if needed</div>
+            <div class="bp-desc">Item didn't arrive? Not as described? Open a dispute and get a full refund — no questions asked.</div>
+          </div>
         </div>
-        <div class="es-text">
-          <div class="es-label">Escrow holds funds</div>
-          <div class="es-sub">Money is secured</div>
-        </div>
-        <span class="es-step-num">02</span>
-      </div>
- 
-      <div class="escrow-step active">
-        <div class="es-dot">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
-        </div>
-        <div class="es-text">
-          <div class="es-label">You ship</div>
-          <div class="es-sub">Tracking sent to buyer</div>
-        </div>
-        <span class="es-step-num">03</span>
-      </div>
- 
-      <div class="escrow-step">
-        <div class="es-dot" style="font-size:12px;font-family:var(--font-d);">72h</div>
-        <div class="es-text">
-          <div class="es-label">Buyer confirms</div>
-          <div class="es-sub">Or auto-releases after 72hrs</div>
-        </div>
-        <span class="es-step-num">04</span>
-      </div>
- 
-      <div class="escrow-step">
-        <div class="es-dot">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <div class="es-text">
-          <div class="es-label">Payout sent</div>
-          <div class="es-sub">Direct to your bank</div>
-        </div>
-        <span class="es-step-num">05</span>
-      </div>
- 
-    </div>{# end .escrow-flow #}
- 
-    <div class="plan-legend hp-fade">
-      <div class="plan-label">
-        <div class="plan-dot" style="background:var(--green)"></div>
-        Free plan — WhatsApp ordering
-      </div>
-      <div class="plan-label">
-        <div class="plan-dot" style="background:#F59E0B"></div>
-        Store Mode — direct escrow payments
-      </div>
-      <div class="plan-label">
-        <div class="plan-dot" style="background:var(--text-muted)"></div>
-        Premium — verified badge + analytics
-      </div>
-    </div>
- 
-  </div>
-</section>
-
-
-<!-- ═══════════════════════════════════════
-     PLATFORM STATS
-════════════════════════════════════════ -->
-<section class="sec-alt">
-  <div class="wrap">
-    <div class="stats-grid hp-fade" style="margin-bottom:0">
-      <div class="stat-card">
-        <div class="stat-num">180+</div>
-        <div class="stat-label">Countries with auto-currency</div>
-        <div class="stat-delta"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg> All African markets included</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">72h</div>
-        <div class="stat-label">Max escrow hold period</div>
-        <div class="stat-delta"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg> Auto-released if no dispute</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">50+</div>
-        <div class="stat-label">Products per batch upload</div>
-        <div class="stat-delta"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg> Done in under 60 seconds</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num">100%</div>
-        <div class="stat-label">Order-verified reviews only</div>
-        <div class="stat-delta"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg> No fake ratings possible</div>
       </div>
     </div>
   </div>
 </section>
 
-
-<!-- ═══════════════════════════════════════
-     MAIN CTA
-════════════════════════════════════════ -->
-<section class="hp-cta">
-  <span class="sec-label">Get Started Free</span>
-  <h2>Your store.<br>Live in 30 seconds.</h2>
-  <p>No payment. No setup. No stress.</p>
-  {% if user.is_authenticated %}
-    <a href="{% url 'upload_product' %}" class="btn-cta">
-      Add More Products
-      <span class="btn-arrow"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+<!-- ══════════════════════════════════════
+     CTA BANNER
+══════════════════════════════════════ -->
+<section class="cta-banner">
+  <h2 class="cta-title gsap-reveal">
+    Ready to grow<br>your business <span>online?</span>
+  </h2>
+  <p class="cta-sub">Join Nigerian sellers already using Vendopage to sell smarter, get paid safely, and grow beyond WhatsApp status.</p>
+  <div class="cta-buttons">
+    <a href="{% url 'register' %}" class="btn-hero-primary">
+      <span class="dot"></span>
+      Create Your Free Store
     </a>
-  {% else %}
-    <a href="{% url 'register' %}" class="btn-cta">
-      Create your free store
-      <span class="btn-arrow"><svg width="12" height="12" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
-    </a>
-  {% endif %}
-</section>
-
-
-<!-- ═══════════════════════════════════════
-     FAQ
-════════════════════════════════════════ -->
-<section class="sec" id="faq">
-  <div class="wrap-sm">
-    <div class="sec-head hp-fade">
-      <span class="sec-label">Got Questions</span>
-      <h2 class="sec-title">Frequently Asked Questions</h2>
-      <p class="sec-sub">Everything you need to know before you start selling.</p>
-    </div>
-    <div class="faq-list">
-      <div class="faq-item">
-        <button class="faq-q"><span>Is Vendopage really free?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="faq-a"><p>Yes — free forever. Create your catalogue, add unlimited products, and start selling without paying anything. Premium plans are available for extra features like escrow payments and a verified badge.</p></div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q"><span>Do I need any technical skills?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="faq-a"><p>None at all. If you can use WhatsApp, you can use Vendopage. Upload photos, add prices, and your store is live. No coding, no spreadsheets, no laptop required.</p></div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q"><span>How do customers buy from me?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="faq-a"><p>Customers browse your store and tap "Order on WhatsApp." A pre-typed message opens instantly on their phone and sends directly to you — no checkout, no passwords, zero friction.</p></div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q"><span>Will my store link ever expire?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="faq-a"><p>Never. Unlike WhatsApp Status that disappears in 24 hours, your Vendopage link is permanent. Share it once and customers can always find your products.</p></div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q"><span>What is escrow and do I need it?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="faq-a"><p>Escrow holds a buyer's payment securely until they confirm delivery. It builds trust and protects both sides. It's optional — the free plan uses WhatsApp ordering. Enable Store Mode to accept escrow payments directly on your page.</p></div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q"><span>Can I use Vendopage for any type of business?</span><svg class="faq-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="faq-a"><p>Yes — fashion, food, electronics, beauty, handmade goods, services. If you sell it, Vendopage works for it. Vendors across Nigeria, Ghana, Kenya, and the UK are already using it daily.</p></div>
-      </div>
-    </div>
+    <a href="{% url 'sellers_directory' %}" class="btn-hero-ghost">Browse live stores →</a>
   </div>
 </section>
 
 {% endblock %}
 
-
 {% block extra_js %}
 <script>
-/* ─── PROOF BAR: duplicate for seamless scroll ─── */
-(function() {
-  const t = document.getElementById('proofTrack');
-  if (t) t.innerHTML += t.innerHTML;
-})();
+window.addEventListener('load', function() {
+  if (typeof gsap === 'undefined') return;
 
-/* ─── FAQ accordion ─── */
-document.querySelectorAll('.faq-q').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const item = btn.closest('.faq-item');
-    const isOpen = item.classList.contains('open');
-    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-    if (!isOpen) item.classList.add('open');
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ── HERO TIMELINE ── */
+  const tl = gsap.timeline({ defaults:{ ease:'power3.out' } });
+
+  tl.to('#heroEyebrow', { opacity:1, y:0, duration:.7 }, 0.1)
+    .fromTo('#heroHeadline',
+      { opacity:0, y:40, clipPath:'inset(0 0 100% 0)' },
+      { opacity:1, y:0, clipPath:'inset(0 0 0% 0)', duration:.9 }, 0.25)
+    .to('#heroSub',   { opacity:1, y:0, duration:.7 }, 0.55)
+    .to('#heroCtas',  { opacity:1, y:0, duration:.6 }, 0.7)
+    .to('#heroTrust', { opacity:1, y:0, duration:.6 }, 0.85)
+    .to('#heroRight', { opacity:1, x:0, duration:.9, ease:'power2.out' }, 0.4);
+
+  /* Set initial states for GSAP targets */
+  gsap.set(['#heroSub','#heroCtas','#heroTrust'], { y:20 });
+  gsap.set('#heroRight', { x:30 });
+
+  /* ── SCROLL REVEALS ── */
+  gsap.utils.toArray('.gsap-reveal').forEach(function(el, i) {
+    gsap.fromTo(el,
+      { opacity:0, y:40 },
+      { opacity:1, y:0, duration:.7, ease:'power2.out',
+        scrollTrigger:{
+          trigger: el,
+          start: 'top 88%',
+          toggleActions: 'play none none none'
+        },
+        delay: (i % 3) * 0.1
+      }
+    );
+  });
+
+  gsap.utils.toArray('.gsap-fade').forEach(function(el, i) {
+    gsap.fromTo(el,
+      { opacity:0, x:-20 },
+      { opacity:1, x:0, duration:.6, ease:'power2.out',
+        scrollTrigger:{
+          trigger: el,
+          start: 'top 90%',
+          toggleActions: 'play none none none'
+        },
+        delay: i * 0.08
+      }
+    );
+  });
+
+  /* ── STAT COUNTER ANIMATION ── */
+  document.querySelectorAll('.sc-num').forEach(function(el) {
+    ScrollTrigger.create({
+      trigger: el,
+      start: 'top 88%',
+      once: true,
+      onEnter: function() {
+        el.style.opacity = '1';
+        el.style.transform = 'scale(1)';
+      }
+    });
   });
 });
-
-/* ─── Scroll fade-in ─── */
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
-  });
-}, { threshold: 0.1 });
-document.querySelectorAll('.hp-fade').forEach(el => observer.observe(el));
-
-/* ─── Smooth scroll for anchor links ─── */
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    const id = a.getAttribute('href').slice(1);
-    const el = document.getElementById(id);
-    if (el) { e.preventDefault(); el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  });
-});
-
-/* ─── Mobile carousel ─── */
-(function() {
-  const track = document.getElementById('carouselTrack');
-  if (!track) return;
-  const dots = document.querySelectorAll('.carousel-dot');
-  let current = 0;
-  const total = 3;
-
-  function goTo(idx) {
-    current = (idx + total) % total;
-    track.style.transform = `translateX(-${current * 100}%)`;
-    dots.forEach((d, i) => d.classList.toggle('active', i === current));
-  }
-
-  document.getElementById('carouselNext')?.addEventListener('click', () => goTo(current + 1));
-  document.getElementById('carouselPrev')?.addEventListener('click', () => goTo(current - 1));
-  dots.forEach(d => d.addEventListener('click', () => goTo(Number(d.dataset.idx))));
-
-  let startX = 0;
-  track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
-  track.addEventListener('touchend', e => {
-    const diff = startX - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) goTo(diff > 0 ? current + 1 : current - 1);
-  }, { passive: true });
-
-  let timer = setInterval(() => goTo(current + 1), 4000);
-  track.addEventListener('touchstart', () => clearInterval(timer), { passive: true });
-})();
-
-/* ─── Currency switcher ─── */
-function switchCurrency(el) {
-  document.querySelectorAll('.cpick').forEach(i => i.classList.remove('active'));
-  el.classList.add('active');
-  const rates = el.dataset.rates.split(',');
-  document.getElementById('liveFlag').textContent        = el.dataset.flag;
-  document.getElementById('liveCurrencyName').textContent = el.dataset.name;
-  const sym = el.dataset.sym;
-  ['cp1','cp2','cp3','cp4'].forEach((id, i) => {
-    const val = parseFloat(rates[i]);
-    document.getElementById(id).textContent = sym + (val >= 100 ? val.toLocaleString() : val.toFixed(2));
-  });
-}
-
 </script>
 {% endblock %}
