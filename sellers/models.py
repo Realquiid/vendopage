@@ -1,10 +1,19 @@
 # sellers/models.py
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.utils.text import slugify
 from django.utils import timezone
 from cloudinary.models import CloudinaryField
 import uuid
+
+class SellerManager(UserManager):
+    def create_user(self, email=None, password=None, **extra_fields):
+        return super().create_user(username=None, email=email, password=password, **extra_fields)
+
+    def create_superuser(self, email=None, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email=email, password=password, **extra_fields)
 
 class Seller(AbstractUser):
     SUBSCRIPTION_CHOICES = [
@@ -23,6 +32,10 @@ class Seller(AbstractUser):
         ('health', 'Health & Wellness'),
         ('other', 'Other'),
     ]
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
+    objects = SellerManager()
     
     business_name = models.CharField(max_length=200)
     email = models.EmailField(unique=True)
@@ -61,19 +74,31 @@ class Seller(AbstractUser):
     def save(self, *args, **kwargs):
         if self.email:
             self.email = self.email.lower()
-        
+
+        if not self.username:
+            base = slugify(self.business_name).replace('-', '_')[:25] or 'seller'
+            uname = base
+            counter = 1
+            while Seller.objects.filter(username__iexact=uname).exclude(pk=self.pk).exists():
+                uname = f"{base}_{counter}"
+                counter += 1
+            self.username = uname
+
         if not self.slug:
-            base_slug = slugify(self.business_name)
+            base_slug = slugify(self.business_name)[:40]
             if not base_slug:
                 base_slug = f"seller-{uuid.uuid4().hex[:8]}"
-            
+
             slug = base_slug
             counter = 1
             while Seller.objects.filter(slug=slug).exists():
                 slug = f"{base_slug}-{counter}"
                 counter += 1
+                if len(slug) > 50:
+                    base_slug = base_slug[:40 - len(str(counter))]
+                    slug = f"{base_slug}-{counter}"
             self.slug = slug
-        
+
         super().save(*args, **kwargs)
     
     def get_product_limit(self):

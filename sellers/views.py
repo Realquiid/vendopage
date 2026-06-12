@@ -250,35 +250,6 @@ def seller_page(request, slug):
     })
 
 
-# ─────────────────────────────────────────────
-# AUTH
-# ─────────────────────────────────────────────
-def login_view(request):
-    if request.method == 'POST':
-        identifier = request.POST.get('username', '').strip()
-        password   = request.POST.get('password', '')
-
-        user = authenticate(request, username=identifier, password=password)
-        if not user:
-            try:
-                seller = Seller.objects.get(email__iexact=identifier)
-                user   = authenticate(request, username=seller.username, password=password)
-            except Seller.DoesNotExist:
-                pass
-
-        if user and user.is_active:
-            login(request, user)
-            return redirect(request.GET.get('next', '') or 'dashboard')
-
-        return render(request, 'register.html', {
-            'error':          'Wrong username/email or password. Try again.',
-            'active_tab':     'login',
-            'login_username': identifier,
-        })
-
-    return render(request, 'register.html', {'active_tab': 'login'})
-
-
 def logout_view(request):
     logout(request)
     return redirect('home')
@@ -293,6 +264,7 @@ def upload_product(request):
         return render(request, 'dashboard/upload.html')
     try:
         seller      = request.user
+        name        = request.POST.get('name', '').strip()
         description = request.POST.get('description', '').strip()
         price       = request.POST.get('price', '').strip()
         image_urls  = request.POST.getlist('image_urls[]')
@@ -314,7 +286,7 @@ def upload_product(request):
             except Exception:
                 return JsonResponse({'success': False, 'error': 'Invalid price format'}, status=400)
 
-        product = Product.objects.create(seller=seller, description=description, price=price_value)
+        product = Product.objects.create(seller=seller, name=name, description=description, price=price_value)
         for index, url in enumerate(image_urls):
             ProductImage.objects.create(product=product, image_url=url, order=index)
 
@@ -932,6 +904,7 @@ def upload_products_batch(request):
 
             product = Product.objects.create(
                 seller=request.user,
+                name=str(item.get('name', '')).strip()[:80],
                 description=str(item.get('description', '')).strip(),
                 price=price_value,
             )
@@ -1084,29 +1057,10 @@ def upload_products_batch(request):
 
 # def verify_email(request, token):
 #     return redirect('register')
-# ─────────────────────────────────────────────
-# REGISTER
-# ─────────────────────────────────────────────
+
 def register_view(request):
     if request.method == 'POST':
-        username = (
-            request.session.get('guest_username') or
-            request.POST.get('username', '')
-        ).strip().lower()
-
-        business_name = (
-            request.session.get('guest_business_name') or
-            request.POST.get('business_name', '')
-        ).strip()
-
-        if not username and business_name:
-            import re
-            username = re.sub(r'[^a-z0-9]', '_', business_name.lower()).strip('_')[:28]
-
-        if username and Seller.objects.filter(username__iexact=username).exists():
-            if not request.session.get('guest_username'):
-                username = f"{username[:25]}_{random.randint(10, 99)}"
-
+        business_name   = request.POST.get('business_name', '').strip()
         email           = request.POST.get('email', '').strip().lower()
         password        = request.POST.get('password', '')
         whatsapp_number = request.POST.get('whatsapp_number', '').strip()
@@ -1121,10 +1075,8 @@ def register_view(request):
         )
 
         errors = []
-        if not all([username, email, password, business_name, whatsapp_number]):
+        if not all([email, password, business_name, whatsapp_number]):
             errors.append('All fields are required')
-        if username and Seller.objects.filter(username__iexact=username).exists():
-            errors.append(f'Username "{username}" was just taken. Please go back and choose another.')
         if email and Seller.objects.filter(email__iexact=email).exists():
             errors.append(f'Email "{email}" is already registered.')
         if full_whatsapp and Seller.objects.filter(whatsapp_number=full_whatsapp).exists():
@@ -1138,18 +1090,17 @@ def register_view(request):
             return render(request, 'register.html', {
                 'errors': errors, 'active_tab': 'register',
                 'email': email, 'business_name': business_name,
-                'username': username, 'whatsapp_number': whatsapp_number,
-                'category': category,
+                'whatsapp_number': whatsapp_number, 'category': category,
             })
 
         try:
             seller = Seller.objects.create_user(
-                username=username, email=email, password=password,
+                email=email, password=password,
                 business_name=business_name, whatsapp_number=full_whatsapp,
                 category=category, country_code=country_code,
                 currency_code=currency_code, currency_symbol=currency_symbol,
                 subscription_type='free',
-                is_active=False,  # blocked until email verified
+                is_active=False,
             )
 
             token = uuid.uuid4().hex
@@ -1169,9 +1120,7 @@ def register_view(request):
 
         except IntegrityError as e:
             err = str(e)
-            if 'username' in err:
-                errors.append('Username is already taken')
-            elif 'email' in err:
+            if 'email' in err:
                 errors.append('Email is already registered')
             elif 'whatsapp' in err:
                 errors.append('WhatsApp number is already registered')
@@ -1181,11 +1130,26 @@ def register_view(request):
             return render(request, 'register.html', {
                 'errors': errors, 'active_tab': 'register',
                 'email': email, 'business_name': business_name,
-                'username': username, 'whatsapp_number': whatsapp_number,
-                'category': category,
+                'whatsapp_number': whatsapp_number, 'category': category,
             })
 
     return render(request, 'register.html', {'active_tab': 'register'})
+
+
+def login_view(request):
+    if request.method == 'POST':
+        email    = request.POST.get('email', '').strip().lower()
+        password = request.POST.get('password', '')
+        user = authenticate(request, username=email, password=password)
+        if user and user.is_active:
+            login(request, user)
+            return redirect(request.GET.get('next', '') or 'dashboard')
+        return render(request, 'register.html', {
+            'error':      'Wrong email or password. Try again.',
+            'active_tab': 'login',
+            'login_email': email,
+        })
+    return render(request, 'register.html', {'active_tab': 'login'})
 
 def verify_email_pending(request):
     return render(request, 'auth/verify_email_pending.html')

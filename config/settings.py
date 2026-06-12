@@ -160,23 +160,7 @@ cloudinary.config(
 )
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 CLOUDINARY_UPLOAD_PRESET = 'vendopage_unsigned'
-from celery.schedules import crontab
 
-CELERY_BEAT_SCHEDULE = {
-    # 2 AM Lagos time every night
-    # Lagos = WAT = UTC+1, so 2 AM WAT = 1 AM UTC
-    'vendopage-daily-payout': {
-        'task': 'sellers.tasks.run_daily_payout',
-        'schedule': crontab(hour=6, minute=0),  # 1 AM UTC = 2 AM Lagos
-    },
-    # Auto-release shipped orders every 6 hours
-    'vendopage-auto-release': {
-        'task': 'sellers.tasks.run_auto_release',
-        'schedule': crontab(hour='*/6', minute=0),
-    },
-}
-
-CELERY_TIMEZONE = 'Africa/Lagos'  # makes crontab times use Lagos time directly
 
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='smtp-relay.brevo.com')
