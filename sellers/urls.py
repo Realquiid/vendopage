@@ -50,7 +50,8 @@ urlpatterns = [
     path('order/<str:order_ref>/confirm-receipt/', views.confirm_receipt, name='confirm_receipt'),
     path('order/<str:order_ref>/dispute/', views.raise_dispute, name='raise_dispute'),
     path('order/<str:order_ref>/review/', views.leave_review, name='leave_review'),
-
+    path('api/product/<int:product_id>/detail/', views.product_detail_api, name='product_detail_api'),
+    path('api/product/<int:product_id>/edit/',   views.product_edit_api,   name='product_edit_api'),
     # ── ESCROW — Vendor flow ─────────────────────────────────
     path('dashboard/orders/', views.vendor_orders, name='vendor_orders'),
     path('dashboard/orders/<str:order_ref>/', views.vendor_order_detail, name='vendor_order_detail'),

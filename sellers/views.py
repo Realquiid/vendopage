@@ -1557,7 +1557,106 @@ def cart_view(request, slug):
         'currency_code': currency_info['code'],
         'currency_name': currency_info['name'],
     })
+# ─────────────────────────────────────────────────────────────────────────────
+# ADD THESE TWO VIEWS to sellers/views.py
+# (paste anywhere near the other product action views around line 160–200)
+# ─────────────────────────────────────────────────────────────────────────────
 
+@require_http_methods(["GET"])
+def product_detail_api(request, product_id):
+    """
+    Returns product data as JSON so the edit drawer can pre-fill itself.
+    Seller-only — must own the product.
+    """
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Login required'}, status=401)
+
+    product = get_object_or_404(Product, id=product_id, seller=request.user)
+
+    images = list(
+        ProductImage.objects
+        .filter(product=product)
+        .order_by('order', 'created_at')
+        .values_list('image_url', flat=True)
+    )
+
+    return JsonResponse({
+        'success':     True,
+        'id':          product.id,
+        'name':        product.name or '',
+        'description': product.description or '',
+        'price':       str(product.price) if product.price else '',
+        'images':      images,
+    })
+
+
+@login_required
+@require_http_methods(["POST"])
+def product_edit_api(request, product_id):
+    """
+    Updates name, description, price, and images for a product.
+    Replaces all images with the new ordered list supplied.
+    Seller-only.
+    """
+    product = get_object_or_404(Product, id=product_id, seller=request.user)
+
+    try:
+        name        = request.POST.get('name', '').strip()[:80]
+        description = request.POST.get('description', '').strip()
+        price_raw   = request.POST.get('price', '').strip()
+        image_urls_json = request.POST.get('image_urls', '[]')
+
+        # ── Validate name ──────────────────────────────────────────────────
+        if not name:
+            return JsonResponse({'success': False, 'error': 'Product name is required'}, status=400)
+
+        # ── Validate price ─────────────────────────────────────────────────
+        price_value = None
+        if price_raw:
+            try:
+                price_value = Decimal(price_raw)
+                if price_value < 0:
+                    return JsonResponse({'success': False, 'error': 'Price cannot be negative'}, status=400)
+            except (InvalidOperation, ValueError):
+                return JsonResponse({'success': False, 'error': 'Invalid price format'}, status=400)
+
+        # ── Validate image URLs ────────────────────────────────────────────
+        try:
+            image_urls = json.loads(image_urls_json)
+        except json.JSONDecodeError:
+            return JsonResponse({'success': False, 'error': 'Invalid image data'}, status=400)
+
+        # Only accept Cloudinary URLs (same rule as upload)
+        valid_urls = [
+            url for url in image_urls
+            if isinstance(url, str) and url.startswith('https://res.cloudinary.com/')
+        ]
+
+        if len(valid_urls) > 10:
+            return JsonResponse({'success': False, 'error': 'Maximum 10 images per product'}, status=400)
+
+        # ── Save product fields ────────────────────────────────────────────
+        product.name        = name
+        product.description = description
+        product.price       = price_value
+        product.save(update_fields=['name', 'description', 'price'])
+
+        # ── Replace images only if a new list was provided ─────────────────
+        # If the seller didn't touch images, image_urls will still contain
+        # the original Cloudinary URLs and this just re-saves them in order.
+        if valid_urls:
+            ProductImage.objects.filter(product=product).delete()
+            for index, url in enumerate(valid_urls[:10]):
+                ProductImage.objects.create(product=product, image_url=url, order=index)
+
+        return JsonResponse({
+            'success': True,
+            'id':      product.id,
+        })
+
+    except Exception as e:
+        logger.error(f"Product edit error for id={product_id}: {str(e)}\n{traceback.format_exc()}")
+        return JsonResponse({'success': False, 'error': 'Failed to save changes.'}, status=500)
 
 def checkout_view(request, slug):
     seller          = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)

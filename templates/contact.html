@@ -1,256 +1,230 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Contact Vendopage — We're Here to Help{% endblock %}
-{% block meta_description %}Get in touch with Vendopage. Support for your store, escrow disputes, payouts, or anything else. We're fast — usually same day on WhatsApp.{% endblock %}
+{% block title %}Contact Vendopage — Support for Vendors Across Africa{% endblock %}
+{% block meta_description %}Get in touch with Vendopage for help with your store, escrow disputes, or payouts. WhatsApp support available for vendors and buyers across Nigeria and Africa.{% endblock %}
+{% block og_title %}Contact Vendopage — We're Here to Help{% endblock %}
+{% block og_description %}Questions about your store, escrow, payouts, or disputes — we respond fast. WhatsApp is fastest.{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --primary:#00C853; --primary-dark:#00a844; --primary-lt:#e8fff0;
-  --wa:#25D366; --wa-dark:#1fbc59;
-  --bg:#ffffff; --bg-alt:#F7F7F5; --text:#0A0A0A; --text-muted:#6B6B6B;
-  --border-c:#E8E8E4; --radius:12px; --radius-lg:20px;
+/* ══════════════════════════════════════
+   SHARED PAGE SHELL (matches about.html / faq.html)
+══════════════════════════════════════ */
+.pg-hero {
+  padding: 90px 80px 70px;
+  background: var(--surface);
+  text-align: center;
+  position: relative; overflow: hidden;
 }
-[data-theme="dark"] .ct-hero,
-[data-theme="dark"] .ct-section  { background:#141414; }
-[data-theme="dark"] .ct-section-alt { background:#1a1a1a; }
-[data-theme="dark"] .ct-hero h1,
-[data-theme="dark"] .ct-section-title,
-[data-theme="dark"] .ct-card-title,
-[data-theme="dark"] .ct-channel-title,
-[data-theme="dark"] .ct-faq-btn { color:#f0f0f0; }
-[data-theme="dark"] .ct-hero-sub,
-[data-theme="dark"] .ct-section-sub,
-[data-theme="dark"] .ct-channel-desc,
-[data-theme="dark"] .ct-form-label { color:#a0a0a0; }
-[data-theme="dark"] .ct-channel-card { background:#1e1e1e; border-color:#2e2e2e; }
-[data-theme="dark"] .ct-channel-card:hover { border-color:var(--primary); }
-[data-theme="dark"] .ct-form-wrap { background:#1e1e1e; border-color:#2e2e2e; }
-[data-theme="dark"] .ct-input { background:#252525; border-color:#3a3a3a; color:#f0f0f0; }
-[data-theme="dark"] .ct-input:focus { border-color:var(--primary); }
-[data-theme="dark"] .ct-faq-item { border-color:#2e2e2e; }
-[data-theme="dark"] .ct-faq-btn:hover,
-[data-theme="dark"] .ct-faq-item.open .ct-faq-btn { background:#1e1e1e; }
-[data-theme="dark"] .ct-faq-body { background:#1e1e1e; }
-[data-theme="dark"] .ct-faq-a { color:#a0a0a0; }
-[data-theme="dark"] .ct-submit { background:#f0f0f0; color:#000; }
-[data-theme="dark"] .ct-submit:hover { background:#fff; }
-[data-theme="dark"] .ct-info-card { background:#1e1e1e; border-color:#2e2e2e; }
-[data-theme="dark"] .ct-info-label { color:#a0a0a0; }
-[data-theme="dark"] .ct-info-val { color:#f0f0f0; }
-[data-theme="dark"] .ct-resp-row { border-color:#2e2e2e; }
+.pg-hero::before {
+  content:''; position:absolute; top:-180px; left:50%; transform:translateX(-50%);
+  width:600px; height:600px; border-radius:50%;
+  background:radial-gradient(circle, rgba(0,135,61,.08) 0%, transparent 65%);
+  pointer-events:none;
+}
+.pg-hero-inner { max-width:680px; margin:0 auto; position:relative; z-index:1; }
+.pg-eyebrow {
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:11px; font-weight:700; letter-spacing:2.5px;
+  text-transform:uppercase; color:var(--green);
+  margin-bottom:20px;
+}
+.pg-eyebrow-line { width:24px; height:1.5px; background:var(--green); }
+.pg-hero h1 {
+  font-family:var(--font-d); font-weight:800;
+  font-size:clamp(32px,5.5vw,60px); line-height:1.05;
+  letter-spacing:-2px; color:var(--ink); margin-bottom:18px;
+}
+.pg-hero-sub {
+  font-size:16px; color:var(--muted);
+  max-width:480px; margin:0 auto; line-height:1.75;
+}
 
-/* ── LETTER DROP ── */
+.pg-section     { padding:80px 80px; background:var(--surface); }
+.pg-section-alt { padding:80px 80px; background:var(--surface-2); }
+.pg-container    { max-width:1140px; margin:0 auto; }
+.pg-container-sm { max-width:760px;  margin:0 auto; }
+
+.section-label {
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:11px; font-weight:700; letter-spacing:2.5px;
+  text-transform:uppercase; color:var(--green);
+  margin-bottom:16px;
+}
+.section-label-line { width:24px; height:1.5px; background:var(--green); }
+.pg-title {
+  font-family:var(--font-d); font-weight:800;
+  font-size:clamp(24px,3.5vw,38px); letter-spacing:-1px;
+  color:var(--ink); margin-bottom:12px; line-height:1.15;
+}
+.pg-sub { font-size:15px; color:var(--muted); line-height:1.7; max-width:520px; }
+
+/* Letter-drop */
 .letter-drop { overflow:hidden; display:inline-block; }
 .letter-drop .ld-word { display:inline-block; overflow:hidden; }
 .letter-drop .ld-char {
-  display:inline-block;
-  transform:translateY(110%); opacity:0;
+  display:inline-block; transform:translateY(110%); opacity:0;
   transition:transform .55s cubic-bezier(.22,1,.36,1), opacity .4s ease;
 }
 .letter-drop.triggered .ld-char { transform:translateY(0); opacity:1; }
 
-.ct-fade { opacity:0; transform:translateY(20px); transition:opacity .6s ease, transform .6s ease; }
-.ct-fade.visible { opacity:1; transform:translateY(0); }
+.pg-fade { opacity:0; transform:translateY(20px); transition:opacity .6s ease, transform .6s ease; }
+.pg-fade.visible { opacity:1; transform:translateY(0); }
 
-/* ── HERO ── */
-.ct-hero {
-  padding:100px 40px 80px; background:var(--bg);
-  position:relative; overflow:hidden;
-}
-.ct-hero::before {
-  content:''; position:absolute; top:-200px; right:-200px;
-  width:520px; height:520px;
-  background:radial-gradient(circle,rgba(0,200,83,.07) 0%,transparent 65%);
-  border-radius:50%; pointer-events:none;
-}
-.ct-hero-inner { max-width:760px; margin:0 auto; text-align:center; position:relative; z-index:1; }
-.ct-label {
-  display:inline-block; font-size:11px; font-weight:700;
-  letter-spacing:2.5px; text-transform:uppercase;
-  color:var(--primary); margin-bottom:18px;
-}
-.ct-hero h1 {
-  font-family:'Syne',sans-serif; font-weight:800;
-  font-size:clamp(34px,5.5vw,62px); line-height:1.05;
-  letter-spacing:-2px; color:var(--text); margin-bottom:22px;
-}
-.ct-hero-sub { font-size:18px; color:var(--text-muted); max-width:480px; margin:0 auto; line-height:1.7; }
-
-.ct-section     { padding:80px 40px; background:var(--bg); }
-.ct-section-alt { padding:80px 40px; background:var(--bg-alt); }
-.ct-container    { max-width:1080px; margin:0 auto; }
-.ct-container-sm { max-width:760px;  margin:0 auto; }
-.ct-section-title {
-  font-family:'Syne',sans-serif; font-weight:800;
-  font-size:clamp(22px,3.5vw,38px); letter-spacing:-1px;
-  color:var(--text); margin-bottom:12px; line-height:1.1;
-}
-.ct-section-sub  { font-size:16px; color:var(--text-muted); line-height:1.65; margin-bottom:40px; }
-.ct-section-head { margin-bottom:48px; }
-
-/* ── CHANNEL CARDS ── */
-.ct-channels { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
-.ct-channel-card {
-  background:var(--bg); border:1.5px solid var(--border-c);
-  border-radius:var(--radius-lg); padding:28px 24px;
+/* ══════════════════════════════════════
+   CHANNEL CARDS
+══════════════════════════════════════ */
+.channels { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; }
+.channel-card {
+  background:var(--white); border:1.5px solid var(--border);
+  border-radius:var(--r-lg); padding:26px 24px;
   transition:border-color .22s, transform .2s, box-shadow .2s;
   text-decoration:none; color:inherit; display:block;
 }
-.ct-channel-card:hover { border-color:var(--primary); transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,200,83,.1); }
-.ct-channel-card.wa-card { border-color:rgba(37,211,102,.35); background:rgba(37,211,102,.04); }
-.ct-channel-card.wa-card:hover { border-color:var(--wa); box-shadow:0 12px 36px rgba(37,211,102,.15); }
-.ct-channel-icon {
-  width:48px; height:48px; border-radius:12px;
-  display:flex; align-items:center; justify-content:center; margin-bottom:18px;
+.channel-card:hover { border-color:var(--green); transform:translateY(-3px); box-shadow:0 12px 36px rgba(0,135,61,.1); }
+.channel-card.wa-card { border-color:rgba(37,211,102,.35); background:rgba(37,211,102,.04); }
+.channel-card.wa-card:hover { border-color:#25D366; box-shadow:0 12px 36px rgba(37,211,102,.15); }
+.channel-icon {
+  width:46px; height:46px; border-radius:var(--r-md);
+  display:flex; align-items:center; justify-content:center; margin-bottom:16px;
 }
-.ct-channel-icon.green { background:var(--primary-lt); }
-.ct-channel-icon.wa    { background:#25D366; }
-.ct-channel-icon.dark  { background:var(--text); }
-.ct-channel-title { font-family:'Syne',sans-serif; font-weight:700; font-size:16px; color:var(--text); margin-bottom:8px; }
-.ct-channel-desc  { font-size:13px; color:var(--text-muted); line-height:1.7; margin-bottom:14px; }
-.ct-channel-link  { font-size:13px; font-weight:600; color:var(--primary); display:inline-flex; align-items:center; gap:5px; }
-.ct-channel-card.wa-card .ct-channel-link { color:var(--wa-dark); }
-.ct-resp-badge {
+.channel-icon.green { background:var(--green-lt); }
+[data-theme="dark"] .channel-icon.green { background:rgba(0,135,61,.12); }
+.channel-icon.wa    { background:#25D366; }
+.channel-icon.dark  { background:var(--ink); }
+.channel-title { font-family:var(--font-d); font-weight:700; font-size:15px; color:var(--ink); margin-bottom:6px; }
+.channel-desc  { font-size:12.5px; color:var(--muted); line-height:1.65; margin-bottom:12px; }
+.channel-link  { font-size:12.5px; font-weight:700; color:var(--green); display:inline-flex; align-items:center; gap:5px; }
+.channel-card.wa-card .channel-link { color:#1fbc59; }
+[data-theme="dark"] .channel-card.wa-card .channel-link { color:#25D366; }
+
+.resp-badge {
   display:inline-block; font-size:10px; font-weight:700;
-  padding:3px 9px; border-radius:100px; margin-bottom:12px; letter-spacing:.4px;
+  padding:3px 9px; border-radius:var(--r-pill); margin-bottom:12px; letter-spacing:.4px;
 }
-.ct-resp-badge.fast   { background:var(--primary-lt); color:var(--primary-dark); border:1px solid rgba(0,200,83,.2); }
-.ct-resp-badge.medium { background:rgba(245,158,11,.1); color:#d97706; border:1px solid rgba(245,158,11,.2); }
-[data-theme="dark"] .ct-resp-badge.fast { color:var(--primary); }
-[data-theme="dark"] .ct-resp-badge.medium { color:#fbbf24; }
+.resp-badge.fast   { background:var(--green-lt); color:var(--green-dk); border:1px solid rgba(0,135,61,.2); }
+.resp-badge.medium { background:rgba(245,158,11,.1); color:#d97706; border:1px solid rgba(245,158,11,.2); }
+[data-theme="dark"] .resp-badge.fast { color:var(--green-pop); background:rgba(0,135,61,.12); }
+[data-theme="dark"] .resp-badge.medium { color:#fbbf24; }
 
-/* ── CONTACT LAYOUT ── */
-.ct-contact-layout { display:grid; grid-template-columns:1fr 360px; gap:40px; align-items:start; }
+/* ══════════════════════════════════════
+   CONTACT LAYOUT
+══════════════════════════════════════ */
+.contact-layout { display:grid; grid-template-columns:1fr 360px; gap:32px; align-items:start; }
 
-/* ── FORM ── */
-.ct-form-wrap {
-  background:var(--bg); border:1.5px solid var(--border-c);
-  border-radius:var(--radius-lg); padding:36px 32px;
+/* Form */
+.form-wrap {
+  background:var(--white); border:1.5px solid var(--border);
+  border-radius:var(--r-lg); padding:32px 30px;
 }
-.ct-form-wrap h2 {
-  font-family:'Syne',sans-serif; font-weight:800; font-size:22px;
-  letter-spacing:-.5px; color:var(--text); margin-bottom:6px;
+.form-wrap h2 {
+  font-family:var(--font-d); font-weight:800; font-size:20px;
+  letter-spacing:-.5px; color:var(--ink); margin-bottom:6px;
 }
-.ct-form-wrap > p { font-size:13px; color:var(--text-muted); line-height:1.6; margin-bottom:26px; }
+.form-wrap > p { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:24px; }
 
-.ct-form-row   { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.ct-form-group { margin-bottom:16px; }
-.ct-form-label {
+.form-row   { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-group { margin-bottom:16px; }
+.form-label {
   display:block; font-size:11px; font-weight:700;
   text-transform:uppercase; letter-spacing:.4px;
-  color:var(--text-muted); margin-bottom:6px;
+  color:var(--muted); margin-bottom:6px;
 }
-.ct-input {
+.form-input {
   width:100%; padding:12px 14px;
-  border:1.5px solid var(--border-c); border-radius:10px;
-  font-family:'DM Sans',sans-serif; font-size:14px; color:var(--text);
+  border:1.5px solid var(--border); border-radius:var(--r-md);
+  font-family:var(--font-b); font-size:14px; color:var(--ink);
   outline:none; transition:border-color .2s, box-shadow .2s;
-  background:var(--bg); box-sizing:border-box;
+  background:var(--white); box-sizing:border-box;
 }
-.ct-input:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(0,200,83,.09); }
-.ct-input::placeholder { color:#bbb; }
-textarea.ct-input { resize:vertical; min-height:120px; }
-.ct-select-wrap { position:relative; }
-.ct-select-wrap select.ct-input { appearance:none; cursor:pointer; }
-.ct-select-wrap::after {
+.form-input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(0,135,61,.09); }
+.form-input::placeholder { color:var(--muted-lt); }
+textarea.form-input { resize:vertical; min-height:120px; }
+.select-wrap { position:relative; }
+.select-wrap select.form-input { appearance:none; cursor:pointer; }
+.select-wrap::after {
   content:''; position:absolute; right:14px; top:50%;
   transform:translateY(-50%); border:5px solid transparent;
-  border-top-color:var(--text-muted); pointer-events:none;
+  border-top-color:var(--muted); pointer-events:none;
 }
-.ct-submit {
-  width:100%; padding:14px; background:var(--text); color:#fff;
-  border:none; border-radius:10px; font-family:'DM Sans',sans-serif;
-  font-size:15px; font-weight:600; cursor:pointer; transition:background .2s, transform .18s;
+.form-submit {
+  width:100%; padding:14px; background:var(--ink); color:var(--surface);
+  border:none; border-radius:var(--r-md); font-family:var(--font-b);
+  font-size:15px; font-weight:600; cursor:pointer; transition:opacity .2s, transform .18s;
   display:flex; align-items:center; justify-content:center; gap:8px;
 }
-.ct-submit:hover { background:#222; transform:translateY(-1px); }
-.ct-submit:disabled { background:#bbb; cursor:not-allowed; transform:none; }
-.ct-form-note { font-size:11px; color:var(--text-muted); text-align:center; margin-top:10px; line-height:1.5; }
+.form-submit:hover { opacity:.88; transform:translateY(-1px); }
+.form-submit:disabled { opacity:.5; cursor:not-allowed; transform:none; }
+.form-note { font-size:11px; color:var(--muted); text-align:center; margin-top:10px; line-height:1.5; }
 
-.ct-success { text-align:center; padding:32px; display:none; }
-.ct-success-icon {
-  width:56px; height:56px; background:var(--primary-lt); border-radius:50%;
-  display:flex; align-items:center; justify-content:center; margin:0 auto 16px;
+.form-success { text-align:center; padding:28px; display:none; }
+.form-success-icon {
+  width:52px; height:52px; background:var(--green-lt); border-radius:50%;
+  display:flex; align-items:center; justify-content:center; margin:0 auto 14px;
 }
-.ct-success h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:20px; color:var(--text); margin-bottom:8px; }
-.ct-success p  { font-size:14px; color:var(--text-muted); }
+[data-theme="dark"] .form-success-icon { background:rgba(0,135,61,.12); }
+.form-success h3 { font-family:var(--font-d); font-weight:700; font-size:18px; color:var(--ink); margin-bottom:8px; }
+.form-success p  { font-size:13.5px; color:var(--muted); }
 
-/* ── SIDEBAR INFO ── */
-.ct-sidebar { display:flex; flex-direction:column; gap:14px; }
-.ct-info-card {
-  background:var(--bg-alt); border:1.5px solid var(--border-c);
-  border-radius:var(--radius-lg); padding:20px 22px;
+/* Sidebar */
+.contact-sidebar { display:flex; flex-direction:column; gap:14px; }
+.info-card {
+  background:var(--surface-2); border:1.5px solid var(--border);
+  border-radius:var(--r-lg); padding:20px 22px;
 }
-.ct-info-card h3 {
-  font-family:'Syne',sans-serif; font-weight:700; font-size:13px;
-  color:var(--text); margin-bottom:14px; letter-spacing:-.2px;
+.info-card h3 {
+  font-family:var(--font-d); font-weight:700; font-size:12px;
+  letter-spacing:1.5px; text-transform:uppercase; color:var(--muted);
+  margin-bottom:14px;
 }
-.ct-info-row {
+.info-row {
   display:flex; align-items:flex-start; gap:12px;
-  padding:10px 0; border-bottom:1px solid var(--border-c);
+  padding:10px 0; border-bottom:1px solid var(--border);
 }
-.ct-info-row:last-child { border-bottom:none; padding-bottom:0; }
-.ct-info-icon {
-  width:32px; height:32px; border-radius:8px;
+.info-row:last-child { border-bottom:none; padding-bottom:0; }
+.info-icon {
+  width:32px; height:32px; border-radius:var(--r-sm);
   display:flex; align-items:center; justify-content:center; flex-shrink:0;
 }
-.ct-info-icon.g  { background:var(--primary-lt); }
-.ct-info-icon.wa { background:#25D366; }
-.ct-info-icon.m  { background:var(--text); }
-.ct-info-body { flex:1; min-width:0; }
-.ct-info-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text-muted); margin-bottom:2px; }
-.ct-info-val   { font-size:12.5px; font-weight:600; color:var(--text); word-break:break-all; }
-.ct-info-sub   { font-size:11px; color:var(--text-muted); margin-top:1px; }
+.info-icon.g  { background:var(--green-lt); }
+[data-theme="dark"] .info-icon.g { background:rgba(0,135,61,.12); }
+.info-icon.wa { background:#25D366; }
+.info-icon.m  { background:var(--ink); }
+.info-body { flex:1; min-width:0; }
+.info-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:2px; }
+.info-val   { font-size:12.5px; font-weight:600; color:var(--ink); word-break:break-all; }
+.info-sub   { font-size:11px; color:var(--muted); margin-top:1px; }
 
-/* response times */
-.ct-resp-list  { display:flex; flex-direction:column; gap:0; }
-.ct-resp-row   { display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border-c); }
-.ct-resp-row:last-child { border-bottom:none; }
-.ct-resp-label { font-size:12px; color:var(--text-muted); }
-.ct-resp-time  {
-  font-size:10.5px; font-weight:700; padding:3px 8px;
-  border-radius:100px; white-space:nowrap;
+.resp-list  { display:flex; flex-direction:column; gap:0; }
+.resp-row   { display:flex; align-items:center; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border); }
+.resp-row:last-child { border-bottom:none; }
+.resp-row-label { font-size:12px; color:var(--muted); }
+.resp-time  { font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:var(--r-pill); white-space:nowrap; }
+.resp-time.fast   { background:var(--green-lt); color:var(--green-dk); }
+.resp-time.medium { background:rgba(245,158,11,.1); color:#d97706; }
+.resp-time.slow   { background:var(--white); border:1px solid var(--border); color:var(--muted); }
+[data-theme="dark"] .resp-time.fast   { color:var(--green-pop); background:rgba(0,135,61,.12); }
+[data-theme="dark"] .resp-time.medium { color:#fbbf24; }
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media(max-width:1024px) {
+  .pg-hero, .pg-section, .pg-section-alt { padding-left:40px; padding-right:40px; }
 }
-.ct-resp-time.fast   { background:var(--primary-lt); color:var(--primary-dark); }
-.ct-resp-time.medium { background:rgba(245,158,11,.1); color:#d97706; }
-.ct-resp-time.slow   { background:var(--bg); border:1px solid var(--border-c); color:var(--text-muted); }
-[data-theme="dark"] .ct-resp-time.fast   { color:var(--primary); background:rgba(0,200,83,.12); }
-[data-theme="dark"] .ct-resp-time.medium { color:#fbbf24; }
-
-/* ── FAQ ── */
-.ct-faq-list { border:1.5px solid var(--border-c); border-radius:var(--radius-lg); overflow:hidden; }
-.ct-faq-item { border-bottom:1px solid var(--border-c); }
-.ct-faq-item:last-child { border-bottom:none; }
-.ct-faq-btn {
-  width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px;
-  padding:20px 24px; background:none; border:none; text-align:left;
-  font-family:'Syne',sans-serif; font-size:15px; font-weight:600;
-  color:var(--text); cursor:pointer; transition:background .18s;
-}
-.ct-faq-btn:hover { background:var(--bg-alt); }
-.ct-faq-item.open .ct-faq-btn { background:var(--bg-alt); color:var(--primary); }
-.ct-faq-icon { flex-shrink:0; color:var(--text-muted); transition:transform .3s; }
-.ct-faq-item.open .ct-faq-icon { transform:rotate(180deg); color:var(--primary); }
-.ct-faq-body { max-height:0; overflow:hidden; transition:max-height .35s ease; background:var(--bg-alt); }
-.ct-faq-item.open .ct-faq-body { max-height:300px; }
-.ct-faq-a { padding:0 24px 20px; font-size:14px; color:var(--text-muted); line-height:1.8; }
-
-/* ── RESPONSIVE ── */
 @media(max-width:900px) {
-  .ct-contact-layout { grid-template-columns:1fr; }
-  .ct-sidebar { display:grid; grid-template-columns:1fr 1fr; }
+  .contact-layout { grid-template-columns:1fr; }
+  .contact-sidebar { display:grid; grid-template-columns:1fr 1fr; }
 }
 @media(max-width:768px) {
-  .ct-hero, .ct-section, .ct-section-alt { padding:64px 20px; }
-  .ct-form-wrap { padding:24px 20px; }
-  .ct-form-row  { grid-template-columns:1fr; }
-  .ct-sidebar   { grid-template-columns:1fr; }
+  .pg-hero, .pg-section, .pg-section-alt { padding:64px 24px; }
+  .form-wrap { padding:24px 20px; }
+  .form-row  { grid-template-columns:1fr; }
+  .contact-sidebar { grid-template-columns:1fr; }
 }
 @media(max-width:560px) {
-  .ct-channels { grid-template-columns:1fr; }
+  .channels { grid-template-columns:1fr; }
 }
 </style>
 {% endblock %}
@@ -258,74 +232,74 @@ textarea.ct-input { resize:vertical; min-height:120px; }
 {% block content %}
 
 <!-- HERO -->
-<section class="ct-hero">
-  <div class="ct-hero-inner">
-    <span class="ct-label">Contact Us</span>
+<section class="pg-hero">
+  <div class="pg-hero-inner">
+    <span class="pg-eyebrow"><span class="pg-eyebrow-line"></span>Contact Us<span class="pg-eyebrow-line"></span></span>
     <h1 class="letter-drop">
       <span class="ld-word">We'd&nbsp;</span><span class="ld-word">love&nbsp;</span><span class="ld-word">to<br></span>
       <span class="ld-word">hear&nbsp;</span><span class="ld-word">from&nbsp;</span><span class="ld-word">you.</span>
     </h1>
-    <p class="ct-hero-sub ct-fade">Questions about your store, escrow, payouts, or disputes — we respond fast. WhatsApp is fastest.</p>
+    <p class="pg-hero-sub pg-fade">Questions about your store, escrow, payouts, or disputes — we respond fast. WhatsApp is fastest.</p>
   </div>
 </section>
 
 <!-- CHANNELS -->
-<section class="ct-section-alt">
-  <div class="ct-container">
-    <div class="ct-channels">
+<section class="pg-section-alt">
+  <div class="pg-container">
+    <div class="channels">
 
-      <!-- WhatsApp — FASTEST -->
-      <a href="https://wa.me/2347017820434" target="_blank" rel="noopener" class="ct-channel-card wa-card ct-fade">
-        <div class="ct-channel-icon wa">
-          <svg width="22" height="22" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+      <!-- WhatsApp -->
+      <a href="https://wa.me/2347017820434" target="_blank" rel="noopener" class="channel-card wa-card pg-fade">
+        <div class="channel-icon wa">
+          <svg width="20" height="20" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
         </div>
-        <span class="ct-resp-badge fast">⚡ Fastest — usually within 1 hour</span>
-        <div class="ct-channel-title">WhatsApp — CTO Direct</div>
-        <div class="ct-channel-desc">Message us directly on WhatsApp for the fastest response. Real people, no bots. Urgent escrow and payout issues resolved same day.</div>
-        <span class="ct-channel-link" style="color:#25D366;">
+        <span class="resp-badge fast">⚡ Fastest — usually within 1 hour</span>
+        <div class="channel-title">WhatsApp — Direct Line</div>
+        <div class="channel-desc">Message us directly on WhatsApp for the fastest response. Real people, no bots. Urgent escrow and payout issues resolved same day.</div>
+        <span class="channel-link">
           +234 701 782 0434
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </span>
       </a>
 
       <!-- Support Email -->
-      <a href="mailto:support@vendopage.com" class="ct-channel-card ct-fade">
-        <div class="ct-channel-icon green">
-          <svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      <a href="mailto:support@vendopage.com" class="channel-card pg-fade">
+        <div class="channel-icon green">
+          <svg width="20" height="20" fill="none" stroke="#00873D" stroke-width="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
         </div>
-        <span class="ct-resp-badge medium">Within 24 hours</span>
-        <div class="ct-channel-title">Vendor Support</div>
-        <div class="ct-channel-desc">For detailed store questions, account issues, disputes, or anything that needs a proper record. We read and respond to every message.</div>
-        <span class="ct-channel-link">
+        <span class="resp-badge medium">Within 24 hours</span>
+        <div class="channel-title">Vendor Support</div>
+        <div class="channel-desc">For detailed store questions, account issues, disputes, or anything that needs a proper record. We read and respond to every message.</div>
+        <span class="channel-link">
           support@vendopage.com
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </span>
       </a>
 
-      <!-- General / Gmail -->
-      <a href="mailto:vendopageglobalventures@gmail.com" class="ct-channel-card ct-fade">
-        <div class="ct-channel-icon dark">
-          <svg width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <!-- General -->
+      <a href="mailto:vendopageglobalventures@gmail.com" class="channel-card pg-fade">
+        <div class="channel-icon dark">
+          <svg width="20" height="20" fill="none" stroke="#F5F4F0" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         </div>
-        <span class="ct-resp-badge medium">Within 48 hours</span>
-        <div class="ct-channel-title">General Enquiries</div>
-        <div class="ct-channel-desc">Partnerships, press, investor conversations, or anything that doesn't fit the categories above. We love hearing from people building things.</div>
-        <span class="ct-channel-link">
+        <span class="resp-badge medium">Within 48 hours</span>
+        <div class="channel-title">General Enquiries</div>
+        <div class="channel-desc">Partnerships, press, investor conversations, or anything that doesn't fit the categories above.</div>
+        <span class="channel-link">
           vendopageglobalventures@gmail.com
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </span>
       </a>
 
-      <!-- FAQ scroll -->
-      <a href="#faq" class="ct-channel-card ct-fade">
-        <div class="ct-channel-icon green">
-          <svg width="22" height="22" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <!-- FAQ link -->
+      <a href="{% url 'faq' %}" class="channel-card pg-fade">
+        <div class="channel-icon green">
+          <svg width="20" height="20" fill="none" stroke="#00873D" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <span class="ct-resp-badge fast">Instant</span>
-        <div class="ct-channel-title">Common Questions</div>
-        <div class="ct-channel-desc">Most answers are right on this page — escrow, disputes, payouts, delivery tracking, and more. Check the FAQ below first.</div>
-        <span class="ct-channel-link">
-          Browse FAQs below
+        <span class="resp-badge fast">Instant</span>
+        <div class="channel-title">Common Questions</div>
+        <div class="channel-desc">Escrow, disputes, payouts, fees and delivery tracking — answered on our FAQ page.</div>
+        <span class="channel-link">
+          Visit our FAQ page
           <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
         </span>
       </a>
@@ -335,39 +309,39 @@ textarea.ct-input { resize:vertical; min-height:120px; }
 </section>
 
 <!-- FORM + SIDEBAR -->
-<section class="ct-section">
-  <div class="ct-container">
-    <div class="ct-contact-layout">
+<section class="pg-section">
+  <div class="pg-container">
+    <div class="contact-layout">
 
       <!-- Form -->
-      <div class="ct-form-wrap ct-fade" id="ctFormWrap">
+      <div class="form-wrap pg-fade" id="ctFormWrap">
         <h2>Send us a message</h2>
         <p>Fill this in and we'll get back to you — usually within 24 hours. For urgent help, WhatsApp is faster.</p>
 
         <form id="ctForm" method="post" action="{% url 'contact' %}">
           {% csrf_token %}
-          <div class="ct-form-row">
-            <div class="ct-form-group">
-              <label class="ct-form-label">First Name</label>
-              <input type="text" name="first_name" class="ct-input" placeholder="Amara" required>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <input type="text" name="first_name" class="form-input" placeholder="Amara" required>
             </div>
-            <div class="ct-form-group">
-              <label class="ct-form-label">Last Name</label>
-              <input type="text" name="last_name" class="ct-input" placeholder="Osei" required>
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <input type="text" name="last_name" class="form-input" placeholder="Osei" required>
             </div>
           </div>
-          <div class="ct-form-group">
-            <label class="ct-form-label">Email Address</label>
-            <input type="email" name="email" class="ct-input" placeholder="you@example.com" required>
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
           </div>
-          <div class="ct-form-group">
-            <label class="ct-form-label">Your store link (optional)</label>
-            <input type="text" name="store_link" class="ct-input" placeholder="vendopage.com/yourname">
+          <div class="form-group">
+            <label class="form-label">Your store link (optional)</label>
+            <input type="text" name="store_link" class="form-input" placeholder="vendopage.com/yourname">
           </div>
-          <div class="ct-form-group">
-            <label class="ct-form-label">Topic</label>
-            <div class="ct-select-wrap">
-              <select name="topic" class="ct-input">
+          <div class="form-group">
+            <label class="form-label">Topic</label>
+            <div class="select-wrap">
+              <select name="topic" class="form-input">
                 <option value="">Select a topic</option>
                 <option>Store setup &amp; products</option>
                 <option>Escrow &amp; payments</option>
@@ -382,153 +356,77 @@ textarea.ct-input { resize:vertical; min-height:120px; }
               </select>
             </div>
           </div>
-          <div class="ct-form-group">
-            <label class="ct-form-label">Message</label>
-            <textarea name="message" class="ct-input" placeholder="Describe what you need help with. The more detail, the faster we can help." required></textarea>
+          <div class="form-group">
+            <label class="form-label">Message</label>
+            <textarea name="message" class="form-input" placeholder="Describe what you need help with. The more detail, the faster we can help." required></textarea>
           </div>
-          <button type="submit" class="ct-submit" id="ctSubmitBtn">
+          <button type="submit" class="form-submit" id="ctSubmitBtn">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             Send Message
           </button>
         </form>
-        <p class="ct-form-note">We read every message. Your info is never shared with third parties.</p>
+        <p class="form-note">We read every message. Your info is never shared with third parties.</p>
 
-        <div class="ct-success" id="ctSuccess">
-          <div class="ct-success-icon"><svg width="26" height="26" fill="none" stroke="#00C853" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="form-success" id="ctSuccess">
+          <div class="form-success-icon"><svg width="24" height="24" fill="none" stroke="#00873D" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
           <h3>Message sent!</h3>
           <p>We'll get back to you within 24 hours. For urgent help, WhatsApp us at +234 701 782 0434.</p>
         </div>
       </div>
 
       <!-- Sidebar -->
-      <div class="ct-sidebar">
+      <div class="contact-sidebar">
 
-        <!-- Contact details -->
-        <div class="ct-info-card ct-fade">
+        <div class="info-card pg-fade">
           <h3>Contact Details</h3>
-          <div class="ct-info-row">
-            <div class="ct-info-icon wa"><svg width="15" height="15" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></div>
-            <div class="ct-info-body">
-              <div class="ct-info-label">WhatsApp (Fastest)</div>
-              <div class="ct-info-val">+234 701 782 0434</div>
-              <div class="ct-info-sub">CTO / Founder — direct line</div>
+          <div class="info-row">
+            <div class="info-icon wa"><svg width="14" height="14" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg></div>
+            <div class="info-body">
+              <div class="info-label">WhatsApp (Fastest)</div>
+              <div class="info-val">+234 701 782 0434</div>
+              <div class="info-sub">Direct line to our team</div>
             </div>
           </div>
-          <div class="ct-info-row">
-            <div class="ct-info-icon g"><svg width="15" height="15" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-            <div class="ct-info-body">
-              <div class="ct-info-label">Support Email</div>
-              <div class="ct-info-val">support@vendopage.com</div>
-              <div class="ct-info-sub">Store help &amp; disputes</div>
+          <div class="info-row">
+            <div class="info-icon g"><svg width="14" height="14" fill="none" stroke="#00873D" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <div class="info-body">
+              <div class="info-label">Support Email</div>
+              <div class="info-val">support@vendopage.com</div>
+              <div class="info-sub">Store help &amp; disputes</div>
             </div>
           </div>
-          <div class="ct-info-row">
-            <div class="ct-info-icon m"><svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-            <div class="ct-info-body">
-              <div class="ct-info-label">General Email</div>
-              <div class="ct-info-val" style="font-size:11px;">vendopageglobalventures<br>@gmail.com</div>
-              <div class="ct-info-sub">Partnerships &amp; press</div>
+          <div class="info-row">
+            <div class="info-icon m"><svg width="14" height="14" fill="none" stroke="#F5F4F0" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <div class="info-body">
+              <div class="info-label">General Email</div>
+              <div class="info-val" style="font-size:11px;">vendopageglobalventures<br>@gmail.com</div>
+              <div class="info-sub">Partnerships &amp; press</div>
             </div>
           </div>
         </div>
 
-        <!-- Response times -->
-        <div class="ct-info-card ct-fade">
+        <div class="info-card pg-fade">
           <h3>Response Times</h3>
-          <div class="ct-resp-list">
-            <div class="ct-resp-row">
-              <span class="ct-resp-label">WhatsApp</span>
-              <span class="ct-resp-time fast">~1 hour</span>
-            </div>
-            <div class="ct-resp-row">
-              <span class="ct-resp-label">Support email</span>
-              <span class="ct-resp-time medium">24 hours</span>
-            </div>
-            <div class="ct-resp-row">
-              <span class="ct-resp-label">Escrow disputes</span>
-              <span class="ct-resp-time medium">48 hours</span>
-            </div>
-            <div class="ct-resp-row">
-              <span class="ct-resp-label">Payout issues</span>
-              <span class="ct-resp-time fast">Same day</span>
-            </div>
-            <div class="ct-resp-row">
-              <span class="ct-resp-label">General enquiries</span>
-              <span class="ct-resp-time slow">2–3 days</span>
-            </div>
+          <div class="resp-list">
+            <div class="resp-row"><span class="resp-row-label">WhatsApp</span><span class="resp-time fast">~1 hour</span></div>
+            <div class="resp-row"><span class="resp-row-label">Support email</span><span class="resp-time medium">24 hours</span></div>
+            <div class="resp-row"><span class="resp-row-label">Escrow disputes</span><span class="resp-time medium">48 hours</span></div>
+            <div class="resp-row"><span class="resp-row-label">Payout issues</span><span class="resp-time fast">Same day</span></div>
+            <div class="resp-row"><span class="resp-row-label">General enquiries</span><span class="resp-time slow">2–3 days</span></div>
           </div>
         </div>
 
-        <!-- Support hours -->
-        <div class="ct-info-card ct-fade">
+        <div class="info-card pg-fade">
           <h3>Support Hours</h3>
-          <div class="ct-resp-list">
-            <div class="ct-resp-row">
-              <span class="ct-resp-label">Mon – Fri</span>
-              <span class="ct-resp-time fast">8am – 8pm WAT</span>
-            </div>
-            <div class="ct-resp-row">
-              <span class="ct-resp-label">Saturday</span>
-              <span class="ct-resp-time medium">9am – 5pm WAT</span>
-            </div>
-            <div class="ct-resp-row">
-              <span class="ct-resp-label">Sunday</span>
-              <span class="ct-resp-time slow">WhatsApp only</span>
-            </div>
+          <div class="resp-list">
+            <div class="resp-row"><span class="resp-row-label">Mon – Fri</span><span class="resp-time fast">8am – 8pm WAT</span></div>
+            <div class="resp-row"><span class="resp-row-label">Saturday</span><span class="resp-time medium">9am – 5pm WAT</span></div>
+            <div class="resp-row"><span class="resp-row-label">Sunday</span><span class="resp-time slow">WhatsApp only</span></div>
           </div>
-          <p style="font-size:11px;color:var(--text-muted);margin-top:12px;line-height:1.5;">For urgent escrow or payout issues outside office hours, WhatsApp us directly — we monitor it around the clock.</p>
+          <p style="font-size:11px;color:var(--muted);margin-top:12px;line-height:1.5;">For urgent escrow or payout issues outside office hours, WhatsApp us directly — we monitor it around the clock.</p>
         </div>
 
       </div>
-    </div>
-  </div>
-</section>
-
-<!-- FAQ -->
-<section class="ct-section-alt" id="faq">
-  <div class="ct-container-sm">
-    <div class="ct-section-head ct-fade">
-      <span class="ct-label">Quick Answers</span>
-      <h2 class="ct-section-title">Common questions.</h2>
-      <p class="ct-section-sub">Answers to what vendors and buyers ask us most.</p>
-    </div>
-    <div class="ct-faq-list">
-
-      <div class="ct-faq-item ct-fade">
-        <button class="ct-faq-btn"><span>I sent money but the seller isn't responding. What do I do?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">If you paid via escrow, your money is safe — it's held by Vendopage and hasn't been sent to the seller. Open a dispute from your order page, or WhatsApp us at +234 701 782 0434. We'll investigate and issue a refund if the seller can't be reached.</p></div>
-      </div>
-
-      <div class="ct-faq-item ct-fade">
-        <button class="ct-faq-btn"><span>My item arrived but it's not what was described. Can I get a refund?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">Yes. Don't confirm delivery. Open a dispute from your order page and describe what arrived vs what was listed. Send photos if you can. Our team reviews all disputes within 48 hours. If the item doesn't match the listing, you get a full refund — the money is still held by us.</p></div>
-      </div>
-
-      <div class="ct-faq-item ct-fade">
-        <button class="ct-faq-btn"><span>My payout hasn't arrived. How long does it take?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">Once an order is confirmed (or auto-released after 72 hours), payouts are processed to your verified bank account — usually the same business day. If it's been more than 24 hours after confirmation, WhatsApp us directly with your order reference and we'll fix it immediately.</p></div>
-      </div>
-
-      <div class="ct-faq-item ct-fade">
-        <button class="ct-faq-btn"><span>How do I upload tracking after shipping?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">Go to your dashboard, open the order, and tap "Mark as Shipped." Enter the courier tracking number or your driver's phone number. Vendopage automatically sends the tracking details to the buyer's email so they can follow their delivery.</p></div>
-      </div>
-
-      <div class="ct-faq-item ct-fade">
-        <button class="ct-faq-btn"><span>Can I use Vendopage without accepting payments?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">Absolutely. The free Catalogue Mode lets buyers browse your store and tap to message you directly on WhatsApp. You handle payment yourself — bank transfer, mobile money, cash, whatever you prefer. Enable Store Mode only if you want payments directly on your page with escrow protection.</p></div>
-      </div>
-
-      <div class="ct-faq-item ct-fade">
-        <button class="ct-faq-btn"><span>How quickly do you respond to support requests?</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">WhatsApp is usually within 1 hour. Email support@vendopage.com is within 24 hours on business days. Escrow and payout issues are highest priority and handled same day wherever possible.</p></div>
-      </div>
-
-      <div class="ct-faq-item ct-fade">
-        <button class="ct-faq-btn"><span>I want to partner with or invest in Vendopage.</span><svg class="ct-faq-icon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg></button>
-        <div class="ct-faq-body"><p class="ct-faq-a">We'd love to hear from you. Email vendopageglobalventures@gmail.com with a brief introduction and we'll arrange a conversation. We're building the storefront layer for social commerce across Africa and beyond.</p></div>
-      </div>
-
     </div>
   </div>
 </section>
@@ -569,48 +467,29 @@ var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
 })();
 
 /* ── SCROLL FADE ── */
-const obs = new IntersectionObserver(entries => {
+const ctObs = new IntersectionObserver(entries => {
   entries.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    if (e.isIntersecting) { e.target.classList.add('visible'); ctObs.unobserve(e.target); }
   });
 }, { threshold: 0.08 });
-document.querySelectorAll('.ct-fade').forEach(el => obs.observe(el));
-
-/* ── FAQ ── */
-document.querySelectorAll('.ct-faq-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const item = btn.closest('.ct-faq-item');
-    const isOpen = item.classList.contains('open');
-    document.querySelectorAll('.ct-faq-item').forEach(i => i.classList.remove('open'));
-    if (!isOpen) item.classList.add('open');
-  });
-});
-
-/* ── SMOOTH SCROLL ── */
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    const id = a.getAttribute('href').slice(1);
-    const el = document.getElementById(id);
-    if (el) { e.preventDefault(); el.scrollIntoView({ behavior:'smooth', block:'start' }); }
-  });
-});
+document.querySelectorAll('.pg-fade').forEach(el => ctObs.observe(el));
 
 /* ── FORM SUBMIT ── */
-const form = document.getElementById('ctForm');
-if (form) {
-  form.addEventListener('submit', async function(e) {
+const ctForm = document.getElementById('ctForm');
+if (ctForm) {
+  ctForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     const btn = document.getElementById('ctSubmitBtn');
     btn.disabled = true;
-    btn.innerHTML = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg> Sending…';
+    btn.innerHTML = 'Sending…';
     try {
-      const res = await fetch(form.action, {
+      const res = await fetch(ctForm.action, {
         method: 'POST',
-        body: new FormData(form),
+        body: new FormData(ctForm),
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
       });
       if (res.ok) {
-        form.style.display = 'none';
+        ctForm.style.display = 'none';
         document.getElementById('ctSuccess').style.display = 'block';
       } else {
         btn.disabled = false;

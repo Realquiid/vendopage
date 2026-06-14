@@ -5,178 +5,325 @@
 {% block meta_description %}Vendopage Privacy Policy. Learn how we collect, use, store, and protect your personal data including escrow payment details and delivery information. Applies globally.{% endblock %}
 
 {% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --primary:#00C853; --primary-dark:#00a844; --primary-lt:#e8fff0;
-  --bg:#ffffff; --bg-alt:#F7F7F5; --text:#0A0A0A; --text-muted:#6B6B6B;
-  --border-c:#E8E8E4; --radius:12px; --radius-lg:20px;
+/* ══════════════════════════════════════
+   PRIVACY — uses base.html tokens only
+   No hardcoded colours. All text must be
+   visible in both light AND dark mode.
+══════════════════════════════════════ */
+
+/* ── PAGE WRAPPER ── */
+.lg-page {
+  background: var(--surface);
+  min-height: 100vh;
 }
 
-[data-theme="dark"] .lg-hero,
-[data-theme="dark"] .lg-body           { background:#141414; }
-[data-theme="dark"] .lg-hero h1,
-[data-theme="dark"] .lg-section-title,
-[data-theme="dark"] .lg-toc-title,
-[data-theme="dark"] .lg-data-title     { color:#f0f0f0; }
-[data-theme="dark"] .lg-hero-sub,
-[data-theme="dark"] .lg-section-body,
-[data-theme="dark"] .lg-section-body p,
-[data-theme="dark"] .lg-section-body li,
-[data-theme="dark"] .lg-toc-link,
-[data-theme="dark"] .lg-data-desc      { color:#a0a0a0; }
-[data-theme="dark"] .lg-toc-link:hover,
-[data-theme="dark"] .lg-toc-link.active { color:var(--primary); }
-[data-theme="dark"] .lg-section        { border-color:#2e2e2e; }
-[data-theme="dark"] .lg-highlight      { background:#1e1e1e; border-color:#3a3a3a; }
-[data-theme="dark"] .lg-highlight-title { color:#f0f0f0; }
-[data-theme="dark"] .lg-badge          { background:#1e1e1e; border-color:#2e2e2e; color:#a0a0a0; }
-[data-theme="dark"] .lg-toc            { background:#1e1e1e; border-color:#2e2e2e; }
-[data-theme="dark"] .lg-data-card      { background:#1e1e1e; border-color:#2e2e2e; }
-[data-theme="dark"] .lg-data-icon      { background:#252525; }
-
-/* ── HERO ── */
+/* ══════════════════════════════════════
+   HERO — always dark, same as homepage.
+   ALL colours hardcoded to #0D0D0D base
+   so they NEVER flip with light/dark mode.
+══════════════════════════════════════ */
 .lg-hero {
-  padding:90px 40px 60px; background:var(--bg);
-  border-bottom:1.5px solid var(--border-c);
+  position: relative;
+  overflow: hidden;
+  background: #0D0D0D;           /* hardcoded — always dark */
+  padding: 90px 80px 72px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
 }
-.lg-hero-inner { max-width:1080px; margin:0 auto; }
-.lg-label {
-  display:inline-block; font-size:11px; font-weight:700;
-  letter-spacing:2.5px; text-transform:uppercase;
-  color:var(--primary); margin-bottom:16px;
+
+/* Exact same grid as homepage .hero */
+.lg-hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 72px 72px;
+  pointer-events: none; z-index: 1;
 }
+
+/* Subtle glow — toned down so it doesn't wash text */
+.lg-hero-glow {
+  position: absolute;
+  width: 700px; height: 700px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0,135,61,.12) 0%, transparent 60%);
+  top: -180px; right: -120px;
+  pointer-events: none; z-index: 1;
+}
+
+.lg-hero-inner {
+  max-width: 1080px; margin: 0 auto;
+  position: relative; z-index: 2;
+}
+
+/* Eyebrow — hardcoded green, always visible on dark bg */
+.lg-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-bottom: 24px;
+}
+.lg-eyebrow-line { width: 28px; height: 1.5px; background: #00C853; }
+.lg-eyebrow-text {
+  font-family: var(--font-b);
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: #00C853;
+}
+
+/* H1 — always light on dark hero */
 .lg-hero h1 {
-  font-family:'Syne',sans-serif; font-weight:800;
-  font-size:clamp(30px,5vw,56px); letter-spacing:-2px;
-  color:var(--text); margin-bottom:16px; line-height:1.05;
+  font-family: var(--font-d);
+  font-size: clamp(40px, 5vw, 72px);
+  font-weight: 800;
+  letter-spacing: -3px;
+  line-height: 1.0;
+  color: #F5F4F0;               /* hardcoded light */
+  margin-bottom: 20px;
 }
-.lg-hero-sub { font-size:15px; color:var(--text-muted); line-height:1.65; max-width:640px; }
-.lg-hero-meta { display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; }
+.lg-hero h1 span { color: #00C853; }
+
+/* Sub — readable muted-light on dark bg */
+.lg-hero-sub {
+  font-family: var(--font-b);
+  font-size: 16px; line-height: 1.75;
+  color: rgba(245,244,240,.5);   /* hardcoded — always light-on-dark */
+  max-width: 560px;
+  margin-bottom: 32px;
+}
+
+/* Badges — hardcoded dark-pill style */
+.lg-badges { display: flex; gap: 10px; flex-wrap: wrap; }
 .lg-badge {
-  display:inline-flex; align-items:center; gap:6px;
-  padding:5px 12px; background:var(--bg-alt);
-  border:1.5px solid var(--border-c); border-radius:100px;
-  font-size:12px; color:var(--text-muted); font-weight:500;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 14px;
+  background: rgba(245,244,240,.06);
+  border: 1px solid rgba(245,244,240,.12);
+  border-radius: var(--r-pill);
+  font-family: var(--font-b);
+  font-size: 12px; font-weight: 600;
+  color: rgba(245,244,240,.55);  /* hardcoded — always visible on dark */
+}
+.lg-badge-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #00C853; flex-shrink: 0;
 }
 
 /* ── LAYOUT ── */
 .lg-layout {
-  max-width:1080px; margin:0 auto; padding:60px 40px;
-  display:grid; grid-template-columns:220px 1fr; gap:60px; align-items:start;
+  max-width: 1080px; margin: 0 auto;
+  padding: 72px 80px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 64px;
+  align-items: start;
 }
-.lg-sidebar-wrap { position:sticky; top:88px; }
+
+/* ── SIDEBAR TOC ── */
+.lg-toc-wrap { position: sticky; top: 88px; }
+
 .lg-toc {
-  background:var(--bg); border:1.5px solid var(--border-c);
-  border-radius:var(--radius-lg); padding:20px 0; overflow:hidden;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+
+.lg-toc-head {
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--border);
 }
 .lg-toc-title {
-  font-family:'Syne',sans-serif; font-weight:700; font-size:11px;
-  letter-spacing:2px; text-transform:uppercase; color:var(--text);
-  padding:0 20px 12px; border-bottom:1px solid var(--border-c); margin-bottom:8px;
+  font-family: var(--font-b);
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted);
 }
+
 .lg-toc-link {
-  display:block; padding:8px 20px; font-size:13px; font-weight:500;
-  color:var(--text-muted); text-decoration:none;
-  transition:color .15s, background .15s; border-left:2px solid transparent;
+  display: block;
+  padding: 9px 18px;
+  font-family: var(--font-b);
+  font-size: 13px; font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color .15s, background .15s, border-color .15s;
 }
-.lg-toc-link:hover  { color:var(--primary); background:var(--primary-lt); }
-.lg-toc-link.active { color:var(--primary); border-left-color:var(--primary); background:var(--primary-lt); }
+.lg-toc-link:hover {
+  color: var(--green);
+  background: var(--green-lt);
+}
+.lg-toc-link.active {
+  color: var(--green);
+  background: var(--green-lt);
+  border-left-color: var(--green);
+}
+
+/* dark overrides */
+[data-theme="dark"] .lg-toc {
+  background: var(--surface-2);
+  border-color: var(--border);
+}
+[data-theme="dark"] .lg-toc-link:hover,
+[data-theme="dark"] .lg-toc-link.active {
+  background: rgba(0,135,61,.1);
+}
 
 /* ── CONTENT ── */
-.lg-section { padding:36px 0; border-bottom:1.5px solid var(--border-c); }
-.lg-section:last-child { border-bottom:none; }
-.lg-section-title {
-  font-family:'Syne',sans-serif; font-weight:700;
-  font-size:clamp(18px,2.5vw,24px); color:var(--text);
-  margin-bottom:16px; letter-spacing:-.5px; scroll-margin-top:110px;
+.lg-section {
+  padding: 40px 0;
+  border-bottom: 1px solid var(--border);
 }
-.lg-section-body { font-size:14px; color:var(--text-muted); line-height:1.85; }
-.lg-section-body p { margin-bottom:14px; }
-.lg-section-body p:last-child { margin-bottom:0; }
-.lg-section-body h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:15px; color:var(--text); margin:20px 0 10px; }
-.lg-section-body ul, .lg-section-body ol { margin:12px 0 14px 20px; }
-.lg-section-body li { margin-bottom:7px; line-height:1.7; }
-.lg-section-body a { color:var(--primary); text-decoration:none; }
-.lg-section-body a:hover { text-decoration:underline; }
-.lg-section-body strong { color:var(--text); }
+.lg-section:last-child { border-bottom: none; padding-bottom: 0; }
 
+.lg-section-title {
+  font-family: var(--font-d);
+  font-size: clamp(20px, 2.5vw, 26px);
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: var(--ink);
+  margin-bottom: 18px;
+  scroll-margin-top: 108px;
+}
+
+.lg-body-text {
+  font-family: var(--font-b);
+  font-size: 14px; line-height: 1.85;
+  color: var(--muted);
+}
+.lg-body-text p { margin-bottom: 14px; }
+.lg-body-text p:last-child { margin-bottom: 0; }
+.lg-body-text strong { color: var(--ink); font-weight: 600; }
+.lg-body-text a { color: var(--green); text-decoration: none; }
+.lg-body-text a:hover { text-decoration: underline; }
+
+.lg-body-text h3 {
+  font-family: var(--font-d);
+  font-size: 15px; font-weight: 700;
+  color: var(--ink);
+  margin: 22px 0 10px;
+}
+
+.lg-body-text ul, .lg-body-text ol {
+  margin: 10px 0 14px 18px;
+}
+.lg-body-text li {
+  margin-bottom: 8px;
+  line-height: 1.7;
+}
+
+/* Highlight box — green accent */
 .lg-highlight {
-  background:var(--primary-lt); border-left:3px solid var(--primary);
-  border-radius:0 var(--radius) var(--radius) 0;
-  padding:16px 20px; margin:20px 0;
+  background: var(--green-lt);
+  border-left: 3px solid var(--green);
+  border-radius: 0 var(--r-md) var(--r-md) 0;
+  padding: 16px 20px;
+  margin: 20px 0;
 }
 .lg-highlight-title {
-  font-family:'Syne',sans-serif; font-weight:700; font-size:13px;
-  color:var(--text); margin-bottom:6px;
+  font-family: var(--font-d);
+  font-size: 13px; font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 6px;
 }
-.lg-highlight p { font-size:13px; color:var(--text-muted); margin:0; line-height:1.7; }
+.lg-highlight p {
+  font-family: var(--font-b);
+  font-size: 13px; line-height: 1.7;
+  color: var(--muted);
+  margin: 0;
+}
 
-/* Data cards */
+[data-theme="dark"] .lg-highlight {
+  background: rgba(0,135,61,.1);
+  border-color: var(--green);
+}
+[data-theme="dark"] .lg-highlight-title { color: #F0EFE9; }
+
+/* Data cards grid */
 .lg-data-grid {
-  display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
-  gap:12px; margin:20px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
 }
 .lg-data-card {
-  background:var(--bg-alt); border:1.5px solid var(--border-c);
-  border-radius:var(--radius); padding:16px;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  transition: border-color .2s;
 }
+.lg-data-card:hover { border-color: var(--green); }
 .lg-data-icon {
-  width:36px; height:36px; background:var(--primary-lt);
-  border-radius:8px; display:flex; align-items:center;
-  justify-content:center; margin-bottom:10px;
+  width: 34px; height: 34px;
+  background: var(--green-lt);
+  border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px;
 }
-.lg-data-title { font-family:'Syne',sans-serif; font-weight:700; font-size:13px; color:var(--text); margin-bottom:5px; }
-.lg-data-desc  { font-size:12px; color:var(--text-muted); line-height:1.6; }
+[data-theme="dark"] .lg-data-icon { background: rgba(0,135,61,.15); }
+.lg-data-title {
+  font-family: var(--font-d);
+  font-size: 12px; font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+.lg-data-desc {
+  font-family: var(--font-b);
+  font-size: 12px; line-height: 1.6;
+  color: var(--muted);
+}
 
-.lg-body { background:var(--bg); }
-
-@media(max-width:900px) {
-  .lg-layout { grid-template-columns:1fr; gap:0; padding:40px 20px; }
-  .lg-hero   { padding:64px 20px 48px; }
-  .lg-sidebar-wrap { position:static; margin-bottom:32px; }
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .lg-hero    { padding: 72px 28px 56px; }
+  .lg-layout  { grid-template-columns: 1fr; gap: 0; padding: 48px 28px; }
+  .lg-toc-wrap { position: static; margin-bottom: 32px; }
+}
+@media (max-width: 480px) {
+  .lg-hero   { padding: 64px 20px 48px; }
+  .lg-layout { padding: 36px 20px; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="lg-page">
 
-<div class="lg-hero">
-  <div class="lg-hero-inner">
-    <span class="lg-label">Legal</span>
-    <h1>Privacy Policy</h1>
-    <p class="lg-hero-sub">We're transparent about how we handle your data — from store information to escrow payment details to delivery records. This policy explains exactly what we collect, why, and how you can control it.</p>
-    <div class="lg-hero-meta">
-      <span class="lg-badge">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Last updated: May 2026
-      </span>
-      <span class="lg-badge">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        We do not sell your data
-      </span>
-      <span class="lg-badge">
-        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-        Applies globally
-      </span>
+  <!-- ── HERO ── -->
+  <div class="lg-hero">
+    <div class="lg-hero-grid"></div>
+    <div class="lg-hero-glow"></div>
+    <div class="lg-hero-inner">
+      <div class="lg-eyebrow">
+        <div class="lg-eyebrow-line"></div>
+        <span class="lg-eyebrow-text">Legal</span>
+      </div>
+      <h1>Privacy <span>Policy</span></h1>
+      <p class="lg-hero-sub">We're transparent about how we handle your data — from store information to escrow payment details to delivery records. Here's exactly what we collect, why, and how you can control it.</p>
+      <div class="lg-badges">
+        <span class="lg-badge"><span class="lg-badge-dot"></span>Last updated: May 2026</span>
+        <span class="lg-badge"><span class="lg-badge-dot"></span>We do not sell your data</span>
+        <span class="lg-badge"><span class="lg-badge-dot"></span>Applies globally</span>
+      </div>
     </div>
   </div>
-</div>
 
-<div class="lg-body">
+  <!-- ── BODY ── -->
   <div class="lg-layout">
 
-    <!-- SIDEBAR TOC -->
-    <div class="lg-sidebar-wrap">
+    <!-- SIDEBAR -->
+    <div class="lg-toc-wrap">
       <nav class="lg-toc" id="lgToc">
-        <div class="lg-toc-title">Contents</div>
+        <div class="lg-toc-head">
+          <div class="lg-toc-title">Contents</div>
+        </div>
         <a class="lg-toc-link" href="#overview">Overview</a>
         <a class="lg-toc-link" href="#collect">What We Collect</a>
         <a class="lg-toc-link" href="#use">How We Use It</a>
-        <a class="lg-toc-link" href="#escrow-data">Escrow & Payment Data</a>
-        <a class="lg-toc-link" href="#delivery-data">Delivery & Tracking Data</a>
+        <a class="lg-toc-link" href="#escrow-data">Escrow &amp; Payments</a>
+        <a class="lg-toc-link" href="#delivery-data">Delivery Data</a>
         <a class="lg-toc-link" href="#sharing">Sharing Your Data</a>
-        <a class="lg-toc-link" href="#storage">Storage & Security</a>
+        <a class="lg-toc-link" href="#storage">Storage &amp; Security</a>
         <a class="lg-toc-link" href="#cookies">Cookies</a>
         <a class="lg-toc-link" href="#rights">Your Rights</a>
         <a class="lg-toc-link" href="#children">Children's Privacy</a>
@@ -191,9 +338,9 @@
 
       <div class="lg-section" id="overview">
         <h2 class="lg-section-title">Overview</h2>
-        <div class="lg-section-body">
-          <p>Vendopage is a global platform that helps vendors create permanent online stores and accept payments securely through escrow. When you use Vendopage — whether as a vendor, buyer, or visitor — you trust us with your information. We take that responsibility seriously.</p>
-          <p>This Privacy Policy applies to all users of Vendopage worldwide, including vendors who create stores, buyers who make purchases, and visitors who browse store pages.</p>
+        <div class="lg-body-text">
+          <p>Vendopage is a platform that helps vendors across Africa create permanent online stores, share a single store link, and accept payments securely through escrow. When you use Vendopage — whether as a vendor, buyer, or visitor — you trust us with your information. We take that responsibility seriously.</p>
+          <p>This Privacy Policy applies to all users of Vendopage worldwide: vendors who create stores, buyers who make purchases, and visitors who browse store pages.</p>
           <div class="lg-highlight">
             <div class="lg-highlight-title">Our core commitment</div>
             <p>We will never sell your personal data to third parties, use it for unrelated advertising, or share it without a legitimate reason. Your data powers your store and protects your transactions — nothing else.</p>
@@ -203,96 +350,107 @@
 
       <div class="lg-section" id="collect">
         <h2 class="lg-section-title">What We Collect</h2>
-        <div class="lg-section-body">
+        <div class="lg-body-text">
           <p>We collect information you give us directly, information collected automatically when you use the platform, and — for Store Mode users — payment and transaction data.</p>
           <h3>Information you provide</h3>
           <div class="lg-data-grid">
             <div class="lg-data-card">
-              <div class="lg-data-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+              <div class="lg-data-icon">
+                <svg width="16" height="16" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </div>
               <div class="lg-data-title">Account info</div>
-              <div class="lg-data-desc">Email, business name, WhatsApp number, store URL, and password</div>
+              <div class="lg-data-desc">Email, business name, WhatsApp number, category, and password</div>
             </div>
             <div class="lg-data-card">
-              <div class="lg-data-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+              <div class="lg-data-icon">
+                <svg width="16" height="16" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              </div>
               <div class="lg-data-title">Store content</div>
-              <div class="lg-data-desc">Product photos, descriptions, prices, business category, profile picture</div>
+              <div class="lg-data-desc">Product photos via Cloudinary, descriptions, prices, and profile picture</div>
             </div>
             <div class="lg-data-card">
-              <div class="lg-data-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-              <div class="lg-data-title">Payment info (Store Mode)</div>
-              <div class="lg-data-desc">Bank account details for payouts; card/payment details processed via Flutterwave</div>
+              <div class="lg-data-icon">
+                <svg width="16" height="16" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div class="lg-data-title">Payment info</div>
+              <div class="lg-data-desc">Bank account details for payouts; card data processed by Flutterwave</div>
             </div>
             <div class="lg-data-card">
-              <div class="lg-data-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-              <div class="lg-data-title">Delivery info (buyers)</div>
+              <div class="lg-data-icon">
+                <svg width="16" height="16" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div class="lg-data-title">Delivery info</div>
               <div class="lg-data-desc">Delivery address provided at checkout for Store Mode orders</div>
             </div>
             <div class="lg-data-card">
-              <div class="lg-data-icon"><svg width="18" height="18" fill="none" stroke="#00C853" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
+              <div class="lg-data-icon">
+                <svg width="16" height="16" fill="none" stroke="var(--green)" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+              </div>
               <div class="lg-data-title">Communications</div>
-              <div class="lg-data-desc">Messages you send via the contact form, email, or WhatsApp support</div>
+              <div class="lg-data-desc">Messages via our contact form, email, or WhatsApp support</div>
             </div>
           </div>
           <h3>Automatically collected</h3>
           <ul>
-            <li><strong>Usage data</strong> — pages visited, features used, time spent on the platform</li>
+            <li><strong>Usage data</strong> — pages visited, features used, time on the platform</li>
             <li><strong>Device info</strong> — browser type, operating system, screen resolution</li>
-            <li><strong>Network info</strong> — IP address, approximate geographic location (country/city level, used for currency auto-detection)</li>
-            <li><strong>Store analytics</strong> — how many times your store and individual products have been viewed</li>
-            <li><strong>Transaction records</strong> — order history, payment status, escrow status, and payout records for Store Mode users</li>
+            <li><strong>Network info</strong> — IP address and approximate location (country/city, used for currency auto-detection)</li>
+            <li><strong>Store analytics</strong> — page views, weekly WhatsApp clicks, and product view counts</li>
+            <li><strong>Transaction records</strong> — order history, payment status, escrow status, payout records, commission rates applied</li>
           </ul>
         </div>
       </div>
 
       <div class="lg-section" id="use">
         <h2 class="lg-section-title">How We Use Your Information</h2>
-        <div class="lg-section-body">
+        <div class="lg-body-text">
           <p>We use your information strictly to operate and improve Vendopage. Specifically:</p>
           <ul>
-            <li><strong>To run your store</strong> — displaying your products, generating your store URL, and making your catalogue visible to customers</li>
-            <li><strong>To process payments and escrow</strong> — holding funds securely, releasing them after delivery confirmation, and processing payouts to your bank account</li>
-            <li><strong>To facilitate delivery</strong> — sharing your delivery address with the seller so they can fulfil your order and sending you tracking details by email when the seller uploads them</li>
-            <li><strong>To communicate with you</strong> — sending account emails, order updates, tracking notifications, and security alerts</li>
+            <li><strong>To run your store</strong> — displaying your products, generating your store URL (vendopage.com/yourname), and making your catalogue visible to customers</li>
+            <li><strong>To process payments and escrow</strong> — holding funds securely via Flutterwave, releasing them after delivery confirmation, and processing payouts to your verified bank account</li>
+            <li><strong>To facilitate delivery</strong> — sharing your delivery address with the seller so they can fulfil your order, and sending tracking details by email when uploaded</li>
+            <li><strong>To communicate with you</strong> — sending account emails, order updates, shipping notifications, and security alerts</li>
             <li><strong>To resolve disputes</strong> — reviewing order evidence and communication records when a dispute is raised</li>
-            <li><strong>To detect fraud</strong> — identifying suspicious activity and protecting both buyers and sellers on the platform</li>
-            <li><strong>To improve the platform</strong> — understanding how Vendopage is used helps us build better features</li>
-            <li><strong>To show you analytics</strong> — giving you data on how many people viewed your store and products</li>
-            <li><strong>To auto-detect currency</strong> — using your approximate location (from IP) to display prices in your local currency</li>
+            <li><strong>To detect fraud</strong> — identifying suspicious activity and protecting both buyers and sellers</li>
+            <li><strong>To improve the platform</strong> — understanding usage patterns to build better features</li>
+            <li><strong>To show you analytics</strong> — giving sellers weekly page views, WhatsApp click counts, and product-level view data in their dashboard</li>
+            <li><strong>To auto-detect currency</strong> — using your approximate IP location to display prices in your local currency at checkout</li>
           </ul>
           <p>We do not use your data to serve third-party advertisements and we do not build advertising profiles from your activity.</p>
         </div>
       </div>
 
       <div class="lg-section" id="escrow-data">
-        <h2 class="lg-section-title">Escrow & Payment Data</h2>
-        <div class="lg-section-body">
+        <h2 class="lg-section-title">Escrow &amp; Payment Data</h2>
+        <div class="lg-body-text">
           <p>When you use Store Mode — either as a buyer making a payment or a seller receiving one — we collect and process additional financial data:</p>
           <h3>For buyers</h3>
           <ul>
-            <li>Payment card or bank details are collected and processed by <strong>Flutterwave</strong>, our payment processor. Vendopage does not store your raw card details — they are tokenised by Flutterwave</li>
-            <li>Your email address is used to send order confirmations, tracking notifications, and dispute communications.</li>
-            <li>The amount paid and the order details are retained in our records for dispute resolution and payout management.</li>
+            <li>Payment card or bank details are collected and processed entirely by <strong>Flutterwave</strong>. Vendopage does not store your raw card numbers — they are tokenised by Flutterwave at the point of payment.</li>
+            <li>Your email is used to send order confirmations, tracking notifications, and dispute communications.</li>
+            <li>The amount paid, order reference, and order items are retained in our records for dispute resolution and payout management.</li>
           </ul>
           <h3>For sellers</h3>
           <ul>
-            <li>Your bank account number and name are collected and verified for the purpose of processing payouts. This data is stored securely and used only for payout disbursement.</li>
-            <li>All escrow transactions — amounts held, amounts released, and payout records — are logged and retained for audit and dispute resolution purposes.</li>
+            <li>Your bank account number, name, and bank code are collected and verified for payout disbursement. This data is stored securely and used only for that purpose.</li>
+            <li>All escrow transactions — commission rates applied, amounts held, amounts released, and payout records — are logged and retained for audit and dispute resolution.</li>
+            <li>Your subscription tier (Starter, Growth, or Pro) determines the commission rate applied to each transaction, and this rate is recorded against each order.</li>
           </ul>
           <div class="lg-highlight">
-            <div class="lg-highlight-title">Flutterwave processes card payments</div>
-            <p>Card and bank payment processing is handled by Flutterwave. Their privacy policy governs how your payment card data is handled during the checkout process. Vendopage receives confirmation of successful payment but does not store raw card numbers.</p>
+            <div class="lg-highlight-title">Flutterwave processes all card payments</div>
+            <p>Card and bank payment processing is handled entirely by Flutterwave. Their privacy policy governs how your payment data is handled during checkout. Vendopage receives confirmation of successful payment and a transaction reference but does not store raw card numbers.</p>
           </div>
         </div>
       </div>
 
       <div class="lg-section" id="delivery-data">
-        <h2 class="lg-section-title">Delivery & Tracking Data</h2>
-        <div class="lg-section-body">
+        <h2 class="lg-section-title">Delivery &amp; Tracking Data</h2>
+        <div class="lg-body-text">
           <p>For Store Mode orders, delivery data is collected and shared as part of the fulfilment process:</p>
           <ul>
-            <li><strong>Buyer's delivery address</strong> — collected at checkout and shared with the seller so they can ship your order. This address is stored with the order record and retained for dispute resolution.</li>
-            <li><strong>Seller's tracking details</strong> — the courier tracking number or driver's phone number uploaded by the seller is stored in the order record and automatically emailed to the buyer.</li>
-            <li><strong>Delivery confirmation</strong> — when a buyer confirms receipt, this is recorded and triggers the payout release to the seller.</li>
+            <li><strong>Buyer's delivery address</strong> — collected at checkout and shared with the seller to ship the order. Stored with the order record and retained for dispute resolution.</li>
+            <li><strong>Seller's tracking details</strong> — the courier tracking number or driver's contact uploaded by the seller is stored in the order record and automatically emailed to the buyer.</li>
+            <li><strong>Delivery confirmation</strong> — when a buyer confirms receipt, this is recorded and triggers the payout release to the seller. If the buyer does not confirm within 72 hours of the seller marking the order shipped, the order is auto-released.</li>
           </ul>
           <p>Delivery address data is not shared with any third party beyond the seller fulfilling your order. It is not used for marketing or profiling.</p>
         </div>
@@ -300,16 +458,18 @@
 
       <div class="lg-section" id="sharing">
         <h2 class="lg-section-title">Sharing Your Data</h2>
-        <div class="lg-section-body">
+        <div class="lg-body-text">
           <p>We do not sell, rent, or trade your personal data. We share your information only in the following circumstances:</p>
           <h3>Publicly visible by design</h3>
-          <p>When you create a store on Vendopage, your business name, store URL, product listings, and profile picture are publicly visible — that's the purpose of the platform. You control what appears on your store page.</p>
+          <p>Your business name, store URL, product listings, and profile picture are publicly visible — that's the purpose of the platform. You control what appears on your store page.</p>
           <h3>Between buyers and sellers (for orders)</h3>
           <p>When a Store Mode purchase is made, the buyer's delivery address is shared with the seller to fulfil the order. The seller's tracking details are shared with the buyer via email. This sharing is necessary to complete the transaction.</p>
           <h3>Flutterwave (payment processing)</h3>
-          <p>Payment transactions are processed by Flutterwave. Relevant transaction data (amount, order reference, seller account) is shared with Flutterwave for the purpose of processing payments and payouts.</p>
+          <p>Payment transactions are processed by Flutterwave. Relevant transaction data (amount, order reference, seller bank account) is shared with Flutterwave for payment processing and payout disbursement.</p>
+          <h3>Cloudinary (image hosting)</h3>
+          <p>Product photos and profile pictures are stored on Cloudinary's infrastructure. Images are publicly accessible via Cloudinary CDN as part of displaying your store to customers.</p>
           <h3>Other service providers</h3>
-          <p>We work with trusted third-party providers for cloud hosting, email delivery, and analytics. These providers are contractually bound to use your data only to provide services to us.</p>
+          <p>We work with trusted third-party providers for cloud hosting and email delivery. These providers are contractually bound to use your data only to provide services to us.</p>
           <h3>Legal requirements</h3>
           <p>We may disclose your information if required by law, court order, or to protect the rights and safety of Vendopage, our users, or the public.</p>
           <h3>Business transfers</h3>
@@ -318,10 +478,10 @@
       </div>
 
       <div class="lg-section" id="storage">
-        <h2 class="lg-section-title">Storage & Security</h2>
-        <div class="lg-section-body">
-          <p>Your data is stored on secure servers with industry-standard protections including encryption at rest and in transit (HTTPS/TLS), access controls, and regular security reviews.</p>
-          <p>Financial and transaction data (escrow records, payout history, order records) is retained for a minimum of 5 years for regulatory and audit purposes, even after account deletion.</p>
+        <h2 class="lg-section-title">Storage &amp; Security</h2>
+        <div class="lg-body-text">
+          <p>Your data is stored on secure servers with industry-standard protections including encryption in transit (HTTPS/TLS), access controls, and regular security reviews.</p>
+          <p>Financial and transaction data — escrow records, commission records, payout history, order records — is retained for a minimum of 5 years for regulatory and audit purposes, even after account deletion.</p>
           <p>All other personal data is retained for as long as your account is active. If you delete your account, non-financial personal data is deleted within 30 days.</p>
           <div class="lg-highlight">
             <div class="lg-highlight-title">No system is 100% secure</div>
@@ -332,11 +492,12 @@
 
       <div class="lg-section" id="cookies">
         <h2 class="lg-section-title">Cookies</h2>
-        <div class="lg-section-body">
-          <p>Vendopage uses cookies and similar technologies to keep you logged in, remember your preferences, and understand how the platform is used. We use:</p>
+        <div class="lg-body-text">
+          <p>Vendopage uses cookies and similar technologies to keep you logged in, remember your preferences (including your chosen light/dark theme), and understand how the platform is used:</p>
           <ul>
-            <li><strong>Essential cookies</strong> — required for the platform to function (login sessions, security tokens, cart state). These cannot be disabled.</li>
-            <li><strong>Analytics cookies</strong> — help us understand how vendors and visitors use Vendopage so we can improve it. No personally identifiable information is shared with analytics providers.</li>
+            <li><strong>Essential cookies</strong> — required for the platform to function: login sessions, security tokens, cart state (stored in session for Store Mode checkouts). These cannot be disabled.</li>
+            <li><strong>Preference cookies</strong> — store your theme preference (light/dark/auto) locally in your browser.</li>
+            <li><strong>Analytics cookies</strong> — help us understand how vendors and visitors use Vendopage. No personally identifiable information is shared with analytics providers.</li>
           </ul>
           <p>We do not use advertising or third-party tracking cookies. You can control non-essential cookies through your browser settings, though disabling certain cookies may affect platform functionality.</p>
         </div>
@@ -344,12 +505,12 @@
 
       <div class="lg-section" id="rights">
         <h2 class="lg-section-title">Your Rights</h2>
-        <div class="lg-section-body">
+        <div class="lg-body-text">
           <p>Regardless of where you live, you have rights over your personal data:</p>
           <ul>
             <li><strong>Access</strong> — you can request a copy of the personal data we hold about you</li>
-            <li><strong>Correction</strong> — you can update your account information at any time from your dashboard</li>
-            <li><strong>Deletion</strong> — you can delete your account from your account settings. Note that financial/transaction records are retained for regulatory purposes as described above.</li>
+            <li><strong>Correction</strong> — you can update your account information at any time from your dashboard Settings page</li>
+            <li><strong>Deletion</strong> — you can delete your account from account settings. Financial and transaction records are retained for regulatory purposes as described above.</li>
             <li><strong>Portability</strong> — you can request your data in a portable format</li>
             <li><strong>Opt-out</strong> — you can unsubscribe from non-essential marketing emails at any time</li>
             <li><strong>Objection</strong> — you can object to certain types of data processing</li>
@@ -361,16 +522,16 @@
 
       <div class="lg-section" id="children">
         <h2 class="lg-section-title">Children's Privacy</h2>
-        <div class="lg-section-body">
-          <p>Vendopage is not directed at children under the age of 13 (or the applicable minimum age in your country). We do not knowingly collect personal data from children. Vendor accounts require users to be at least 18 years old.</p>
+        <div class="lg-body-text">
+          <p>Vendopage is not directed at children under the age of 13. We do not knowingly collect personal data from children. Vendor accounts require users to be at least 18 years old.</p>
           <p>If we become aware that a child has provided us with personal information without parental consent, we will delete that data promptly. Please contact us at <a href="mailto:support@vendopage.com">support@vendopage.com</a> if you believe this has occurred.</p>
         </div>
       </div>
 
       <div class="lg-section" id="international">
         <h2 class="lg-section-title">International Users</h2>
-        <div class="lg-section-body">
-          <p>Vendopage is a global platform serving vendors in every country. By using Vendopage, you acknowledge that your data may be transferred to and processed in countries other than your own, where data protection laws may differ.</p>
+        <div class="lg-body-text">
+          <p>Vendopage is a global platform serving vendors across Africa and beyond. By using Vendopage, you acknowledge that your data may be transferred to and processed in countries other than your own, where data protection laws may differ.</p>
           <p>We take appropriate safeguards to ensure your data is protected regardless of where it is processed, consistent with applicable laws in your region.</p>
           <p>We are actively working toward compliance with regional data protection frameworks including GDPR (EU/UK), NDPA (Nigeria), PDPA (Thailand/Philippines), LGPD (Brazil), and others as our platform grows.</p>
         </div>
@@ -378,7 +539,7 @@
 
       <div class="lg-section" id="changes">
         <h2 class="lg-section-title">Policy Changes</h2>
-        <div class="lg-section-body">
+        <div class="lg-body-text">
           <p>We may update this Privacy Policy periodically. When we make significant changes, we will notify you by email and update the date at the top of this page.</p>
           <p>Your continued use of Vendopage after any changes indicates acceptance of the updated policy. If you disagree with changes, you may delete your account before they take effect.</p>
         </div>
@@ -386,7 +547,7 @@
 
       <div class="lg-section" id="contact">
         <h2 class="lg-section-title">Contact</h2>
-        <div class="lg-section-body">
+        <div class="lg-body-text">
           <p>If you have questions, concerns, or requests regarding this Privacy Policy or your personal data, please reach us through any of the following:</p>
           <ul>
             <li>WhatsApp (fastest): <a href="https://wa.me/2347017820434">+234 701 782 0434</a></li>
@@ -399,37 +560,40 @@
       </div>
 
     </main>
-  </div>
-</div>
-
+  </div><!-- /.lg-layout -->
+</div><!-- /.lg-page -->
 {% endblock %}
 
 {% block extra_js %}
-<!-- Tawk.to -->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
 (function(){var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];s1.async=true;s1.src='https://embed.tawk.to/69fa16efaad7681c33913fa1/1jnsej74t';s1.charset='UTF-8';s1.setAttribute('crossorigin','*');s0.parentNode.insertBefore(s1,s0);})();
 </script>
 <script>
-const sections = document.querySelectorAll('.lg-section');
-const tocLinks = document.querySelectorAll('.lg-toc-link');
-const obs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      tocLinks.forEach(l => l.classList.remove('active'));
-      const active = document.querySelector(`.lg-toc-link[href="#${e.target.id}"]`);
-      if (active) active.classList.add('active');
-    }
-  });
-}, { rootMargin:'-30% 0px -60% 0px' });
-sections.forEach(s => obs.observe(s));
+/* ── Sticky TOC highlight ── */
+(function () {
+  const sections = document.querySelectorAll('.lg-section[id]');
+  const tocLinks = document.querySelectorAll('.lg-toc-link');
 
-tocLinks.forEach(link => {
-  link.addEventListener('click', e => {
-    e.preventDefault();
-    const id = link.getAttribute('href').slice(1);
-    document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' });
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const a = document.querySelector(`.lg-toc-link[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -65% 0px' });
+
+  sections.forEach(s => obs.observe(s));
+
+  tocLinks.forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const id = link.getAttribute('href').slice(1);
+      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   });
-});
+})();
 </script>
 {% endblock %}
