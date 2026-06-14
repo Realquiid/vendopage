@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>{% block title %}Vendopage — Your Store. One Link.{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}Stop posting on WhatsApp status every day. Get your own store link, receive payments safely, and let buyers shop from anywhere.{% endblock %}">
+  <title>{% block title %}Vendopage — Your Store. One Link. Sell Online Across Africa{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Create your free online store with Vendopage. Share one link on WhatsApp, Instagram and social media, get paid safely with escrow protection, and sell to customers across Nigeria and Africa.{% endblock %}">
   <meta name="author" content="Vendopage">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
-  <meta property="og:title" content="{% block og_title %}Vendopage — Your Store. One Link.{% endblock %}">
-  <meta property="og:description" content="{% block og_description %}Stop posting on WhatsApp status every day. Get your own store link, receive payments safely, and let buyers shop from anywhere.{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}Vendopage — Your Store. One Link. Sell Online Across Africa{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Create your free online store, share one link everywhere, and get paid safely with escrow — built for vendors across Africa.{% endblock %}">
   <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'images/og-image.jpg' %}">
   <meta property="og:site_name" content="Vendopage">
   <meta property="twitter:card" content="summary_large_image">
@@ -37,7 +37,8 @@
       "name": "Vendopage",
       "url": "{{ request.scheme }}://{{ request.get_host }}",
       "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/apple-touch-icon.png' %}",
-      "description": "Stop posting on WhatsApp status every day. Get your own store link, receive payments safely, and let buyers shop from anywhere.",
+      "description": "Create your free online store, share one link everywhere, and get paid safely with escrow — built for vendors across Africa.",
+       "areaServed": "Africa",
       "founders": [
         {
           "@type": "Person",
@@ -62,7 +63,7 @@
         const dark = mode==='auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : mode==='dark';
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
       }
-      const saved = localStorage.getItem('vp-theme') || 'light';
+      const saved = localStorage.getItem('vp-theme') || 'dark';
       applyTheme(saved);
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){
         if(localStorage.getItem('vp-theme')==='auto') applyTheme('auto');

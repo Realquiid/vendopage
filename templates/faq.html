@@ -1,0 +1,488 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FAQ — Vendopage | Online Selling, Escrow & Payouts in Africa{% endblock %}
+{% block meta_description %}Answers to common questions about Vendopage — how store links work, escrow payments, payout timing, fees per plan, disputes and refunds, and selling across Nigeria and Africa.{% endblock %}
+{% block og_title %}Frequently Asked Questions — Vendopage{% endblock %}
+{% block og_description %}Everything you need to know about selling on Vendopage — store links, escrow, payouts, fees, disputes, and more.{% endblock %}
+
+{% block extra_css %}
+<style>
+.faq-hero {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 64px 40px 48px;
+  text-align: center;
+}
+.faq-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+  text-transform: uppercase; color: var(--green);
+  margin-bottom: 18px;
+}
+.faq-eyebrow-line { width: 24px; height: 1.5px; background: var(--green); }
+.faq-hero h1 {
+  font-family: var(--font-d);
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 800; letter-spacing: -2px;
+  line-height: 1.05; color: var(--ink);
+  margin-bottom: 14px;
+}
+.faq-hero p {
+  font-size: 15px; color: var(--muted);
+  max-width: 480px; margin: 0 auto; line-height: 1.7;
+}
+
+.faq-body {
+  max-width: 760px; margin: 0 auto;
+  padding: 56px 24px 100px;
+}
+
+.faq-group { margin-bottom: 48px; }
+.faq-group-title {
+  font-family: var(--font-d);
+  font-size: 13px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 10px;
+}
+.faq-group-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 10px;
+  overflow: hidden;
+  background: var(--white);
+  transition: border-color .2s;
+}
+.faq-item.open { border-color: var(--green); }
+
+.faq-q {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px;
+  padding: 18px 22px;
+  cursor: pointer;
+  font-family: var(--font-d);
+  font-size: 15px; font-weight: 700;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.faq-q-icon {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background .2s, transform .25s;
+  color: var(--muted);
+}
+.faq-item.open .faq-q-icon {
+  background: var(--green);
+  color: #fff;
+  transform: rotate(45deg);
+}
+.faq-q-icon svg { width: 14px; height: 14px; }
+
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .3s ease;
+}
+.faq-a-inner {
+  padding: 0 22px 20px;
+  font-size: 14px; line-height: 1.75;
+  color: var(--muted);
+}
+.faq-a-inner a { color: var(--green); font-weight: 600; text-decoration: none; }
+.faq-a-inner a:hover { text-decoration: underline; }
+
+/* CTA at bottom */
+.faq-cta {
+  text-align: center;
+  padding: 48px 32px;
+  border-radius: var(--r-lg);
+  border: 1.5px dashed var(--border);
+  margin-top: 24px;
+}
+.faq-cta h3 {
+  font-family: var(--font-d);
+  font-size: 22px; font-weight: 800;
+  color: var(--ink); letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.faq-cta p {
+  font-size: 14px; color: var(--muted);
+  margin-bottom: 22px;
+}
+.faq-cta-buttons {
+  display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+}
+
+@media (max-width: 560px) {
+  .faq-hero { padding: 48px 20px 36px; }
+  .faq-body { padding: 40px 16px 70px; }
+  .faq-q { padding: 16px 16px; font-size: 14px; }
+  .faq-a-inner { padding: 0 16px 18px; font-size: 13.5px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<section class="faq-hero">
+  <div class="faq-eyebrow">
+    <span class="faq-eyebrow-line"></span>
+    Frequently Asked Questions
+    <span class="faq-eyebrow-line"></span>
+  </div>
+  <h1>Got questions?<br>We've got answers.</h1>
+  <p>Everything you need to know about selling, getting paid, and shopping safely on Vendopage — wherever you are in Africa.</p>
+</section>
+
+<div class="faq-body">
+
+  <!-- ══════════════════════════════════════
+       GETTING STARTED
+  ══════════════════════════════════════ -->
+  <div class="faq-group">
+    <div class="faq-group-title">Getting Started</div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        What is Vendopage?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          Vendopage gives you one permanent link for your business — vendopage.com/yourname — where buyers can browse everything you sell. Instead of reposting products on WhatsApp Status every day, you build your catalog once and share the same link everywhere: WhatsApp, Instagram, Twitter, anywhere your customers are.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Is Vendopage free to use?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          Yes. Creating an account, building your catalog, and sharing your store link is completely free on the Starter plan. If you turn on Store Mode to accept payments directly, a small percentage is taken from each completed sale to cover payment processing — there's no monthly cost unless you choose to upgrade for lower transaction fees and a higher monthly sales cap.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Is Vendopage only for Nigeria?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          No. Vendopage was built with Nigerian vendors in mind, but the platform works for sellers and buyers across Africa. Your store link works the same everywhere — what matters is that you and your customers can communicate (usually via WhatsApp) and that your payout details are set up correctly for your country.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        What's the difference between Catalog Mode and Store Mode?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          In <strong>Catalog Mode</strong>, your page works as a free, shareable product list — buyers see your items and contact you on WhatsApp to negotiate and pay however you normally would. In <strong>Store Mode</strong>, buyers can pay directly on your page with a card or bank transfer, your sale goes through escrow, and you receive payouts automatically once delivery is confirmed. You can switch Store Mode on once you've added a payout account.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       PAYMENTS & ESCROW
+  ══════════════════════════════════════ -->
+  <div class="faq-group">
+    <div class="faq-group-title">Payments &amp; Escrow</div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        How does escrow protect buyers and sellers?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          When a buyer pays through Store Mode, the money doesn't go straight to the seller — it's held safely until the order is confirmed as delivered. The seller ships the item and uploads tracking info, the buyer confirms they received it (or the order auto-confirms after 72 hours), and only then is the payout released to the seller. If something goes wrong, either side can raise a dispute before the money moves.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        When do I actually get paid after a sale?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          Once a buyer confirms they've received their order, there's a 24-hour buffer (this lines up with our payment provider's settlement cycle), and then your payout is sent automatically — usually overnight. So if a buyer confirms receipt today, you'll typically see the funds the following day. Your dashboard's Transactions page shows exactly where each order is in this process, including an estimated payout time.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Why didn't my payout go through on a weekend?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          Payouts don't run on Saturdays or Sundays because our payment provider doesn't settle funds on weekends — so there's nothing to pay out from yet. Any orders confirmed over the weekend are queued up and paid out automatically on Monday morning along with everything else in the queue. Nothing is lost; it's just a short delay.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Is "Direct Pay" the same as escrow?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          No. With Direct Pay, once a buyer marks an order as received, the payout is released right away without the 24-hour escrow buffer. It's faster for sellers but gives buyers slightly less of a protection window, so it's best suited for low-risk or quick local orders.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       FEES & PLANS
+  ══════════════════════════════════════ -->
+  <div class="faq-group">
+    <div class="faq-group-title">Fees &amp; Plans</div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        How much does Vendopage charge per sale?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          On the free Starter plan, Vendopage takes 5% of each Store Mode sale to cover payment processing — there's no separate "platform fee" on top. If you upgrade to Growth or Pro, that percentage drops to 2.5% or 1.5% respectively, up to a monthly sales volume cap for your plan. Catalog Mode (WhatsApp-only sales) is always free, since no payment passes through Vendopage.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        What happens if I go over my plan's monthly cap?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          Each paid plan (Growth and Pro) has a monthly sales volume cap that comes with its discounted fee. Once your processed volume for the month crosses that cap, any further sales that month are charged at the standard 5% rate until your volume resets the following month. You can see your current usage and cap on your Settings page.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Can I downgrade or cancel my plan anytime?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          Yes. You can switch back to the free Starter plan at any time from your Subscription page — there's no penalty and it takes effect immediately. Upgrading to a paid plan is handled securely through our payment provider.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ORDERS, DELIVERY & DISPUTES
+  ══════════════════════════════════════ -->
+  <div class="faq-group">
+    <div class="faq-group-title">Orders, Delivery &amp; Disputes</div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        What if my order never arrives, or arrives damaged?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          As a buyer, you can open a dispute directly from your order page — choose a reason (not received, damaged, wrong item, not as described), describe what happened, and attach evidence if you have it. As soon as a dispute is raised, that order's payout is automatically frozen so the seller can't be paid until our team reviews it. Most disputes are reviewed within 48 hours.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        How are disputes resolved?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          Once a dispute is opened, the seller is notified and can respond with their side and any evidence (proof of shipping, photos, etc.). Our team reviews both sides and decides one of two outcomes: a full refund back to the buyer, or releasing the payment to the seller if the order was legitimate. Whichever way it's resolved, both the buyer and seller receive an email update.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        What happens if I don't confirm receipt of my order?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          If a seller marks an order as shipped and the buyer doesn't confirm or open a dispute within 72 hours, the order auto-confirms as received. This protects sellers from orders being stuck in limbo forever, while still giving buyers a full 3-day window to flag any problems.
+        </div>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">
+        Do I need an account to buy from a Vendopage store?
+        <span class="faq-q-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      </div>
+      <div class="faq-a">
+        <div class="faq-a-inner">
+          No. Buyers don't need to create an account to shop or pay on a seller's store page. You'll just provide your name, contact details, and delivery address at checkout, and you'll get an order confirmation by email with a link to track its status, confirm delivery, or raise a dispute if needed.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="faq-cta">
+    <h3>Still have a question?</h3>
+    <p>Our team is happy to help — reach out and we'll get back to you.</p>
+    <div class="faq-cta-buttons">
+      <a href="{% url 'contact' %}" class="btn btn-primary">Contact Support</a>
+      <a href="{% url 'register' %}" class="btn btn-ghost">Create Your Free Store</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- FAQPage structured data for search engines -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Vendopage?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Vendopage gives you one permanent link for your business where buyers can browse everything you sell. Instead of reposting products on WhatsApp Status every day, you build your catalog once and share the same link everywhere."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Vendopage free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Creating an account, building your catalog, and sharing your store link is completely free on the Starter plan. If you turn on Store Mode to accept payments directly, a small percentage is taken from each completed sale, with no monthly cost unless you choose to upgrade."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Vendopage only for Nigeria?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Vendopage was built with Nigerian vendors in mind, but the platform works for sellers and buyers across Africa. Your store link works the same everywhere."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What's the difference between Catalog Mode and Store Mode?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "In Catalog Mode, your page works as a free, shareable product list and buyers contact you on WhatsApp to pay. In Store Mode, buyers can pay directly on your page, your sale goes through escrow, and you receive payouts automatically once delivery is confirmed."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does escrow protect buyers and sellers?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When a buyer pays through Store Mode, the money is held safely until the order is confirmed as delivered. Only after delivery is confirmed is the payout released to the seller, and either side can raise a dispute before the money moves."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "When do I actually get paid after a sale?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Once a buyer confirms they've received their order, there is a 24-hour buffer, and then the payout is sent automatically, usually overnight."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why didn't my payout go through on a weekend?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Payouts don't run on Saturdays or Sundays because our payment provider doesn't settle funds on weekends. Orders confirmed over the weekend are paid out automatically on Monday."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How much does Vendopage charge per sale?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "On the free Starter plan, Vendopage takes 5% of each Store Mode sale to cover payment processing. Upgrading to Growth or Pro reduces this to 2.5% or 1.5% up to a monthly sales volume cap. Catalog Mode sales are always free."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What if my order never arrives, or arrives damaged?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Buyers can open a dispute directly from their order page. As soon as a dispute is raised, that order's payout is automatically frozen until the Vendopage team reviews it, usually within 48 hours."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Do I need an account to buy from a Vendopage store?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Buyers don't need to create an account to shop or pay on a seller's store page, and receive an order confirmation by email to track status or raise a dispute if needed."
+      }
+    }
+  ]
+}
+</script>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.faq-item').forEach(function(item) {
+    const q = item.querySelector('.faq-q');
+    const a = item.querySelector('.faq-a');
+    q.addEventListener('click', function() {
+      const isOpen = item.classList.contains('open');
+
+      // Close all others (accordion behaviour)
+      document.querySelectorAll('.faq-item.open').forEach(function(openItem) {
+        if (openItem !== item) {
+          openItem.classList.remove('open');
+          openItem.querySelector('.faq-a').style.maxHeight = null;
+        }
+      });
+
+      if (isOpen) {
+        item.classList.remove('open');
+        a.style.maxHeight = null;
+      } else {
+        item.classList.add('open');
+        a.style.maxHeight = a.scrollHeight + 'px';
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

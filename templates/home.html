@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <style>
+
 /* ══════════════════════════════════════
    HOMEPAGE TOKENS
 ══════════════════════════════════════ */
@@ -591,6 +592,106 @@ main { display:block; }
   .buyers-left { grid-template-columns:1fr; }
   .cta-buttons { flex-direction:column; align-items:center; }
 }
+
+@media (max-width: 860px) {
+  .steps {
+    display: flex;
+    grid-template-columns: unset;
+    gap: 0;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .steps::-webkit-scrollbar { display: none; }
+  .step {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+    border-right: 1px solid var(--border);
+  }
+}
+
+
+:root {
+  --hero-bg:    var(--surface);
+  --hero-ink:   var(--ink);
+  --hero-card:  #FFFFFF;
+
+  /* Light mode: use solid readable tones instead of low-opacity black,
+     which washes out to near-invisible on a light background */
+  --hero-ink-90: var(--ink);
+  --hero-ink-55: var(--muted);
+  --hero-ink-50: var(--muted);
+  --hero-ink-45: var(--muted);
+  --hero-ink-40: var(--muted);
+  --hero-ink-35: var(--muted);
+  --hero-ink-30: var(--muted);
+  --hero-ink-12: rgba(13,13,13,.08);
+
+  --hero-line:        rgba(13,13,13,.08);
+  --hero-line-strong: rgba(13,13,13,.12);
+  --hero-line-faint:  rgba(13,13,13,.04);
+  --hero-line-ultra:  rgba(13,13,13,.03);
+}
+[data-theme="dark"] {
+  --hero-bg:    #0D0D0D;
+  --hero-ink:   #F5F4F0;
+  --hero-card:  #1A1A18;
+
+  /* Dark mode: white-on-black at these opacities reads fine — unchanged */
+  --hero-ink-90: rgba(245,244,240,.9);
+  --hero-ink-55: rgba(245,244,240,.55);
+  --hero-ink-50: rgba(245,244,240,.5);
+  --hero-ink-45: rgba(245,244,240,.45);
+  --hero-ink-40: rgba(245,244,240,.4);
+  --hero-ink-35: rgba(245,244,240,.35);
+  --hero-ink-30: rgba(245,244,240,.3);
+  --hero-ink-12: rgba(245,244,240,.12);
+
+  --hero-line:        rgba(255,255,255,.06);
+  --hero-line-strong: rgba(255,255,255,.08);
+  --hero-line-faint:  rgba(255,255,255,.025);
+  --hero-line-ultra:  rgba(255,255,255,.02);
+}
+
+/* Hero */
+.hero { background: var(--hero-bg); }
+.hero-headline { color: var(--hero-ink); }
+.hero-sub { color: var(--hero-ink-45); }
+.hero-grid {
+  background-image:
+    linear-gradient(var(--hero-line-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--hero-line-faint) 1px, transparent 1px);
+}
+.btn-hero-primary { background: var(--hero-ink); color: var(--hero-bg); }
+.btn-hero-primary:hover { opacity:.9; box-shadow: 0 12px 32px var(--hero-line-strong); }
+.btn-hero-ghost { color: var(--hero-ink-50); border-color: var(--hero-ink-12); }
+.btn-hero-ghost:hover { color: var(--hero-ink-90); border-color: var(--hero-ink-30); }
+.hero-trust-item { color: var(--hero-ink-30); }
+
+/* Ticker */
+.ticker-wrap { background: var(--hero-bg); border-color: var(--hero-line); }
+.ticker-item { color: var(--hero-ink-30); }
+
+/* Features */
+.features { background: var(--hero-bg); }
+.features-bg-text { color: var(--hero-line-ultra); }
+.features-title { color: var(--hero-ink); }
+.feature-item, .feature-item:first-child { border-color: var(--hero-line); }
+.feature-item-icon { background: var(--hero-line); }
+.feature-item-title { color: var(--hero-ink); }
+.feature-item-desc { color: var(--hero-ink-40); }
+.feature-card { background: var(--hero-card); border-color: var(--hero-line-strong); }
+.fc-amount { color: var(--hero-ink); }
+.fc-label { color: var(--hero-ink-35); }
+.ef-step { border-color: var(--hero-line); }
+.ef-text { color: var(--hero-ink-55); }
+.ef-wait { background: var(--hero-line); color: var(--hero-ink-30); }
+
+/* CTA banner */
+.cta-banner { background: var(--hero-bg); }
+.cta-title { color: var(--hero-ink); }
+.cta-sub { color: var(--hero-ink-40); }
 </style>
 {% endblock %}
 
@@ -607,7 +708,7 @@ main { display:block; }
   <div class="hero-left">
     <div class="hero-eyebrow" id="heroEyebrow">
       <div class="hero-eyebrow-line"></div>
-      <span class="hero-eyebrow-text">🇳🇬 Built for Nigerian sellers</span>
+      <span class="hero-eyebrow-text">🌍 Built for vendors across Africa</span>
     </div>
 
     <h1 class="hero-headline" id="heroHeadline">

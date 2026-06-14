@@ -7,62 +7,65 @@
       <!-- Brand -->
       <div class="vp-footer-brand">
         <a href="{% url 'home' %}" class="vp-footer-logo">
-          <img src="{% static 'images/logo-white.png' %}" alt="Vendopage">
+          <img class="logo-dark"  src="{% static 'images/logoo.png' %}"      alt="Vendopage">
+          <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage">
         </a>
-        <p class="vp-footer-tagline">The permanent product catalogue built for WhatsApp vendors across Nigeria and Africa.</p>
+        <p class="vp-footer-tagline">The permanent product catalogue built for vendors across Africa — share one link on WhatsApp, Instagram and social media.</p>
         <div class="vp-footer-socials">
-          <a href="https://www.instagram.com/vendopage_hq" class="vp-social" aria-label="Instagram">
+          <a href="https://www.instagram.com/vendopage_hq" class="vp-social" aria-label="Instagram" target="_blank" rel="noopener">
             <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
           </a>
-          <a href="https://x.com/vendopage?s=21" class="vp-social" aria-label="X (Twitter)">
+          <a href="https://x.com/vendopage?s=21" class="vp-social" aria-label="X (Twitter)" target="_blank" rel="noopener">
             <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1-.07z"/></svg>
           </a>
         </div>
       </div>
 
-      <!-- Product -->
-      <div class="vp-footer-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="{% url 'home' %}#how">How it works</a></li>
-          <li><a href="{% url 'home' %}#stores">Live Stores</a></li>
-          <li><a href="{% url 'home' %}#faq">FAQ</a></li>
-          <li><a href="{% url 'register' %}">Get Started Free</a></li>
-        </ul>
-      </div>
+      <!-- Link columns: Product / Company / Account -->
+      <div class="vp-footer-links">
 
-      <!-- Company -->
-      <div class="vp-footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="{% url 'about' %}">About Us</a></li>
-          <li><a href="{% url 'contact' %}">Contact</a></li>
-          <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
-          <li><a href="{% url 'terms' %}">Terms of Service</a></li>
-        </ul>
-      </div>
+        <div class="vp-footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="{% url 'home' %}#how">How it works</a></li>
+            <li><a href="{% url 'sellers_directory' %}">Live Stores</a></li>
+            <li><a href="{% url 'faq' %}">FAQ</a></li>
+            <li><a href="{% url 'register' %}">Get Started Free</a></li>
+          </ul>
+        </div>
 
-      <!-- Account -->
-      <div class="vp-footer-col">
-        <h4>Account</h4>
-        <ul>
-          {% if user.is_authenticated %}
-            <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-            <li><a href="/{{ user.slug }}" target="_blank">My Store</a></li>
-            <li><a href="{% url 'settings' %}">Settings</a></li>
-            <li><a href="{% url 'logout' %}">Log Out</a></li>
-          {% else %}
-            <li><a href="{% url 'login' %}">Sign In</a></li>
-            <li><a href="{% url 'register' %}">Create Account</a></li>
-          {% endif %}
-        </ul>
+        <div class="vp-footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="{% url 'about' %}">About Us</a></li>
+            <li><a href="{% url 'contact' %}">Contact</a></li>
+            <li><a href="{% url 'privacy' %}">Privacy Policy</a></li>
+            <li><a href="{% url 'terms' %}">Terms of Service</a></li>
+          </ul>
+        </div>
+
+        <div class="vp-footer-col">
+          <h4>Account</h4>
+          <ul>
+            {% if user.is_authenticated %}
+              <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+              <li><a href="/{{ user.slug }}" target="_blank">My Store</a></li>
+              <li><a href="{% url 'settings' %}">Settings</a></li>
+              <li><a href="{% url 'logout' %}">Log Out</a></li>
+            {% else %}
+              <li><a href="{% url 'login' %}">Sign In</a></li>
+              <li><a href="{% url 'register' %}">Create Account</a></li>
+            {% endif %}
+          </ul>
+        </div>
+
       </div>
 
     </div>
 
     <!-- Bottom baseline -->
     <div class="vp-footer-bottom">
-      <p>© {% now "Y" %} Vendopage. Built for African vendors.</p>
+      <p>© {% now "Y" %} Vendopage. Built for vendors across Africa.</p>
       <div class="vp-footer-trust">
         <span class="vp-trust-badge">
           <svg width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -84,13 +87,12 @@
 
 <style>
 /* ═══════════════════════════════════════════
-   FOOTER — VendoPage Design Spec v2
-   Dark canvas, editorial columns, trust grid
+   FOOTER — Vendopage, theme-aware
 ═══════════════════════════════════════════ */
 .vp-footer {
-  background: #09090B;   /* spec dark canvas */
-  border-top: 1px solid #18181B;
-  padding: 64px 40px 32px;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border);
+  padding: 56px 40px 28px;
 }
 .vp-footer-inner {
   max-width: 1200px; margin: 0 auto;
@@ -99,71 +101,82 @@
 /* ── Top grid ── */
 .vp-footer-top {
   display: grid;
-  grid-template-columns: 1.8fr repeat(3, 1fr);
+  grid-template-columns: 1.4fr 2fr;
   gap: 48px;
-  padding-bottom: 48px;
-  border-bottom: 1px solid #18181B;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--border);
 }
 
 /* Brand column */
 .vp-footer-logo {
   display: inline-block;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 .vp-footer-logo img {
-  height: 48px; width: auto; display: block;
+  height: 42px; width: auto; display: block;
 }
+.vp-footer-logo .logo-dark  { display: block; }
+.vp-footer-logo .logo-light { display: none; }
+[data-theme="dark"] .vp-footer-logo .logo-dark  { display: none; }
+[data-theme="dark"] .vp-footer-logo .logo-light { display: block; }
+
 .vp-footer-tagline {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-b);
   font-size: 13px;
-  color: #52525B;          /* muted on dark */
+  color: var(--muted);
   line-height: 1.7;
-  max-width: 240px;
-  margin-bottom: 24px;
+  max-width: 260px;
+  margin-bottom: 20px;
 }
 
 /* Social icons */
 .vp-footer-socials { display: flex; gap: 8px; flex-wrap: wrap; }
 .vp-social {
   width: 34px; height: 34px;
-  background: #18181B;
-  border: 1px solid #27272A;
-  border-radius: 8px;          /* spec r-interactive */
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
   display: flex; align-items: center; justify-content: center;
-  color: #52525B;
+  color: var(--muted);
   text-decoration: none;
   transition: background 150ms ease-in-out, border-color 150ms ease-in-out, color 150ms ease-in-out, transform 150ms ease-in-out;
 }
 .vp-social:hover {
-  background: #10B981;
-  border-color: #10B981;
+  background: var(--green);
+  border-color: var(--green);
   color: #fff;
   transform: translateY(-2px);
 }
 
-/* Link columns */
+/* Link columns wrapper */
+.vp-footer-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
 .vp-footer-col h4 {
-  font-family: 'Inter', sans-serif;
-  font-weight: 600;
+  font-family: var(--font-b);
+  font-weight: 700;
   font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #3F3F46;
-  margin-bottom: 18px;
+  color: var(--muted-lt);
+  margin-bottom: 16px;
 }
 .vp-footer-col ul {
   list-style: none; padding: 0;
   display: flex; flex-direction: column; gap: 10px;
 }
 .vp-footer-col ul li a {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-b);
   font-size: 13px;
-  color: #52525B;
+  color: var(--muted);
   text-decoration: none;
   transition: color 150ms ease-in-out;
   letter-spacing: -0.01em;
 }
-.vp-footer-col ul li a:hover { color: #FAFAFA; }
+.vp-footer-col ul li a:hover { color: var(--ink); }
 
 /* ── Bottom baseline ── */
 .vp-footer-bottom {
@@ -172,12 +185,12 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  padding-top: 28px;
+  padding-top: 24px;
 }
 .vp-footer-bottom > p {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-b);
   font-size: 12px;
-  color: #3F3F46;
+  color: var(--muted-lt);
   letter-spacing: -0.01em;
 }
 
@@ -188,31 +201,48 @@
 .vp-trust-badge {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 3px 9px;
-  background: #18181B;
-  border: 1px solid #27272A;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: 6px;
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-b);
   font-size: 10px; font-weight: 500;
-  color: #52525B;
+  color: var(--muted);
   letter-spacing: 0.02em;
 }
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .vp-footer-top {
-    grid-template-columns: 1fr 1fr;
-    gap: 36px;
+    grid-template-columns: 1fr;
+    gap: 28px;
   }
-  .vp-footer-brand { grid-column: 1 / -1; }
+  .vp-footer-tagline { max-width: none; }
 }
 
 @media (max-width: 560px) {
-  .vp-footer { padding: 48px 20px 24px; }
-  .vp-footer-top { grid-template-columns: 1fr; }
+  .vp-footer { padding: 40px 20px 20px; }
+
+  .vp-footer-tagline { font-size: 12.5px; margin-bottom: 16px; }
+
+  .vp-footer-links {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  .vp-footer-col h4 { font-size: 9.5px; margin-bottom: 10px; letter-spacing: 0.08em; }
+  .vp-footer-col ul { gap: 8px; }
+  .vp-footer-col ul li a { font-size: 11.5px; line-height: 1.3; }
+
   .vp-footer-bottom {
     flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
+    padding-top: 18px;
   }
+  .vp-footer-bottom > p { font-size: 11px; }
+}
+
+@media (max-width: 380px) {
+  .vp-footer-links { grid-template-columns: repeat(2, 1fr); }
+  .vp-footer-col:nth-child(3) { grid-column: 1 / -1; }
 }
 </style>

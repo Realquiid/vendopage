@@ -16,6 +16,7 @@ class StaticSitemap(Sitemap):
             'privacy',
             'terms',
             'contact',
+            'faq',
         ]
 
     def location(self, item):

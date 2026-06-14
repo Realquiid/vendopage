@@ -98,6 +98,7 @@ urlpatterns = [
     path('privacy/', views.privacy, name='privacy'),
     path('terms/', views.terms, name='terms'),
     path('contact/', views.contact, name='contact'),
+    path('faq/', views.faq, name='faq'),
     path('api/banks/', views.get_banks, name='get_banks'),
     path('api/verify-bank-account/', views.verify_bank_account, name='verify_bank_account'),
 
