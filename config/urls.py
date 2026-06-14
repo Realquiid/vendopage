@@ -8,11 +8,18 @@ from django.conf.urls.static import static
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.generic import RedirectView
 from sellers import api_views
-
+from django.views.generic import TemplateView
 admin.site.login_template = 'admin/custom_login.html'
 admin.site.site_header = 'VendoPage Admin'
 admin.site.site_title = 'VendoPage'
 admin.site.index_title = 'Welcome to VendoPage Dashboard'
+from django.contrib.sitemaps.views import sitemap
+from sellers.sitemaps import SellerSitemap, StaticSitemap, SellerSitemap
+
+sitemaps = {
+    "static": StaticSitemap,
+    "sellers": SellerSitemap,
+}
 
 urlpatterns = [
     # This must come BEFORE path('admin/', ...) to intercept /admin/
@@ -24,3 +31,21 @@ urlpatterns = [
     path('api/vendor/<str:phone>/', api_views.get_vendor_by_phone, name='api_vendor'),
     path('api/products/create/', api_views.create_product_from_whatsapp, name='api_create_product'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+
+urlpatterns += [
+    path(
+        "robots.txt",
+        TemplateView.as_view(
+            template_name="robots.txt",
+            content_type="text/plain"
+        ),
+    ),
+
+    path(
+    "sitemap.xml",
+    sitemap,
+    {"sitemaps": sitemaps},
+    name="django.contrib.sitemaps.views.sitemap",
+    ),
+]

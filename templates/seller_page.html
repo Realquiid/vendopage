@@ -9,10 +9,21 @@
 <meta property="og:title" content="{{ seller.business_name }} on Vendopage">
 <meta property="og:description" content="{{ seller.bio|default:'Browse products and order safely.' }}">
 {% if seller.profile_picture %}<meta property="og:image" content="{{ seller.profile_picture.url }}">{% endif %}
-
+<meta name="robots" content="index,follow">
+<meta property="og:url" content="https://vendopage.com/{{ seller.slug }}/">
+<link rel="canonical" href="https://vendopage.com/{{ seller.slug }}/">
 <link rel="preconnect" href="https://api.fontshare.com">
 <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
 
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Store",
+  "name":"{{ seller.business_name|escapejs }}",
+  "description":"{{ seller.bio|default:''|escapejs }}",
+  "url":"https://vendopage.com/{{ seller.slug }}/"
+}
+</script>
 <script>
 (function(){
   const saved = localStorage.getItem('vp-theme') || 'light';

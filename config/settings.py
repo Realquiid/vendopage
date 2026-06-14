@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'cloudinary',
     'django_celery_beat',
+    'django.contrib.sitemaps',
 ]
 
 MIDDLEWARE = [
