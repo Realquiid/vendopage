@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:40px 0;">
+    <tr>
+      <td align="center">
+        <table width="500" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
+          <tr>
+            <td style="padding:36px 36px 0;">
+              <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#00873D;text-transform:uppercase;letter-spacing:1px;">Vendopage</p>
+              <h1 style="margin:0 0 16px;font-size:24px;font-weight:800;color:#0A0A0A;">Welcome to {{tier_label}} ⭐</h1>
+              <p style="margin:0 0 24px;font-size:15px;color:#555555;line-height:1.6;">
+                Hi {{business_name}}, your payment was successful and your account has been upgraded to the
+                <strong>{{tier_label}}</strong> plan.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 36px 24px;">
+              <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f7f7;border-radius:8px;">
+                <tr>
+                  <td style="padding:18px 22px;">
+                    <p style="margin:0 0 8px;font-size:14px;color:#0A0A0A;">
+                      <strong>Your new commission rate:</strong> {{fee_percent}}%
+                    </p>
+                    <p style="margin:0 0 8px;font-size:14px;color:#0A0A0A;">
+                      <strong>Monthly volume cap at this rate:</strong> ₦{{cap}}
+                    </p>
+                    <p style="margin:0;font-size:13px;color:#888888;line-height:1.6;">
+                      Sales above your cap revert to the standard 5% fee until your volume resets next month.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:0 36px 36px;">
+              <p style="margin:0 0 24px;font-size:14px;color:#555555;line-height:1.6;">
+                This plan is active until <strong>{{expires_date}}</strong>. You can manage or change your plan
+                anytime from your dashboard.
+              </p>
+              <a href="{{dashboard_url}}" style="display:inline-block;background:#0A0A0A;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:12px 28px;border-radius:100px;">
+                Go to Dashboard
+              </a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

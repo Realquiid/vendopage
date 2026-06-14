@@ -6,36 +6,47 @@ VendoPage Daily Escrow Payout — Flutterwave (NGN)
 
 Payout Logic
 ────────────
-1. Query Flutterwave /v3/balances/NGN for available (spendable) balance
-2. Fetch ALL orders where:
+1. Weekend guard: exits immediately on Saturday/Sunday — FLW doesn't settle
+   on weekends so our balance may only contain our own 5% revenue, not buyer funds.
+2. Query Flutterwave /v3/balances/NGN for available (spendable) balance
+3. Fetch ALL orders where:
       - status = 'RECEIVED'           (buyer explicitly clicked "I received my product")
       - delivered_at < today midnight  (confirmed before end of yesterday — T+1 cleared)
       - payout_triggered = False
+      - is_disputed = False            ← BRAKE: disputed orders are NEVER paid out by cron
    Sorted by delivered_at ASC — 3 PM order paid before 4 PM order, fair queue
-3. Walk the queue oldest-first:
-      - Running balance check: if remaining spendable < this order's vendor_payout → SKIP (carry to tomorrow)
+4. Walk the queue oldest-first:
+      - Running balance check: if remaining spendable < this order's vendor_payout → SKIP
       - Send vendor_payout via Flutterwave Transfer API (already net of 5% — stored at checkout)
       - On success → status='completed', payout_triggered=True
       - On gateway error → status='FAILED_PAYOUT' (retries tomorrow)
-4. The 5% platform fee NEVER moves — it already sits in our Flutterwave balance
+5. The 5% platform fee NEVER moves — it already sits in our Flutterwave balance
    as accumulated revenue. The cron ONLY sends order.vendor_payout, nothing more.
 
-Key rule: if buyer has NOT clicked received, the order is NEVER paid out,
-even if 24h have passed. No auto-assumptions.
+Key rules:
+  - Never runs on Saturday or Sunday (FLW weekend settlement gap).
+  - Monday 6AM pays everyone queued from Friday + Saturday + Sunday at once.
+  - If buyer has NOT clicked received, the order is NEVER paid out.
+  - If is_disputed=True, the order is NEVER paid out by cron.
+
+FLW Settlement schedule:
+  Mon transaction → settles Tue  → paid Tue 6AM
+  Tue transaction → settles Wed  → paid Wed 6AM
+  Wed transaction → settles Thu  → paid Thu 6AM
+  Thu transaction → settles Fri  → paid Fri 6AM
+  Fri transaction → settles Mon  → paid Mon 6AM
+  Sat transaction → settles Mon  → paid Mon 6AM
+  Sun transaction → settles Mon  → paid Mon 6AM
 
 Usage
 ─────
   python manage.py process_payouts            # live run
   python manage.py process_payouts --dry-run  # simulate, zero API calls
-
-Settings required
-─────────────────
-  FLUTTERWAVE_SECRET_KEY  (already in your codebase)
 """
 
 import logging
-from datetime import time as dt_time
 from decimal import Decimal
+from itertools import chain
 
 import requests
 from django.core.management.base import BaseCommand, CommandError
@@ -51,9 +62,10 @@ CURRENCY = "NGN"
 
 class Command(BaseCommand):
     help = (
-        "Daily escrow payout. Pays all sellers whose buyers clicked 'received' "
-        "before midnight yesterday, oldest delivery confirmation first, "
-        "until Flutterwave balance is exhausted. Never re-deducts the 5%% fee."
+        "Daily escrow payout. Skips weekends (FLW settlement gap). "
+        "Pays all sellers whose buyers clicked 'received' before midnight yesterday, "
+        "oldest-first, until balance is exhausted. Never re-deducts the 5%% fee. "
+        "Disputed orders are completely skipped."
     )
 
     def add_arguments(self, parser):
@@ -76,40 +88,74 @@ class Command(BaseCommand):
             f"{'='*64}"
         ))
 
+        # ── Weekend guard ──────────────────────────────────────────────────────
+        # Flutterwave does not settle buyer payments on Sat/Sun.
+        # Our balance on weekends contains only our accumulated 5% fees —
+        # not actual buyer funds. Paying sellers from that pool would drain
+        # our own revenue. Skip entirely and let Monday pick up the full queue.
+        #
+        # weekday(): 0=Mon 1=Tue 2=Wed 3=Thu 4=Fri 5=Sat 6=Sun
+        if now.weekday() in (5, 6) and not dry_run:
+            self.stdout.write(self.style.WARNING(
+                f"\n  ⏸  WEEKEND SKIP — today is {now.strftime('%A')}.\n"
+                f"     Flutterwave does not settle payments on Sat/Sun.\n"
+                f"     All queued orders will be paid on Monday 6 AM.\n"
+                f"     No DB changes made.\n"
+            ))
+            logger.info(
+                "PAYOUT SKIPPED — weekend (%s). "
+                "FLW settlement resumes Monday. Orders stay in queue.",
+                now.strftime('%A'),
+            )
+            return
+
         flw = FlutterwavePayment()
 
-        # ── Build the eligible queue ───────────────────────────────────────────
         # Midnight at the start of today (WAT / server local time)
-        # Any buyer who clicked "received" before midnight yesterday is eligible.
         today_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
+        # ── Build payout queue (disputed orders excluded) ──────────────────────
         eligible = (
             Order.objects
             .filter(
-                status="RECEIVED",              # buyer MUST have clicked received
-                delivered_at__lt=today_midnight, # confirmed before midnight yesterday
+                status="RECEIVED",
+                delivered_at__lt=today_midnight,
                 payout_triggered=False,
+                is_disputed=False,
             )
             .select_related("seller", "seller__bank_account")
-            .order_by("delivered_at")           # 3 PM before 4 PM — time-fair queue
+            .order_by("delivered_at")
         )
 
-        # Also include FAILED_PAYOUT orders (gateway failures from a previous run)
-        # so they retry today — same time-priority ordering
         failed_retry = (
             Order.objects
             .filter(
                 status="FAILED_PAYOUT",
                 delivered_at__lt=today_midnight,
                 payout_triggered=False,
+                is_disputed=False,
             )
             .select_related("seller", "seller__bank_account")
             .order_by("delivered_at")
         )
 
-        # Combine: process fresh RECEIVED first (in time order),
-        # then retries (also in time order). Both sorted by delivered_at.
-        from itertools import chain
+        disputed_count = Order.objects.filter(
+            status__in=["RECEIVED", "FAILED_PAYOUT"],
+            delivered_at__lt=today_midnight,
+            payout_triggered=False,
+            is_disputed=True,
+        ).count()
+
+        if disputed_count:
+            self.stdout.write(self.style.WARNING(
+                f"\n  ⚠  {disputed_count} disputed order(s) in queue — "
+                f"SKIPPED (money locked until admin resolves).\n"
+            ))
+            logger.warning(
+                "PAYOUT CRON: %d disputed order(s) skipped — locked pending admin resolution.",
+                disputed_count,
+            )
+
         queue = sorted(
             chain(eligible, failed_retry),
             key=lambda o: o.delivered_at or now,
@@ -118,15 +164,12 @@ class Command(BaseCommand):
         if not queue:
             self.stdout.write(self.style.SUCCESS(
                 "\n  No eligible orders in the payout queue.\n"
-                "  (Only orders where the buyer has clicked 'I received my product'\n"
-                "   before midnight yesterday are processed.)\n"
+                "  (Only orders where the buyer clicked 'I received my product'\n"
+                "   before midnight yesterday AND have no active dispute are processed.)\n"
                 "  Exiting cleanly.\n"
             ))
             return
 
-        # Total owed = sum of vendor_payout across queue
-        # This is ALREADY net of 5% (stored by calculate_fees() at checkout).
-        # We DO NOT subtract 5% again here — that would double-charge the seller.
         total_owed = sum(o.vendor_payout for o in queue)
 
         self.stdout.write(
@@ -135,22 +178,22 @@ class Command(BaseCommand):
             f"  Cutoff               : buyer confirmed before {today_midnight.strftime('%d %b %Y 00:00')}\n"
         )
 
-        # ── Safety Layer 1: Flutterwave balance check ──────────────────────────
+        # ── Flutterwave balance check ──────────────────────────────────────────
         if dry_run:
             self.stdout.write(self.style.WARNING(
                 "  [DRY RUN] Skipping live balance check — assuming sufficient funds.\n"
             ))
             spendable = total_owed
         else:
-            self.stdout.write("  Checking Flutterwave spendable balance …")
+            self.stdout.write("  Checking Flutterwave spendable balance …\n")
             spendable = self._get_balance(flw)
-            self.stdout.write(
-                f"  Flutterwave balance  : ₦{spendable:,.2f}\n"
-            )
+            self.stdout.write(f"  Flutterwave balance  : ₦{spendable:,.2f}\n")
 
         if spendable <= Decimal("0"):
-            self._abort("Flutterwave balance is ₦0. No payouts possible today. "
-                        "All orders remain in queue for tomorrow.")
+            self._abort(
+                "Flutterwave balance is ₦0. No payouts possible today. "
+                "All orders remain in queue for tomorrow."
+            )
             return
 
         if spendable < total_owed:
@@ -158,23 +201,23 @@ class Command(BaseCommand):
                 f"  ⚠  Balance (₦{spendable:,.2f}) is less than total owed "
                 f"(₦{total_owed:,.2f}).\n"
                 f"     Will pay oldest-first until balance is exhausted.\n"
-                f"     Unpaid orders remain in queue — they run first tomorrow.\n"
+                f"     Remaining orders retry tomorrow.\n"
             ))
         else:
             self.stdout.write(self.style.SUCCESS(
                 f"  ✓ Balance covers full queue. Processing all {len(queue)} orders.\n"
             ))
 
-        # ── Payout loop — oldest delivered_at first ────────────────────────────
+        # ── Payout loop ────────────────────────────────────────────────────────
         remaining_balance = spendable
         success_count  = 0
-        skipped_count  = 0   # balance ran out mid-queue
-        failure_count  = 0   # gateway errors
+        skipped_count  = 0
+        failure_count  = 0
 
         self.stdout.write(f"  {'─'*60}")
 
         for order in queue:
-            seller_amount = order.vendor_payout   # already net of 5% — DO NOT touch
+            seller_amount = order.vendor_payout
             ref_short     = str(order.order_ref)[:8].upper()
             confirmed_at  = (
                 order.delivered_at.strftime("%d %b %Y %I:%M %p")
@@ -188,12 +231,10 @@ class Command(BaseCommand):
                 f"Payout: ₦{seller_amount:,.2f}"
             )
 
-            # Balance check per order — skip if we can't cover this one
             if remaining_balance < seller_amount:
                 self.stdout.write(self.style.WARNING(
                     f"  ⏭  SKIPPED — remaining balance ₦{remaining_balance:,.2f} "
-                    f"cannot cover ₦{seller_amount:,.2f}. "
-                    f"Will pay tomorrow."
+                    f"cannot cover ₦{seller_amount:,.2f}. Will pay tomorrow."
                 ))
                 logger.warning(
                     "PAYOUT SKIPPED (balance exhausted) | order=%s | seller=%s | "
@@ -202,7 +243,6 @@ class Command(BaseCommand):
                     seller_amount, remaining_balance,
                 )
                 skipped_count += 1
-                # Don't change order status — stays RECEIVED, retries tomorrow
                 continue
 
             if dry_run:
@@ -214,15 +254,12 @@ class Command(BaseCommand):
                 success_count += 1
                 continue
 
-            # ── Execute transfer ───────────────────────────────────────────────
             ok = self._execute_transfer(order, flw)
             if ok:
                 remaining_balance -= seller_amount
                 success_count += 1
             else:
                 failure_count += 1
-                # Note: we do NOT deduct from remaining_balance on failure
-                # because the money never left our account
 
         # ── Summary ────────────────────────────────────────────────────────────
         self.stdout.write(self.style.MIGRATE_HEADING(
@@ -231,15 +268,16 @@ class Command(BaseCommand):
             f"  Paid out    : {success_count} order(s)\n"
             f"  Skipped     : {skipped_count} order(s)  (balance exhausted — retry tomorrow)\n"
             f"  Failed      : {failure_count} order(s)  (gateway error — retry tomorrow)\n"
+            f"  Disputed    : {disputed_count} order(s)  (locked — awaiting admin decision)\n"
             f"  Balance left: ₦{remaining_balance:,.2f}  (includes your 5% revenue)\n"
             f"{'='*64}\n"
         ))
 
         if skipped_count or failure_count:
             logger.warning(
-                "PAYOUT RUN | success=%d | skipped=%d | failed=%d | "
+                "PAYOUT RUN | success=%d | skipped=%d | failed=%d | disputed=%d | "
                 "remaining_balance=₦%s",
-                success_count, skipped_count, failure_count, remaining_balance,
+                success_count, skipped_count, failure_count, disputed_count, remaining_balance,
             )
 
     # ── Flutterwave balance ────────────────────────────────────────────────────
@@ -265,12 +303,6 @@ class Command(BaseCommand):
 
     # ── Single order transfer ──────────────────────────────────────────────────
     def _execute_transfer(self, order: Order, flw: FlutterwavePayment) -> bool:
-        """
-        Sends order.vendor_payout to the seller.
-        vendor_payout = subtotal - 5% fee  (calculated once at checkout, stored on order).
-        We transfer this exact amount. The 5% never moves — it stays in our balance.
-        Returns True on success, False on any error.
-        """
         ref_short = str(order.order_ref)[:8].upper()
 
         try:
@@ -278,9 +310,7 @@ class Command(BaseCommand):
                 result = flw.transfer_to_vendor(order)
 
                 if result.get("status") != "success":
-                    raise ValueError(
-                        f"Flutterwave returned non-success: {result}"
-                    )
+                    raise ValueError(f"Flutterwave returned non-success: {result}")
 
                 order.payout_triggered        = True
                 order.payout_at               = timezone.now()
@@ -289,10 +319,8 @@ class Command(BaseCommand):
                     result.get("data", {}).get("id", "")
                 )
                 order.save(update_fields=[
-                    "payout_triggered",
-                    "payout_at",
-                    "status",
-                    "flutterwave_transfer_id",
+                    "payout_triggered", "payout_at",
+                    "status", "flutterwave_transfer_id",
                 ])
 
             self.stdout.write(self.style.SUCCESS(
@@ -301,10 +329,8 @@ class Command(BaseCommand):
             logger.info(
                 "PAYOUT SUCCESS | order=%s | seller=%s | amount=₦%s | "
                 "confirmed_at=%s | transfer_id=%s",
-                ref_short,
-                order.seller.business_name,
-                order.vendor_payout,
-                order.delivered_at,
+                ref_short, order.seller.business_name,
+                order.vendor_payout, order.delivered_at,
                 order.flutterwave_transfer_id,
             )
             return True
@@ -318,8 +344,7 @@ class Command(BaseCommand):
             order.status = "FAILED_PAYOUT"
             order.save(update_fields=["status"])
             self.stdout.write(self.style.ERROR(
-                f"  ❌ Transfer failed — marked FAILED_PAYOUT (retries tomorrow). "
-                f"Error: {exc}"
+                f"  ❌ Transfer failed — marked FAILED_PAYOUT. Error: {exc}"
             ))
             return False
 

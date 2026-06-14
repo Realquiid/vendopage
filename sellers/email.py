@@ -119,6 +119,7 @@ def send_password_reset_email(to_email, business_name, reset_code):
     )
 
 
+
 # ─────────────────────────────────────────────
 # 2. WELCOME
 # ─────────────────────────────────────────────
@@ -503,6 +504,26 @@ def send_premium_upgrade_email(to_email, business_name, expires_date):
     return send_email_via_brevo(
         to_email=to_email,       # ← SELLER only
         subject=f'{business_name}, you are now Premium ⭐',
+        html_content=html,
+    )
+
+# ─────────────────────────────────────────────
+# 14b. TIER UPGRADE (Growth/Pro)  →  seller only
+# ─────────────────────────────────────────────
+def send_tier_upgrade_email(to_email, business_name, tier_label,
+                             fee_percent, cap, expires_date):
+    """Sent to SELLER after successful Growth/Pro tier payment."""
+    html = _render('tier_upgrade.html', {
+        'business_name': business_name,
+        'tier_label':    tier_label,
+        'fee_percent':   f'{float(fee_percent):.2f}'.rstrip('0').rstrip('.'),
+        'cap':           f'{float(cap):,.0f}',
+        'expires_date':  expires_date,
+        'dashboard_url': _vendor_dashboard_url(),
+    })
+    return send_email_via_brevo(
+        to_email=to_email,       # ← SELLER only
+        subject=f'{business_name}, welcome to {tier_label} ⭐',
         html_content=html,
     )
 

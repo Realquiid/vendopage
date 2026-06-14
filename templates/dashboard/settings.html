@@ -492,13 +492,10 @@
           <div class="vps-settings-row">
             <div class="vps-settings-row-info">
               <h4>Show watermark on images</h4>
-              <p>Your business name appears diagonally across each product photo.</p>
-              {% if user.subscription_type == 'free' %}
-              <p class="vps-plan-note">Premium sellers can disable this. <a href="{% url 'subscription' %}">Upgrade →</a></p>
-              {% endif %}
+              <p>Your business name appears diagonally across each product photo. Toggle this on or off anytime.</p>
             </div>
             <label class="vps-toggle">
-              <input type="checkbox" name="watermark_enabled" {% if user.watermark_enabled %}checked{% endif %} {% if user.subscription_type == 'free' %}disabled{% endif %} onchange="this.form.submit()">
+              <input type="checkbox" name="watermark_enabled" {% if user.watermark_enabled %}checked{% endif %} onchange="this.form.submit()">
               <span class="vps-toggle-track"></span>
               <span class="vps-toggle-thumb"></span>
             </label>
@@ -794,64 +791,79 @@
     <div class="vps-panel" id="tab-plan">
       <div class="vps-fee-banner">
         <div class="vps-fee-banner-text">
-          <h3>We only earn when you make a sale</h3>
-          <p>Store Mode is free to enable. We take a small % from each order only.</p>
+          <h3>You're on the {{ current_tier|title }} plan</h3>
+          <p>Your current commission rate is {{ current_fee_percent|floatformat:"-2" }}% on this month's sales, up to a ₦{{ current_cap|floatformat:"0" }} volume cap.</p>
         </div>
-        <div class="vps-fee-pill">{{ transaction_fee|floatformat:"-2" }}%<span>per sale</span></div>
+        <div class="vps-fee-pill">{{ current_fee_percent|floatformat:"-2" }}%<span>per sale</span></div>
       </div>
-      <div class="vps-plan-grid">
-        <div class="vps-plan-card {% if current_subscription == 'free' %}vps-plan-current{% endif %}">
-          <div class="vps-plan-card-head">
-            <div class="vps-plan-name">Free Forever {% if current_subscription == 'free' %}<span class="vps-plan-tag">Current</span>{% endif %}</div>
-            <div class="vps-plan-price">₦0<span>/mo</span></div>
-          </div>
-          <div class="vps-plan-card-body">
-            <ul class="vps-plan-features">
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited products</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Custom store URL</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>WhatsApp integration</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Store Mode (escrow)</li>
-              <li class="vps-pf-item vps-pf-off"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>"Powered by" badge</li>
-              <li class="vps-pf-item vps-pf-off"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Watermarks on</li>
-            </ul>
-            <button class="vps-btn vps-btn-secondary vps-btn-full" disabled style="opacity:.5;cursor:default;">{% if current_subscription == 'free' %}Current plan{% else %}Free{% endif %}</button>
-          </div>
+
+      <div class="vps-section-label">Monthly Volume</div>
+      <div class="vps-card">
+        <div class="vps-card-header">
+          <h2>This month's processed volume</h2>
+          <p>Resets to ₦0 on the 1st of every month</p>
         </div>
-        <div class="vps-plan-card vps-plan-featured {% if current_subscription == 'premium' %}vps-plan-current{% endif %}">
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px;">
+          <span style="font-family:'Cabinet Grotesk',sans-serif;font-size:24px;font-weight:800;color:var(--ink);">₦{{ monthly_volume|floatformat:"0" }}</span>
+          <span style="font-size:13px;color:var(--muted);">/ ₦{{ current_cap|floatformat:"0" }} cap</span>
+        </div>
+        <div style="background:var(--bg);border-radius:100px;height:8px;overflow:hidden;">
+          <div style="background:var(--vp-green);height:100%;border-radius:100px;width:{% widthratio monthly_volume current_cap 100 %}%;"></div>
+        </div>
+        {% if monthly_volume >= current_cap and current_tier != 'starter' %}
+        <p style="font-size:12px;color:#c2410c;margin-top:10px;">You've exceeded your cap — sales above this revert to the standard 5% fee until next month.</p>
+        {% endif %}
+      </div>
+
+      <div class="vps-section-label">Plans</div>
+      <div class="vps-plan-grid" style="grid-template-columns:1fr 1fr 1fr;">
+        {% for tier in tiers %}
+        <div class="vps-plan-card {% if tier.is_current %}vps-plan-current{% endif %} {% if tier.key == 'pro' %}vps-plan-featured{% endif %}">
           <div class="vps-plan-card-head">
-            <div class="vps-plan-name">⭐ Premium {% if current_subscription == 'premium' %}<span class="vps-plan-tag">Active</span>{% endif %}</div>
-            <div class="vps-plan-price">₦{{ premium_price|floatformat:"0" }}<span>/mo</span></div>
+            <div class="vps-plan-name">
+              {{ tier.label }}
+              {% if tier.is_current %}<span class="vps-plan-tag">Current</span>{% endif %}
+            </div>
+            <div class="vps-plan-price">₦{{ tier.price|floatformat:"0" }}<span>/mo</span></div>
           </div>
           <div class="vps-plan-card-body">
             <ul class="vps-plan-features">
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Everything in Free</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Remove "Powered by"</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Disable watermarks</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Featured on homepage</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Verified badge</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Priority support</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><strong>{{ tier.fee_percent|floatformat:"-2" }}%</strong> commission</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to ₦{{ tier.cap|floatformat:"0" }}/mo at this rate</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Standard 5% above cap</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited products</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Store Mode (escrow)</li>
             </ul>
-            {% if current_subscription == 'premium' %}
-              <button class="vps-btn vps-btn-primary vps-btn-full" disabled style="opacity:.75;cursor:default;">✓ Active · expires {{ subscription_expires|date:"M d, Y" }}</button>
-            {% else %}
-              <form method="POST" action="{% url 'upgrade_to_premium' %}">
+            {% if tier.is_current %}
+              <button class="vps-btn vps-btn-secondary vps-btn-full" disabled style="opacity:.6;cursor:default;">Current plan</button>
+            {% elif tier.key == 'starter' %}
+              <form method="POST" action="{% url 'upgrade_subscription_tier' %}">
                 {% csrf_token %}
+                <input type="hidden" name="tier" value="starter">
+                <button type="submit" class="vps-btn vps-btn-secondary vps-btn-full">Switch to Starter</button>
+              </form>
+            {% else %}
+              <form method="POST" action="{% url 'upgrade_subscription_tier' %}">
+                {% csrf_token %}
+                <input type="hidden" name="tier" value="{{ tier.key }}">
                 <button type="submit" class="vps-btn vps-btn-primary vps-btn-full">
                   <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                  Upgrade — ₦{{ premium_price|floatformat:"0" }}/mo
+                  Upgrade — ₦{{ tier.price|floatformat:"0" }}/mo
                 </button>
               </form>
             {% endif %}
           </div>
         </div>
+        {% endfor %}
       </div>
 
       <div class="vps-section-label">Earnings Breakdown</div>
       <div class="vps-card">
+
         <div class="vps-card-header"><h2>What you keep on every ₦{{ example_order|floatformat:"0" }} sale</h2></div>
         <div class="vps-earn-grid">
-          <div class="vps-earn-cell"><div class="vps-earn-label">Buyer pays</div><div class="vps-earn-value">₦{{ example_order|floatformat:"0" }}</div><div class="vps-earn-sub">Held in escrow</div></div>
-          <div class="vps-earn-cell"><div class="vps-earn-label">Our fee ({{ transaction_fee|floatformat:"-2" }}%)</div><div class="vps-earn-value" style="color:#c2410c;">₦{{ example_fee|floatformat:"0" }}</div><div class="vps-earn-sub">Platform cut</div></div>
+          <div class="vps-earn-cell"><div class="vps-earn-label">Buyer pays</div><div class="vps-earn-value">₦10,000</div><div class="vps-earn-sub">Held in escrow</div></div>
+          <div class="vps-earn-cell"><div class="vps-earn-label">Your fee ({{ current_fee_percent|floatformat:"-2" }}%)</div><div class="vps-earn-value" style="color:#c2410c;">₦{{ example_fee|floatformat:"0" }}</div><div class="vps-earn-sub">Platform cut</div></div>
           <div class="vps-earn-cell"><div class="vps-earn-label">You receive</div><div class="vps-earn-value" style="color:var(--vp-green);">₦{{ example_payout|floatformat:"0" }}</div><div class="vps-earn-sub">To your bank</div></div>
         </div>
         <p class="vps-earn-footnote">Flutterwave processing fees apply separately.</p>

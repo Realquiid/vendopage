@@ -1,7 +1,7 @@
 
 {% extends 'base.html' %}
 {% load static %}
-
+{% include 'dashboard/_nav.html' %}
 {% block title %}Orders — Vendopage{% endblock %}
 
 {% block extra_css %}
@@ -10,8 +10,20 @@
 /* ─────────────────────────────────────
    THEME TOKENS
 ───────────────────────────────────── */
-
 :root{
+  --bg:#0D0D0D;
+  --card:#1A1A18;
+  --card-2:#151515;
+  --text:#F5F4F0;
+  --muted:rgba(245,244,240,.4);
+  --border:rgba(255,255,255,.07);
+  --green:#00873D;
+  --blue:#60a5fa;
+  --amber:#FBBF24;
+  --red:#f87171;
+}
+
+[data-theme="light"]{
   --bg:#F6F6F4;
   --card:#FFFFFF;
   --card-2:#FAFAF9;
@@ -24,15 +36,6 @@
   --red:#DC2626;
 }
 
-[data-theme="dark"]{
-  --bg:#0D0D0D;
-  --card:#1A1A18;
-  --card-2:#151515;
-  --text:#F5F4F0;
-  --muted:rgba(245,244,240,.4);
-  --border:rgba(255,255,255,.07);
-}
-
 /* ─────────────────────────────────────
    PAGE
 ───────────────────────────────────── */
@@ -40,7 +43,7 @@
 .vp-orders{
   background:var(--bg);
   min-height:100vh;
-  padding-bottom:60px;
+  padding-bottom:90px;
   position:relative;
   overflow-x:hidden;
 }
@@ -55,6 +58,7 @@
   background-size:72px 72px;
   pointer-events:none;
 }
+[data-theme="light"] .vp-orders::before { display:none; }
 
 .vp-orders-inner{
   max-width:1100px;
@@ -369,12 +373,12 @@
 
 </style>
 {% endblock %}
-
 {% block content %}
 
-<div class="vp-orders">
-<div class="vp-orders-inner">
+{% include 'dashboard/_nav.html' with active_nav='orders' %}
 
+<div class="vp-orders vp-has-sidebar">
+<div class="vp-orders-inner">
   <!-- HEADER -->
 
   <div class="vp-orders-head">
@@ -392,10 +396,6 @@
         Manage and fulfill customer purchases
       </div>
     </div>
-
-    <a href="{% url 'dashboard' %}" class="vp-back-btn">
-      ← Dashboard
-    </a>
 
   </div>
 

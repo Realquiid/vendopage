@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load custom_filters %}
+{% include 'dashboard/_nav.html' %}
 {% block title %}Transactions — Vendopage{% endblock %}
 
 {% block extra_css %}
@@ -11,15 +12,6 @@
 ══════════════════════════════════════════════════ */
 
 :root{
-  --vp-card:#FFFFFF;
-  --vp-card-2:#FAFAF9;
-  --vp-text:#0D0D0D;
-  --vp-text-soft:rgba(13,13,13,.45);
-  --vp-text-faint:rgba(13,13,13,.28);
-  --vp-border:#E5E7EB;
-  --vp-bg:#F6F6F4;
-}
-[data-theme="dark"]{
   --vp-card:#1A1A18;
   --vp-card-2:#151515;
   --vp-text:#F5F4F0;
@@ -27,6 +19,15 @@
   --vp-text-faint:rgba(245,244,240,.25);
   --vp-border:rgba(255,255,255,.07);
   --vp-bg:#0D0D0D;
+}
+[data-theme="light"]{
+  --vp-card:#FFFFFF;
+  --vp-card-2:#FAFAF9;
+  --vp-text:#0D0D0D;
+  --vp-text-soft:rgba(13,13,13,.45);
+  --vp-text-faint:rgba(13,13,13,.28);
+  --vp-border:#E5E7EB;
+  --vp-bg:#F6F6F4;
 }
 
 .vp-tx {
@@ -490,143 +491,7 @@
 }
 .vp-tx-empty p { font-size: 14px; color: var(--vp-text-faint); line-height: 1.6; }
 
-/* ── BOTTOM NAV (mobile) ── */
-.vp-bottom-nav {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  background: rgba(13,13,13,.95);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,.07);
-  display: flex; align-items: center; justify-content: space-around;
-  padding: 0 16px; height: 72px; z-index: 200;
-}
-.vp-nav-item {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 8px 20px; border-radius: 12px;
-  cursor: pointer; transition: all .18s;
-  background: none; border: none;
-  color: rgba(245,244,240,.25);
-  text-decoration: none; flex: 1;
-}
-.vp-nav-item:hover { color: rgba(245,244,240,.5); }
-.vp-nav-item.active { color: var(--green); }
-.vp-nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
-.vp-nav-label { font-family: var(--font-b); font-size: 10px; font-weight: 700; letter-spacing: .3px; }
-.vp-nav-add {
-  width: 52px; height: 52px; border-radius: 50%;
-  background: #F5F4F0; border: none;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; transition: all .2s;
-  margin-top: -14px; flex-shrink: 0; text-decoration: none;
-  box-shadow: 0 8px 24px rgba(245,244,240,.15);
-}
-.vp-nav-add:hover {
-  background: #fff; transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(245,244,240,.2);
-}
-.vp-nav-add svg { width: 22px; height: 22px; stroke: #0D0D0D; fill: none; stroke-width: 2.5; }
-
-/* ── SIDEBAR (desktop) — fixed dark, theme-independent ── */
-@media (min-width: 900px) {
-
-  .vp-bottom-nav { display: none; }
-
-  .vp-sidebar{
-    position:fixed; left:0; top:0; bottom:0;
-    width:248px;
-    background:#0D0D0D;
-    display:flex; flex-direction:column;
-    padding:22px 16px;
-    z-index:100;
-    gap:6px;
-  }
-
-  .vp-tx{ margin-left:248px; padding-bottom: 40px; }
-
-  .vp-sb-logo{
-    display:flex; align-items:center;
-    padding:8px 10px 22px;
-    text-decoration:none;
-  }
-
-  .vp-sb-nav{
-    display:flex; flex-direction:column; gap:2px;
-    flex:1;
-  }
-
-  .vp-sb-item{
-    display:flex; align-items:center; gap:12px;
-    padding:11px 14px; border-radius:12px;
-    font-family:var(--font-b); font-size:13.5px; font-weight:600;
-    color:rgba(245,244,240,.45);
-    text-decoration:none;
-    transition:all .15s;
-  }
-  .vp-sb-item svg{
-    width:18px; height:18px;
-    stroke:currentColor; fill:none; stroke-width:1.8;
-    flex-shrink:0;
-  }
-  .vp-sb-item:hover{
-    color:#F5F4F0;
-    background:rgba(255,255,255,.05);
-  }
-  .vp-sb-item.active{
-    color:#0D0D0D;
-    background:#F5F4F0;
-  }
-
-  .vp-sb-add{
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    margin:14px 0 8px;
-    padding:12px;
-    border-radius:12px;
-    border:1.5px dashed rgba(255,255,255,.12);
-    font-family:var(--font-b); font-size:13px; font-weight:700;
-    color:rgba(245,244,240,.4);
-    text-decoration:none;
-    transition:all .15s;
-  }
-  .vp-sb-add:hover{
-    border-color:var(--green);
-    color:var(--green);
-  }
-
-  .vp-sb-profile{
-    display:flex; align-items:center; gap:10px;
-    padding:10px; border-radius:12px;
-    border-top:1px solid rgba(255,255,255,.07);
-    margin-top:6px; padding-top:16px;
-    text-decoration:none;
-    transition:background .15s;
-  }
-  .vp-sb-profile:hover{ background:rgba(255,255,255,.04); }
-
-  .vp-sb-avi{
-    width:36px; height:36px; border-radius:50%;
-    background:var(--green);
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Cabinet Grotesk',sans-serif;
-    font-size:14px; font-weight:800; color:#fff;
-    flex-shrink:0; overflow:hidden;
-  }
-  .vp-sb-avi img{ width:100%; height:100%; object-fit:cover; }
-
-  .vp-sb-profile-text{ overflow:hidden; }
-  .vp-sb-profile-name{
-    font-family:var(--font-b); font-size:13px; font-weight:700;
-    color:#F5F4F0;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .vp-sb-profile-email{
-    font-size:11px; color:rgba(245,244,240,.3);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-
-}
-
 @media (max-width:899px){
-  .vp-sidebar{ display:none; }
-}
 
 /* ── TOAST ── */
 .toast {
@@ -659,77 +524,15 @@
 @keyframes livePulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 </style>
 {% endblock %}
-
 {% block content %}
 
-<!-- ── DESKTOP SIDEBAR ── -->
-<aside class="vp-sidebar">
+{% include 'dashboard/_nav.html' with active_nav='transactions' %}
 
-  <a href="{% url 'dashboard' %}" class="vp-sb-logo">
-    <img src="{% static 'images/logo-white.png' %}" alt="Vendopage" style="height:28px;width:auto;">
-  </a>
-
-  <nav class="vp-sb-nav">
-
-    <a href="{% url 'dashboard' %}" class="vp-sb-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-      <span>Dashboard</span>
-    </a>
-
-    <a href="{% url 'vendor_orders' %}" class="vp-sb-item {% if request.resolver_match.url_name == 'vendor_orders' %}active{% endif %}">
-      <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="1.5"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-      <span>Orders</span>
-    </a>
-
-    <a href="{% url 'seller_transactions' %}" class="vp-sb-item {% if request.resolver_match.url_name == 'seller_transactions' %}active{% endif %}">
-      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-      <span>Payouts</span>
-    </a>
-
-    <a href="{% url 'upload_product' %}" class="vp-sb-item {% if request.resolver_match.url_name == 'upload_product' %}active{% endif %}">
-      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      <span>Products</span>
-    </a>
-
-    <a href="{% url 'settings' %}" class="vp-sb-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-      <span>Settings</span>
-    </a>
-
-  </nav>
-
-  <a href="{% url 'upload_product' %}" class="vp-sb-add">
-    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Add Product
-  </a>
-
-  <a href="{% url 'settings' %}" class="vp-sb-profile">
-    <div class="vp-sb-avi">
-      {% if user.profile_picture %}
-        <img src="{{ user.profile_picture.url }}" alt="{{ user.business_name }}">
-      {% else %}
-        {{ user.business_name|first|upper }}
-      {% endif %}
-    </div>
-    <div class="vp-sb-profile-text">
-      <div class="vp-sb-profile-name">{{ user.business_name|truncatechars:18 }}</div>
-      <div class="vp-sb-profile-email">{{ user.email|truncatechars:22 }}</div>
-    </div>
-  </a>
-
-</aside>
-
-<!-- ── MAIN ── -->
-<div class="vp-tx">
+<div class="vp-tx vp-has-sidebar">
 <div class="vp-tx-inner">
-
   <!-- PAGE HEADER -->
   <div class="vp-tx-header">
     <div>
-      <a href="{% url 'dashboard' %}" class="vp-tx-back">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        Back to Dashboard
-      </a>
       <div class="vp-page-eyebrow">
         <span class="vp-page-eyebrow-line"></span>
         Payout Ledger
@@ -907,30 +710,6 @@
   </div>
 
 </div><!-- /vp-tx-inner -->
-
-<!-- ── BOTTOM NAV (mobile) ── -->
-<nav class="vp-bottom-nav">
-  <a href="{% url 'dashboard' %}" class="vp-nav-item">
-    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-    <span class="vp-nav-label">Home</span>
-  </a>
-  <a href="{% url 'vendor_orders' %}" class="vp-nav-item">
-    <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-    <span class="vp-nav-label">Orders</span>
-  </a>
-  <a href="{% url 'upload_product' %}" class="vp-nav-add">
-    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  </a>
-  <a href="{% url 'seller_transactions' %}" class="vp-nav-item active">
-    <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-    <span class="vp-nav-label">Payouts</span>
-  </a>
-  <a href="{% url 'settings' %}" class="vp-nav-item">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-    <span class="vp-nav-label">Settings</span>
-  </a>
-</nav>
-
 </div><!-- /vp-tx -->
 
 <!-- ── ORDER DETAIL DRAWER ── -->

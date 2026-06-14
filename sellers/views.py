@@ -9,6 +9,7 @@ from django.db.models import Q, Count, Sum
 from django.utils import timezone
 from datetime import timedelta, datetime
 import urllib.parse
+from decimal import Decimal
 from django.db import IntegrityError
 from sellers.models import (
     Seller, PlatformSettings,
@@ -39,6 +40,7 @@ from sellers.email import (
     send_premium_upgrade_email,
     send_order_auto_released_buyer,
     send_review_received_vendor,
+    send_tier_upgrade_email,
 )
 import random
 import string
@@ -374,23 +376,35 @@ def track_whatsapp_click(request, product_id):
     except Exception:
         return JsonResponse({'success': False}, status=400)
 
-
-# ─────────────────────────────────────────────
-# SETTINGS
-# ─────────────────────────────────────────────
 @login_required
 def dashboard_settings(request):
-    platform                = PlatformSettings.get()
-    transaction_fee_percent = platform.transaction_fee_percent
-    premium_price           = platform.premium_monthly_price
-    example_order           = 10000
-    example_fee             = (example_order * transaction_fee_percent) / 100
-    example_payout          = example_order - example_fee
+    seller = request.user
+    platform = PlatformSettings.get()
+
+    tiers = []
+    for key, cfg in Seller.TIER_CONFIG.items():
+        tiers.append({
+            'key':         key,
+            'label':       cfg['label'],
+            'price':       cfg['price'],
+            'fee_percent': cfg['fee_percent'],
+            'cap':         cfg['cap'],
+            'is_current':  seller.subscription_tier == key,
+        })
+
+    current_fee_percent = seller.get_commission_rate()
+    example_order  = 10000
+    example_fee    = (example_order * current_fee_percent) / 100
+    example_payout = example_order - example_fee
 
     return render(request, 'dashboard/settings.html', {
-        'platform_fee_percent': transaction_fee_percent,
-        'transaction_fee':      transaction_fee_percent,
-        'premium_price':        premium_price,
+        'platform_fee_percent': platform.transaction_fee_percent,
+        'transaction_fee':      current_fee_percent,
+        'tiers':                tiers,
+        'current_tier':         seller.subscription_tier,
+        'monthly_volume':       seller.monthly_volume_processed,
+        'current_cap':          seller.get_tier_config()['cap'],
+        'current_fee_percent':  current_fee_percent,
         'example_order':        example_order,
         'example_fee':          example_fee,
         'example_payout':       example_payout,
@@ -398,15 +412,13 @@ def dashboard_settings(request):
         'subscription_expires': request.user.subscription_expires,
     })
 
-
 @login_required
 @require_http_methods(["POST"])
 def update_watermark(request):
-    if request.user.subscription_type == 'premium':
-        request.user.watermark_enabled = 'watermark_enabled' in request.POST
-        request.user.save(update_fields=['watermark_enabled'])
+    request.user.watermark_enabled = 'watermark_enabled' in request.POST
+    request.user.save(update_fields=['watermark_enabled'])
+    messages.success(request, 'Watermark setting updated.')
     return redirect('settings')
-
 
 @login_required
 def update_profile_picture(request):
@@ -626,52 +638,84 @@ def reset_password(request, token):
     return render(request, 'auth/reset_password.html')
 
 
-# ─────────────────────────────────────────────
-# SUBSCRIPTION / PAYMENT
-# ─────────────────────────────────────────────
+
 @login_required
 def subscription(request):
-    platform                = PlatformSettings.get()
-    transaction_fee_percent = platform.transaction_fee_percent
-    premium_price           = platform.premium_monthly_price
-    example_order           = 10000
-    example_fee             = (example_order * transaction_fee_percent) / 100
-    example_payout          = example_order - example_fee
+    seller = request.user
+    tiers  = []
+    for key, cfg in Seller.TIER_CONFIG.items():
+        tiers.append({
+            'key':         key,
+            'label':       cfg['label'],
+            'price':       cfg['price'],
+            'fee_percent': cfg['fee_percent'],
+            'cap':         cfg['cap'],
+            'is_current':  seller.subscription_tier == key,
+        })
 
     return render(request, 'dashboard/subscription.html', {
-        'current_subscription': request.user.subscription_type,
-        'subscription_expires': request.user.subscription_expires,
-        'transaction_fee':      transaction_fee_percent,
-        'premium_price':        premium_price,
-        'example_order':        example_order,
-        'example_fee':          example_fee,
-        'example_payout':       example_payout,
+        'tiers':                   tiers,
+        'current_tier':            seller.subscription_tier,
+        'monthly_volume':          seller.monthly_volume_processed,
+        'current_cap':             seller.get_tier_config()['cap'],
+        'current_fee_percent':     seller.get_commission_rate(),
+        'watermark_enabled':       seller.watermark_enabled,
     })
 
 
 @login_required
+@require_http_methods(["POST"])
+def upgrade_subscription_tier(request):
+    """
+    Starts a Flutterwave payment to upgrade to 'growth' or 'pro'.
+    Downgrading to 'starter' is immediate (no payment needed).
+    """
+    seller    = request.user
+    tier      = request.POST.get('tier', '').strip().lower()
+
+    if tier not in Seller.TIER_CONFIG:
+        messages.error(request, 'Invalid plan selected.')
+        return redirect('subscription')
+
+    # Downgrade to starter — instant, no payment
+    if tier == 'starter':
+        seller.subscription_tier = 'starter'
+        seller.save(update_fields=['subscription_tier'])
+        messages.success(request, 'You are now on the Starter plan.')
+        return redirect('subscription')
+
+    # Growth / Pro — charge via Flutterwave
+    config = Seller.TIER_CONFIG[tier]
+    amount = config['price']
+    tx_ref = f"VDP-TIER-{seller.id}-{uuid.uuid4().hex[:8]}"
+
+    flw          = FlutterwavePayment()
+    redirect_url = 'https://www.vendopage.com/payment/verify/'
+    result       = flw.initialize_payment(
+        email=seller.email, amount=amount, tx_ref=tx_ref,
+        redirect_url=redirect_url, customer_name=seller.business_name,
+        title=f"VendoPage {config['label']} Plan",
+    )
+
+    if result.get('status') == 'success':
+        request.session['tx_ref']            = tx_ref
+        request.session['upgrading_to_tier'] = tier
+        return redirect(result['data']['link'])
+
+    messages.error(request, 'Payment initialization failed. Please try again.')
+    return redirect('subscription')
+
+
+# Keep old endpoint working in case anything still links to it —
+# routes to the same flow, defaulting to 'growth'.
+@login_required
 def upgrade_to_premium(request):
     if request.method == 'POST':
-        seller   = request.user
-        platform = PlatformSettings.get()
-        amount   = platform.premium_monthly_price
-        tx_ref   = f"VDP-{seller.id}-{uuid.uuid4().hex[:8]}"
-
-        flw          = FlutterwavePayment()
-        redirect_url = 'https://www.vendopage.com/payment/verify/'
-        result       = flw.initialize_payment(
-            email=seller.email, amount=amount, tx_ref=tx_ref,
-            redirect_url=redirect_url, customer_name=seller.business_name,
-            title="VendoPage Premium Subscription",
-        )
-        if result.get('status') == 'success':
-            request.session['tx_ref']               = tx_ref
-            request.session['upgrading_to_premium'] = True
-            return redirect(result['data']['link'])
-        messages.error(request, 'Payment initialization failed. Please try again.')
-        return redirect('subscription')
+        request.POST = request.POST.copy()
+        request.POST['tier'] = request.POST.get('tier', 'growth')
+        return upgrade_subscription_tier(request)
     return redirect('subscription')
- 
+
 @login_required
 def onboarding(request):
     """
@@ -735,13 +779,15 @@ def onboarding(request):
         'cloudinary_upload_preset': cloudinary_upload_preset,
     })
 
+
 @login_required
 def verify_payment(request):
     tx_ref         = request.GET.get('tx_ref')
     transaction_id = request.GET.get('transaction_id')
     status         = request.GET.get('status', '')
 
-    if not request.session.get('upgrading_to_premium'):
+    upgrading_tier = request.session.get('upgrading_to_tier')
+    if not upgrading_tier:
         messages.error(request, 'Invalid payment session')
         return redirect('subscription')
 
@@ -755,21 +801,31 @@ def verify_payment(request):
     if result.get('status') == 'success':
         data = result.get('data', {})
         if data.get('status') == 'successful' and data.get('tx_ref') == tx_ref:
-            seller                      = request.user
-            seller.subscription_type    = 'premium'
+            seller = request.user
+            seller.subscription_tier = upgrading_tier
+            # Keep legacy fields in sync for templates that still check them
+            seller.subscription_type    = 'premium' if upgrading_tier != 'starter' else 'free'
             seller.subscription_expires = timezone.now() + timedelta(days=30)
             seller.save()
-            request.session.pop('upgrading_to_premium', None)
+
+            request.session.pop('upgrading_to_tier', None)
             request.session.pop('tx_ref', None)
+
             try:
-                send_premium_upgrade_email(
+                tier_config = Seller.TIER_CONFIG[upgrading_tier]
+                send_tier_upgrade_email(
                     to_email=seller.email,
                     business_name=seller.business_name,
+                    tier_label=tier_config['label'],
+                    fee_percent=tier_config['fee_percent'],
+                    cap=tier_config['cap'],
                     expires_date=seller.subscription_expires.strftime('%B %d, %Y'),
                 )
             except Exception as e:
-                logger.error(f"Premium upgrade email failed: {e}")
-            messages.success(request, '🎉 Welcome to Premium!')
+                logger.error(f"Tier upgrade email failed: {e}")
+
+            tier_label = Seller.TIER_CONFIG[upgrading_tier]['label']
+            messages.success(request, f'🎉 Welcome to the {tier_label} plan!')
             return redirect('dashboard')
 
     messages.error(request, 'Payment verification failed. Please contact support.')
@@ -1271,7 +1327,10 @@ def dashboard(request):
         payout_queue = raw_queue
 
     platform_settings = PlatformSettings.get()
-
+ 
+    tier_config = seller.get_tier_config()
+    current_fee_percent = seller.get_commission_rate()
+    volume_near_cap = seller.monthly_volume_processed >= (tier_config['cap'] * Decimal('0.8'))
     return render(request, 'dashboard/dashboard.html', {
         'products':             all_products,
         'active_count':         active_products.count(),
@@ -1294,6 +1353,12 @@ def dashboard(request):
         'time_icon':            time_icon,
         'platform_fee_percent': platform_settings.transaction_fee_percent,
         'premium_price':        platform_settings.premium_monthly_price,
+        'tier_label':           tier_config['label'],
+        'subscription_tier':    seller.subscription_tier,
+        'monthly_volume':       seller.monthly_volume_processed,
+        'tier_cap':             tier_config['cap'],
+        'current_fee_percent':  current_fee_percent,
+        'volume_near_cap':      volume_near_cap,
     })
 
 # ─────────────────────────────────────────────
@@ -1794,57 +1859,6 @@ def confirm_receipt(request, order_ref):
     return redirect('order_detail', order_ref=order_ref)
  
 
-
-@require_http_methods(["GET", "POST"])
-def raise_dispute(request, order_ref):
-    order = get_object_or_404(Order, order_ref=order_ref)
-
-    if hasattr(order, 'dispute'):
-        messages.info(request, 'A dispute already exists for this order.')
-        return redirect('order_detail', order_ref=order_ref)
-
-    if order.status not in ('shipped', 'paid'):
-        messages.error(request, 'You can only dispute an active order.')
-        return redirect('order_detail', order_ref=order_ref)
-
-    if order.payout_triggered:
-        messages.error(request, 'Payout has already been sent. Please contact support.')
-        return redirect('order_detail', order_ref=order_ref)
-
-    if request.method == 'POST':
-        reason        = request.POST.get('reason', 'other')
-        buyer_message = request.POST.get('message', '').strip()
-        evidence_url  = request.POST.get('evidence_url', '').strip()
-
-        if not buyer_message:
-            messages.error(request, 'Please describe the issue.')
-            return render(request, 'store/dispute.html', {'order': order})
-
-        Dispute.objects.create(
-            order=order, raised_by='buyer', reason=reason,
-            buyer_message=buyer_message, buyer_evidence=evidence_url,
-        )
-        order.status = 'disputed'
-        order.save(update_fields=['status'])
-
-        try:
-            send_dispute_opened(
-                vendor_email=order.seller.email,
-                buyer_email=order.buyer_email,
-                order_ref=str(order.order_ref)[:8].upper(),
-                reason=reason,
-                buyer_name=order.buyer_name,
-                order_url=f"https://www.vendopage.com/order/{order.order_ref}/",
-            )
-        except Exception as e:
-            logger.error(f"Dispute email failed: {e}")
-
-        messages.success(request, '✅ Dispute raised. Our team will review within 48 hours.')
-        return redirect('order_detail', order_ref=order_ref)
-
-    return render(request, 'store/dispute.html', {'order': order})
-
-
 @require_http_methods(["GET", "POST"])
 def leave_review(request, order_ref):
     order = get_object_or_404(Order, order_ref=order_ref)
@@ -2031,36 +2045,6 @@ def _trigger_payout(order):
         )
 
 
-def auto_release_expired_orders():
-    now     = timezone.now()
-    expired = Order.objects.filter(
-        status='shipped',
-        auto_release_at__lte=now,
-        payout_triggered=False,
-    )
-    for order in expired:
-        logger.info(f"Auto-releasing order {order.order_ref}")
-        order.delivered_at = now
- 
-        if order.payment_type == 'direct':
-            order.status = 'delivered'
-            order.save(update_fields=['status', 'delivered_at', 'updated_at'])
-            _trigger_payout(order)
-        else:
-            # Escrow: stamp RECEIVED, let the daily cron pay it out
-            order.status = 'RECEIVED'
-            order.save(update_fields=['status', 'delivered_at', 'updated_at'])
- 
-        try:
-            send_order_auto_released_buyer(
-                to_email=order.buyer_email,
-                buyer_name=order.buyer_name,
-                order_ref=str(order.order_ref)[:8].upper(),
-                seller_name=order.seller.business_name,
-            )
-        except Exception as e:
-            logger.error(f"Auto-release buyer email failed for order {order.order_ref}: {e}")
- 
 
 # ─────────────────────────────────────────────
 # BANK PROXY APIs
@@ -2343,6 +2327,101 @@ def admin_disputes(request):
         'open_disputes_count': open_disputes_count, 'pending_payouts_count': pending_payouts_count,
     })
 
+# ─────────────────────────────────────────────────────────────────────────────
+# REPLACE these three functions in sellers/views.py
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# ── 1. raise_dispute ──────────────────────────────────────────────────────────
+# Sets is_disputed=True so the cron and auto-release both skip this order.
+
+@require_http_methods(["GET", "POST"])
+def raise_dispute(request, order_ref):
+    order = get_object_or_404(Order, order_ref=order_ref)
+
+    if hasattr(order, 'dispute'):
+        messages.info(request, 'A dispute already exists for this order.')
+        return redirect('order_detail', order_ref=order_ref)
+
+    if order.status not in ('shipped', 'paid'):
+        messages.error(request, 'You can only dispute an active order.')
+        return redirect('order_detail', order_ref=order_ref)
+
+    if order.payout_triggered:
+        messages.error(request, 'Payout has already been sent. Please contact support.')
+        return redirect('order_detail', order_ref=order_ref)
+
+    if request.method == 'POST':
+        reason        = request.POST.get('reason', 'other')
+        buyer_message = request.POST.get('message', '').strip()
+        evidence_url  = request.POST.get('evidence_url', '').strip()
+
+        if not buyer_message:
+            messages.error(request, 'Please describe the issue.')
+            return render(request, 'store/dispute.html', {'order': order})
+
+        Dispute.objects.create(
+            order=order, raised_by='buyer', reason=reason,
+            buyer_message=buyer_message, buyer_evidence=evidence_url,
+        )
+
+        # ── BRAKE: lock money until admin resolves ─────────────────────────
+        order.status        = 'disputed'
+        order.is_disputed   = True
+        order.dispute_reason = f"{reason}: {buyer_message[:200]}"
+        order.save(update_fields=['status', 'is_disputed', 'dispute_reason'])
+
+        try:
+            send_dispute_opened(
+                vendor_email=order.seller.email,
+                buyer_email=order.buyer_email,
+                order_ref=str(order.order_ref)[:8].upper(),
+                reason=reason,
+                buyer_name=order.buyer_name,
+                order_url=f"https://www.vendopage.com/order/{order.order_ref}/",
+            )
+        except Exception as e:
+            logger.error(f"Dispute email failed: {e}")
+
+        messages.success(request, '✅ Dispute raised. Our team will review within 48 hours.')
+        return redirect('order_detail', order_ref=order_ref)
+
+    return render(request, 'store/dispute.html', {'order': order})
+
+
+# ── 2. auto_release_expired_orders ───────────────────────────────────────────
+# Never auto-releases a disputed order — is_disputed=False filter added.
+
+def auto_release_expired_orders():
+    now     = timezone.now()
+    expired = Order.objects.filter(
+        status='shipped',
+        auto_release_at__lte=now,
+        payout_triggered=False,
+        is_disputed=False,          # ← BRAKE: disputed orders are never auto-released
+    )
+    for order in expired:
+        logger.info(f"Auto-releasing order {order.order_ref}")
+        order.delivered_at = now
+
+        if order.payment_type == 'direct':
+            order.status = 'delivered'
+            order.save(update_fields=['status', 'delivered_at', 'updated_at'])
+            _trigger_payout(order)
+        else:
+            order.status = 'RECEIVED'
+            order.save(update_fields=['status', 'delivered_at', 'updated_at'])
+
+        try:
+            send_order_auto_released_buyer(
+                to_email=order.buyer_email,
+                buyer_name=order.buyer_name,
+                order_ref=str(order.order_ref)[:8].upper(),
+                seller_name=order.seller.business_name,
+            )
+        except Exception as e:
+            logger.error(f"Auto-release buyer email failed for order {order.order_ref}: {e}")
+
 
 @staff_member_required
 @require_http_methods(["POST"])
@@ -2355,17 +2434,51 @@ def resolve_dispute(request, dispute_id):
     dispute.admin_note  = note
     dispute.resolved_at = timezone.now()
 
+    # ── PATH 1: Refund Buyer ──────────────────────────────────────────────────
     if action == 'refund_buyer':
         if order.payout_triggered:
-            messages.error(request, f'Cannot refund — payout already sent to seller.')
+            messages.error(request, 'Cannot refund — payout already sent to seller.')
             return redirect('admin_disputes')
         if order.status == 'refunded':
             messages.warning(request, 'Order is already refunded.')
             return redirect('admin_disputes')
 
-        # Mark as refunded — manual refund via FLW dashboard
-        order.status = 'refunded'
+        # Call Flutterwave Refund API
+        flw_refund_success = False
+        flw_refund_id      = ''
+        try:
+            flw           = FlutterwavePayment()
+            refund_result = flw.refund_payment(
+                transaction_id=order.flutterwave_tx_id,
+                amount=order.subtotal,      # full refund — buyer gets everything back
+            )
+            logger.info(
+                f"FLW REFUND RESULT for order {str(order.order_ref)[:8].upper()}: "
+                f"{refund_result}"
+            )
+            if refund_result.get('status') == 'success':
+                flw_refund_success = True
+                flw_refund_id      = str(refund_result.get('data', {}).get('id', ''))
+            else:
+                logger.error(
+                    f"FLW refund API non-success for order "
+                    f"{str(order.order_ref)[:8].upper()}: {refund_result}"
+                )
+        except Exception as e:
+            logger.error(
+                f"FLW refund API exception for order "
+                f"{str(order.order_ref)[:8].upper()}: {e}"
+            )
+
+        # Update order — admin has decided, we mark it regardless of API success
+        # If API failed, admin will see a warning and can do it manually on FLW dashboard
+        order.status            = 'refunded'
+        order.is_disputed       = False     # lift the brake
+        order.refund_initiated_at = timezone.now()
+        if flw_refund_id:
+            order.refund_reference = flw_refund_id
         order.save()
+
         dispute.status = 'resolved_buyer'
         dispute.save()
 
@@ -2377,36 +2490,66 @@ def resolve_dispute(request, dispute_id):
         except Exception as e:
             logger.error(f"Dispute resolved buyer email failed: {e}")
 
-        messages.success(
-            request,
-            f'✅ Dispute resolved in buyer\'s favour for order #{str(order.order_ref)[:8].upper()}. '
-            f'Issue refund manually via Flutterwave dashboard → Transactions.'
-        )
+        if flw_refund_success:
+            messages.success(
+                request,
+                f'✅ Refund initiated via Flutterwave for order '
+                f'#{str(order.order_ref)[:8].upper()}. '
+                f'Refund ID: {flw_refund_id}. '
+                f'Buyer will receive funds in 3–5 business days.'
+            )
+        else:
+            messages.warning(
+                request,
+                f'⚠️ Dispute resolved in buyer\'s favour but Flutterwave API refund FAILED. '
+                f'Order #{str(order.order_ref)[:8].upper()} is marked as refunded — '
+                f'you must issue this refund MANUALLY via Flutterwave dashboard → Transactions. '
+                f'Check server logs for details.'
+            )
 
+    # ── PATH 2: Pay Vendor ────────────────────────────────────────────────────
     elif action == 'pay_vendor':
+        # Lift the brake BEFORE triggering payout so _trigger_payout can proceed
+        order.is_disputed = False
+        order.status      = 'delivered'
+        order.save(update_fields=['status', 'is_disputed'])
+
         dispute.status = 'resolved_vendor'
         dispute.save()
-        order.status = 'delivered'
-        order.save(update_fields=['status'])
+
         _trigger_payout(order)
 
         try:
             send_dispute_resolved_vendor(
-                to_email=order.seller.email, business_name=order.seller.business_name,
-                order_ref=str(order.order_ref)[:8].upper(), admin_note=note,
+                to_email=order.seller.email,
+                business_name=order.seller.business_name,
+                order_ref=str(order.order_ref)[:8].upper(),
+                admin_note=note,
             )
         except Exception as e:
             logger.error(f"Dispute resolved vendor email failed: {e}")
 
+        # Re-fetch to check if _trigger_payout actually succeeded
+        order.refresh_from_db()
         if order.payout_triggered:
-            messages.success(request, f'✅ Dispute resolved — payment released to {order.seller.business_name}.')
+            messages.success(
+                request,
+                f'✅ Dispute resolved in seller\'s favour — '
+                f'payment released to {order.seller.business_name}.'
+            )
         else:
-            messages.warning(request, 'Dispute marked resolved but payout transfer failed. Check logs.')
+            messages.warning(
+                request,
+                f'⚠️ Dispute resolved for seller but payout transfer FAILED. '
+                f'Check server logs — you may need to trigger manually.'
+            )
 
+    # ── PATH 3: Mark Under Review (brake stays ON) ────────────────────────────
     elif action == 'under_review':
+        # is_disputed stays True — money remains locked
         dispute.status = 'under_review'
         dispute.save()
-        messages.info(request, 'Dispute marked as under review.')
+        messages.info(request, 'Dispute marked as under review. Funds remain locked.')
 
     else:
         messages.error(request, 'Invalid action.')

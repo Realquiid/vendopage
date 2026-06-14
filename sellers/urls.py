@@ -38,7 +38,7 @@ urlpatterns = [
     path('api/product/<int:product_id>/track-whatsapp/', views.track_whatsapp_click, name='track_whatsapp_click'),
     path('onboarding/', views.onboarding, name='onboarding'),
     path('dashboard/products/', views.vendor_products, name='vendor_products'),
-
+    path('subscription/upgrade-tier/', views.upgrade_subscription_tier, name='upgrade_subscription_tier'),
     path('dashboard/transactions/', views.seller_transactions, name='seller_transactions'),
 
     # ── ESCROW — Buyer flow ──────────────────────────────────

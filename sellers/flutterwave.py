@@ -1,5 +1,5 @@
 # sellers/flutterwave.py
-
+#
 # Flutterwave integration for VendoPage.
 # Handles:
 #   - Subscription payments
@@ -7,7 +7,7 @@
 #   - Webhook signature verification
 #   - Payout via Transfer API (requires static IP whitelisted in FLW dashboard)
 #   - Bank account verification
-# """
+#   - Refunds (reverses buyer payment back to original payment method)
 
 import hmac
 import hashlib
@@ -180,6 +180,72 @@ class FlutterwavePayment:
             return resp.json()
         except requests.exceptions.RequestException as e:
             logger.error("FLW transfer_to_vendor error for order %s: %s", order.order_ref, e)
+            return {"status": "error", "message": str(e)}
+
+    # ── Refund payment to buyer ───────────────────────────────────
+    def refund_payment(self, transaction_id: str, amount=None) -> dict:
+        """
+        Refunds a buyer's payment via Flutterwave.
+
+        HOW IT WORKS:
+        ─────────────
+        Flutterwave already holds the buyer's card/bank details from when
+        they originally paid. You just pass the transaction_id (stored as
+        order.flutterwave_tx_id) and FLW reverses the money back to
+        whatever the buyer paid with — card, bank transfer, USSD, etc.
+        You never need to store or know the buyer's account details.
+
+        Args:
+            transaction_id : order.flutterwave_tx_id — the numeric FLW
+                             transaction ID from the original payment
+                             (e.g. "4957376"). NOT the tx_ref.
+            amount         : Decimal or None.
+                             None  → full refund of the original amount
+                             Value → partial refund for that exact amount
+
+        FLW docs: POST /v3/transactions/{id}/refund
+
+        Success response shape:
+            {
+                "status": "success",
+                "message": "Transaction refunded",
+                "data": {
+                    "id": 123,
+                    "amount_refunded": 5000,
+                    "status": "completed",
+                    ...
+                }
+            }
+
+        Buyer receives funds in 3–5 business days depending on their bank.
+        """
+        if not transaction_id:
+            logger.error("refund_payment called with empty transaction_id")
+            return {"status": "error", "message": "transaction_id is required"}
+
+        url     = f"{self.BASE_URL}/transactions/{transaction_id}/refund"
+        payload = {}
+        if amount is not None:
+            payload['amount'] = float(amount)   # FLW expects a plain float, not Decimal
+
+        try:
+            resp = requests.post(
+                url,
+                json=payload if payload else None,   # send None body for full refund
+                headers=self._headers(),
+                timeout=30,
+            )
+            data = resp.json()
+            logger.info(
+                "FLW refund_payment | tx_id=%s | http=%s | response=%s",
+                transaction_id, resp.status_code, data
+            )
+            return data
+        except requests.exceptions.RequestException as e:
+            logger.error(
+                "FLW refund_payment error | tx_id=%s | error=%s",
+                transaction_id, e
+            )
             return {"status": "error", "message": str(e)}
 
     # ── Get banks ────────────────────────────────────────────────
