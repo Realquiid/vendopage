@@ -22,6 +22,8 @@ sitemaps = {
 }
 
 urlpatterns = [
+    path("robots.txt",TemplateView.as_view(template_name="robots.txt",content_type="text/plain"),),
+    path("sitemap.xml",sitemap,{"sitemaps": sitemaps},name="django.contrib.sitemaps.views.sitemap",),
     # This must come BEFORE path('admin/', ...) to intercept /admin/
     path('admin/', staff_member_required(
         RedirectView.as_view(pattern_name='admin_dashboard', permanent=False)
@@ -32,20 +34,3 @@ urlpatterns = [
     path('api/products/create/', api_views.create_product_from_whatsapp, name='api_create_product'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-
-urlpatterns += [
-    path(
-        "robots.txt",
-        TemplateView.as_view(
-            template_name="robots.txt",
-            content_type="text/plain"
-        ),
-    ),
-
-    path(
-    "sitemap.xml",
-    sitemap,
-    {"sitemaps": sitemaps},
-    name="django.contrib.sitemaps.views.sitemap",
-    ),
-]
