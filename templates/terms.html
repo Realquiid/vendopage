@@ -2,233 +2,162 @@
 {% load static %}
 
 {% block title %}Terms of Service — Vendopage{% endblock %}
-{% block meta_description %}Vendopage Terms of Service. Read our terms covering vendor responsibilities, escrow payments, Store Mode, buyer protections, and how we handle accounts globally.{% endblock %}
+{% block meta_description %}Vendopage's Terms of Service covering vendor responsibilities, escrow payments, Store Mode, and buyer protections for users across Africa and worldwide.{% endblock %}
+{% block og_title %}Terms of Service — Vendopage{% endblock %}
+{% block og_description %}Terms covering vendor responsibilities, escrow payments, Store Mode, and buyer protections — for users across Africa and worldwide.{% endblock %}
 
 {% block extra_css %}
 <style>
 /* ══════════════════════════════════════
-   TERMS — uses base.html tokens only.
-   No hardcoded colours. Fully readable
-   in light AND dark mode.
+   LEGAL HERO (matches section-label / pg-title pattern)
 ══════════════════════════════════════ */
+.legal-hero {
+  padding:90px 80px 60px; background:var(--surface);
+  border-bottom:1.5px solid var(--border);
+  position:relative; overflow:hidden;
+}
+.legal-hero::before {
+  content:''; position:absolute; top:-160px; left:-160px;
+  width:480px; height:480px; border-radius:50%;
+  background:radial-gradient(circle, rgba(0,135,61,.07) 0%, transparent 65%);
+  pointer-events:none;
+}
+.legal-hero-inner { max-width:1140px; margin:0 auto; position:relative; z-index:1; }
 
-.lg-page { background: var(--surface); min-height: 100vh; }
+.section-label {
+  display:inline-flex; align-items:center; gap:10px;
+  font-size:11px; font-weight:700; letter-spacing:2.5px;
+  text-transform:uppercase; color:var(--green);
+  margin-bottom:18px;
+}
+.section-label-line { width:24px; height:1.5px; background:var(--green); }
 
-/* ── HERO ── */
-.lg-hero {
-  position: relative; overflow: hidden;
-  background: #0D0D0D;
-  padding: 90px 80px 72px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+.legal-hero h1 {
+  font-family:var(--font-d); font-weight:800;
+  font-size:clamp(30px,5vw,56px); letter-spacing:-2px;
+  color:var(--ink); margin-bottom:16px; line-height:1.05;
 }
-.lg-hero-grid {
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
-  background-size: 72px 72px;
-  pointer-events: none; z-index: 0;
+.legal-hero-sub { font-size:15px; color:var(--muted); line-height:1.65; max-width:640px; }
+.legal-hero-meta { display:flex; gap:12px; margin-top:22px; flex-wrap:wrap; }
+.legal-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:5px 12px; background:var(--surface-2);
+  border:1.5px solid var(--border); border-radius:var(--r-pill);
+  font-size:12px; color:var(--muted); font-weight:500;
 }
-.lg-hero-glow {
-  position: absolute;
-  width: 600px; height: 600px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(0,135,61,.18) 0%, transparent 65%);
-  top: -160px; right: -80px;
-  pointer-events: none; z-index: 0;
-}
-.lg-hero-inner {
-  max-width: 1080px; margin: 0 auto;
-  position: relative; z-index: 2;
-}
-.lg-eyebrow {
-  display: inline-flex; align-items: center; gap: 10px;
-  margin-bottom: 24px;
-}
-.lg-eyebrow-line { width: 28px; height: 1.5px; background: var(--green-pop); }
-.lg-eyebrow-text {
-  font-family: var(--font-b);
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 2.5px; text-transform: uppercase;
-  color: var(--green-pop);
-}
-.lg-hero h1 {
-  font-family: var(--font-d);
-  font-size: clamp(40px, 5vw, 72px);
-  font-weight: 800; letter-spacing: -3px; line-height: 1.0;
-  color: #F5F4F0; margin-bottom: 20px;
-}
-.lg-hero h1 span { color: var(--green-pop); }
-.lg-hero-sub {
-  font-family: var(--font-b);
-  font-size: 16px; line-height: 1.75;
-  color: rgba(245,244,240,.45);
-  max-width: 560px; margin-bottom: 32px;
-}
-.lg-badges { display: flex; gap: 10px; flex-wrap: wrap; }
-.lg-badge {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 6px 14px;
-  background: rgba(245,244,240,.05);
-  border: 1px solid rgba(245,244,240,.1);
-  border-radius: var(--r-pill);
-  font-family: var(--font-b); font-size: 12px; font-weight: 600;
-  color: rgba(245,244,240,.5);
-}
-.lg-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green-pop); flex-shrink: 0; }
 
-/* ── LAYOUT ── */
+/* ══════════════════════════════════════
+   LAYOUT
+══════════════════════════════════════ */
+.lg-body { background:var(--surface); }
 .lg-layout {
-  max-width: 1080px; margin: 0 auto;
-  padding: 72px 80px;
-  display: grid; grid-template-columns: 220px 1fr;
-  gap: 64px; align-items: start;
+  max-width:1140px; margin:0 auto; padding:60px 80px;
+  display:grid; grid-template-columns:240px 1fr; gap:56px; align-items:start;
 }
-
-/* ── TOC ── */
-.lg-toc-wrap { position: sticky; top: 88px; }
+.lg-sidebar-wrap { position:sticky; top:88px; }
 .lg-toc {
-  background: var(--white);
-  border: 1.5px solid var(--border);
-  border-radius: var(--r-lg); overflow: hidden;
+  background:var(--white); border:1.5px solid var(--border);
+  border-radius:var(--r-lg); padding:20px 0; overflow:hidden;
 }
-.lg-toc-head { padding: 14px 18px 12px; border-bottom: 1px solid var(--border); }
 .lg-toc-title {
-  font-family: var(--font-b); font-size: 10px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+  font-family:var(--font-d); font-weight:700; font-size:11px;
+  letter-spacing:2px; text-transform:uppercase; color:var(--ink);
+  padding:0 20px 12px; border-bottom:1px solid var(--border); margin-bottom:8px;
 }
 .lg-toc-link {
-  display: block; padding: 9px 18px;
-  font-family: var(--font-b); font-size: 13px; font-weight: 500;
-  color: var(--muted); text-decoration: none;
-  border-left: 2px solid transparent;
-  transition: color .15s, background .15s, border-color .15s;
+  display:block; padding:8px 20px; font-size:13px; font-weight:500;
+  color:var(--muted); text-decoration:none;
+  transition:color .15s, background .15s; border-left:2px solid transparent;
 }
-.lg-toc-link:hover  { color: var(--green); background: var(--green-lt); }
-.lg-toc-link.active { color: var(--green); background: var(--green-lt); border-left-color: var(--green); }
-
-[data-theme="dark"] .lg-toc { background: var(--surface-2); border-color: var(--border); }
+.lg-toc-link:hover  { color:var(--green); background:var(--green-lt); }
+.lg-toc-link.active { color:var(--green); border-left-color:var(--green); background:var(--green-lt); }
 [data-theme="dark"] .lg-toc-link:hover,
-[data-theme="dark"] .lg-toc-link.active { background: rgba(0,135,61,.1); }
+[data-theme="dark"] .lg-toc-link.active { background:rgba(0,135,61,.12); color:var(--green-pop); }
 
-/* ── CONTENT ── */
-.lg-section { padding: 40px 0; border-bottom: 1px solid var(--border); }
-.lg-section:last-child { border-bottom: none; padding-bottom: 0; }
-
+/* ══════════════════════════════════════
+   CONTENT
+══════════════════════════════════════ */
+.lg-section { padding:32px 0; border-bottom:1.5px solid var(--border); }
+.lg-section:last-child { border-bottom:none; }
 .lg-section-title {
-  font-family: var(--font-d);
-  font-size: clamp(20px, 2.5vw, 26px); font-weight: 800;
-  letter-spacing: -0.8px; color: var(--ink);
-  margin-bottom: 18px; scroll-margin-top: 108px;
+  font-family:var(--font-d); font-weight:800;
+  font-size:clamp(18px,2.5vw,24px); color:var(--ink);
+  margin-bottom:16px; letter-spacing:-.5px; scroll-margin-top:110px;
 }
+.lg-section-body { font-size:14px; color:var(--muted); line-height:1.85; }
+.lg-section-body p { margin-bottom:14px; }
+.lg-section-body p:last-child { margin-bottom:0; }
+.lg-section-body h3 { font-family:var(--font-d); font-weight:700; font-size:15px; color:var(--ink); margin:20px 0 10px; }
+.lg-section-body ul, .lg-section-body ol { margin:12px 0 14px 20px; }
+.lg-section-body li { margin-bottom:7px; line-height:1.7; }
+.lg-section-body a { color:var(--green); text-decoration:none; }
+.lg-section-body a:hover { text-decoration:underline; }
+.lg-section-body strong { color:var(--ink); }
 
-.lg-body-text { font-family: var(--font-b); font-size: 14px; line-height: 1.85; color: var(--muted); }
-.lg-body-text p { margin-bottom: 14px; }
-.lg-body-text p:last-child { margin-bottom: 0; }
-.lg-body-text strong { color: var(--ink); font-weight: 600; }
-.lg-body-text a { color: var(--green); text-decoration: none; }
-.lg-body-text a:hover { text-decoration: underline; }
-.lg-body-text h3 { font-family: var(--font-d); font-size: 15px; font-weight: 700; color: var(--ink); margin: 22px 0 10px; }
-.lg-body-text ul, .lg-body-text ol { margin: 10px 0 14px 18px; }
-.lg-body-text li { margin-bottom: 8px; line-height: 1.7; }
-
-/* Green highlight */
 .lg-highlight {
-  background: var(--green-lt);
-  border-left: 3px solid var(--green);
-  border-radius: 0 var(--r-md) var(--r-md) 0;
-  padding: 16px 20px; margin: 20px 0;
+  background:var(--green-lt); border-left:3px solid var(--green);
+  border-radius:0 var(--r-md) var(--r-md) 0;
+  padding:16px 20px; margin:20px 0;
 }
-.lg-highlight-title { font-family: var(--font-d); font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
-.lg-highlight p { font-family: var(--font-b); font-size: 13px; line-height: 1.7; color: var(--muted); margin: 0; }
+[data-theme="dark"] .lg-highlight { background:rgba(0,135,61,.08); }
+.lg-highlight-title {
+  font-family:var(--font-d); font-weight:700; font-size:13px;
+  color:var(--ink); margin-bottom:6px;
+}
+.lg-highlight p { font-size:13px; color:var(--muted); margin:0; line-height:1.7; }
 
-[data-theme="dark"] .lg-highlight { background: rgba(0,135,61,.1); border-color: var(--green); }
-[data-theme="dark"] .lg-highlight-title { color: #F0EFE9; }
-
-/* Amber warning box */
 .lg-warn {
-  background: rgba(245,158,11,.07);
-  border-left: 3px solid #F59E0B;
-  border-radius: 0 var(--r-md) var(--r-md) 0;
-  padding: 16px 20px; margin: 20px 0;
+  background:rgba(245,158,11,.08); border-left:3px solid #f59e0b;
+  border-radius:0 var(--r-md) var(--r-md) 0;
+  padding:16px 20px; margin:20px 0;
 }
-.lg-warn-title { font-family: var(--font-d); font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 6px; }
-.lg-warn p { font-family: var(--font-b); font-size: 13px; line-height: 1.7; color: var(--muted); margin: 0; }
+.lg-warn-title { font-family:var(--font-d); font-weight:700; font-size:13px; color:#92400e; margin-bottom:6px; }
+[data-theme="dark"] .lg-warn-title { color:#fbbf24; }
+.lg-warn p { font-size:13px; color:var(--muted); margin:0; line-height:1.7; }
 
-[data-theme="dark"] .lg-warn { background: rgba(245,158,11,.06); }
-[data-theme="dark"] .lg-warn-title { color: #FBBF24; }
-
-/* Fee tier table */
-.lg-tier-table {
-  width: 100%; border-collapse: collapse;
-  margin: 20px 0; font-size: 13px;
-  font-family: var(--font-b);
+@media(max-width:1024px) {
+  .legal-hero { padding:80px 40px 56px; }
+  .lg-layout  { padding:56px 40px; }
 }
-.lg-tier-table th {
-  background: var(--surface-2);
-  color: var(--ink); font-weight: 700;
-  padding: 10px 14px; text-align: left;
-  border-bottom: 2px solid var(--border);
-  font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
-}
-.lg-tier-table td {
-  padding: 10px 14px; color: var(--muted);
-  border-bottom: 1px solid var(--border); vertical-align: middle;
-}
-.lg-tier-table tr:last-child td { border-bottom: none; }
-.lg-tier-table tr:hover td { background: var(--surface-2); }
-.lg-tier-tag {
-  display: inline-flex; align-items: center;
-  padding: 3px 10px; border-radius: var(--r-pill);
-  font-size: 11px; font-weight: 700;
-  background: var(--green-lt); color: var(--green-dk);
-}
-[data-theme="dark"] .lg-tier-tag { background: rgba(0,135,61,.15); color: var(--green-pop); }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 900px) {
-  .lg-hero   { padding: 72px 28px 56px; }
-  .lg-layout { grid-template-columns: 1fr; gap: 0; padding: 48px 28px; }
-  .lg-toc-wrap { position: static; margin-bottom: 32px; }
-  .lg-tier-table { display: block; overflow-x: auto; }
-}
-@media (max-width: 480px) {
-  .lg-hero   { padding: 64px 20px 48px; }
-  .lg-layout { padding: 36px 20px; }
+@media(max-width:900px) {
+  .lg-layout { grid-template-columns:1fr; gap:0; padding:40px 24px; }
+  .legal-hero { padding:64px 24px 48px; }
+  .lg-sidebar-wrap { position:static; margin-bottom:32px; }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="lg-page">
 
-  <!-- ── HERO ── -->
-  <div class="lg-hero">
-    <div class="lg-hero-grid"></div>
-    <div class="lg-hero-glow"></div>
-    <div class="lg-hero-inner">
-      <div class="lg-eyebrow">
-        <div class="lg-eyebrow-line"></div>
-        <span class="lg-eyebrow-text">Legal</span>
-      </div>
-      <h1>Terms of <span>Service</span></h1>
-      <p class="lg-hero-sub">These terms govern your use of Vendopage — including the free catalogue, Store Mode payments, escrow protection, and all related services. They apply to vendors, buyers, and visitors in every country.</p>
-      <div class="lg-badges">
-        <span class="lg-badge"><span class="lg-badge-dot"></span>Last updated: May 2026</span>
-        <span class="lg-badge"><span class="lg-badge-dot"></span>Applies globally</span>
-        <span class="lg-badge"><span class="lg-badge-dot"></span>Escrow protected</span>
-      </div>
+<div class="legal-hero">
+  <div class="legal-hero-inner">
+    <span class="section-label"><span class="section-label-line"></span>Legal</span>
+    <h1>Terms of Service</h1>
+    <p class="legal-hero-sub">These terms govern your use of Vendopage — including the free catalogue, Store Mode payments, escrow protection, and all related services. They apply to vendors, buyers, and visitors in every country.</p>
+    <div class="legal-hero-meta">
+      <span class="legal-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Last updated: May 2026
+      </span>
+      <span class="legal-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Applies globally
+      </span>
+      <span class="legal-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Escrow protected
+      </span>
     </div>
   </div>
+</div>
 
-  <!-- ── BODY ── -->
+<div class="lg-body">
   <div class="lg-layout">
 
     <!-- SIDEBAR -->
-    <div class="lg-toc-wrap">
+    <div class="lg-sidebar-wrap">
       <nav class="lg-toc" id="lgToc">
-        <div class="lg-toc-head">
-          <div class="lg-toc-title">Contents</div>
-        </div>
+        <div class="lg-toc-title">Contents</div>
         <a class="lg-toc-link" href="#agreement">Agreement to Terms</a>
         <a class="lg-toc-link" href="#eligibility">Eligibility</a>
         <a class="lg-toc-link" href="#accounts">Account Responsibilities</a>
@@ -236,7 +165,6 @@
         <a class="lg-toc-link" href="#buyers">Buyer Responsibilities</a>
         <a class="lg-toc-link" href="#prohibited">Prohibited Content</a>
         <a class="lg-toc-link" href="#payments">Payments &amp; Store Mode</a>
-        <a class="lg-toc-link" href="#fees">Commission &amp; Fees</a>
         <a class="lg-toc-link" href="#escrow">Escrow Service</a>
         <a class="lg-toc-link" href="#delivery">Delivery &amp; Tracking</a>
         <a class="lg-toc-link" href="#disputes">Disputes &amp; Refunds</a>
@@ -253,19 +181,19 @@
 
       <div class="lg-section" id="agreement">
         <h2 class="lg-section-title">Agreement to Terms</h2>
-        <div class="lg-body-text">
-          <p>By accessing or using Vendopage ("the Platform", "we", "us", "our"), you agree to be bound by these Terms of Service and our <a href="{% url 'privacy' %}">Privacy Policy</a>. If you do not agree, please do not use Vendopage.</p>
+        <div class="lg-section-body">
+          <p>By accessing or using Vendopage ("the Platform", "we", "us", "our"), you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree, please do not use Vendopage.</p>
           <p>These terms apply to all users of the platform — vendors, buyers, and visitors — in every country. Vendopage is operated by Vendopage Global Ventures.</p>
           <div class="lg-highlight">
             <div class="lg-highlight-title">Plain English version</div>
-            <p>Using Vendopage means you've read and accepted these rules. We've written them as clearly as we can. If something isn't clear, message us on WhatsApp — we'll explain it.</p>
+            <p>Using Vendopage means you've read and accepted these rules. We've written them as clearly as we can. If something isn't clear, message us — we'll explain it.</p>
           </div>
         </div>
       </div>
 
       <div class="lg-section" id="eligibility">
         <h2 class="lg-section-title">Eligibility</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>You must be at least 18 years old to create a Vendopage vendor account, accept payments, or use Store Mode. Buyers of any age may browse public store pages.</p>
           <p>By creating an account, you confirm that you are 18 or older and have the legal right and capacity to enter into these terms in your country. If you are opening a Store Mode account, you also confirm that the bank account provided belongs to you or your registered business.</p>
         </div>
@@ -273,29 +201,29 @@
 
       <div class="lg-section" id="accounts">
         <h2 class="lg-section-title">Account Responsibilities</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>When you create a Vendopage account, you are responsible for:</p>
           <ul>
             <li>Providing accurate and truthful information — business name, email address, WhatsApp number, and bank details (for Store Mode)</li>
             <li>Keeping your login credentials secure and not sharing your password</li>
             <li>All activity that takes place under your account</li>
-            <li>Notifying us immediately at <a href="mailto:support@vendopage.com">support@vendopage.com</a> or <a href="https://wa.me/2347017820434">+234 701 782 0434</a> if you suspect unauthorised access</li>
+            <li>Notifying us immediately at <a href="mailto:support@vendopage.com">support@vendopage.com</a> or on WhatsApp at <a href="https://wa.me/2347017820434">+234 701 782 0434</a> if you suspect unauthorised access</li>
           </ul>
           <p>You may not create multiple accounts to evade suspensions, impersonate another person or business, or use Vendopage on behalf of a third party without their authorisation.</p>
           <h3>Your store URL</h3>
-          <p>Your store URL (vendopage.com/yourname) is generated from your business name at registration and is permanently associated with your account. Vendopage reserves the right to reclaim URLs that are inactive for extended periods, used to impersonate, or in violation of these terms.</p>
+          <p>Your store URL (vendopage.com/yourname) is chosen at registration and is permanently associated with your account. Vendopage reserves the right to reclaim URLs that are inactive for extended periods, used to impersonate, or in violation of these terms.</p>
         </div>
       </div>
 
       <div class="lg-section" id="sellers">
         <h2 class="lg-section-title">Seller Responsibilities</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>As a vendor on Vendopage, you agree to:</p>
           <ul>
             <li>Only list products or services you have the legal right to sell in your country</li>
             <li>Provide accurate product descriptions, real photos, and honest pricing — no misleading claims</li>
             <li>Honour the terms of every sale you agree to with a buyer</li>
-            <li>Ship Store Mode orders promptly and upload a valid tracking number or driver's contact to your order dashboard</li>
+            <li>Ship orders promptly and upload a valid tracking number or driver's contact to the dashboard</li>
             <li>Comply with all applicable local, national, and international laws governing your products and business</li>
             <li>Not use Vendopage to collect buyer data beyond what is necessary to fulfil an order</li>
           </ul>
@@ -308,11 +236,11 @@
 
       <div class="lg-section" id="buyers">
         <h2 class="lg-section-title">Buyer Responsibilities</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>As a buyer on Vendopage, you agree to:</p>
           <ul>
             <li>Provide an accurate delivery address at checkout</li>
-            <li>Confirm delivery promptly once your order arrives — funds are held until you do (or auto-released after 72 hours)</li>
+            <li>Confirm delivery promptly once your order arrives — funds are held until you do (or 72 hours auto-release)</li>
             <li>Not raise fraudulent disputes or falsely claim non-delivery</li>
             <li>Contact the seller or Vendopage support if an issue arises before initiating a chargeback with your bank</li>
           </ul>
@@ -322,7 +250,7 @@
 
       <div class="lg-section" id="prohibited">
         <h2 class="lg-section-title">Prohibited Content</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>The following is strictly prohibited on Vendopage, regardless of country:</p>
           <h3>Illegal goods and services</h3>
           <ul>
@@ -350,132 +278,92 @@
 
       <div class="lg-section" id="payments">
         <h2 class="lg-section-title">Payments &amp; Store Mode</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>Vendopage operates in two modes:</p>
           <h3>Free Catalogue Mode</h3>
           <p>In Catalogue Mode, buyers contact vendors directly via WhatsApp to complete purchases. Vendopage is not involved in these transactions — payment, delivery, and any disputes are handled entirely between the vendor and buyer. Vendopage takes no commission and processes no payments in this mode.</p>
-          <h3>Store Mode (direct payments)</h3>
-          <p>In Store Mode, vendors accept direct payments on their Vendopage store page. Payments are processed securely via Flutterwave. Vendopage holds funds in escrow until delivery is confirmed. To enable Store Mode, you must first add and verify a Nigerian bank account in your dashboard Settings. By enabling Store Mode, you agree to:</p>
+          <h3>Store Mode (paid payments)</h3>
+          <p>In Store Mode, vendors can accept direct payments on their Vendopage store. Payments are processed securely via Flutterwave. Vendopage acts as an intermediary holding funds in escrow until delivery is confirmed. By enabling Store Mode, you agree to:</p>
           <ul>
-            <li>Providing a verified Nigerian bank account for payouts</li>
+            <li>Providing a verified bank account for payouts in a supported country and currency</li>
             <li>Flutterwave's terms of service for payment processing</li>
             <li>Vendopage's escrow terms as described below</li>
-            <li>The applicable commission fees based on your subscription tier</li>
+            <li>Any applicable transaction or service fees as communicated in your dashboard</li>
           </ul>
           <div class="lg-warn">
-            <div class="lg-warn-title">Taxes and duties are your responsibility</div>
+            <div class="lg-warn-title">Important — taxes and duties</div>
             <p>Vendors are solely responsible for any taxes, VAT, duties, or regulatory fees applicable to their sales in their jurisdiction. Vendopage does not collect or remit taxes on your behalf.</p>
           </div>
         </div>
       </div>
 
-      <div class="lg-section" id="fees">
-        <h2 class="lg-section-title">Commission &amp; Fees</h2>
-        <div class="lg-body-text">
-          <p>Vendopage charges a platform commission on Store Mode transactions. The rate depends on your subscription tier and your monthly processed volume. Catalogue Mode (WhatsApp-only) is always free with no commissions.</p>
-          <table class="lg-tier-table">
-            <thead>
-              <tr>
-                <th>Tier</th>
-                <th>Monthly Fee</th>
-                <th>Commission Rate</th>
-                <th>Monthly Volume Cap</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><span class="lg-tier-tag">Starter</span></td>
-                <td>Free</td>
-                <td>5%</td>
-                <td>₦50,000</td>
-              </tr>
-              <tr>
-                <td><span class="lg-tier-tag">Growth</span></td>
-                <td>₦2,500/mo</td>
-                <td>2.5%</td>
-                <td>₦300,000</td>
-              </tr>
-              <tr>
-                <td><span class="lg-tier-tag">Pro</span></td>
-                <td>₦5,000/mo</td>
-                <td>1.5%</td>
-                <td>₦1,500,000</td>
-              </tr>
-            </tbody>
-          </table>
-          <p>Once your monthly processed volume exceeds your tier's cap, a fallback rate of <strong>5%</strong> applies to all further transactions until the next billing month resets your volume counter. Your current rate and monthly volume are always visible in your dashboard.</p>
-          <p>Commission is deducted from the buyer's payment before the remainder (your payout) is transferred to your bank account. The exact commission rate applied is recorded against each order for full auditability.</p>
-        </div>
-      </div>
-
       <div class="lg-section" id="escrow">
         <h2 class="lg-section-title">Escrow Service</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>When a buyer pays via escrow in Store Mode, the following applies:</p>
           <ul>
             <li><strong>Funds held:</strong> Payment is received by Vendopage and held in escrow — not transferred to the seller — until delivery is confirmed or the 72-hour auto-release period expires.</li>
             <li><strong>Seller obligation:</strong> The seller must ship the order and upload a valid courier tracking number or driver's contact number to the dashboard within a reasonable time.</li>
-            <li><strong>Buyer confirmation:</strong> Once the buyer confirms receipt, funds are released. Payout is processed via our daily cron at 2 AM the night after confirmation, after a 24-hour buffer to allow for disputes.</li>
-            <li><strong>72-hour auto-release:</strong> If the buyer does not confirm or dispute within 72 hours of the seller marking the order shipped, the order moves to RECEIVED status and is queued for the next payout run.</li>
-            <li><strong>T+1 payout cycle:</strong> Payouts are processed nightly in the order received (oldest first), subject to Flutterwave's T+1 clearing cycle. Sellers are paid in chronological order.</li>
+            <li><strong>Buyer confirmation:</strong> Once the buyer receives and confirms their order, funds are released to the seller's verified bank account.</li>
+            <li><strong>72-hour auto-release:</strong> If the buyer does not respond within 72 hours of the seller marking the order as delivered, funds are automatically released to the seller.</li>
             <li><strong>Direct payment option:</strong> Buyers may also choose to pay the seller directly (outside escrow). In this case, Vendopage holds no funds and is not responsible for the outcome of the transaction.</li>
           </ul>
           <div class="lg-highlight">
             <div class="lg-highlight-title">Escrow only covers payments made through Vendopage</div>
-            <p>Escrow protection only applies to payments made directly on the Vendopage platform using Store Mode. Payments made via bank transfer, mobile money, or any method outside the platform are not covered.</p>
+            <p>Escrow protection only applies to payments made directly on the Vendopage platform using Store Mode. Payments made via bank transfer, mobile money, or any method outside the platform are not covered by Vendopage escrow.</p>
           </div>
         </div>
       </div>
 
       <div class="lg-section" id="delivery">
         <h2 class="lg-section-title">Delivery &amp; Tracking</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>For Store Mode orders, sellers are required to:</p>
           <ul>
             <li>Ship the order within a reasonable time after receiving payment confirmation</li>
             <li>Upload a courier tracking number or driver's phone number to the order dashboard</li>
           </ul>
-          <p>Once tracking details are uploaded, Vendopage automatically emails the buyer with delivery tracking information so they can follow their order.</p>
+          <p>Once tracking details are uploaded, Vendopage automatically sends delivery tracking information to the buyer's registered email address so they can follow their order.</p>
           <p>Vendopage is not a courier or logistics provider. We do not arrange or guarantee delivery. We are not liable for delays, lost packages, or damage caused by third-party couriers or drivers.</p>
         </div>
       </div>
 
       <div class="lg-section" id="disputes">
         <h2 class="lg-section-title">Disputes &amp; Refunds</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>If a buyer has not received their order, or the item received does not match the listing, they may open a dispute before confirming delivery. Vendopage will:</p>
           <ul>
             <li>Review the dispute within 48 hours</li>
             <li>Request evidence from both parties (photos, tracking records, messages)</li>
-            <li>Issue a fair resolution — either releasing funds to the seller or refunding the buyer via Flutterwave</li>
+            <li>Issue a fair resolution — either releasing funds to the seller or refunding the buyer</li>
           </ul>
-          <p>Because funds are held in escrow, the buyer's money has not been sent to the seller at the time of a dispute. This means refunds can be issued promptly when the buyer's claim is valid. Refunds are processed via Flutterwave and typically arrive within 3–5 business days.</p>
+          <p>Because funds are held in escrow, the buyer's money has not been sent to the seller at the time of a dispute. This means refunds can be issued promptly when the buyer's claim is valid.</p>
           <div class="lg-warn">
             <div class="lg-warn-title">Disputes must be raised before confirming delivery</div>
-            <p>Once a buyer confirms delivery, the transaction is considered complete and funds are queued for payout to the seller. Disputes cannot be raised after this point through Vendopage. Please inspect your order carefully before confirming receipt.</p>
+            <p>Once a buyer confirms delivery, the transaction is considered complete and funds are released to the seller. Disputes cannot be raised after this point through Vendopage. Please inspect your order before confirming.</p>
           </div>
-          <p>For free Catalogue Mode transactions (handled outside the platform via WhatsApp), Vendopage cannot mediate disputes and is not responsible for outcomes.</p>
+          <p>For free Catalogue Mode transactions (handled outside the platform), Vendopage cannot mediate disputes and is not responsible for outcomes.</p>
         </div>
       </div>
 
       <div class="lg-section" id="ip">
         <h2 class="lg-section-title">Intellectual Property</h2>
-        <div class="lg-body-text">
-          <p>You retain ownership of all content you upload to Vendopage — including product photos stored on Cloudinary, descriptions, and store information. By uploading content, you grant Vendopage a non-exclusive, worldwide, royalty-free licence to display your content on the platform for the purpose of operating your store.</p>
+        <div class="lg-section-body">
+          <p>You retain ownership of all content you upload to Vendopage — including product photos, descriptions, and store information. By uploading content, you grant Vendopage a non-exclusive, worldwide, royalty-free licence to display your content on the platform for the purpose of operating your store.</p>
           <p>Vendopage's branding, interface design, code, and platform features are protected intellectual property. You may not copy, reproduce, or distribute any part of Vendopage's proprietary assets without express written permission.</p>
         </div>
       </div>
 
       <div class="lg-section" id="termination">
         <h2 class="lg-section-title">Account Termination</h2>
-        <div class="lg-body-text">
-          <p>You may delete your account at any time from your account settings. Upon deletion, your store page and product listings will be removed. Any pending escrow payouts will be processed before account deletion is finalised.</p>
+        <div class="lg-section-body">
+          <p>You may delete your account at any time from your account settings. Upon deletion, your store page and product listings will be removed. Any pending escrow payouts will be processed first before account deletion is finalised.</p>
           <p>Vendopage reserves the right to suspend or permanently terminate accounts that:</p>
           <ul>
             <li>Violate these Terms of Service</li>
             <li>Engage in fraud, scamming, or harmful activity</li>
             <li>List prohibited content</li>
-            <li>Fail to fulfil Store Mode orders without valid reason</li>
+            <li>Fail to fulfil escrow orders without valid reason</li>
             <li>Receive sustained, verified reports of misconduct from buyers</li>
             <li>Provide false bank account or identity information for payouts</li>
           </ul>
@@ -485,7 +373,7 @@
 
       <div class="lg-section" id="liability">
         <h2 class="lg-section-title">Limitation of Liability</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>Vendopage is provided "as is" and "as available" without warranties of any kind, either express or implied. We do not warrant that the platform will be uninterrupted, error-free, or completely secure at all times.</p>
           <p>To the maximum extent permitted by applicable law, Vendopage and its team shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the platform — including lost revenue, lost data, or business interruption.</p>
           <p>Our liability for escrow transactions is limited to the amount of funds actually held in escrow for the specific transaction in question. We are not liable for losses arising from a buyer's or seller's own actions, fraud by third parties, courier failures, or events outside our reasonable control.</p>
@@ -495,7 +383,7 @@
 
       <div class="lg-section" id="changes">
         <h2 class="lg-section-title">Changes to Terms</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>We may update these Terms of Service from time to time. When we make significant changes, we will notify registered users by email and update the date at the top of this page.</p>
           <p>Your continued use of Vendopage after changes take effect constitutes acceptance of the revised terms. If you disagree with any changes, you may delete your account before they take effect.</p>
         </div>
@@ -503,7 +391,7 @@
 
       <div class="lg-section" id="contact">
         <h2 class="lg-section-title">Contact</h2>
-        <div class="lg-body-text">
+        <div class="lg-section-body">
           <p>If you have questions about these Terms of Service, please contact us through any of the following:</p>
           <ul>
             <li>WhatsApp (fastest): <a href="https://wa.me/2347017820434">+234 701 782 0434</a></li>
@@ -516,39 +404,37 @@
       </div>
 
     </main>
-  </div><!-- /.lg-layout -->
-</div><!-- /.lg-page -->
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
+<!-- Tawk.to -->
 <script type="text/javascript">
 var Tawk_API=Tawk_API||{},Tawk_LoadStart=new Date();
 (function(){var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];s1.async=true;s1.src='https://embed.tawk.to/69fa16efaad7681c33913fa1/1jnsej74t';s1.charset='UTF-8';s1.setAttribute('crossorigin','*');s0.parentNode.insertBefore(s1,s0);})();
 </script>
 <script>
-(function () {
-  const sections = document.querySelectorAll('.lg-section[id]');
-  const tocLinks = document.querySelectorAll('.lg-toc-link');
-
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        tocLinks.forEach(l => l.classList.remove('active'));
-        const a = document.querySelector(`.lg-toc-link[href="#${e.target.id}"]`);
-        if (a) a.classList.add('active');
-      }
-    });
-  }, { rootMargin: '-20% 0px -65% 0px' });
-
-  sections.forEach(s => obs.observe(s));
-
-  tocLinks.forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      const id = link.getAttribute('href').slice(1);
-      document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+const lgSections = document.querySelectorAll('.lg-section');
+const lgTocLinks = document.querySelectorAll('.lg-toc-link');
+const lgObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      lgTocLinks.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector(`.lg-toc-link[href="#${e.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
   });
-})();
+}, { rootMargin:'-30% 0px -60% 0px' });
+lgSections.forEach(s => lgObs.observe(s));
+
+lgTocLinks.forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    const id = link.getAttribute('href').slice(1);
+    document.getElementById(id)?.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+});
 </script>
 {% endblock %}
