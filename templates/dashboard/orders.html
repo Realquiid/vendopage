@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 {% load static %}
 {% include 'dashboard/_nav.html' %}
@@ -8,32 +7,19 @@
 <style>
 
 /* ─────────────────────────────────────
-   THEME TOKENS
+   THEME — uses base.html tokens
 ───────────────────────────────────── */
 :root{
-  --bg:#0D0D0D;
-  --card:#1A1A18;
-  --card-2:#151515;
-  --text:#F5F4F0;
-  --muted:rgba(245,244,240,.4);
-  --border:rgba(255,255,255,.07);
-  --green:#00873D;
-  --blue:#60a5fa;
-  --amber:#FBBF24;
-  --red:#f87171;
+  --grid-line: rgba(13,13,13,.025);
+  --status-blue:   #2563eb;
+  --status-amber:  #b45309;
+  --status-red:    #dc2626;
 }
-
-[data-theme="light"]{
-  --bg:#F6F6F4;
-  --card:#FFFFFF;
-  --card-2:#FAFAF9;
-  --text:#0D0D0D;
-  --muted:#6B7280;
-  --border:#E5E7EB;
-  --green:#00873D;
-  --blue:#2563EB;
-  --amber:#F59E0B;
-  --red:#DC2626;
+[data-theme="dark"]{
+  --grid-line: rgba(255,255,255,.018);
+  --status-blue:   #60a5fa;
+  --status-amber:  #FBBF24;
+  --status-red:    #f87171;
 }
 
 /* ─────────────────────────────────────
@@ -41,7 +27,7 @@
 ───────────────────────────────────── */
 
 .vp-orders{
-  background:var(--bg);
+  background:var(--surface);
   min-height:100vh;
   padding-bottom:90px;
   position:relative;
@@ -53,12 +39,11 @@
   position:fixed;
   inset:0;
   background-image:
-    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size:72px 72px;
   pointer-events:none;
 }
-[data-theme="light"] .vp-orders::before { display:none; }
 
 .vp-orders-inner{
   max-width:1100px;
@@ -91,11 +76,11 @@
 }
 
 .vp-orders-title{
-  font-family:'Cabinet Grotesk',sans-serif;
+  font-family:var(--font-d);
   font-size:42px;
   font-weight:800;
   letter-spacing:-2px;
-  color:var(--text);
+  color:var(--ink);
   line-height:1;
 }
 
@@ -103,25 +88,6 @@
   margin-top:8px;
   color:var(--muted);
   font-size:14px;
-}
-
-.vp-back-btn{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:10px 16px;
-  border-radius:100px;
-  border:1px solid var(--border);
-  background:var(--card);
-  text-decoration:none;
-  color:var(--text);
-  font-size:13px;
-  font-weight:700;
-  transition:.18s;
-}
-
-.vp-back-btn:hover{
-  transform:translateY(-1px);
 }
 
 /* ─────────────────────────────────────
@@ -136,7 +102,7 @@
 }
 
 .vp-stat{
-  background:var(--card);
+  background:var(--white);
   border:1px solid var(--border);
   border-radius:18px;
   padding:22px;
@@ -152,17 +118,17 @@
 }
 
 .vp-stat-value{
-  font-family:'Cabinet Grotesk',sans-serif;
+  font-family:var(--font-d);
   font-size:30px;
   font-weight:800;
-  color:var(--text);
+  color:var(--ink);
   line-height:1;
 }
 
 .vp-stat-value.green{ color:var(--green); }
-.vp-stat-value.blue{ color:var(--blue); }
-.vp-stat-value.amber{ color:var(--amber); }
-.vp-stat-value.red{ color:var(--red); }
+.vp-stat-value.blue{ color:var(--status-blue); }
+.vp-stat-value.amber{ color:var(--status-amber); }
+.vp-stat-value.red{ color:var(--status-red); }
 
 /* ─────────────────────────────────────
    FILTERS
@@ -179,89 +145,77 @@
   padding:9px 16px;
   border-radius:100px;
   border:1px solid var(--border);
-  background:var(--card);
+  background:var(--white);
   text-decoration:none;
   color:var(--muted);
   font-size:12px;
   font-weight:700;
   transition:.18s;
 }
+.vp-tab:hover{ color:var(--ink); border-color:var(--muted-lt); }
 
 .vp-tab.active{
-  background:var(--text);
-  color:var(--bg);
-  border-color:var(--text);
+  background:var(--ink);
+  color:var(--surface);
+  border-color:var(--ink);
 }
 
 /* ─────────────────────────────────────
    TABLE
 ───────────────────────────────────── */
 
-.vp-orders-table{
-  background:var(--card);
+.vp-orders-table-wrap{
+  background:var(--white);
   border:1px solid var(--border);
   border-radius:22px;
-  overflow:hidden;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
 }
 
-.vp-orders-head-row{
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr 1fr 1fr 120px;
+.vp-orders-table{
+  width:100%;
+  min-width:760px;
+  border-collapse:collapse;
+}
+
+.vp-orders-table thead th{
+  text-align:left;
   padding:14px 24px;
+  background:var(--surface-2);
   border-bottom:1px solid var(--border);
-  background:var(--card-2);
   font-size:11px;
   text-transform:uppercase;
   letter-spacing:1px;
   color:var(--muted);
   font-weight:700;
+  white-space:nowrap;
 }
+.vp-orders-table thead th:last-child{ text-align:right; }
 
-.vp-order-row{
-  display:grid;
-  grid-template-columns:2fr 1fr 1fr 1fr 1fr 120px;
-  align-items:center;
+.vp-orders-table tbody td{
   padding:18px 24px;
   border-bottom:1px solid var(--border);
-  transition:.15s;
-  text-decoration:none;
-  color:inherit;
+  vertical-align:middle;
+  font-size:14px;
+  color:var(--ink);
+  white-space:nowrap;
 }
-
-.vp-order-row:last-child{
-  border-bottom:none;
-}
-
-.vp-order-row:hover{
-  background:rgba(127,127,127,.04);
-}
+.vp-orders-table tbody tr:last-child td{ border-bottom:none; }
+.vp-orders-table tbody tr:hover{ background:var(--surface-2); }
+.vp-orders-table tbody td:last-child{ text-align:right; }
 
 /* buyer */
+.vp-buyer{ font-weight:700; font-size:15px; color:var(--ink); }
+.vp-ref{ margin-top:3px; font-size:11px; color:var(--muted); font-family:monospace; }
 
-.vp-buyer{
-  font-weight:700;
-  font-size:15px;
-  color:var(--text);
-}
-
-.vp-ref{
-  margin-top:3px;
-  font-size:11px;
-  color:var(--muted);
-  font-family:monospace;
-}
+/* items / date */
+.vp-muted-cell{ color:var(--muted); font-size:13px; }
 
 /* amount */
-
-.vp-amount{
-  font-family:'Cabinet Grotesk',sans-serif;
-  font-size:16px;
-  font-weight:800;
-  color:var(--text);
-}
+.vp-amount{ font-family:var(--font-d); font-size:16px; font-weight:800; color:var(--ink); }
 
 /* badge */
-
 .vp-badge{
   display:inline-flex;
   align-items:center;
@@ -272,30 +226,14 @@
   text-transform:uppercase;
   font-weight:700;
   letter-spacing:.5px;
+  white-space:nowrap;
 }
-
-.badge-paid{
-  background:rgba(37,99,235,.1);
-  color:var(--blue);
-}
-
-.badge-shipped{
-  background:rgba(245,158,11,.1);
-  color:var(--amber);
-}
-
-.badge-completed{
-  background:rgba(0,135,61,.12);
-  color:var(--green);
-}
-
-.badge-disputed{
-  background:rgba(220,38,38,.1);
-  color:var(--red);
-}
+.badge-paid{ background:rgba(37,99,235,.1); color:var(--status-blue); }
+.badge-shipped{ background:rgba(245,158,11,.1); color:var(--status-amber); }
+.badge-completed{ background:rgba(0,135,61,.12); color:var(--green); }
+.badge-disputed{ background:rgba(220,38,38,.1); color:var(--status-red); }
 
 /* buttons */
-
 .vp-action{
   display:inline-flex;
   align-items:center;
@@ -308,34 +246,42 @@
   font-weight:700;
   transition:.18s;
 }
-
 .vp-action.ship{
-  background:var(--text);
-  color:var(--bg);
-  border-color:var(--text);
+  background:var(--ink);
+  color:var(--surface);
+  border-color:var(--ink);
 }
-
+.vp-action.ship:hover{ opacity:.88; }
 .vp-action.view{
-  background:var(--card);
-  color:var(--text);
+  background:var(--white);
+  color:var(--ink);
 }
+.vp-action.view:hover{ border-color:var(--muted-lt); }
+.vp-action:hover{ transform:translateY(-1px); }
 
-.vp-action:hover{
-  transform:translateY(-1px);
+/* scroll hint (mobile only) */
+.vp-scroll-hint{
+  display:none;
+  align-items:center;
+  gap:6px;
+  font-size:11.5px;
+  font-weight:600;
+  color:var(--muted);
+  margin-bottom:10px;
+  padding:0 4px;
 }
 
 /* empty */
-
 .vp-empty{
   padding:90px 30px;
   text-align:center;
 }
 
 .vp-empty h3{
-  font-family:'Cabinet Grotesk',sans-serif;
+  font-family:var(--font-d);
   font-size:22px;
   font-weight:800;
-  color:var(--text);
+  color:var(--ink);
   margin-bottom:10px;
 }
 
@@ -345,30 +291,17 @@
 }
 
 /* mobile */
-
 @media(max-width:900px){
 
   .vp-orders-inner{
     padding:20px 16px;
   }
 
-  .vp-orders-head-row{
-    display:none;
-  }
-
-  .vp-order-row{
-    grid-template-columns:1fr;
-    gap:12px;
-  }
-
-  .vp-order-actions{
-    display:flex;
-  }
-
   .vp-orders-title{
     font-size:34px;
   }
 
+  .vp-scroll-hint{ display:flex; }
 }
 
 </style>
@@ -471,107 +404,81 @@
 
   </div>
 
+  {% if orders %}
+  <!-- SCROLL HINT (mobile) -->
+  <div class="vp-scroll-hint">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    Swipe sideways to see more
+  </div>
+  {% endif %}
+
   <!-- TABLE -->
 
-  <div class="vp-orders-table">
-
-    <div class="vp-orders-head-row">
-      <span>Buyer</span>
-      <span>Items</span>
-      <span>Amount</span>
-      <span>Status</span>
-      <span>Date</span>
-      <span></span>
-    </div>
+  <div class="vp-orders-table-wrap">
 
     {% if orders %}
+    <table class="vp-orders-table">
+      <thead>
+        <tr>
+          <th>Buyer</th>
+          <th>Items</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+        <tr>
 
-      {% for order in orders %}
+          <!-- buyer -->
+          <td>
+            <div class="vp-buyer">{{ order.buyer_name }}</div>
+            <div class="vp-ref">#{{ order.order_ref|slice:":8"|upper }}</div>
+          </td>
 
-      <div class="vp-order-row">
+          <!-- items -->
+          <td class="vp-muted-cell">
+            {{ order.items.count }} item{{ order.items.count|pluralize }}
+          </td>
 
-        <!-- buyer -->
+          <!-- amount -->
+          <td class="vp-amount">
+            {{ order.currency }} {{ order.subtotal|floatformat:0 }}
+          </td>
 
-        <div>
-          <div class="vp-buyer">
-            {{ order.buyer_name }}
-          </div>
+          <!-- status -->
+          <td>
+            {% if order.status == 'paid' %}
+              <span class="vp-badge badge-paid">To Ship</span>
+            {% elif order.status == 'shipped' %}
+              <span class="vp-badge badge-shipped">Shipped</span>
+            {% elif order.status == 'completed' %}
+              <span class="vp-badge badge-completed">Completed</span>
+            {% elif order.status == 'disputed' %}
+              <span class="vp-badge badge-disputed">Disputed</span>
+            {% endif %}
+          </td>
 
-          <div class="vp-ref">
-            #{{ order.order_ref|slice:":8"|upper }}
-          </div>
-        </div>
+          <!-- date -->
+          <td class="vp-muted-cell">
+            {{ order.created_at|date:"M d, H:i" }}
+          </td>
 
-        <!-- items -->
+          <!-- action -->
+          <td>
+            {% if order.status == 'paid' or order.status == 'disputed' %}
+              <a href="{% url 'mark_shipped' order.order_ref %}" class="vp-action ship">Ship</a>
+            {% else %}
+              <a href="{% url 'vendor_order_detail' order.order_ref %}" class="vp-action view">View</a>
+            {% endif %}
+          </td>
 
-        <div>
-          {{ order.items.count }} item{{ order.items.count|pluralize }}
-        </div>
-
-        <!-- amount -->
-
-        <div class="vp-amount">
-          {{ order.currency }} {{ order.subtotal|floatformat:0 }}
-        </div>
-
-        <!-- status -->
-
-        <div>
-
-          {% if order.status == 'paid' %}
-            <span class="vp-badge badge-paid">
-              To Ship
-            </span>
-
-          {% elif order.status == 'shipped' %}
-            <span class="vp-badge badge-shipped">
-              Shipped
-            </span>
-
-          {% elif order.status == 'completed' %}
-            <span class="vp-badge badge-completed">
-              Completed
-            </span>
-
-          {% elif order.status == 'disputed' %}
-            <span class="vp-badge badge-disputed">
-              Disputed
-            </span>
-          {% endif %}
-
-        </div>
-
-        <!-- date -->
-
-        <div>
-          {{ order.created_at|date:"M d, H:i" }}
-        </div>
-
-        <!-- action -->
-
-        <div class="vp-order-actions">
-
-          {% if order.status == 'paid' or order.status == 'disputed' %}
-
-          <a href="{% url 'mark_shipped' order.order_ref %}"
-             class="vp-action ship">
-            Ship
-          </a>
-
-          {% else %}
-
-          <a href="{% url 'vendor_order_detail' order.order_ref %}"
-             class="vp-action view">
-            View
-          </a>
-
-          {% endif %}
-
-        </div>
-
-      </div>
-
-      {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
     {% else %}
 
