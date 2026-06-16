@@ -5,344 +5,362 @@
 
 {% block extra_css %}
 <style>
-/*
-  Layout & structure tokens use base.html vars:
-    var(--surface)   page bg
-    var(--white)     card bg
-    var(--surface-2) card-alt bg
-    var(--ink)       primary text
-    var(--muted)     secondary text
-    var(--muted-lt)  tertiary text
-    var(--border)    dividers
-    var(--green)     brand green
-    var(--red)       error/dispute
-    var(--font-d)    Cabinet Grotesk
-    var(--font-b)    Satoshi
-    var(--r-lg/r-pill/r-md/r-sm)  radii
-    var(--sh-sm/sh-md/sh-lg)      shadows
 
-  Semantic status colours are local because they
-  have no base.html equivalent.
-*/
-
-/* ── Local status tokens ── */
-:root {
-  --ord-green-bg:  #ECFDF3;
-  --ord-blue:      #2563EB;
-  --ord-blue-bg:   #EFF6FF;
-  --ord-amber:     #D97706;
-  --ord-amber-bg:  #FFF7ED;
-  --ord-amber-txt: #92400e;
-  --ord-red-bg:    #FEF2F2;
-  --ord-purple:    #7C3AED;
+/* ─────────────────────────────────────
+   THEME — base.html tokens only
+───────────────────────────────────── */
+:root{
+  --grid-line: rgba(13,13,13,.025);
+  --status-blue:   #2563eb;
+  --status-amber:  #b45309;
+  --status-red:    #dc2626;
+  --status-purple: #7c3aed;
 }
-[data-theme="dark"] {
-  --ord-green-bg:  rgba(0,135,61,.12);
-  --ord-blue-bg:   rgba(37,99,235,.12);
-  --ord-amber-bg:  rgba(245,158,11,.1);
-  --ord-amber-txt: #fbbf24;
-  --ord-red-bg:    rgba(220,38,38,.12);
+[data-theme="dark"]{
+  --grid-line: rgba(255,255,255,.018);
+  --status-blue:   #60a5fa;
+  --status-amber:  #FBBF24;
+  --status-red:    #f87171;
+  --status-purple: #a78bfa;
 }
 
-/* ── PAGE ── */
-.vp-order-page {
-  background: var(--surface);
-  min-height: 100vh;
-  padding: 36px 18px 100px;
-  position: relative; overflow: hidden;
+/* ─────────────────────────────────────
+   PAGE
+───────────────────────────────────── */
+.vp-order-page{
+  background:var(--surface);
+  min-height:100vh;
+  padding:40px 24px 90px;
+  position:relative;
+  overflow-x:hidden;
 }
-
-/* Subtle grid — uses --border so it adapts to both modes */
-.vp-order-page::before {
-  content: '';
-  position: fixed; inset: 0;
+.vp-order-page::before{
+  content:'';
+  position:fixed; inset:0;
   background-image:
-    linear-gradient(var(--border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--border) 1px, transparent 1px);
-  background-size: 72px 72px;
-  opacity: .5;
-  pointer-events: none;
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:72px 72px;
+  pointer-events:none;
+}
+.vp-order-inner{
+  max-width:1160px;
+  margin:0 auto;
+  position:relative; z-index:2;
 }
 
-.vp-order-inner {
-  max-width: 1180px; margin: 0 auto;
-  position: relative; z-index: 2;
+/* ─────────────────────────────────────
+   HEADER
+───────────────────────────────────── */
+.vp-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px; flex-wrap:wrap;
+  margin-bottom:28px;
+}
+.vp-pill{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:7px 14px; border-radius:100px;
+  background:var(--ink); color:var(--surface);
+  font-size:11px; font-weight:700;
+  letter-spacing:1px; font-family:monospace;
+  margin-bottom:14px;
+}
+.vp-title{
+  font-family:var(--font-d);
+  font-size:clamp(28px,4vw,40px);
+  font-weight:800; line-height:1;
+  letter-spacing:-2px; color:var(--ink);
+  margin-bottom:10px;
+}
+.vp-sub{ font-size:14px; color:var(--muted); }
+.vp-back{
+  height:48px; padding:0 18px;
+  border-radius:100px;
+  border:1px solid var(--border);
+  background:var(--white);
+  display:inline-flex; align-items:center; gap:10px;
+  text-decoration:none; color:var(--ink);
+  font-size:13px; font-weight:700;
+  transition:.18s;
+}
+.vp-back:hover{ transform:translateY(-1px); border-color:var(--muted-lt); }
+
+/* ─────────────────────────────────────
+   STATUS BADGES
+───────────────────────────────────── */
+.vp-status{
+  display:inline-flex; align-items:center; gap:7px;
+  padding:6px 14px; border-radius:100px;
+  font-size:11px; text-transform:uppercase;
+  letter-spacing:.6px; font-weight:700;
+}
+.vp-status-dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+.status-paid    { background:rgba(180,83,9,.1);   color:var(--status-amber); }
+.status-shipped { background:rgba(37,99,235,.1);  color:var(--status-blue); }
+.status-completed,.status-delivered,.status-RECEIVED{
+                  background:rgba(0,135,61,.12);  color:var(--green); }
+.status-disputed{ background:rgba(220,38,38,.1);  color:var(--status-red); }
+.status-refunded{ background:rgba(124,58,237,.1); color:var(--status-purple); }
+
+/* ─────────────────────────────────────
+   LAYOUT
+───────────────────────────────────── */
+.vp-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 300px;
+  gap:20px; align-items:start;
+}
+.vp-aside{
+  position:sticky; top:90px;
+  display:flex; flex-direction:column; gap:18px;
 }
 
-/* ── HEADER ── */
-.vp-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px; flex-wrap: wrap;
-  margin-bottom: 28px;
+/* ─────────────────────────────────────
+   CARDS
+───────────────────────────────────── */
+.vp-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:24px;
+  overflow:hidden;
+  margin-bottom:18px;
+}
+.vp-card:last-child{ margin-bottom:0; }
+.vp-card-head{
+  padding:20px 24px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center;
+  justify-content:space-between; gap:12px;
+}
+.vp-card-title{
+  font-family:var(--font-d);
+  font-size:17px; font-weight:800; color:var(--ink);
+}
+.vp-card-body{ padding:24px; }
+
+/* ─────────────────────────────────────
+   ITEMS TABLE (scrollable)
+───────────────────────────────────── */
+.vp-items-scroll{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;
+}
+.vp-items-table{
+  width:100%; min-width:480px;
+  border-collapse:collapse;
+}
+.vp-items-table thead th{
+  text-align:left;
+  padding:11px 16px;
+  background:var(--surface-2);
+  border-bottom:1px solid var(--border);
+  font-size:10px; text-transform:uppercase;
+  letter-spacing:1px; color:var(--muted);
+  font-weight:700; white-space:nowrap;
+}
+.vp-items-table thead th:last-child{ text-align:right; }
+.vp-items-table tbody td{
+  padding:16px 16px;
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+  font-size:14px; color:var(--ink);
+}
+.vp-items-table tbody tr:last-child td{ border-bottom:none; }
+.vp-items-table tbody td:last-child{ text-align:right; }
+
+.vp-item-wrap{ display:flex; align-items:center; gap:14px; }
+.vp-item-img{
+  width:52px; height:52px; border-radius:12px;
+  object-fit:cover; flex-shrink:0;
+}
+.vp-item-ph{
+  width:52px; height:52px; border-radius:12px;
+  background:var(--surface-2); flex-shrink:0;
+  display:flex; align-items:center;
+  justify-content:center; font-size:22px;
+}
+.vp-item-name{ font-size:14px; font-weight:700; color:var(--ink); }
+.vp-item-meta{ font-size:12px; color:var(--muted); margin-top:2px; }
+.vp-item-price{
+  font-family:var(--font-d);
+  font-size:16px; font-weight:800; color:var(--ink);
+}
+.vp-table-muted{ color:var(--muted); font-size:13px; }
+
+.vp-total{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:18px 24px;
+  border-top:1px solid var(--border);
+  font-size:15px; font-weight:800; color:var(--ink);
 }
 
-.vp-pill {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 6px 14px; border-radius: var(--r-pill);
-  background: var(--ink); color: var(--surface);
-  font-size: 11px; font-weight: 700; letter-spacing: 1px;
-  font-family: monospace; margin-bottom: 12px;
+/* scroll hint */
+.vp-scroll-hint{
+  display:none;
+  align-items:center; gap:6px;
+  font-size:11px; font-weight:600;
+  color:var(--muted); margin-bottom:8px;
 }
 
-.vp-title {
-  font-family: var(--font-d);
-  font-size: clamp(28px, 5vw, 40px);
-  font-weight: 800; line-height: 1;
-  letter-spacing: -2px; color: var(--ink); margin-bottom: 10px;
+/* ─────────────────────────────────────
+   INFO GRID
+───────────────────────────────────── */
+.vp-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px;
+}
+.vp-field label{
+  display:block; margin-bottom:6px;
+  font-size:11px; text-transform:uppercase;
+  letter-spacing:1px; color:var(--muted);
+  font-weight:700;
+}
+.vp-field span{
+  font-size:14px; color:var(--ink);
+  line-height:1.7; word-break:break-word;
 }
 
-.vp-sub { font-size: 14px; color: var(--muted); line-height: 1.5; }
+/* ─────────────────────────────────────
+   SHIPPING BOX
+───────────────────────────────────── */
+.vp-ship-box{
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:16px; padding:18px;
+  line-height:2; font-size:14px; color:var(--ink);
+}
+.vp-ship-box strong{ color:var(--ink); }
 
-.vp-header-right {
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-  padding-top: 4px;
+/* ─────────────────────────────────────
+   DISPUTE
+───────────────────────────────────── */
+.vp-dispute{
+  background:rgba(220,38,38,.06);
+  border:1px solid rgba(220,38,38,.15);
+  border-radius:24px; padding:26px;
+  margin-bottom:22px;
 }
+[data-theme="dark"] .vp-dispute{ background:rgba(220,38,38,.08); }
+.vp-dispute h3{
+  font-family:var(--font-d); font-size:20px; font-weight:800;
+  color:var(--status-red); margin-bottom:18px;
+}
+.vp-dispute-box{
+  background:var(--white);
+  border:1px solid rgba(220,38,38,.12);
+  border-radius:16px; padding:18px; margin-bottom:12px;
+}
+.vp-dispute-box strong{
+  display:block; margin-bottom:8px;
+  font-size:11px; text-transform:uppercase;
+  letter-spacing:1px; color:var(--status-red);
+}
+.vp-dispute-box p{ margin:0; line-height:1.8; font-size:14px; color:var(--ink); }
+.vp-reply{ margin-top:18px; }
+.vp-dispute-label{
+  display:block; margin-bottom:8px;
+  font-size:12px; font-weight:700; color:var(--status-red);
+}
+.vp-d-input, .vp-d-textarea{
+  width:100%; border-radius:14px;
+  border:1px solid rgba(220,38,38,.2);
+  background:var(--white); color:var(--ink);
+  padding:13px 16px; box-sizing:border-box;
+  outline:none; font-size:14px; transition:.18s;
+  margin-bottom:12px; font-family:var(--font-b);
+}
+.vp-d-textarea{ resize:vertical; min-height:120px; }
+.vp-d-input:focus, .vp-d-textarea:focus{ border-color:var(--status-red); }
+.vp-d-submit{
+  height:48px; border:none; border-radius:100px;
+  background:var(--status-red); color:#fff;
+  font-size:13px; font-weight:700;
+  padding:0 22px; cursor:pointer;
+  font-family:var(--font-b); transition:.18s;
+}
+.vp-d-submit:hover{ opacity:.88; }
 
-.vp-back {
-  height: 44px; padding: 0 18px; border-radius: var(--r-pill);
-  border: 1px solid var(--border); background: var(--white);
-  display: inline-flex; align-items: center; gap: 8px;
-  text-decoration: none; color: var(--ink);
-  font-family: var(--font-b); font-size: 13px; font-weight: 700;
-  transition: all .18s; white-space: nowrap;
+/* ─────────────────────────────────────
+   SIDEBAR BUTTONS
+───────────────────────────────────── */
+.vp-actions{ display:flex; flex-direction:column; gap:10px; }
+.vp-btn{
+  height:50px; border-radius:100px;
+  display:flex; align-items:center;
+  justify-content:center; gap:10px;
+  text-decoration:none; font-size:14px; font-weight:700;
+  transition:.18s; border:none; cursor:pointer;
+  font-family:var(--font-b);
 }
-.vp-back:hover { transform: translateY(-1px); box-shadow: var(--sh-sm); }
+.vp-btn-primary{ background:var(--ink); color:var(--surface); }
+.vp-btn-primary:hover{ opacity:.88; transform:translateY(-1px); }
+.vp-btn-secondary{
+  background:var(--surface-2);
+  border:1px solid var(--border); color:var(--ink);
+}
+.vp-btn-secondary:hover{ border-color:var(--muted-lt); transform:translateY(-1px); }
 
-/* ── STATUS PILL ── */
-.vp-status {
-  display: inline-flex; align-items: center; gap: 7px;
-  padding: 6px 14px; border-radius: var(--r-pill);
-  font-size: 11px; text-transform: uppercase;
-  letter-spacing: .6px; font-weight: 700; white-space: nowrap;
-  font-family: var(--font-b);
+/* ─────────────────────────────────────
+   PAYOUT ROWS
+───────────────────────────────────── */
+.vp-pay-row{
+  display:flex; justify-content:space-between;
+  align-items:center; padding:13px 0;
+  border-bottom:1px solid var(--border);
 }
-.vp-status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.vp-pay-row:last-child{ border-bottom:none; }
+.vp-pay-label{ font-size:13px; color:var(--muted); }
+.vp-pay-value{ font-size:14px; font-weight:700; color:var(--ink); }
+.vp-pay-green{ color:var(--green); font-size:18px; }
+.vp-pay-red{ color:var(--status-red); }
 
-.status-paid       { background: var(--ord-amber-bg); color: var(--ord-amber); }
-.status-shipped    { background: var(--ord-blue-bg);  color: var(--ord-blue); }
-.status-completed  { background: var(--ord-green-bg); color: var(--green); }
-.status-RECEIVED   { background: var(--ord-green-bg); color: var(--green); }
-.status-disputed   { background: var(--ord-red-bg);   color: var(--red); }
-.status-refunded   { background: rgba(124,58,237,.1);  color: var(--ord-purple); }
+/* ─────────────────────────────────────
+   INFO BOXES (escrow / direct)
+───────────────────────────────────── */
+.vp-info-box{
+  border-radius:20px; padding:20px;
+  line-height:1.8; font-size:13px;
+}
+.vp-info-box strong{
+  display:block; margin-bottom:6px; font-size:14px;
+}
+.vp-escrow{
+  background:rgba(0,135,61,.08);
+  border:1px solid rgba(0,135,61,.15);
+  color:var(--green);
+}
+.vp-direct{
+  background:rgba(180,83,9,.08);
+  border:1px solid rgba(180,83,9,.15);
+  color:var(--status-amber);
+}
+[data-theme="dark"] .vp-direct{ color:#FBBF24; }
 
-/* ── LAYOUT ── */
-.vp-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 316px;
-  gap: 20px; align-items: start;
+/* ─────────────────────────────────────
+   RESPONSIVE
+───────────────────────────────────── */
+@media(max-width:980px){
+  .vp-layout{ grid-template-columns:1fr; }
+  .vp-aside{ position:static; }
 }
-.vp-sidebar {
-  position: sticky; top: 88px;
-  display: flex; flex-direction: column; gap: 18px;
-}
-
-/* ── CARDS ── */
-.vp-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: 22px; overflow: hidden;
-  margin-bottom: 18px;
-}
-.vp-card:last-child { margin-bottom: 0; }
-
-.vp-card-head {
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between; gap: 12px;
-}
-.vp-card-title {
-  font-family: var(--font-d); font-size: 17px; font-weight: 800; color: var(--ink);
-}
-.vp-card-body { padding: 24px; }
-
-/* ── ORDER ITEMS ── */
-.vp-item {
-  display: flex; gap: 16px;
-  padding: 18px 0; border-bottom: 1px solid var(--border);
-}
-.vp-item:last-child { border-bottom: none; }
-
-.vp-item-img, .vp-item-ph {
-  width: 60px; height: 60px; border-radius: var(--r-md); flex-shrink: 0;
-}
-.vp-item-img  { object-fit: cover; }
-.vp-item-ph   { background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 22px; }
-
-.vp-item-info { flex: 1; min-width: 0; }
-.vp-item-name {
-  font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 4px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.vp-item-meta { font-size: 13px; color: var(--muted); }
-.vp-item-price {
-  font-family: var(--font-d); font-size: 16px; font-weight: 800; color: var(--ink);
-  white-space: nowrap;
-}
-
-.vp-total {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 18px 24px; border-top: 1px solid var(--border);
-  font-family: var(--font-d); font-size: 15px; font-weight: 800; color: var(--ink);
-}
-
-/* ── BUYER INFO GRID ── */
-.vp-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
-}
-.vp-field label {
-  display: block; margin-bottom: 5px;
-  font-family: var(--font-b); font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 1px; color: var(--muted-lt);
-}
-.vp-field span {
-  font-family: var(--font-b); font-size: 14px; color: var(--ink);
-  line-height: 1.7; word-break: break-word;
-}
-
-/* ── SHIPPING BOX ── */
-.vp-ship-box {
-  background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--r-md); padding: 18px;
-  line-height: 2; font-size: 14px; color: var(--ink);
-  font-family: var(--font-b);
-}
-.vp-ship-box strong { color: var(--ink); font-weight: 700; }
-
-/* ── ACTIONS (sidebar) ── */
-.vp-actions { display: flex; flex-direction: column; gap: 10px; }
-.vp-btn {
-  height: 48px; border-radius: var(--r-pill);
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  text-decoration: none; font-family: var(--font-b);
-  font-size: 14px; font-weight: 700; transition: all .18s;
-  border: none; cursor: pointer;
-}
-.vp-btn-primary  { background: var(--ink);    color: var(--surface); }
-.vp-btn-secondary{ background: var(--surface-2); border: 1px solid var(--border); color: var(--ink); }
-.vp-btn:hover    { transform: translateY(-1px); box-shadow: var(--sh-sm); }
-[data-theme="dark"] .vp-btn-primary { background: var(--ink); color: #111110; }
-
-/* ── PAYOUT BREAKDOWN ── */
-.vp-pay-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 13px 0; border-bottom: 1px solid var(--border);
-}
-.vp-pay-row:last-child { border-bottom: none; }
-.vp-pay-label { font-family: var(--font-b); font-size: 13px; color: var(--muted); }
-.vp-pay-value { font-family: var(--font-b); font-size: 14px; font-weight: 700; color: var(--ink); }
-.vp-pay-green { color: var(--green) !important; font-size: 17px !important; font-family: var(--font-d) !important; }
-
-/* ── INFO BOXES (escrow / direct) ── */
-.vp-info-box {
-  border-radius: 18px; padding: 20px;
-  line-height: 1.8; font-size: 13px; font-family: var(--font-b);
-}
-.vp-info-box strong { display: block; margin-bottom: 5px; font-size: 14px; font-weight: 700; }
-
-.vp-escrow {
-  background: var(--ord-green-bg);
-  border: 1px solid rgba(0,135,61,.14);
-  color: var(--green);
-}
-.vp-direct {
-  background: var(--ord-amber-bg);
-  border: 1px solid rgba(245,158,11,.15);
-  color: var(--ord-amber-txt);
+@media(max-width:640px){
+  .vp-order-page{ padding:24px 16px 90px; }
+  .vp-grid{ grid-template-columns:1fr; }
+  .vp-card-body, .vp-card-head{ padding:18px; }
+  .vp-total{ padding:16px 18px; }
+  .vp-scroll-hint{ display:flex; }
 }
 
-/* ── DISPUTE SECTION ── */
-.vp-dispute {
-  background: var(--ord-red-bg);
-  border: 1px solid rgba(220,38,38,.14);
-  border-radius: 22px; padding: 24px;
-  margin-bottom: 24px;
-}
-.vp-dispute h3 {
-  font-family: var(--font-d); font-size: 20px; font-weight: 800;
-  color: var(--red); margin-bottom: 18px;
-}
-.vp-dispute-box {
-  background: var(--white); border: 1px solid rgba(220,38,38,.12);
-  border-radius: 14px; padding: 16px; margin-bottom: 12px;
-}
-.vp-dispute-box:last-of-type { margin-bottom: 0; }
-.vp-dispute-box strong {
-  display: block; margin-bottom: 8px;
-  font-family: var(--font-b); font-size: 10px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 1px; color: var(--red);
-}
-.vp-dispute-box p {
-  margin: 0; line-height: 1.8;
-  font-family: var(--font-b); font-size: 14px; color: var(--ink);
-}
-
-/* Dispute reply form */
-.vp-reply { margin-top: 20px; }
-.vp-label {
-  display: block; margin-bottom: 8px;
-  font-family: var(--font-b); font-size: 12px; font-weight: 700; color: var(--red);
-}
-/* font-size 16px prevents iOS zoom on focus */
-.vp-input, .vp-textarea {
-  width: 100%; border-radius: var(--r-md);
-  border: 1px solid rgba(220,38,38,.2);
-  background: var(--white); color: var(--ink);
-  padding: 13px 15px; box-sizing: border-box;
-  outline: none; font-size: 16px;
-  font-family: var(--font-b);
-  transition: border-color .18s; margin-bottom: 12px;
-}
-.vp-textarea { resize: vertical; min-height: 110px; }
-.vp-input:focus, .vp-textarea:focus { border-color: var(--red); }
-.vp-submit {
-  height: 48px; border: none; border-radius: var(--r-pill);
-  background: var(--red); color: #fff;
-  font-family: var(--font-b); font-size: 14px; font-weight: 700;
-  padding: 0 24px; cursor: pointer;
-  transition: opacity .18s;
-  -webkit-tap-highlight-color: transparent;
-}
-.vp-submit:hover { opacity: .88; }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 980px) {
-  .vp-layout { grid-template-columns: 1fr; }
-  .vp-sidebar { position: static; }
-}
-
-@media (max-width: 640px) {
-  .vp-order-page { padding: 24px 14px 90px; }
-  .vp-title      { font-size: 28px; letter-spacing: -1.2px; }
-  .vp-grid       { grid-template-columns: 1fr; gap: 14px; }
-  .vp-card-body, .vp-card-head { padding: 16px; }
-  .vp-total      { padding: 16px; }
-  .vp-header     { flex-direction: column; gap: 12px; }
-  .vp-header-right { width: 100%; }
-  .vp-back       { flex: 1; justify-content: center; }
-  .vp-status     { font-size: 10px; }
-  .vp-item       { gap: 12px; }
-  .vp-item-img, .vp-item-ph { width: 52px; height: 52px; }
-  .vp-dispute    { padding: 18px; }
-  .vp-dispute-box { padding: 14px; }
-  .vp-submit     { width: 100%; }
-  .vp-btn        { height: 52px; font-size: 15px; }
-  .vp-card       { border-radius: 16px; }
-}
-
-@media (max-width: 400px) {
-  .vp-item-price { font-size: 14px; }
-  .vp-item-name  { font-size: 13px; }
-}
 </style>
 {% endblock %}
 
 {% block content %}
 
-{% include 'dashboard/_nav.html' with active_nav='orders' %}
-
-<div class="vp-order-page">
+<div class="vp-order-page vp-has-sidebar">
 <div class="vp-order-inner">
 
   <!-- HEADER -->
@@ -350,26 +368,23 @@
     <div>
       <div class="vp-pill">#{{ order.order_ref|slice:":8"|upper }}</div>
       <h1 class="vp-title">Order Details</h1>
-      <p class="vp-sub">
-        {{ order.buyer_name }} &nbsp;·&nbsp;
-        Placed {{ order.created_at|date:"F d, Y \\a\\t H:i" }}
-      </p>
+      <div class="vp-sub">
+        {{ order.buyer_name }} · Placed {{ order.created_at|date:"F d, Y \\a\\t H:i" }}
+      </div>
     </div>
-    <div class="vp-header-right">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
       <span class="vp-status status-{{ order.status }}">
         <span class="vp-status-dot"></span>
         {{ order.get_status_display }}
       </span>
       <a href="{% url 'vendor_orders' %}" class="vp-back">
-        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <polyline points="15 18 9 12 15 6"/>
-        </svg>
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         All Orders
       </a>
     </div>
   </div>
 
-  <!-- DISPUTE SECTION -->
+  <!-- DISPUTE -->
   {% if dispute %}
   <div class="vp-dispute">
     <h3>⚠️ Dispute Raised</h3>
@@ -382,10 +397,7 @@
     {% if dispute.buyer_evidence %}
     <div class="vp-dispute-box">
       <strong>Buyer Evidence</strong>
-      <p>
-        <a href="{{ dispute.buyer_evidence }}" target="_blank"
-           style="color:var(--red);font-weight:700;">View evidence →</a>
-      </p>
+      <p><a href="{{ dispute.buyer_evidence }}" target="_blank" style="color:var(--status-red);font-weight:700;">View evidence →</a></p>
     </div>
     {% endif %}
 
@@ -408,20 +420,16 @@
       <form method="POST">
         {% csrf_token %}
         <input type="hidden" name="action" value="reply_dispute">
-
-        <label class="vp-label">
+        <label class="vp-dispute-label">
           {% if dispute.vendor_reply %}Update your response{% else %}Your response{% endif %}
         </label>
-        <textarea name="vendor_reply" class="vp-textarea"
-                  placeholder="Explain your side clearly..."
-                  required>{{ dispute.vendor_reply|default:'' }}</textarea>
-
-        <label class="vp-label">Evidence link (optional)</label>
-        <input type="text" name="vendor_evidence" class="vp-input"
-               value="{{ dispute.vendor_evidence|default:'' }}"
-               placeholder="Tracking URL or proof link">
-
-        <button type="submit" class="vp-submit">
+        <textarea name="vendor_reply" class="vp-d-textarea"
+          placeholder="Explain your side clearly..." required>{{ dispute.vendor_reply|default:'' }}</textarea>
+        <label class="vp-dispute-label">Evidence link (optional)</label>
+        <input type="text" name="vendor_evidence" class="vp-d-input"
+          value="{{ dispute.vendor_evidence|default:'' }}"
+          placeholder="Tracking URL or proof link">
+        <button type="submit" class="vp-d-submit">
           {% if dispute.vendor_reply %}Update Response{% else %}Submit Response{% endif %}
         </button>
       </form>
@@ -430,33 +438,57 @@
   </div>
   {% endif %}
 
-  <!-- TWO-COLUMN LAYOUT -->
+  <!-- LAYOUT -->
   <div class="vp-layout">
 
-    <!-- MAIN COLUMN -->
+    <!-- MAIN -->
     <div>
 
-      <!-- ITEMS -->
+      <!-- ITEMS TABLE -->
       <div class="vp-card">
         <div class="vp-card-head">
           <div class="vp-card-title">Items Ordered</div>
         </div>
-        <div class="vp-card-body">
-          {% for item in order.items.all %}
-          <div class="vp-item">
-            {% if item.product_image_url %}
-              <img src="{{ item.product_image_url }}" class="vp-item-img" alt="{{ item.product_name }}">
-            {% else %}
-              <div class="vp-item-ph">📦</div>
-            {% endif %}
-            <div class="vp-item-info">
-              <div class="vp-item-name">{{ item.product_name }}</div>
-              <div class="vp-item-meta">Qty: {{ item.quantity }} × {{ order.currency }} {{ item.price|floatformat:0 }}</div>
-            </div>
-            <div class="vp-item-price">{{ order.currency }} {{ item.price|floatformat:0 }}</div>
-          </div>
-          {% endfor %}
+
+        <div class="vp-scroll-hint" style="padding:12px 24px 0;">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          Swipe sideways to see more
         </div>
+
+        <div class="vp-items-scroll">
+          <table class="vp-items-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in order.items.all %}
+              <tr>
+                <td>
+                  <div class="vp-item-wrap">
+                    {% if item.product_image_url %}
+                      <img src="{{ item.product_image_url }}" class="vp-item-img" alt="{{ item.product_name }}">
+                    {% else %}
+                      <div class="vp-item-ph">📦</div>
+                    {% endif %}
+                    <div>
+                      <div class="vp-item-name">{{ item.product_name }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="vp-table-muted">{{ item.quantity }}</td>
+                <td class="vp-table-muted">{{ order.currency }} {{ item.price|floatformat:0 }}</td>
+                <td class="vp-item-price">{{ order.currency }} {{ item.line_total|floatformat:0 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
         <div class="vp-total">
           <span>Order Total</span>
           <span>{{ order.currency }} {{ order.subtotal|floatformat:0 }}</span>
@@ -466,14 +498,26 @@
       <!-- BUYER & DELIVERY -->
       <div class="vp-card">
         <div class="vp-card-head">
-          <div class="vp-card-title">Buyer & Delivery</div>
+          <div class="vp-card-title">Buyer &amp; Delivery</div>
         </div>
         <div class="vp-card-body">
           <div class="vp-grid">
-            <div class="vp-field"><label>Name</label><span>{{ order.buyer_name }}</span></div>
-            <div class="vp-field"><label>Phone</label><span>{{ order.buyer_phone }}</span></div>
-            <div class="vp-field"><label>Email</label><span>{{ order.buyer_email }}</span></div>
-            <div class="vp-field"><label>City</label><span>{{ order.delivery_city|default:"—" }}</span></div>
+            <div class="vp-field">
+              <label>Name</label>
+              <span>{{ order.buyer_name }}</span>
+            </div>
+            <div class="vp-field">
+              <label>Phone</label>
+              <span>{{ order.buyer_phone }}</span>
+            </div>
+            <div class="vp-field">
+              <label>Email</label>
+              <span>{{ order.buyer_email }}</span>
+            </div>
+            <div class="vp-field">
+              <label>City</label>
+              <span>{{ order.delivery_city|default:"—" }}</span>
+            </div>
             <div class="vp-field" style="grid-column:1/-1;">
               <label>Delivery Address</label>
               <span>{{ order.delivery_address }}</span>
@@ -482,7 +526,7 @@
         </div>
       </div>
 
-      <!-- SHIPMENT (only if shipped) -->
+      <!-- SHIPMENT DETAILS -->
       {% if order.tracking_info %}
       <div class="vp-card">
         <div class="vp-card-head">
@@ -502,10 +546,10 @@
       </div>
       {% endif %}
 
-    </div><!-- /main column -->
+    </div>
 
     <!-- SIDEBAR -->
-    <div class="vp-sidebar">
+    <div class="vp-aside">
 
       <!-- ACTIONS -->
       <div class="vp-card">
@@ -516,19 +560,9 @@
           <div class="vp-actions">
             {% if order.status == 'paid' or order.status == 'disputed' %}
             <a href="{% url 'mark_shipped' order_ref=order.order_ref %}" class="vp-btn vp-btn-primary">
-              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <rect x="1" y="3" width="15" height="13"/>
-                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
-                <circle cx="5.5" cy="18.5" r="2.5"/>
-                <circle cx="18.5" cy="18.5" r="2.5"/>
-              </svg>
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
               Mark as Shipped
             </a>
-            {% endif %}
-            {% if not order.status == 'paid' and not order.status == 'disputed' %}
-            <p style="font-family:var(--font-b);font-size:13px;color:var(--muted);text-align:center;padding:8px 0;">
-              No actions available for this order status.
-            </p>
             {% endif %}
           </div>
         </div>
@@ -546,15 +580,11 @@
           </div>
           <div class="vp-pay-row">
             <span class="vp-pay-label">Platform Fee</span>
-            <span class="vp-pay-value" style="color:var(--red);">
-              − {{ order.currency }} {{ order.platform_fee|floatformat:0 }}
-            </span>
+            <span class="vp-pay-value vp-pay-red">− {{ order.currency }} {{ order.platform_fee|floatformat:0 }}</span>
           </div>
           <div class="vp-pay-row">
             <span class="vp-pay-label">Your Payout</span>
-            <span class="vp-pay-value vp-pay-green">
-              {{ order.currency }} {{ order.vendor_payout|floatformat:0 }}
-            </span>
+            <span class="vp-pay-value vp-pay-green">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</span>
           </div>
           <div class="vp-pay-row">
             <span class="vp-pay-label">Payout Status</span>
@@ -565,7 +595,7 @@
         </div>
       </div>
 
-      <!-- ESCROW / DIRECT INFO BOX -->
+      <!-- ESCROW / DIRECT -->
       {% if order.payment_type == 'escrow' %}
       <div class="vp-info-box vp-escrow">
         <strong>🔒 Escrow Active</strong>
@@ -578,12 +608,11 @@
       </div>
       {% endif %}
 
-    </div><!-- /sidebar -->
+    </div>
 
-  </div><!-- /vp-layout -->
+  </div>
 
 </div>
 </div>
-
 {% block footer %}{% endblock %}
 {% endblock %}

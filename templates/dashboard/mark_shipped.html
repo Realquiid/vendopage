@@ -1,342 +1,217 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}
-Mark as Shipped — Order #{{ order.order_ref|slice:":8"|upper }}
-{% endblock %}
+{% block title %}Mark as Shipped — Order #{{ order.order_ref|slice:":8"|upper }}{% endblock %}
 
 {% block extra_css %}
 <style>
 
 /* ─────────────────────────────────────
-   THEME TOKENS
+   THEME — base.html tokens only
 ───────────────────────────────────── */
-
 :root{
-  --bg:#F6F6F4;
-  --card:#FFFFFF;
-  --card-2:#FAFAF9;
-  --text:#0D0D0D;
-  --muted:#6B7280;
-  --border:#E5E7EB;
-
-  --green:#00873D;
-  --green-bg:#ECFDF3;
-
-  --blue:#2563EB;
-  --blue-bg:#EFF6FF;
+  --grid-line: rgba(13,13,13,.025);
+  --status-blue: #2563eb;
 }
-
 [data-theme="dark"]{
-  --bg:#0D0D0D;
-  --card:#1A1A18;
-  --card-2:#151515;
-  --text:#F5F4F0;
-  --muted:rgba(245,244,240,.45);
-  --border:rgba(255,255,255,.07);
-
-  --green-bg:rgba(0,135,61,.12);
-  --blue-bg:rgba(37,99,235,.12);
+  --grid-line: rgba(255,255,255,.018);
+  --status-blue: #60a5fa;
 }
 
 /* ─────────────────────────────────────
    PAGE
 ───────────────────────────────────── */
-
 .vp-ship-page{
-  background:var(--bg);
+  background:var(--surface);
   min-height:100vh;
-  padding:40px 18px 80px;
+  padding:40px 24px 80px;
   position:relative;
   overflow:hidden;
 }
-
 .vp-ship-page::before{
-  content:'';
-  position:fixed;
-  inset:0;
+  content:''; position:fixed; inset:0;
   background-image:
-    linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size:72px 72px;
   pointer-events:none;
 }
-
 .vp-ship-wrap{
-  max-width:680px;
+  max-width:660px;
   margin:0 auto;
-  position:relative;
-  z-index:2;
+  position:relative; z-index:2;
 }
 
 /* ─────────────────────────────────────
    CARD
 ───────────────────────────────────── */
-
 .vp-ship-card{
-  background:var(--card);
+  background:var(--white);
   border:1px solid var(--border);
   border-radius:28px;
   overflow:hidden;
-  backdrop-filter:blur(20px);
 }
 
 /* ─────────────────────────────────────
    HEADER
 ───────────────────────────────────── */
-
 .vp-ship-header{
-  padding:34px;
+  padding:32px 34px;
   border-bottom:1px solid var(--border);
+  position:relative; overflow:hidden;
 }
-
+.vp-ship-header::before{
+  content:''; position:absolute; top:0; left:0; right:0; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(0,200,83,.5), transparent);
+}
 .vp-order-pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  padding:7px 14px;
-  border-radius:100px;
-  background:var(--text);
-  color:var(--bg);
-  font-size:11px;
-  font-weight:700;
-  letter-spacing:1px;
-  font-family:monospace;
+  display:inline-flex; align-items:center; gap:8px;
+  padding:7px 14px; border-radius:100px;
+  background:var(--ink); color:var(--surface);
+  font-size:11px; font-weight:700;
+  letter-spacing:1px; font-family:monospace;
   margin-bottom:18px;
 }
-
 .vp-ship-title{
-  font-family:'Cabinet Grotesk',sans-serif;
-  font-size:36px;
-  font-weight:800;
-  line-height:1;
-  letter-spacing:-2px;
-  color:var(--text);
+  font-family:var(--font-d);
+  font-size:clamp(28px,4vw,36px);
+  font-weight:800; line-height:1;
+  letter-spacing:-2px; color:var(--ink);
   margin-bottom:12px;
 }
-
 .vp-ship-sub{
-  font-size:14px;
-  line-height:1.7;
-  color:var(--muted);
-  max-width:500px;
+  font-size:14px; line-height:1.7;
+  color:var(--muted); max-width:500px;
 }
 
 /* ─────────────────────────────────────
    BODY
 ───────────────────────────────────── */
-
-.vp-ship-body{
-  padding:32px 34px;
-}
+.vp-ship-body{ padding:28px 34px; }
 
 /* ─────────────────────────────────────
-   MINI SUMMARY
+   MINI ORDER SUMMARY
 ───────────────────────────────────── */
-
 .vp-mini-card{
-  background:var(--card-2);
+  background:var(--surface-2);
   border:1px solid var(--border);
-  border-radius:20px;
-  padding:22px;
-  margin-bottom:22px;
+  border-radius:18px; padding:20px;
+  margin-bottom:20px;
 }
-
 .vp-mini-title{
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  color:var(--muted);
-  font-weight:700;
-  margin-bottom:18px;
+  font-size:11px; text-transform:uppercase;
+  letter-spacing:1px; color:var(--muted);
+  font-weight:700; margin-bottom:16px;
 }
-
 .vp-mini-row{
-  display:flex;
-  justify-content:space-between;
-  gap:14px;
-  padding:10px 0;
-  border-bottom:1px solid var(--border);
+  display:flex; justify-content:space-between;
+  align-items:flex-start; gap:14px;
+  padding:10px 0; border-bottom:1px solid var(--border);
 }
-
-.vp-mini-row:last-child{
-  border-bottom:none;
-  padding-bottom:0;
-}
-
-.vp-mini-label{
-  font-size:13px;
-  color:var(--muted);
-}
-
+.vp-mini-row:last-child{ border-bottom:none; padding-bottom:0; }
+.vp-mini-label{ font-size:13px; color:var(--muted); flex-shrink:0; }
 .vp-mini-value{
-  font-size:14px;
-  color:var(--text);
-  font-weight:700;
-  text-align:right;
+  font-size:13px; color:var(--ink);
+  font-weight:700; text-align:right;
+  word-break:break-word;
 }
 
 /* ─────────────────────────────────────
-   NOTICE
+   ESCROW NOTICE
 ───────────────────────────────────── */
-
 .vp-notice{
-  background:var(--green-bg);
-  border:1px solid rgba(0,135,61,.15);
-  border-radius:18px;
-  padding:22px;
-  margin-bottom:22px;
+  background:rgba(0,135,61,.08);
+  border:1px solid rgba(0,135,61,.18);
+  border-radius:16px; padding:20px;
+  margin-bottom:20px;
 }
-
+[data-theme="dark"] .vp-notice{ background:rgba(0,135,61,.1); }
 .vp-notice h4{
-  font-size:14px;
-  font-weight:800;
-  color:var(--green);
-  margin-bottom:10px;
+  font-size:14px; font-weight:800;
+  color:var(--green); margin-bottom:10px;
 }
-
-.vp-notice ul{
-  margin:0;
-  padding-left:18px;
-}
-
+.vp-notice ul{ margin:0; padding-left:18px; }
 .vp-notice li{
-  font-size:13px;
-  line-height:1.9;
-  color:var(--text);
+  font-size:13px; line-height:1.9; color:var(--ink);
 }
 
 /* ─────────────────────────────────────
    FORM
 ───────────────────────────────────── */
-
-.vp-form-group{
-  margin-bottom:22px;
-}
-
+.vp-form-group{ margin-bottom:20px; }
 .vp-label{
-  display:block;
-  margin-bottom:10px;
-  font-size:13px;
-  font-weight:700;
-  color:var(--muted);
+  display:block; margin-bottom:8px;
+  font-size:13px; font-weight:700; color:var(--muted);
 }
-
-.vp-label span{
-  opacity:.6;
-  font-weight:500;
-}
-
+.vp-label span{ opacity:.65; font-weight:500; }
 .vp-input{
-  width:100%;
-  height:54px;
-  padding:0 18px;
-  border-radius:16px;
-  border:1px solid var(--border);
-  background:var(--card-2);
-  color:var(--text);
-  font-size:14px;
-  outline:none;
-  transition:.18s;
-  box-sizing:border-box;
+  width:100%; height:52px;
+  padding:0 18px; border-radius:14px;
+  border:1.5px solid var(--border);
+  background:var(--surface-2); color:var(--ink);
+  font-size:14px; outline:none;
+  transition:.18s; box-sizing:border-box;
+  font-family:var(--font-b);
 }
-
 .vp-input:focus{
   border-color:var(--green);
   box-shadow:0 0 0 4px rgba(0,135,61,.08);
 }
-
-.vp-input::placeholder{
-  color:var(--muted);
-}
+.vp-input::placeholder{ color:var(--muted-lt); }
 
 /* ─────────────────────────────────────
-   AUTO INFO
+   INFO BOX
 ───────────────────────────────────── */
-
 .vp-auto{
-  background:var(--blue-bg);
-  border:1px solid rgba(37,99,235,.12);
-  border-radius:16px;
-  padding:16px 18px;
-  font-size:13px;
-  line-height:1.7;
-  color:var(--text);
+  background:rgba(37,99,235,.08);
+  border:1px solid rgba(37,99,235,.15);
+  border-radius:14px; padding:15px 18px;
+  font-size:13px; line-height:1.7;
+  color:var(--ink);
 }
+[data-theme="dark"] .vp-auto{
+  background:rgba(96,165,250,.08);
+  border-color:rgba(96,165,250,.15);
+}
+.vp-auto strong{ color:var(--status-blue); }
 
 /* ─────────────────────────────────────
-   FOOTER
+   FOOTER BUTTONS
 ───────────────────────────────────── */
-
 .vp-ship-footer{
-  padding:28px 34px;
+  padding:24px 34px;
   border-top:1px solid var(--border);
-  display:flex;
-  gap:12px;
+  display:flex; gap:12px;
 }
-
 .vp-btn{
-  height:52px;
-  border-radius:100px;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  text-decoration:none;
-  font-size:14px;
-  font-weight:700;
-  transition:.18s;
-  cursor:pointer;
+  height:52px; border-radius:100px;
+  display:inline-flex; align-items:center;
+  justify-content:center; gap:10px;
+  text-decoration:none; font-size:14px; font-weight:700;
+  transition:.18s; cursor:pointer;
+  font-family:var(--font-b);
 }
-
 .vp-btn-cancel{
-  flex:1;
-  background:var(--card-2);
-  border:1px solid var(--border);
-  color:var(--text);
+  flex:1; background:var(--surface-2);
+  border:1px solid var(--border); color:var(--ink);
 }
-
+.vp-btn-cancel:hover{ border-color:var(--muted-lt); }
 .vp-btn-primary{
-  flex:2;
-  border:none;
-  background:var(--text);
-  color:var(--bg);
+  flex:2; border:none;
+  background:var(--ink); color:var(--surface);
 }
-
-.vp-btn:hover{
-  transform:translateY(-1px);
-}
+.vp-btn-primary:hover{ opacity:.88; }
+.vp-btn:hover{ transform:translateY(-1px); }
 
 /* ─────────────────────────────────────
-   MOBILE
+   RESPONSIVE
 ───────────────────────────────────── */
-
 @media(max-width:640px){
-
-  .vp-ship-header,
-  .vp-ship-body,
-  .vp-ship-footer{
-    padding:22px;
-  }
-
-  .vp-ship-footer{
-    flex-direction:column-reverse;
-  }
-
-  .vp-mini-row{
-    flex-direction:column;
-    align-items:flex-start;
-  }
-
-  .vp-mini-value{
-    text-align:left;
-  }
-
-  .vp-ship-title{
-    font-size:30px;
-  }
-
+  .vp-ship-page{ padding:20px 16px 80px; }
+  .vp-ship-header, .vp-ship-body, .vp-ship-footer{ padding:22px; }
+  .vp-ship-footer{ flex-direction:column-reverse; }
+  .vp-mini-row{ flex-direction:column; gap:4px; }
+  .vp-mini-value{ text-align:left; }
 }
 
 </style>
@@ -344,141 +219,88 @@ Mark as Shipped — Order #{{ order.order_ref|slice:":8"|upper }}
 
 {% block content %}
 
-<div class="vp-ship-page">
+<div class="vp-ship-page vp-has-sidebar">
 <div class="vp-ship-wrap">
 
   <div class="vp-ship-card">
 
     <!-- HEADER -->
-
     <div class="vp-ship-header">
-
-      <div class="vp-order-pill">
-        #{{ order.order_ref|slice:":8"|upper }}
-      </div>
-
-      <h1 class="vp-ship-title">
-        Mark as Shipped
-      </h1>
-
+      <div class="vp-order-pill">#{{ order.order_ref|slice:":8"|upper }}</div>
+      <h1 class="vp-ship-title">Mark as Shipped</h1>
       <div class="vp-ship-sub">
-        Enter shipping details below. The buyer will be notified instantly and escrow protection will continue until delivery confirmation.
+        Enter the shipping details below. The buyer will be notified instantly and escrow protection continues until they confirm delivery.
       </div>
-
     </div>
 
     <form method="POST">
-
       {% csrf_token %}
 
       <div class="vp-ship-body">
 
         <!-- MINI SUMMARY -->
-
         <div class="vp-mini-card">
-
-          <div class="vp-mini-title">
-            Order Summary
-          </div>
-
+          <div class="vp-mini-title">Order Summary</div>
           <div class="vp-mini-row">
             <div class="vp-mini-label">Buyer</div>
-            <div class="vp-mini-value">
-              {{ order.buyer_name }}
-            </div>
+            <div class="vp-mini-value">{{ order.buyer_name }}</div>
           </div>
-
           <div class="vp-mini-row">
             <div class="vp-mini-label">Delivery address</div>
             <div class="vp-mini-value">
-              {{ order.delivery_address }}
-              {% if order.delivery_city %}
-                , {{ order.delivery_city }}
-              {% endif %}
+              {{ order.delivery_address }}{% if order.delivery_city %}, {{ order.delivery_city }}{% endif %}
             </div>
           </div>
-
           <div class="vp-mini-row">
             <div class="vp-mini-label">Phone</div>
-            <div class="vp-mini-value">
-              {{ order.buyer_phone }}
-            </div>
+            <div class="vp-mini-value">{{ order.buyer_phone }}</div>
           </div>
-
           <div class="vp-mini-row">
             <div class="vp-mini-label">Items</div>
-            <div class="vp-mini-value">
-              {{ order.items.count }} item{{ order.items.count|pluralize }}
-            </div>
+            <div class="vp-mini-value">{{ order.items.count }} item{{ order.items.count|pluralize }}</div>
           </div>
-
           <div class="vp-mini-row">
             <div class="vp-mini-label">Order value</div>
-            <div class="vp-mini-value">
-              {{ order.currency }} {{ order.subtotal|floatformat:0 }}
-            </div>
+            <div class="vp-mini-value">{{ order.currency }} {{ order.subtotal|floatformat:0 }}</div>
           </div>
-
         </div>
 
-        <!-- ESCROW -->
-
+        <!-- ESCROW NOTICE -->
         <div class="vp-notice">
-
-          <h4>
-            🔒 Escrow Protection
-          </h4>
-
+          <h4>🔒 Escrow Protection</h4>
           <ul>
             <li>Buyer has 72 hours to confirm delivery.</li>
-            <li>If no dispute is opened, funds release automatically.</li>
-            <li>
-              Your payout:
-              <strong>
-                {{ order.currency }}
-                {{ order.vendor_payout|floatformat:0 }}
-              </strong>
-            </li>
+            <li>If no dispute is raised, funds release automatically.</li>
+            <li>Your payout: <strong>{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</strong></li>
           </ul>
-
         </div>
 
-        <!-- FORM -->
-
+        <!-- FORM FIELDS -->
         <div class="vp-form-group">
-
           <label class="vp-label">
-            Courier / Logistics Service
-            <span>(optional)</span>
+            Courier / Logistics Service <span>(optional)</span>
           </label>
-
           <input
             type="text"
             name="courier_name"
             class="vp-input"
             placeholder="e.g. DHL, GIG Logistics, Kwik Delivery"
           >
-
         </div>
 
         <div class="vp-form-group">
-
           <label class="vp-label">
-            Tracking Number / Delivery Info
-            <span>(optional)</span>
+            Tracking Number / Delivery Info <span>(optional)</span>
           </label>
-
           <input
             type="text"
             name="tracking_info"
             class="vp-input"
-            placeholder="e.g. GIG-1234567890"
+            placeholder="e.g. GIG-1234567890 or driver's contact"
           >
-
         </div>
 
-        <!-- INFO -->
-
+        <!-- AUTO RELEASE NOTE -->
         <div class="vp-auto">
           ℹ️ If the buyer does not confirm receipt within
           <strong>72 hours</strong>,
@@ -488,38 +310,19 @@ Mark as Shipped — Order #{{ order.order_ref|slice:":8"|upper }}
       </div>
 
       <!-- FOOTER -->
-
       <div class="vp-ship-footer">
-
-        <a
-          href="{% url 'vendor_order_detail' order.order_ref %}"
-          class="vp-btn vp-btn-cancel"
-        >
+        <a href="{% url 'vendor_order_detail' order.order_ref %}" class="vp-btn vp-btn-cancel">
           Cancel
         </a>
-
-        <button
-          type="submit"
-          class="vp-btn vp-btn-primary"
-          id="shipBtn"
-        >
-
-          <svg width="16" height="16" fill="none"
-               stroke="currentColor"
-               stroke-width="2"
-               viewBox="0 0 24 24">
-
+        <button type="submit" class="vp-btn vp-btn-primary" id="shipBtn">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <rect x="1" y="3" width="15" height="13"/>
             <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/>
             <circle cx="5.5" cy="18.5" r="2.5"/>
             <circle cx="18.5" cy="18.5" r="2.5"/>
-
           </svg>
-
           Confirm Shipment
-
         </button>
-
       </div>
 
     </form>
@@ -532,16 +335,11 @@ Mark as Shipped — Order #{{ order.order_ref|slice:":8"|upper }}
 {% block footer %}{% endblock %}
 
 <script>
-
 document.querySelector('form').addEventListener('submit', function(){
-
   const btn = document.getElementById('shipBtn');
-
   btn.innerHTML = 'Updating order…';
   btn.disabled = true;
-
 });
-
 </script>
 
 {% endblock %}

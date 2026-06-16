@@ -3,18 +3,13 @@
 {% include 'dashboard/_nav.html' %}
 {% block title %}Settings — Vendopage{% endblock %}
 
-
 {% block extra_css %}
 <style>
 /* ══════════════════════════════════════════════════
    SETTINGS — page content only
    Nav styles come from shared nav CSS in base.html
+   Theme: base.html tokens only (--ink/--surface/--muted/--border/--white/--green)
 ══════════════════════════════════════════════════ */
-
-:root {
-  --vp-green: #00873D;
-  --vp-green-bright: #00C853;
-}
 
 /* ── PAGE WRAPPER ── */
 .vp-settings {
@@ -27,7 +22,7 @@
 /* ── HEADER ── */
 .vps-header { margin-bottom: 24px; }
 .vps-header h1 {
-  font-family: 'Cabinet Grotesk', sans-serif;
+  font-family: var(--font-d);
   font-size: clamp(28px, 3.5vw, 38px);
   font-weight: 800;
   letter-spacing: -1.5px;
@@ -46,16 +41,15 @@
   animation: vpsMsgIn .25s ease;
 }
 @keyframes vpsMsgIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
-.vps-msg.success { background:rgba(0,135,61,.08); border-color:rgba(0,135,61,.2); color:var(--vp-green); }
-[data-theme="dark"] .vps-msg.success { color:var(--vp-green-bright); }
-.vps-msg.error { background:rgba(248,113,113,.08); border-color:rgba(248,113,113,.2); color:#dc2626; }
+.vps-msg.success { background:rgba(0,135,61,.08); border-color:rgba(0,135,61,.2); color:var(--green); }
+.vps-msg.error { background:rgba(220,38,38,.08); border-color:rgba(220,38,38,.2); color:#dc2626; }
 [data-theme="dark"] .vps-msg.error { color:#f87171; }
 .vps-msg svg { flex-shrink: 0; }
 
 /* ── TAB NAVIGATION ── */
 .vps-tabs-wrap {
   position: sticky; top: 0; z-index: 50;
-  background: var(--bg);
+  background: var(--surface);
   padding: 4px 0 16px;
   margin-bottom: 8px;
   border-bottom: 1px solid var(--border);
@@ -72,9 +66,8 @@
 }
 .vps-tab svg { stroke:currentColor; flex-shrink:0; opacity:.7; }
 .vps-tab:hover { color:var(--ink); border-color:rgba(0,135,61,.3); }
-.vps-tab.active { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+.vps-tab.active { background:var(--ink); color:var(--surface); border-color:var(--ink); }
 .vps-tab.active svg { opacity:1; }
-[data-theme="dark"] .vps-tab.active { background:#F5F4F0; color:#0D0D0D; border-color:#F5F4F0; }
 
 /* ── PANELS ── */
 .vps-panels { position:relative; }
@@ -86,75 +79,102 @@
 .vps-section-label {
   font-family:var(--font-b); font-size:11px; font-weight:700;
   letter-spacing:2px; text-transform:uppercase;
-  color:var(--vp-green); margin:28px 0 12px;
+  color:var(--green); margin:28px 0 12px;
   display:flex; align-items:center; gap:8px;
 }
-.vps-section-label::before { content:''; width:18px; height:1.5px; background:var(--vp-green); flex-shrink:0; }
+.vps-section-label::before { content:''; width:18px; height:1.5px; background:var(--green); flex-shrink:0; }
 .vps-section-label:first-child { margin-top:4px; }
 
 /* ── CARD ── */
 .vps-card {
-  background:var(--surface-2); border:1px solid var(--border);
+  background:var(--white);
+  border:1px solid var(--border);
   border-radius:18px; padding:24px; margin-bottom:16px;
   position:relative; overflow:hidden;
 }
-[data-theme="dark"] .vps-card { background:#1A1A18; border-color:rgba(255,255,255,.07); }
 .vps-card::before {
   content:''; position:absolute; top:0; left:0; right:0; height:1px;
   background:linear-gradient(90deg,transparent,rgba(0,200,83,.3),transparent);
   pointer-events:none;
 }
 .vps-card-header { margin-bottom:18px; }
-.vps-card-header h2 { font-family:'Cabinet Grotesk',sans-serif; font-size:17px; font-weight:800; letter-spacing:-.4px; color:var(--ink); margin-bottom:4px; }
+.vps-card-header h2 { font-family:var(--font-d); font-size:17px; font-weight:800; letter-spacing:-.4px; color:var(--ink); margin-bottom:4px; }
 .vps-card-header p { font-size:13px; color:var(--muted); line-height:1.5; }
 
 /* ── STORE MODE BANNER ── */
 .vps-store-banner {
-  background:linear-gradient(135deg,rgba(0,135,61,.07),rgba(0,135,61,.02));
+  background:rgba(0,135,61,.06);
   border:1px solid rgba(0,135,61,.18); border-radius:18px;
   padding:22px 24px; display:flex; align-items:center; justify-content:space-between;
   gap:20px; margin-bottom:16px; flex-wrap:wrap; position:relative; overflow:hidden;
 }
 .vps-store-banner::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(0,200,83,.5),transparent); }
 .vps-store-banner-info { flex:1; min-width:220px; }
-.vps-badge { display:inline-flex; align-items:center; font-family:var(--font-b); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--vp-green); background:rgba(0,135,61,.12); border:1px solid rgba(0,135,61,.2); padding:3px 10px; border-radius:100px; margin-bottom:10px; }
-.vps-store-banner-info h3 { font-family:'Cabinet Grotesk',sans-serif; font-size:18px; font-weight:800; letter-spacing:-.4px; color:var(--ink); margin-bottom:6px; }
+.vps-badge { display:inline-flex; align-items:center; font-family:var(--font-b); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--green); background:rgba(0,135,61,.12); border:1px solid rgba(0,135,61,.2); padding:3px 10px; border-radius:100px; margin-bottom:10px; }
+.vps-store-banner-info h3 { font-family:var(--font-d); font-size:18px; font-weight:800; letter-spacing:-.4px; color:var(--ink); margin-bottom:6px; }
 .vps-store-banner-info p { font-size:13px; color:var(--muted); line-height:1.6; max-width:380px; }
 
 /* ── TOGGLE SWITCH ── */
 .vps-toggle { position:relative; display:inline-block; width:50px; height:28px; flex-shrink:0; cursor:pointer; }
 .vps-toggle input { opacity:0; width:0; height:0; position:absolute; }
-.vps-toggle-track { position:absolute; inset:0; border-radius:100px; background:var(--border); border:1px solid var(--border); transition:all .25s; }
-[data-theme="dark"] .vps-toggle-track { background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.12); }
-.vps-toggle input:checked + .vps-toggle-track { background:var(--vp-green); border-color:var(--vp-green); }
-.vps-toggle-thumb { position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--white); box-shadow:0 2px 6px rgba(0,0,0,.2); transition:transform .25s; pointer-events:none; }
-[data-theme="dark"] .vps-toggle-thumb { background:rgba(245,244,240,.5); }
+.vps-toggle-track {
+  position:absolute; inset:0; border-radius:100px;
+  background:var(--border); border:1px solid var(--border);
+  transition:all .25s;
+}
+.vps-toggle input:checked + .vps-toggle-track { background:var(--green); border-color:var(--green); }
+.vps-toggle-thumb {
+  position:absolute; top:3px; left:3px;
+  width:20px; height:20px; border-radius:50%;
+  background:var(--white);
+  box-shadow:0 2px 6px rgba(0,0,0,.2);
+  transition:transform .25s; pointer-events:none;
+}
 .vps-toggle input:checked ~ .vps-toggle-thumb { transform:translateX(22px); }
 [data-theme="dark"] .vps-toggle input:checked ~ .vps-toggle-thumb { background:#0D0D0D; }
 .vps-toggle input:disabled + .vps-toggle-track { opacity:.4; cursor:not-allowed; }
 
 /* ── NOTICE ── */
-.vps-notice { display:flex; align-items:center; gap:10px; background:rgba(251,191,36,.08); border:1px solid rgba(251,191,36,.2); border-radius:12px; padding:13px 16px; font-size:13px; font-weight:500; color:#92660b; margin-bottom:16px; flex-wrap:wrap; }
+.vps-notice {
+  display:flex; align-items:center; gap:10px;
+  background:rgba(245,158,11,.08);
+  border:1px solid rgba(245,158,11,.2);
+  border-radius:12px; padding:13px 16px;
+  font-size:13px; font-weight:500;
+  color:#92660b; margin-bottom:16px; flex-wrap:wrap;
+}
 [data-theme="dark"] .vps-notice { color:#FBBF24; }
 .vps-notice svg { flex-shrink:0; }
-.vps-notice button { background:none; border:none; cursor:pointer; font-family:var(--font-b); font-size:13px; font-weight:700; color:var(--vp-green); text-decoration:underline; margin-left:auto; padding:0; }
+.vps-notice button { background:none; border:none; cursor:pointer; font-family:var(--font-b); font-size:13px; font-weight:700; color:var(--green); text-decoration:underline; margin-left:auto; padding:0; }
 
 /* ── FORM ELEMENTS ── */
 .vps-form-group { margin-bottom:18px; }
 .vps-form-group:last-child { margin-bottom:0; }
 .vps-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-.vps-label { display:flex; align-items:center; gap:8px; font-family:var(--font-b); font-size:11px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-.vps-label-opt { font-size:10px; font-weight:600; letter-spacing:.3px; text-transform:none; color:rgba(245,244,240,.2); background:var(--border); padding:1px 8px; border-radius:100px; }
-.vps-label-verified { font-size:10px; font-weight:700; letter-spacing:.3px; text-transform:none; color:var(--vp-green); background:rgba(0,135,61,.1); padding:1px 8px; border-radius:100px; }
-.vps-input { width:100%; box-sizing:border-box; padding:11px 16px; border:1px solid var(--border); background:var(--bg); border-radius:10px; font-family:var(--font-b); font-size:14px; color:var(--ink); outline:none; transition:border-color .18s,background .18s; }
-[data-theme="dark"] .vps-input { background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.1); }
-.vps-input:focus { border-color:var(--vp-green); background:rgba(0,135,61,.04); }
+.vps-label {
+  display:flex; align-items:center; gap:8px;
+  font-family:var(--font-b); font-size:11px; font-weight:700;
+  letter-spacing:.8px; text-transform:uppercase;
+  color:var(--muted); margin-bottom:8px;
+}
+.vps-label-opt { font-size:10px; font-weight:600; letter-spacing:.3px; text-transform:none; color:var(--muted-lt); background:var(--surface-2); padding:1px 8px; border-radius:100px; }
+.vps-label-verified { font-size:10px; font-weight:700; letter-spacing:.3px; text-transform:none; color:var(--green); background:rgba(0,135,61,.1); padding:1px 8px; border-radius:100px; }
+.vps-input {
+  width:100%; box-sizing:border-box;
+  padding:11px 16px;
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  border-radius:10px;
+  font-family:var(--font-b); font-size:14px; color:var(--ink);
+  outline:none; transition:border-color .18s, background .18s;
+}
+.vps-input:focus { border-color:var(--green); background:rgba(0,135,61,.04); }
 .vps-input:disabled { opacity:.45; cursor:not-allowed; }
-.vps-input::placeholder { color:var(--muted); opacity:.6; }
+.vps-input::placeholder { color:var(--muted-lt); }
 .vps-textarea { resize:vertical; min-height:90px; line-height:1.6; }
 .vps-hint { display:block; font-size:12px; color:var(--muted); margin-top:6px; line-height:1.5; }
 .vps-divider { border:none; border-top:1px solid var(--border); margin:24px 0; }
-.vps-subsection-title { font-family:'Cabinet Grotesk',sans-serif; font-size:15px; font-weight:800; letter-spacing:-.3px; color:var(--ink); margin-bottom:16px; }
+.vps-subsection-title { font-family:var(--font-d); font-size:15px; font-weight:800; letter-spacing:-.3px; color:var(--ink); margin-bottom:16px; }
 
 /* Select */
 .vps-select-wrap { position:relative; }
@@ -163,49 +183,74 @@
 
 /* ── BUTTONS ── */
 .vps-form-actions { display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; }
-.vps-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:11px 22px; border-radius:100px; font-family:var(--font-b); font-size:13px; font-weight:700; cursor:pointer; border:none; transition:all .2s; letter-spacing:.2px; text-decoration:none; }
-.vps-btn-primary { background:var(--ink); color:var(--bg); }
-[data-theme="dark"] .vps-btn-primary { background:#F5F4F0; color:#0D0D0D; }
-.vps-btn-primary:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 8px 20px rgba(0,0,0,.15); }
-[data-theme="dark"] .vps-btn-primary:hover:not(:disabled) { background:#fff; box-shadow:0 8px 24px rgba(245,244,240,.15); }
+.vps-btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  padding:11px 22px; border-radius:100px;
+  font-family:var(--font-b); font-size:13px; font-weight:700;
+  cursor:pointer; border:none; transition:all .2s;
+  letter-spacing:.2px; text-decoration:none;
+}
+.vps-btn-primary { background:var(--ink); color:var(--surface); }
+.vps-btn-primary:hover:not(:disabled) { opacity:.88; transform:translateY(-1px); box-shadow:0 8px 20px rgba(0,0,0,.15); }
 .vps-btn-secondary { background:transparent; color:var(--ink); border:1.5px solid var(--border); }
-.vps-btn-secondary:hover:not(:disabled) { border-color:var(--vp-green); color:var(--vp-green); }
-.vps-btn-danger { background:rgba(248,113,113,.1); color:#dc2626; border:1px solid rgba(248,113,113,.25); }
-[data-theme="dark"] .vps-btn-danger { color:#f87171; }
-.vps-btn-danger:hover:not(:disabled) { background:rgba(248,113,113,.18); }
+.vps-btn-secondary:hover:not(:disabled) { border-color:var(--green); color:var(--green); }
+.vps-btn-danger { background:rgba(220,38,38,.08); color:#dc2626; border:1px solid rgba(220,38,38,.2); }
+[data-theme="dark"] .vps-btn-danger { color:#f87171; background:rgba(248,113,113,.08); }
+.vps-btn-danger:hover:not(:disabled) { background:rgba(220,38,38,.15); }
 .vps-btn:disabled { opacity:.45; cursor:not-allowed; }
 .vps-btn-sm { padding:8px 16px; font-size:12px; }
 .vps-btn-full { width:100%; }
 
 /* ── SETTINGS ROW ── */
 .vps-settings-row { display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
-.vps-settings-row-info h4 { font-family:'Cabinet Grotesk',sans-serif; font-size:15px; font-weight:700; letter-spacing:-.3px; color:var(--ink); margin-bottom:4px; }
+.vps-settings-row-info h4 { font-family:var(--font-d); font-size:15px; font-weight:700; letter-spacing:-.3px; color:var(--ink); margin-bottom:4px; }
 .vps-settings-row-info p { font-size:13px; color:var(--muted); line-height:1.6; max-width:360px; }
-.vps-plan-note { font-size:12px; color:var(--vp-green); font-weight:600; margin-top:6px; }
+.vps-plan-note { font-size:12px; color:var(--green); font-weight:600; margin-top:6px; }
 .vps-plan-note a { color:inherit; text-decoration:underline; }
 
 /* ── STORE LINK BOX ── */
-.vps-link-box { display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:4px 4px 4px 16px; flex-wrap:wrap; }
-[data-theme="dark"] .vps-link-box { background:rgba(0,0,0,.25); }
-.vps-link-box input { flex:1; min-width:160px; border:none; background:none; outline:none; font-family:var(--font-b); font-size:14px; font-weight:600; color:var(--ink); padding:8px 0; cursor:pointer; }
-.vps-link-copy { display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:9px; border:none; background:var(--vp-green); color:#fff; font-family:var(--font-b); font-size:12px; font-weight:700; cursor:pointer; transition:all .18s; flex-shrink:0; }
-.vps-link-copy:hover { background:#00a348; }
+.vps-link-box {
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:12px; padding:4px 4px 4px 16px; flex-wrap:wrap;
+}
+.vps-link-box input {
+  flex:1; min-width:160px; border:none; background:none; outline:none;
+  font-family:var(--font-b); font-size:14px; font-weight:600;
+  color:var(--ink); padding:8px 0; cursor:pointer;
+}
+.vps-link-copy {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:9px 16px; border-radius:9px; border:none;
+  background:var(--green); color:#fff;
+  font-family:var(--font-b); font-size:12px; font-weight:700;
+  cursor:pointer; transition:all .18s; flex-shrink:0;
+}
+.vps-link-copy:hover { background:var(--green-dk); }
 
 /* ── PAYOUT SAVED ROW ── */
-.vps-payout-saved { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; background:rgba(0,135,61,.06); border:1px solid rgba(0,135,61,.16); border-radius:14px; padding:16px 18px; margin-bottom:20px; }
+.vps-payout-saved {
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  flex-wrap:wrap;
+  background:rgba(0,135,61,.06);
+  border:1px solid rgba(0,135,61,.16);
+  border-radius:14px; padding:16px 18px; margin-bottom:20px;
+}
 .vps-payout-saved-details { display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
-.vps-payout-saved-name { font-family:'Cabinet Grotesk',sans-serif; font-size:15px; font-weight:800; letter-spacing:-.3px; color:var(--ink); }
+.vps-payout-saved-name { font-family:var(--font-d); font-size:15px; font-weight:800; letter-spacing:-.3px; color:var(--ink); }
 .vps-payout-saved-meta { font-size:12px; color:var(--muted); margin-top:1px; }
-.vps-verified-pill { display:inline-flex; align-items:center; gap:4px; font-family:var(--font-b); font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--vp-green); background:rgba(0,135,61,.12); border:1px solid rgba(0,135,61,.2); padding:3px 9px; border-radius:100px; }
+.vps-verified-pill { display:inline-flex; align-items:center; gap:4px; font-family:var(--font-b); font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--green); background:rgba(0,135,61,.12); border:1px solid rgba(0,135,61,.2); padding:3px 9px; border-radius:100px; }
 
 /* ── ACCOUNT NUMBER + BADGE ── */
 .vps-acct-wrap { position:relative; }
 .vps-acct-input { padding-right:110px; }
 .vps-acct-badge { position:absolute; right:8px; top:50%; transform:translateY(-50%); display:none; align-items:center; gap:5px; font-family:var(--font-b); font-size:11px; font-weight:700; padding:5px 10px; border-radius:100px; pointer-events:none; }
 .vps-acct-badge.show { display:flex; }
-.vps-acct-badge.checking { color:rgba(245,244,240,.4); background:var(--border); }
-.vps-acct-badge.verified { color:var(--vp-green); background:rgba(0,135,61,.12); }
-.vps-acct-badge.unverified { color:#f87171; background:rgba(248,113,113,.1); }
+.vps-acct-badge.checking { color:var(--muted); background:var(--border); }
+.vps-acct-badge.verified { color:var(--green); background:rgba(0,135,61,.12); }
+.vps-acct-badge.unverified { color:#dc2626; background:rgba(220,38,38,.1); }
+[data-theme="dark"] .vps-acct-badge.unverified { color:#f87171; }
 .vps-acct-badge-mobile { display:none; position:static; transform:none; margin-top:8px; }
 @media(max-width:520px) { .vps-acct-input{padding-right:16px} .vps-acct-badge:not(.vps-acct-badge-mobile){display:none!important} .vps-acct-badge-mobile.show{display:inline-flex} }
 .vps-spin-ring { width:11px; height:11px; border-radius:50%; border:2px solid currentColor; border-top-color:transparent; animation:vpsSpin .7s linear infinite; flex-shrink:0; opacity:.6; }
@@ -214,47 +259,65 @@
 /* ── ACCOUNT NAME BANNER ── */
 .vps-acct-banner { display:none; align-items:center; gap:8px; padding:10px 14px; border-radius:10px; font-family:var(--font-b); font-size:13px; font-weight:700; margin-bottom:4px; }
 .vps-acct-banner.show { display:flex; }
-.vps-acct-banner.success { background:rgba(0,135,61,.1); border:1px solid rgba(0,135,61,.2); color:var(--vp-green); }
-.vps-acct-banner.error { background:rgba(248,113,113,.08); border:1px solid rgba(248,113,113,.2); color:#f87171; }
+.vps-acct-banner.success { background:rgba(0,135,61,.1); border:1px solid rgba(0,135,61,.2); color:var(--green); }
+.vps-acct-banner.error { background:rgba(220,38,38,.08); border:1px solid rgba(220,38,38,.2); color:#dc2626; }
+[data-theme="dark"] .vps-acct-banner.error { color:#f87171; }
 
 /* ── BANK PICKER ── */
 .vps-bank-picker { position:relative; }
 .vps-bp-selected { display:none; align-items:center; gap:10px; padding:11px 16px; border:1px solid rgba(0,135,61,.25); background:rgba(0,135,61,.05); border-radius:10px; }
 .vps-bp-selected.show { display:flex; }
 .vps-bp-selected-name { flex:1; font-family:var(--font-b); font-size:14px; font-weight:700; color:var(--ink); }
-.vps-bp-change { background:none; border:none; cursor:pointer; font-family:var(--font-b); font-size:12px; font-weight:700; color:var(--vp-green); padding:0; text-decoration:underline; flex-shrink:0; }
-.vps-bp-search-row { display:flex; align-items:center; gap:10px; border:1px solid var(--border); background:var(--bg); border-radius:10px; padding:0 14px; }
-[data-theme="dark"] .vps-bp-search-row { background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.1); }
-.vps-bp-search-row:focus-within { border-color:var(--vp-green); }
-.vps-bp-input { flex:1; border:none; background:none; outline:none; padding:11px 0; font-family:var(--font-b); font-size:14px; color:var(--ink); }
-.vps-bp-input::placeholder { color:var(--muted); opacity:.6; }
+.vps-bp-change { background:none; border:none; cursor:pointer; font-family:var(--font-b); font-size:12px; font-weight:700; color:var(--green); padding:0; text-decoration:underline; flex-shrink:0; }
+.vps-bp-search-row {
+  display:flex; align-items:center; gap:10px;
+  border:1px solid var(--border);
+  background:var(--surface-2);
+  border-radius:10px; padding:0 14px;
+}
+.vps-bp-search-row:focus-within { border-color:var(--green); }
+.vps-bp-input {
+  flex:1; border:none; background:none; outline:none;
+  padding:11px 0; font-family:var(--font-b); font-size:14px; color:var(--ink);
+}
+.vps-bp-input::placeholder { color:var(--muted-lt); }
 .vps-bp-clear { display:none; background:none; border:none; cursor:pointer; color:var(--muted); font-size:13px; padding:4px; flex-shrink:0; }
-.vps-bp-list { display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:60; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; max-height:240px; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,.15); }
-[data-theme="dark"] .vps-bp-list { background:#1E1E1C; border-color:rgba(255,255,255,.1); box-shadow:0 20px 40px rgba(0,0,0,.5); }
+.vps-bp-list {
+  display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:60;
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:12px; max-height:240px; overflow-y:auto;
+  box-shadow:var(--sh-lg);
+}
 .vps-bp-list.open { display:block; }
-.vps-bp-item { padding:11px 16px; cursor:pointer; font-family:var(--font-b); font-size:13px; font-weight:500; color:var(--ink); border-bottom:1px solid var(--border); transition:background .12s; }
+.vps-bp-item {
+  padding:11px 16px; cursor:pointer;
+  font-family:var(--font-b); font-size:13px; font-weight:500;
+  color:var(--ink); border-bottom:1px solid var(--border);
+  transition:background .12s;
+}
 .vps-bp-item:last-child { border-bottom:none; }
-.vps-bp-item:hover,.vps-bp-item.kbdfocus { background:rgba(0,135,61,.08); color:var(--vp-green); }
+.vps-bp-item:hover, .vps-bp-item.kbdfocus { background:rgba(0,135,61,.08); color:var(--green); }
 .vps-bp-empty { display:flex; align-items:center; justify-content:center; padding:24px 16px; font-family:var(--font-b); font-size:13px; color:var(--muted); }
 .vps-bp-count { font-size:11px; color:var(--muted); margin-top:6px; text-align:right; }
 
 /* ── PAYOUT SAVE ROW ── */
 .vps-payout-save-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-top:22px; }
 .vps-payout-save-hint { font-size:12px; color:var(--muted); font-weight:500; }
-.vps-payout-save-hint.ready { color:var(--vp-green); font-weight:700; }
+.vps-payout-save-hint.ready { color:var(--green); font-weight:700; }
 
 /* ── PAYOUT STEPS ── */
 .vps-payout-steps { display:flex; flex-direction:column; gap:0; }
 .vps-payout-step { display:flex; align-items:flex-start; gap:16px; padding:16px 0; border-bottom:1px solid var(--border); }
 .vps-payout-step:last-child { border-bottom:none; padding-bottom:0; }
 .vps-payout-step:first-child { padding-top:0; }
-.vps-step-num { width:30px; height:30px; border-radius:50%; background:rgba(0,135,61,.1); border:1px solid rgba(0,135,61,.2); color:var(--vp-green); font-family:'Cabinet Grotesk',sans-serif; font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.vps-step-title { font-family:'Cabinet Grotesk',sans-serif; font-size:14px; font-weight:700; letter-spacing:-.2px; color:var(--ink); margin-bottom:3px; }
+.vps-step-num { width:30px; height:30px; border-radius:50%; background:rgba(0,135,61,.1); border:1px solid rgba(0,135,61,.2); color:var(--green); font-family:var(--font-d); font-size:13px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.vps-step-title { font-family:var(--font-d); font-size:14px; font-weight:700; letter-spacing:-.2px; color:var(--ink); margin-bottom:3px; }
 .vps-step-desc { font-size:13px; color:var(--muted); line-height:1.6; }
 
 /* ── PROFILE AVATAR ── */
 .vps-avatar-row { display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
-.vps-avatar { position:relative; width:76px; height:76px; border-radius:50%; background:var(--vp-green); display:flex; align-items:center; justify-content:center; font-family:'Cabinet Grotesk',sans-serif; font-size:30px; font-weight:800; color:#fff; border:2px solid rgba(0,135,61,.2); overflow:hidden; flex-shrink:0; }
+.vps-avatar { position:relative; width:76px; height:76px; border-radius:50%; background:var(--green); display:flex; align-items:center; justify-content:center; font-family:var(--font-d); font-size:30px; font-weight:800; color:#fff; border:2px solid rgba(0,135,61,.2); overflow:hidden; flex-shrink:0; }
 .vps-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
 .vps-avatar-spinner { display:none; position:absolute; inset:0; background:rgba(0,0,0,.45); align-items:center; justify-content:center; border-radius:50%; }
 .vps-avatar-spinner svg { animation:vpsSpin .8s linear infinite; }
@@ -264,22 +327,27 @@
 .vps-currency-row { display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
 .vps-currency-flag { width:36px; height:28px; border-radius:6px; overflow:hidden; flex-shrink:0; background:var(--border); display:flex; align-items:center; justify-content:center; }
 .vps-currency-info { flex:1; min-width:140px; }
-.vps-currency-name { font-family:'Cabinet Grotesk',sans-serif; font-size:16px; font-weight:800; letter-spacing:-.3px; color:var(--ink); }
+.vps-currency-name { font-family:var(--font-d); font-size:16px; font-weight:800; letter-spacing:-.3px; color:var(--ink); }
 .vps-currency-meta { font-size:12px; color:var(--muted); margin-top:2px; }
 .vps-cp-wrap { position:relative; }
 .vps-cp-field { border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-.vps-cp-btn { width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; border:none; background:var(--bg); cursor:pointer; text-align:left; }
-[data-theme="dark"] .vps-cp-btn { background:rgba(255,255,255,.04); }
-.vps-cp-symbol { font-family:'Cabinet Grotesk',sans-serif; font-size:18px; font-weight:800; color:var(--vp-green); width:28px; text-align:center; flex-shrink:0; }
+.vps-cp-btn { width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; border:none; background:var(--surface-2); cursor:pointer; text-align:left; }
+.vps-cp-symbol { font-family:var(--font-d); font-size:18px; font-weight:800; color:var(--green); width:28px; text-align:center; flex-shrink:0; }
 .vps-cp-code { font-family:var(--font-b); font-size:14px; font-weight:700; color:var(--ink); }
 .vps-cp-preview { padding:8px 16px 12px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); }
-.vps-cp-dropdown { display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:60; background:var(--surface-2); border:1px solid var(--border); border-radius:12px; box-shadow:0 20px 40px rgba(0,0,0,.15); overflow:hidden; }
-[data-theme="dark"] .vps-cp-dropdown { background:#1E1E1C; border-color:rgba(255,255,255,.1); box-shadow:0 20px 40px rgba(0,0,0,.5); }
+.vps-cp-dropdown {
+  display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:60;
+  background:var(--white); border:1px solid var(--border);
+  border-radius:12px; box-shadow:var(--sh-lg); overflow:hidden;
+}
 .vps-cp-dropdown.open { display:block; }
 .vps-cp-search { padding:10px; border-bottom:1px solid var(--border); }
-.vps-cp-search input { width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px; border:1px solid var(--border); background:var(--bg); font-family:var(--font-b); font-size:13px; color:var(--ink); outline:none; }
-[data-theme="dark"] .vps-cp-search input { background:rgba(255,255,255,.04); border-color:rgba(255,255,255,.08); }
-.vps-cp-search input:focus { border-color:var(--vp-green); }
+.vps-cp-search input {
+  width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px;
+  border:1px solid var(--border); background:var(--surface-2);
+  font-family:var(--font-b); font-size:13px; color:var(--ink); outline:none;
+}
+.vps-cp-search input:focus { border-color:var(--green); }
 .vps-cp-list { max-height:240px; overflow-y:auto; }
 .vps-cp-item { display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; font-family:var(--font-b); font-size:13px; border-bottom:1px solid var(--border); transition:background .12s; }
 .vps-cp-item:last-child { border-bottom:none; }
@@ -288,33 +356,47 @@
 .vps-cp-item-code { color:var(--muted); font-weight:600; font-size:12px; }
 
 /* ── THEME PILLS ── */
-.vps-mode-pills { display:inline-flex; gap:4px; background:var(--bg); border:1px solid var(--border); border-radius:100px; padding:4px; flex-shrink:0; }
-[data-theme="dark"] .vps-mode-pills { background:rgba(255,255,255,.03); }
+.vps-mode-pills {
+  display:inline-flex; gap:4px;
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:100px; padding:4px; flex-shrink:0;
+}
 .vps-pill { display:inline-flex; align-items:center; gap:6px; padding:8px 16px; border-radius:100px; border:none; background:transparent; font-family:var(--font-b); font-size:12px; font-weight:700; color:var(--muted); cursor:pointer; transition:all .18s; }
 .vps-pill svg { stroke:currentColor; }
 .vps-pill:hover { color:var(--ink); }
-.vps-pill.active { background:var(--vp-green); color:#fff; }
+.vps-pill.active { background:var(--green); color:#fff; }
 
 /* ── PLAN / SUBSCRIPTION ── */
-.vps-fee-banner { background:linear-gradient(135deg,#0D0D0D 0%,#1A1A18 100%); border-radius:18px; padding:24px 28px; display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:16px; position:relative; overflow:hidden; }
+.vps-fee-banner {
+  background:#0D0D0D;
+  border-radius:18px; padding:24px 28px;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:20px; flex-wrap:wrap; margin-bottom:16px;
+  position:relative; overflow:hidden;
+}
 .vps-fee-banner::before { content:''; position:absolute; width:240px; height:240px; border-radius:50%; background:radial-gradient(circle,rgba(0,135,61,.2) 0%,transparent 65%); top:-60px; right:-40px; pointer-events:none; }
 .vps-fee-banner-text { position:relative; z-index:1; }
-.vps-fee-banner-text h3 { font-family:'Cabinet Grotesk',sans-serif; font-size:18px; font-weight:800; letter-spacing:-.4px; color:#F5F4F0; margin-bottom:4px; }
+.vps-fee-banner-text h3 { font-family:var(--font-d); font-size:18px; font-weight:800; letter-spacing:-.4px; color:#F5F4F0; margin-bottom:4px; }
 .vps-fee-banner-text p { font-size:13px; color:rgba(245,244,240,.4); max-width:340px; line-height:1.6; }
-.vps-fee-pill { position:relative; z-index:1; font-family:'Cabinet Grotesk',sans-serif; font-size:32px; font-weight:800; letter-spacing:-1.5px; color:var(--vp-green); background:rgba(0,135,61,.12); border:1px solid rgba(0,135,61,.2); border-radius:16px; padding:14px 24px; text-align:center; flex-shrink:0; }
+.vps-fee-pill { position:relative; z-index:1; font-family:var(--font-d); font-size:32px; font-weight:800; letter-spacing:-1.5px; color:var(--green); background:rgba(0,135,61,.12); border:1px solid rgba(0,135,61,.2); border-radius:16px; padding:14px 24px; text-align:center; flex-shrink:0; }
 .vps-fee-pill span { display:block; font-family:var(--font-b); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:rgba(0,200,83,.6); margin-top:2px; }
 
 .vps-plan-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:8px; }
-.vps-plan-card { background:var(--surface-2); border:1.5px solid var(--border); border-radius:18px; overflow:hidden; display:flex; flex-direction:column; transition:border-color .2s,transform .2s; }
-[data-theme="dark"] .vps-plan-card { background:#1A1A18; border-color:rgba(255,255,255,.07); }
+.vps-plan-card {
+  background:var(--white);
+  border:1.5px solid var(--border);
+  border-radius:18px; overflow:hidden; display:flex; flex-direction:column;
+  transition:border-color .2s, transform .2s;
+}
 .vps-plan-card:hover { transform:translateY(-2px); }
-.vps-plan-card.vps-plan-current { border-color:var(--vp-green); }
+.vps-plan-card.vps-plan-current { border-color:var(--green); }
 .vps-plan-card.vps-plan-featured { border-color:rgba(251,191,36,.3); position:relative; }
 .vps-plan-card.vps-plan-featured::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,transparent,#FBBF24,transparent); }
 .vps-plan-card-head { padding:22px 22px 16px; border-bottom:1px solid var(--border); }
-.vps-plan-name { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-family:'Cabinet Grotesk',sans-serif; font-size:16px; font-weight:800; letter-spacing:-.3px; color:var(--ink); margin-bottom:10px; }
-.vps-plan-tag { font-family:var(--font-b); font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--vp-green); background:rgba(0,135,61,.12); border:1px solid rgba(0,135,61,.2); padding:2px 9px; border-radius:100px; }
-.vps-plan-price { font-family:'Cabinet Grotesk',sans-serif; font-size:30px; font-weight:800; letter-spacing:-1.5px; color:var(--ink); }
+.vps-plan-name { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-family:var(--font-d); font-size:16px; font-weight:800; letter-spacing:-.3px; color:var(--ink); margin-bottom:10px; }
+.vps-plan-tag { font-family:var(--font-b); font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; color:var(--green); background:rgba(0,135,61,.12); border:1px solid rgba(0,135,61,.2); padding:2px 9px; border-radius:100px; }
+.vps-plan-price { font-family:var(--font-d); font-size:30px; font-weight:800; letter-spacing:-1.5px; color:var(--ink); }
 .vps-plan-price span { font-size:13px; font-weight:600; color:var(--muted); letter-spacing:0; }
 .vps-plan-card-body { padding:18px 22px 22px; display:flex; flex-direction:column; flex:1; }
 .vps-plan-features { list-style:none; margin:0 0 20px; padding:0; display:flex; flex-direction:column; gap:11px; flex:1; }
@@ -323,10 +405,13 @@
 .vps-pf-item.vps-pf-off { color:var(--muted); text-decoration:line-through; opacity:.55; }
 
 .vps-earn-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-.vps-earn-cell { background:var(--bg); border:1px solid var(--border); border-radius:12px; padding:16px; text-align:center; }
-[data-theme="dark"] .vps-earn-cell { background:rgba(0,0,0,.25); }
+.vps-earn-cell {
+  background:var(--surface-2);
+  border:1px solid var(--border);
+  border-radius:12px; padding:16px; text-align:center;
+}
 .vps-earn-label { font-family:var(--font-b); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-.vps-earn-value { font-family:'Cabinet Grotesk',sans-serif; font-size:22px; font-weight:800; letter-spacing:-.8px; margin-bottom:4px; }
+.vps-earn-value { font-family:var(--font-d); font-size:22px; font-weight:800; letter-spacing:-.8px; color:var(--ink); margin-bottom:4px; }
 .vps-earn-sub { font-size:11px; color:var(--muted); }
 .vps-earn-footnote { font-size:12px; color:var(--muted); text-align:center; margin-top:16px; }
 
@@ -492,7 +577,7 @@
           <div class="vps-settings-row">
             <div class="vps-settings-row-info">
               <h4>Show watermark on images</h4>
-              <p>Your business name appears diagonally across each product photo. Toggle this on or off anytime.</p>
+              <p>Your business name appears diagonally across each product photo.</p>
             </div>
             <label class="vps-toggle">
               <input type="checkbox" name="watermark_enabled" {% if user.watermark_enabled %}checked{% endif %} onchange="this.form.submit()">
@@ -572,7 +657,7 @@
             <label class="vps-label">Bank</label>
             <div class="vps-bank-picker" id="bankPicker">
               <div class="vps-bp-selected" id="bpSelected">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--vp-green);flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="color:var(--green);flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
                 <span class="vps-bp-selected-name" id="bpSelectedName">—</span>
                 <button type="button" class="vps-bp-change" onclick="resetBank()">Change</button>
               </div>
@@ -804,11 +889,11 @@
           <p>Resets to ₦0 on the 1st of every month</p>
         </div>
         <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px;">
-          <span style="font-family:'Cabinet Grotesk',sans-serif;font-size:24px;font-weight:800;color:var(--ink);">₦{{ monthly_volume|floatformat:"0" }}</span>
+          <span style="font-family:var(--font-d);font-size:24px;font-weight:800;color:var(--ink);">₦{{ monthly_volume|floatformat:"0" }}</span>
           <span style="font-size:13px;color:var(--muted);">/ ₦{{ current_cap|floatformat:"0" }} cap</span>
         </div>
-        <div style="background:var(--bg);border-radius:100px;height:8px;overflow:hidden;">
-          <div style="background:var(--vp-green);height:100%;border-radius:100px;width:{% widthratio monthly_volume current_cap 100 %}%;"></div>
+        <div style="background:var(--surface-2);border-radius:100px;height:8px;overflow:hidden;">
+          <div style="background:var(--green);height:100%;border-radius:100px;width:{% widthratio monthly_volume current_cap 100 %}%;"></div>
         </div>
         {% if monthly_volume >= current_cap and current_tier != 'starter' %}
         <p style="font-size:12px;color:#c2410c;margin-top:10px;">You've exceeded your cap — sales above this revert to the standard 5% fee until next month.</p>
@@ -828,11 +913,11 @@
           </div>
           <div class="vps-plan-card-body">
             <ul class="vps-plan-features">
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><strong>{{ tier.fee_percent|floatformat:"-2" }}%</strong> commission</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to ₦{{ tier.cap|floatformat:"0" }}/mo at this rate</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Standard 5% above cap</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited products</li>
-              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--vp-green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Store Mode (escrow)</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><strong>{{ tier.fee_percent|floatformat:"-2" }}%</strong> commission</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Up to ₦{{ tier.cap|floatformat:"0" }}/mo at this rate</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Standard 5% above cap</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Unlimited products</li>
+              <li class="vps-pf-item"><svg width="13" height="13" fill="none" stroke="var(--green)" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Store Mode (escrow)</li>
             </ul>
             {% if tier.is_current %}
               <button class="vps-btn vps-btn-secondary vps-btn-full" disabled style="opacity:.6;cursor:default;">Current plan</button>
@@ -859,12 +944,11 @@
 
       <div class="vps-section-label">Earnings Breakdown</div>
       <div class="vps-card">
-
         <div class="vps-card-header"><h2>What you keep on every ₦{{ example_order|floatformat:"0" }} sale</h2></div>
         <div class="vps-earn-grid">
           <div class="vps-earn-cell"><div class="vps-earn-label">Buyer pays</div><div class="vps-earn-value">₦10,000</div><div class="vps-earn-sub">Held in escrow</div></div>
           <div class="vps-earn-cell"><div class="vps-earn-label">Your fee ({{ current_fee_percent|floatformat:"-2" }}%)</div><div class="vps-earn-value" style="color:#c2410c;">₦{{ example_fee|floatformat:"0" }}</div><div class="vps-earn-sub">Platform cut</div></div>
-          <div class="vps-earn-cell"><div class="vps-earn-label">You receive</div><div class="vps-earn-value" style="color:var(--vp-green);">₦{{ example_payout|floatformat:"0" }}</div><div class="vps-earn-sub">To your bank</div></div>
+          <div class="vps-earn-cell"><div class="vps-earn-label">You receive</div><div class="vps-earn-value" style="color:var(--green);">₦{{ example_payout|floatformat:"0" }}</div><div class="vps-earn-sub">To your bank</div></div>
         </div>
         <p class="vps-earn-footnote">Flutterwave processing fees apply separately.</p>
       </div>
