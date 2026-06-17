@@ -29,7 +29,8 @@
   <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
-   <!-- Structured SEO Data for Google Knowledge Graph -->
+
+  <!-- Structured SEO Data for Google Knowledge Graph -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -38,7 +39,7 @@
       "url": "{{ request.scheme }}://{{ request.get_host }}",
       "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/apple-touch-icon.png' %}",
       "description": "Create your free online store, share one link everywhere, and get paid safely with escrow — built for vendors across Africa.",
-       "areaServed": "Africa",
+      "areaServed": "Africa",
       "founders": [
         {
           "@type": "Person",
@@ -71,8 +72,6 @@
       window.vpSetTheme = function(mode){ localStorage.setItem('vp-theme', mode); applyTheme(mode); };
     })();
   </script>
-
-  
 
   <style>
   /* ══════════════════════════════════════
@@ -131,49 +130,41 @@
     -webkit-font-smoothing: antialiased;
   }
 
-   /* ════════════════════════════════════════════════
-   SIDEBAR + BOTTOM NAV — full theme-aware rewrite
-   Uses base.html tokens throughout.
-   Light mode:  surface bg, ink text, green accents
-   Dark mode:   surface-2 bg, ink text, green accents
-   NO hardcoded colours except the always-dark hero.
-   ════════════════════════════════════════════════ */
- 
-  /* ── SIDEBAR (desktop ≥900px) ── */
+  /* ════════════════════════════════════════════
+     SIDEBAR (desktop ≥900px)
+  ════════════════════════════════════════════ */
   .vp-sidebar {
     position: fixed; left: 0; top: 0; bottom: 0;
     width: 248px;
-    background: var(--white);           /* white in light, #1A1A18 in dark */
+    background: var(--white);
     border-right: 1px solid var(--border);
     display: flex; flex-direction: column;
     padding: 22px 16px;
     z-index: 100;
     gap: 6px;
   }
-  
-  /* Logo: show dark logo on light sidebar, white logo on dark sidebar */
+
   .vp-sb-logo .logo-dark  { display: block; }
   .vp-sb-logo .logo-light { display: none;  }
   [data-theme="dark"] .vp-sb-logo .logo-dark  { display: none;  }
   [data-theme="dark"] .vp-sb-logo .logo-light { display: block; }
-  
+
   .vp-sb-logo {
     display: flex; align-items: center;
     padding: 8px 10px 22px;
     text-decoration: none;
   }
-  
+
   .vp-sb-nav {
     display: flex; flex-direction: column;
     gap: 2px; flex: 1;
   }
-  
-  /* Nav items — muted text, readable in both modes */
+
   .vp-sb-item {
     display: flex; align-items: center; gap: 12px;
     padding: 11px 14px; border-radius: 12px;
     font-family: var(--font-b); font-size: 13.5px; font-weight: 600;
-    color: var(--muted);              /* #6B6B6B light / #888880 dark */
+    color: var(--muted);
     text-decoration: none;
     transition: all .15s;
   }
@@ -183,21 +174,18 @@
     flex-shrink: 0;
   }
   .vp-sb-item:hover {
-    color: var(--ink);                /* full contrast on hover */
-    background: var(--surface-2);    /* subtle tint */
+    color: var(--ink);
+    background: var(--surface-2);
   }
-  
-  /* Active item — green pill, fully readable in both modes */
   .vp-sb-item.active {
-    color: var(--green);             /* #00873D — works on any bg */
-    background: var(--green-lt);    /* #E8F5EE light / stays subtle in dark */
+    color: var(--green);
+    background: var(--green-lt);
   }
   [data-theme="dark"] .vp-sb-item.active {
-    background: rgba(0,135,61,.15); /* darker surfaces need a tighter green wash */
-    color: var(--green-pop);        /* #00C853 — brighter green pops on dark bg */
+    background: rgba(0,135,61,.15);
+    color: var(--green-pop);
   }
-  
-  /* "Add Product" dashed button */
+
   .vp-sb-add {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     margin: 14px 0 8px;
@@ -214,11 +202,8 @@
     color: var(--green);
     background: var(--green-lt);
   }
-  [data-theme="dark"] .vp-sb-add:hover {
-    background: rgba(0,135,61,.08);
-  }
-  
-  /* Profile footer */
+  [data-theme="dark"] .vp-sb-add:hover { background: rgba(0,135,61,.08); }
+
   .vp-sb-profile {
     display: flex; align-items: center; gap: 10px;
     padding: 16px 10px 10px;
@@ -228,37 +213,37 @@
     transition: background .15s;
   }
   .vp-sb-profile:hover { background: var(--surface-2); }
-  
+
   .vp-sb-avi {
     width: 36px; height: 36px; border-radius: 50%;
     background: var(--green);
     display: flex; align-items: center; justify-content: center;
     font-family: 'Cabinet Grotesk', sans-serif;
     font-size: 14px; font-weight: 800;
-    color: #fff;                       /* always white on green — never token */
+    color: #fff;
     flex-shrink: 0; overflow: hidden;
   }
   .vp-sb-avi img { width: 100%; height: 100%; object-fit: cover; }
-  
+
   .vp-sb-profile-text { overflow: hidden; }
-  
   .vp-sb-profile-name {
     font-family: var(--font-b); font-size: 13px; font-weight: 700;
-    color: var(--ink);                 /* full contrast in both modes */
+    color: var(--ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .vp-sb-profile-email {
     font-size: 11px; color: var(--muted-lt);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  
-  /* Push page content right on desktop */
+
   .vp-has-sidebar { margin-left: 248px; }
-  
-  /* ── BOTTOM NAV (mobile <900px) ── */
+
+  /* ════════════════════════════════════════════
+     BOTTOM NAV (mobile <900px)
+  ════════════════════════════════════════════ */
   .vp-bottom-nav {
     position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--white);           /* white in light, dark surface in dark */
+    background: var(--white);
     border-top: 1px solid var(--border);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -267,60 +252,36 @@
     height: 72px;
     z-index: 200;
   }
-  
+
   .vp-nav-item {
     display: flex; flex-direction: column; align-items: center; gap: 4px;
     padding: 8px 12px; border-radius: 12px;
     cursor: pointer; transition: all .18s;
     background: none; border: none;
-    color: var(--muted);               /* muted — readable in both modes */
+    color: var(--muted);
     text-decoration: none; flex: 1;
   }
-  .vp-nav-item:hover {
-    color: var(--ink);
-    background: var(--surface-2);
-  }
+  .vp-nav-item:hover { color: var(--ink); background: var(--surface-2); }
   .vp-nav-item.active { color: var(--green); }
   [data-theme="dark"] .vp-nav-item.active { color: var(--green-pop); }
-  
-  .vp-nav-item svg {
-    width: 22px; height: 22px;
-    stroke: currentColor; fill: none; stroke-width: 1.8;
-  }
-  .vp-nav-label {
-    font-family: var(--font-b);
-    font-size: 10px; font-weight: 700; letter-spacing: .3px;
-  }
-  
-  /* Centre + (add) button */
+  .vp-nav-item svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .vp-nav-label { font-family: var(--font-b); font-size: 10px; font-weight: 700; letter-spacing: .3px; }
+
   .vp-nav-add {
     width: 52px; height: 52px; border-radius: 50%;
-    background: var(--ink);            /* ink bg = dark in light, light in dark */
+    background: var(--ink);
     border: none;
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: all .2s;
     margin-top: -14px; flex-shrink: 0; text-decoration: none;
     box-shadow: var(--sh-md);
   }
-  .vp-nav-add:hover {
-    opacity: .88;
-    transform: translateY(-2px);
-    box-shadow: var(--sh-lg);
-  }
-  .vp-nav-add svg {
-    width: 22px; height: 22px;
-    stroke: var(--surface);            /* surface = light cream in light, dark in dark */
-    fill: none; stroke-width: 2.5;
-  }
-  
-  /* ── RESPONSIVE ── */
-  @media (min-width: 900px) {
-    .vp-bottom-nav { display: none; }
-  }
-  @media (max-width: 899px) {
-    .vp-sidebar { display: none; }
-    .vp-has-sidebar { margin-left: 0; }
-  }
+  .vp-nav-add:hover { opacity: .88; transform: translateY(-2px); box-shadow: var(--sh-lg); }
+  .vp-nav-add svg { width: 22px; height: 22px; stroke: var(--surface); fill: none; stroke-width: 2.5; }
+
+  @media (min-width: 900px) { .vp-bottom-nav { display: none; } }
+  @media (max-width: 899px) { .vp-sidebar { display: none; } .vp-has-sidebar { margin-left: 0; } }
+
   /* ══════════════════════════════════════
      TOAST
   ══════════════════════════════════════ */
@@ -381,8 +342,9 @@
     justify-content: space-between; gap:24px;
   }
 
+  /* ── LOGO — bumped to 52px ── */
   .nav-logo { display:flex; align-items:center; text-decoration:none; flex-shrink:0; }
-  .nav-logo img { height:46px; width:auto; display:block; }
+  .nav-logo img { height: 52px; width: auto; display: block; }
   .nav-logo .logo-dark  { display:block; }
   .nav-logo .logo-light { display:none; }
   [data-theme="dark"] .nav-logo .logo-dark  { display:none; }
@@ -401,7 +363,7 @@
 
   .nav-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
 
-  /* Buttons */
+  /* ── BUTTONS ── */
   .btn {
     display:inline-flex; align-items:center; justify-content:center;
     gap:7px; padding:10px 22px; border-radius:var(--r-pill);
@@ -421,7 +383,7 @@
   [data-theme="dark"] .btn-ghost { border-color:#333; color:#888; }
   [data-theme="dark"] .btn-ghost:hover { border-color:#777; color:#F0EFE9; background:#222; }
 
-  /* Profile dropdown */
+  /* ── PROFILE DROPDOWN ── */
   .nav-profile { position:relative; }
   .nav-profile-btn {
     display:flex; align-items:center; gap:8px;
@@ -472,7 +434,7 @@
   [data-theme="dark"] .dropdown-item.danger:hover { background:#2A1515; }
   .dropdown-divider { height:1px; background:var(--border); }
 
-  /* Hamburger */
+  /* ── HAMBURGER ── */
   .nav-hamburger {
     display:none; flex-direction:column; justify-content:center;
     gap:5px; width:40px; height:40px;
@@ -492,86 +454,140 @@
   .nav-hamburger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
 
   /* ══════════════════════════════════════
-     FULLSCREEN DRAWER
+     DRAWER OVERLAY
+  ══════════════════════════════════════ */
+  .drawer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 999;
+    opacity: 0; pointer-events: none;
+    transition: opacity .38s cubic-bezier(.4,0,.2,1);
+  }
+  .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+
+  /* ══════════════════════════════════════
+     DRAWER — side panel (340px)
   ══════════════════════════════════════ */
   .drawer {
-    position:fixed; inset:0;
-    width:100vw; height:100dvh;
-    background:var(--surface);
-    z-index:1000; display:flex; flex-direction:column;
-    transform:translateX(100%);
-    transition:transform .42s cubic-bezier(.4,0,.2,1);
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: min(340px, 100vw);
+    background: var(--white);
+    border-left: 1px solid var(--border);
+    box-shadow: -16px 0 64px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform .4s cubic-bezier(.4, 0, .2, 1);
+    overflow: hidden;
   }
-  [data-theme="dark"] .drawer { background:#111110; }
-  .drawer.open { transform:translateX(0); }
+  [data-theme="dark"] .drawer {
+    background: #161614;
+    border-left-color: #2A2A28;
+    box-shadow: -16px 0 64px rgba(0, 0, 0, 0.45);
+  }
+  .drawer.open { transform: translateX(0); }
 
+  /* Header */
   .drawer-head {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:0 24px; height:var(--nav-h);
-    border-bottom:1px solid var(--border); flex-shrink:0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 20px;
+    height: 64px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
-  .drawer-logo { display:flex; align-items:center; text-decoration:none; }
-  .drawer-logo img { height:42px; width:auto; }
-  .drawer-logo .logo-dark  { display:block; }
-  .drawer-logo .logo-light { display:none; }
-  [data-theme="dark"] .drawer-logo .logo-dark  { display:none; }
-  [data-theme="dark"] .drawer-logo .logo-light { display:block; }
+  .drawer-logo { display: flex; align-items: center; text-decoration: none; }
+  .drawer-logo img { height: 38px; width: auto; }
+  .drawer-logo .logo-dark  { display: block; }
+  .drawer-logo .logo-light { display: none; }
+  [data-theme="dark"] .drawer-logo .logo-dark  { display: none; }
+  [data-theme="dark"] .drawer-logo .logo-light { display: block; }
 
   .drawer-close {
-    width:38px; height:38px; border-radius:50%;
-    border:1.5px solid var(--border);
-    background:transparent;
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; transition:all .2s;
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all .2s;
+    color: var(--muted);
   }
-  .drawer-close:hover { background:var(--ink); border-color:var(--ink); }
-  .drawer-close:hover svg { color:#fff; }
-  .drawer-close svg { color:var(--ink); transition:color .2s; }
+  .drawer-close:hover { background: var(--ink); border-color: var(--ink); color: var(--surface); }
 
+  /* User card */
   .drawer-user {
-    display:flex; align-items:center; gap:14px;
-    padding:24px 24px 20px;
-    border-bottom:1px solid var(--border); flex-shrink:0;
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 20px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
+  [data-theme="dark"] .drawer-user { background: rgba(255,255,255,.03); }
+
   .drawer-user-avatar {
-    width:48px; height:48px; border-radius:50%;
-    background:var(--green); color:#fff;
-    font-family:var(--font-d); font-weight:800; font-size:18px;
-    display:flex; align-items:center; justify-content:center;
-    overflow:hidden; flex-shrink:0;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--green); color: #fff;
+    font-family: var(--font-d); font-weight: 800; font-size: 17px;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(0,135,61,.2);
   }
-  .drawer-user-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
-  .drawer-user-name   { font-family:var(--font-d); font-weight:700; font-size:15px; color:var(--ink); }
-  .drawer-user-handle { font-size:12px; color:var(--muted-lt); margin-top:2px; }
+  .drawer-user-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .drawer-user-info { flex: 1; min-width: 0; overflow: hidden; }
+  .drawer-user-name {
+    font-family: var(--font-d); font-weight: 700; font-size: 14px;
+    color: var(--ink);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .drawer-user-handle { font-size: 11.5px; color: var(--muted-lt); margin-top: 2px; }
 
-  .drawer-nav { flex:1; overflow-y:auto; padding:12px 0; }
+  /* Nav links */
+  .drawer-nav { flex: 1; overflow-y: auto; padding: 10px 12px; }
+
   .drawer-link {
-    display:flex; align-items:center; gap:14px;
-    padding:14px 24px;
-    font-size:16px; font-weight:500; color:var(--ink);
-    text-decoration:none;
-    border-left:2px solid transparent;
-    transition:background .13s, border-color .13s;
+    display: flex; align-items: center; gap: 11px;
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-family: var(--font-b); font-size: 13.5px; font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    transition: all .15s;
+    margin-bottom: 2px;
+    border-left: none; /* reset original style */
   }
-  .drawer-link:hover { background:var(--surface-2); border-left-color:var(--green); }
-  .drawer-link svg { color:var(--muted-lt); flex-shrink:0; width:18px; height:18px; }
-  .drawer-link.active { background:var(--green-lt); border-left-color:var(--green); color:var(--green-dk); }
-  .drawer-link.active svg { color:var(--green); }
-  .drawer-link.danger { color:var(--red); }
-  .drawer-link.danger:hover { background:#FFF5F5; border-left-color:var(--red); }
+  .drawer-link svg {
+    width: 17px; height: 17px;
+    stroke: currentColor; fill: none; stroke-width: 1.8;
+    flex-shrink: 0;
+  }
+  .drawer-link:hover {
+    color: var(--ink);
+    background: var(--surface-2);
+  }
+  [data-theme="dark"] .drawer-link:hover { background: rgba(255,255,255,.05); }
 
-  [data-theme="dark"] .drawer-link:hover { background:#1C1C1A; }
-  [data-theme="dark"] .drawer-link.active { background:rgba(0,135,61,.12); color:#00C853; }
-  [data-theme="dark"] .drawer-link.danger:hover { background:#1F0A0A; }
+  .drawer-link.active {
+    color: var(--green);
+    background: var(--green-lt);
+  }
+  [data-theme="dark"] .drawer-link.active {
+    color: var(--green-pop);
+    background: rgba(0,135,61,.12);
+  }
+  .drawer-link.danger { color: var(--red); }
+  .drawer-link.danger:hover { background: #FFF5F5; color: var(--red); }
+  [data-theme="dark"] .drawer-link.danger:hover { background: rgba(229,62,62,.09); }
 
-  .drawer-sep { height:1px; background:var(--border); margin:8px 24px; }
+  .drawer-sep { height: 1px; background: var(--border); margin: 6px 0; }
 
+  /* Footer */
   .drawer-foot {
-    padding:20px 24px;
-    border-top:1px solid var(--border);
-    display:flex; flex-direction:column; gap:10px; flex-shrink:0;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    display: flex; flex-direction: column; gap: 8px;
+    flex-shrink: 0;
   }
-  .btn-full { width:100%; justify-content:center; }
+  .btn-full { width: 100%; justify-content: center; }
 
   /* Alert */
   .alert { display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:var(--r-md); font-size:14px; font-weight:500; margin-bottom:16px; }
@@ -581,12 +597,17 @@
   [data-theme="dark"] body { background:#111110; color:#F0EFE9; }
   [data-theme="dark"] .nav { background:rgba(17,17,16,.94); }
 
-  @media (max-width:900px) { .nav-inner { padding:0 20px; } }
-  @media (max-width:768px) {
-    .nav-links { display:none; }
-    .nav-right .btn { display:none; }
-    .nav-profile { display:none; }
-    .nav-hamburger { display:flex; }
+  /* ── RESPONSIVE ── */
+  /* ≤1024px: tighten nav padding */
+  @media (max-width:1024px) { .nav-inner { padding: 0 28px; } }
+  @media (max-width:900px)  { .nav-inner { padding: 0 20px; } }
+
+  /* ≤899px: switch to hamburger (aligned with sidebar breakpoint) */
+  @media (max-width:899px) {
+    .nav-links        { display: none; }
+    .nav-right .btn   { display: none; }
+    .nav-profile      { display: none; }
+    .nav-hamburger    { display: flex; }
   }
   </style>
   {% block extra_css %}{% endblock %}
@@ -601,19 +622,19 @@
 </script>
 {% endif %}
 
-<!-- ── NAVBAR (wrapped in block so child templates can remove it) ── -->
 {% block header %}
 <nav class="nav" id="mainNav">
   <div class="nav-inner">
+
     <a href="/" class="nav-logo">
       <img class="logo-dark"  src="{% static 'images/logoo.png' %}"      alt="Vendopage">
       <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage">
     </a>
 
     <div class="nav-links">
-      <a href="{% url 'home' %}#how"      class="nav-link">How It Works</a>
-      <a href="{% url 'home' %}#sellers"  class="nav-link">For Sellers</a>
-      <a href="{% url 'home' %}#buyers"   class="nav-link">For Buyers</a>
+      <a href="{% url 'home' %}#how"          class="nav-link">How It Works</a>
+      <a href="{% url 'home' %}#sellers"      class="nav-link">For Sellers</a>
+      <a href="{% url 'home' %}#buyers"       class="nav-link">For Buyers</a>
       <a href="{% url 'sellers_directory' %}" class="nav-link">Live Stores</a>
     </div>
 
@@ -657,19 +678,25 @@
           </div>
         </div>
       {% else %}
+        <!-- Sign In stays ghost; Get Started is green to pop as CTA -->
         <a href="{% url 'login' %}"    class="btn btn-ghost">Sign In</a>
-        <a href="{% url 'register' %}" class="btn btn-primary">Get Started Free</a>
+        <a href="{% url 'register' %}" class="btn btn-green">Get Started Free</a>
       {% endif %}
 
       <button class="nav-hamburger" id="navHamburger" onclick="toggleDrawer()" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
     </div>
+
   </div>
 </nav>
 
-<!-- DRAWER -->
+<!-- OVERLAY (behind the drawer) -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+<!-- DRAWER — side panel, slides in from right -->
 <div class="drawer" id="drawer">
+
   <div class="drawer-head">
     <a href="/" class="drawer-logo">
       <img class="logo-dark"  src="{% static 'images/logoo.png' %}"      alt="Vendopage">
@@ -681,37 +708,69 @@
   </div>
 
   {% if user.is_authenticated %}
+
   <div class="drawer-user">
     <div class="drawer-user-avatar">
       {% if user.profile_picture %}<img src="{{ user.profile_picture.url }}" alt="">
       {% else %}{{ user.business_name|first }}{% endif %}
     </div>
-    <div>
+    <div class="drawer-user-info">
       <div class="drawer-user-name">{{ user.business_name }}</div>
       <div class="drawer-user-handle">@{{ user.username }}</div>
     </div>
   </div>
+
   <nav class="drawer-nav">
-    <a href="{% url 'dashboard' %}"     class="drawer-link"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>Dashboard</a>
-    <a href="{% url 'upload_product' %}" class="drawer-link"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Product</a>
-    <a href="/{{ user.slug }}" target="_blank" class="drawer-link"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>View My Store</a>
+    <a href="{% url 'dashboard' %}" class="drawer-link">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </a>
+    <a href="{% url 'upload_product' %}" class="drawer-link">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Product
+    </a>
+    <a href="/{{ user.slug }}" target="_blank" class="drawer-link">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      View My Store
+    </a>
     <div class="drawer-sep"></div>
-    <a href="{% url 'settings' %}"    class="drawer-link"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Settings</a>
-    <a href="{% url 'subscription' %}" class="drawer-link"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Subscription</a>
+    <a href="{% url 'settings' %}" class="drawer-link">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Settings
+    </a>
+    <a href="{% url 'subscription' %}" class="drawer-link">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      Subscription
+    </a>
     <div class="drawer-sep"></div>
-    <a href="{% url 'logout' %}" class="drawer-link danger"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log out</a>
+    <a href="{% url 'logout' %}" class="drawer-link danger">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Log out
+    </a>
   </nav>
 
   {% else %}
+
   <nav class="drawer-nav">
-    <a href="{% url 'home' %}"              class="drawer-link"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</a>
-    <a href="{% url 'home' %}#how"          class="drawer-link"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>How It Works</a>
-    <a href="{% url 'sellers_directory' %}" class="drawer-link"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>Live Stores</a>
+    <a href="{% url 'home' %}" class="drawer-link">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Home
+    </a>
+    <a href="{% url 'home' %}#how" class="drawer-link">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      How It Works
+    </a>
+    <a href="{% url 'sellers_directory' %}" class="drawer-link">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      Live Stores
+    </a>
   </nav>
+
   <div class="drawer-foot">
     <a href="{% url 'login' %}"    class="btn btn-ghost btn-full">Sign In</a>
-    <a href="{% url 'register' %}" class="btn btn-primary btn-full">Get Started Free</a>
+    <a href="{% url 'register' %}" class="btn btn-green btn-full">Get Started Free</a>
   </div>
+
   {% endif %}
 </div>
 {% endblock %}
@@ -767,17 +826,30 @@ document.addEventListener('click',function(e){
 });
 
 /* ── DRAWER ── */
-function toggleDrawer(){const d=document.getElementById('drawer');if(d)d.classList.contains('open')?closeDrawer():openDrawer();}
-function openDrawer(){const d=document.getElementById('drawer');if(d)d.classList.add('open');const h=document.getElementById('navHamburger');if(h)h.classList.add('open');document.body.style.overflow='hidden';}
-function closeDrawer(){const d=document.getElementById('drawer');if(d)d.classList.remove('open');const h=document.getElementById('navHamburger');if(h)h.classList.remove('open');document.body.style.overflow='';}
-document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDrawer();});
+function toggleDrawer(){
+  const d=document.getElementById('drawer');
+  if(d) d.classList.contains('open') ? closeDrawer() : openDrawer();
+}
+function openDrawer(){
+  document.getElementById('drawer')?.classList.add('open');
+  document.getElementById('navHamburger')?.classList.add('open');
+  document.getElementById('drawerOverlay')?.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer(){
+  document.getElementById('drawer')?.classList.remove('open');
+  document.getElementById('navHamburger')?.classList.remove('open');
+  document.getElementById('drawerOverlay')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeDrawer(); });
 
 /* ── ACTIVE LINK ── */
 document.addEventListener('DOMContentLoaded',function(){
   const path=window.location.pathname;
   document.querySelectorAll('.drawer-link,.nav-link').forEach(function(link){
     const href=link.getAttribute('href');
-    if(href&&href!=='/'&&path.startsWith(href))link.classList.add('active');
+    if(href&&href!=='/'&&path.startsWith(href)) link.classList.add('active');
   });
 });
 </script>

@@ -104,7 +104,7 @@ body {
   padding: 0 18px;
   background: var(--surface);
 }
-.top-logo-img            { height: 28px; width: auto; display: block; }
+.top-logo-img            { height: 90px; width: auto; display: block; }
 .top-logo-img.logo-light { display: none; }
 [data-theme="dark"] .top-logo-img.logo-dark  { display: none; }
 [data-theme="dark"] .top-logo-img.logo-light { display: block; }
@@ -582,6 +582,9 @@ body {
     background: rgba(0,0,0,.78);
     align-items: center;
     justify-content: center;
+  }
+    @media (max-width:768px) {
+    .top-logo-img { height: 40px; }
   }
   /* override mobile column */
   .lightbox.open { flex-direction: row; }

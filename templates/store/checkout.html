@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
@@ -6,102 +5,330 @@
 
 {% block extra_css %}
 <style>
-.checkout-page { background:var(--light); min-height:calc(100vh - 64px); padding:40px 20px 80px; }
-.checkout-inner { max-width:920px; margin:0 auto; }
+/* ══════════════════════════════════════
+   BUYER NAV — minimal, logo + 3-dot
+══════════════════════════════════════ */
+.buyer-nav {
+  position: sticky; top: 0; z-index: 400;
+  height: 60px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+.buyer-nav-logo img {
+  height: 90px; width: auto; display: block;
+}
+.buyer-nav-logo .logo-dark  { display: block; }
+.buyer-nav-logo .logo-light { display: none; }
+[data-theme="dark"] .buyer-nav-logo .logo-dark  { display: none; }
+[data-theme="dark"] .buyer-nav-logo .logo-light { display: block; }
 
-.checkout-header { margin-bottom:32px; }
-.checkout-header h1 { font-family:var(--font-d); font-weight:800; font-size:28px; letter-spacing:-1px; margin-bottom:4px; }
-.checkout-header p { font-size:14px; color:var(--gray); }
-.breadcrumb { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--gray-lt); margin-bottom:24px; }
-.breadcrumb a { color:var(--green); text-decoration:none; }
-.breadcrumb span { color:var(--gray-lt); }
+.buyer-nav-dots {
+  position: relative;
+}
+.buyer-dots-btn {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--surface-2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all .18s;
+  color: var(--muted);
+}
+.buyer-dots-btn:hover { border-color: var(--green); color: var(--green); }
+.buyer-dots-btn svg { width: 18px; height: 18px; }
 
-.checkout-layout { display:grid; grid-template-columns:1fr 340px; gap:24px; align-items:start; }
+.buyer-dots-menu {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); min-width: 200px;
+  box-shadow: var(--sh-lg);
+  opacity: 0; pointer-events: none;
+  transform: translateY(-6px) scale(.97);
+  transition: opacity .18s, transform .18s;
+  z-index: 500; overflow: hidden;
+}
+.buyer-dots-menu.open {
+  opacity: 1; pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+.buyer-dots-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px;
+  font-family: var(--font-b); font-size: 14px; font-weight: 500;
+  color: var(--ink); text-decoration: none;
+  transition: background .13s;
+  border-bottom: 1px solid var(--border);
+}
+.buyer-dots-item:last-child { border-bottom: none; }
+.buyer-dots-item:hover { background: var(--surface-2); }
+.buyer-dots-item svg { color: var(--muted); flex-shrink: 0; }
+.buyer-dots-item.highlight {
+  color: var(--green); font-weight: 700;
+}
+.buyer-dots-item.highlight svg { color: var(--green); }
 
-/* ── Payment type banner ─────────────────────────────────── */
+/* ══════════════════════════════════════
+   CHECKOUT PAGE
+══════════════════════════════════════ */
+.checkout-page {
+  background: var(--surface);
+  min-height: calc(100vh - 60px);
+  padding: 32px 20px 80px;
+}
+.checkout-inner { max-width: 900px; margin: 0 auto; }
+
+.checkout-header { margin-bottom: 24px; }
+.checkout-header h1 {
+  font-family: var(--font-d); font-weight: 800;
+  font-size: clamp(22px, 3vw, 30px);
+  letter-spacing: -1px; color: var(--ink);
+  margin-bottom: 4px;
+}
+.checkout-header p { font-size: 14px; color: var(--muted); }
+
+.breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; color: var(--muted-lt);
+  margin-bottom: 20px; flex-wrap: wrap;
+}
+.breadcrumb a { color: var(--green); text-decoration: none; font-weight: 600; }
+.breadcrumb a:hover { text-decoration: underline; }
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 20px; align-items: start;
+}
+
+/* ── Payment type banner ── */
 .pt-banner {
-  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
-  padding:13px 16px; border-radius:14px; margin-bottom:20px;
-  font-size:13px; font-weight:500;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px;
+  padding: 12px 16px; border-radius: var(--r-md);
+  margin-bottom: 16px;
+  font-size: 13px; font-weight: 500;
 }
-.pt-banner.escrow { background:#f0fdf4; border:1px solid #bbf7d0; color:#166534; }
-.pt-banner.direct { background:#fefce8; border:1px solid #fde68a; color:#92400e; }
-.pt-banner-left { display:flex; align-items:center; gap:8px; }
-.pt-banner-left strong { font-weight:700; }
+.pt-banner.escrow {
+  background: rgba(0,135,61,.08);
+  border: 1px solid rgba(0,135,61,.2);
+  color: var(--green);
+}
+.pt-banner.direct {
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.2);
+  color: #b45309;
+}
+[data-theme="dark"] .pt-banner.direct { color: #FBBF24; }
+.pt-banner-left { display: flex; align-items: center; gap: 8px; }
+.pt-banner-left strong { font-weight: 700; }
 .pt-change-btn {
-  font-size:12px; font-weight:600; color:var(--gray);
-  background:none; border:1px solid var(--border); border-radius:100px;
-  padding:4px 12px; cursor:pointer; transition:all .15s; white-space:nowrap;
+  font-size: 12px; font-weight: 600; color: var(--muted);
+  background: none; border: 1px solid var(--border);
+  border-radius: 100px; padding: 4px 12px;
+  cursor: pointer; transition: all .15s; white-space: nowrap;
 }
-.pt-change-btn:hover { color:var(--dark); border-color:var(--dark); }
+.pt-change-btn:hover { color: var(--ink); border-color: var(--muted-lt); }
 
-/* ── Form card ──────────────────────────────────────────── */
-.checkout-form-card { background:var(--white); border:1px solid var(--border); border-radius:20px; overflow:hidden; }
-.form-section { padding:24px; border-bottom:1px solid var(--border); }
-.form-section:last-child { border-bottom:none; }
-.form-section-title { font-family:var(--font-d); font-weight:700; font-size:16px; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
-.form-section-title .sec-num { width:24px; height:24px; border-radius:50%; background:var(--dark); color:var(--white); font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; }
-.form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
-.form-group { margin-bottom:14px; }
-.form-group:last-child { margin-bottom:0; }
-.form-label { font-size:13px; font-weight:600; color:var(--gray); margin-bottom:6px; display:block; }
-.form-label .req { color:var(--red); margin-left:2px; }
-.form-input { width:100%; padding:11px 14px; border:1.5px solid var(--border); border-radius:var(--r-md); font-family:var(--font-b); font-size:14px; outline:none; transition:border-color .18s, box-shadow .18s; background:var(--white); color:var(--dark); box-sizing:border-box; }
-.form-input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(0,194,168,.1); }
-.form-input::placeholder { color:var(--gray-lt); }
+/* ── Form card ── */
+.checkout-form-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+}
+.form-section { padding: 22px; border-bottom: 1px solid var(--border); }
+.form-section:last-child { border-bottom: none; }
+.form-section-title {
+  font-family: var(--font-d); font-weight: 700;
+  font-size: 15px; color: var(--ink);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.form-section-title .sec-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--ink); color: var(--surface);
+  font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.form-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px; margin-bottom: 12px;
+}
+.form-group { margin-bottom: 12px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label {
+  font-size: 12px; font-weight: 700;
+  color: var(--muted); margin-bottom: 6px;
+  display: block; text-transform: uppercase; letter-spacing: .5px;
+}
+.form-label .req { color: var(--red); margin-left: 2px; }
+.form-input {
+  width: 100%; padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-md);
+  font-family: var(--font-b); font-size: 14px;
+  outline: none; transition: border-color .18s, box-shadow .18s;
+  background: var(--surface-2); color: var(--ink);
+  box-sizing: border-box;
+}
+.form-input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(0,135,61,.09);
+}
+.form-input::placeholder { color: var(--muted-lt); }
+.form-hint { font-size: 12px; color: var(--muted); margin-top: 5px; }
 
-/* Delivery skipped notice */
 .delivery-skip-notice {
-  display:flex; align-items:flex-start; gap:12px;
-  padding:16px; border-radius:14px; background:#fef3c7;
-  border:1px solid #fde68a; font-size:13px; color:#92400e; line-height:1.6;
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px; border-radius: var(--r-md);
+  background: rgba(245,158,11,.08);
+  border: 1px solid rgba(245,158,11,.2);
+  font-size: 13px; color: #b45309; line-height: 1.6;
 }
-.delivery-skip-notice .wa-icon { font-size:20px; flex-shrink:0; margin-top:1px; }
+[data-theme="dark"] .delivery-skip-notice { color: #FBBF24; }
+.delivery-skip-notice .wa-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
 
-/* ── Order review ───────────────────────────────────────── */
-.order-review-card { background:var(--white); border:1px solid var(--border); border-radius:20px; overflow:hidden; position:sticky; top:80px; }
-.order-review-head { padding:18px 20px; border-bottom:1px solid var(--border); }
-.order-review-head h3 { font-family:var(--font-d); font-weight:700; font-size:16px; }
-.order-item-row { display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border); }
-.order-item-row:last-of-type { border-bottom:none; }
-.oi-img { width:52px; height:52px; border-radius:10px; object-fit:cover; background:var(--light); flex-shrink:0; }
-.oi-img-ph { width:52px; height:52px; border-radius:10px; background:var(--light); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0; }
-.oi-info { flex:1; min-width:0; }
-.oi-name { font-size:13px; font-weight:600; margin-bottom:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.oi-meta { font-size:12px; color:var(--gray-lt); }
-.oi-price { font-size:14px; font-weight:700; color:var(--dark); flex-shrink:0; }
-.order-totals { padding:16px 20px; border-top:1px solid var(--border); }
-.tot-row { display:flex; justify-content:space-between; font-size:14px; margin-bottom:8px; color:var(--gray); }
-.tot-row.grand { font-weight:800; font-size:17px; color:var(--dark); border-top:1px solid var(--border); padding-top:10px; margin-top:10px; margin-bottom:0; }
+/* ── Order review sidebar ── */
+.order-review-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+  position: sticky; top: 76px;
+}
+.order-review-head {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.order-review-head h3 {
+  font-family: var(--font-d); font-weight: 700;
+  font-size: 15px; color: var(--ink);
+}
+.order-item-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.order-item-row:last-of-type { border-bottom: none; }
+.oi-img {
+  width: 48px; height: 48px; border-radius: 10px;
+  object-fit: cover; background: var(--surface-2); flex-shrink: 0;
+}
+.oi-img-ph {
+  width: 48px; height: 48px; border-radius: 10px;
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.oi-info { flex: 1; min-width: 0; }
+.oi-name {
+  font-size: 13px; font-weight: 600; color: var(--ink);
+  margin-bottom: 2px;
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.oi-meta { font-size: 11.5px; color: var(--muted); }
+.oi-price { font-size: 13px; font-weight: 700; color: var(--ink); flex-shrink: 0; }
 
-/* ── Place order button ─────────────────────────────────── */
-.place-order-btn { width:100%; padding:15px; border-radius:var(--r-pill); border:none; background:var(--dark); color:var(--white); font-family:var(--font-b); font-size:15px; font-weight:700; cursor:pointer; transition:all .2s; margin:16px 20px 0; width:calc(100% - 40px); display:flex; align-items:center; justify-content:center; gap:8px; }
-.place-order-btn:hover:not(:disabled) { background:#222; transform:translateY(-1px); box-shadow:0 6px 20px rgba(0,0,0,.15); }
-.place-order-btn:disabled { opacity:.5; cursor:not-allowed; }
-.place-order-btn.direct { background:var(--green); }
-.place-order-btn.direct:hover:not(:disabled) { background:var(--green-dk); box-shadow:0 6px 20px rgba(0,200,83,.3); }
-.place-order-wrap { padding:0 0 20px; }
-.secure-note { display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; color:var(--gray-lt); margin:10px 20px 0; }
-.escrow-info { margin:12px 20px 20px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:12px 14px; font-size:12px; color:#166534; line-height:1.6; }
-.direct-info { margin:12px 20px 20px; background:#fefce8; border:1px solid #fde68a; border-radius:10px; padding:12px 14px; font-size:12px; color:#92400e; line-height:1.6; }
+.order-totals {
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+}
+.tot-row {
+  display: flex; justify-content: space-between;
+  font-size: 13px; margin-bottom: 7px; color: var(--muted);
+}
+.tot-row.grand {
+  font-weight: 800; font-size: 16px; color: var(--ink);
+  border-top: 1px solid var(--border);
+  padding-top: 10px; margin-top: 6px; margin-bottom: 0;
+}
 
-[data-theme="dark"] .checkout-form-card,
-[data-theme="dark"] .order-review-card { background:#1e1e1e; border-color:#2e2e2e; }
-[data-theme="dark"] .form-input { background:#2a2a2a; border-color:#3a3a3a; color:#f0f0f0; }
-[data-theme="dark"] .form-section { border-color:#2e2e2e; }
-[data-theme="dark"] .order-item-row { border-color:#2a2a2a; }
-[data-theme="dark"] .order-totals { border-color:#2a2a2a; }
-[data-theme="dark"] .tot-row.grand { border-color:#3a3a3a; }
+/* ── Place order button ── */
+.place-order-wrap { padding: 0 18px 18px; }
+.place-order-btn {
+  width: 100%; padding: 14px;
+  border-radius: var(--r-pill); border: none;
+  background: var(--ink); color: var(--surface);
+  font-family: var(--font-b); font-size: 15px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  margin-top: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.place-order-btn:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,.15); }
+.place-order-btn:disabled { opacity: .45; cursor: not-allowed; }
+.place-order-btn.direct { background: var(--green); color: #fff; }
+.place-order-btn.direct:hover:not(:disabled) { background: var(--green-dk); box-shadow: 0 6px 20px rgba(0,135,61,.3); }
 
-@media(max-width:768px) {
-  .checkout-layout { grid-template-columns:1fr; }
-  .order-review-card { position:static; order:-1; }
-  .form-row { grid-template-columns:1fr; }
-  .place-order-btn { margin:16px 16px 0; width:calc(100% - 32px); }
-  .secure-note { margin:10px 16px 0; }
-  .escrow-info, .direct-info { margin:12px 16px 20px; }
+.secure-note {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 12px; color: var(--muted-lt); margin-top: 10px;
+}
+
+.pay-info {
+  margin-top: 10px;
+  border-radius: var(--r-md); padding: 11px 13px;
+  font-size: 12px; line-height: 1.65;
+}
+.pay-info.escrow {
+  background: rgba(0,135,61,.07);
+  border: 1px solid rgba(0,135,61,.18);
+  color: var(--green);
+}
+.pay-info.direct {
+  background: rgba(245,158,11,.07);
+  border: 1px solid rgba(245,158,11,.18);
+  color: #b45309;
+}
+[data-theme="dark"] .pay-info.direct { color: #FBBF24; }
+
+/* ── Responsive ── */
+@media(max-width: 768px) {
+  .checkout-layout { grid-template-columns: 1fr; }
+  .order-review-card { position: static; order: -1; }
+  .form-row { grid-template-columns: 1fr; }
+  .buyer-nav { padding: 0 16px; }
+}
+@media(max-width: 480px) {
+  .checkout-page { padding: 20px 16px 60px; }
+  .buyer-nav-logo img {
+  height: 60px; }
 }
 </style>
+{% endblock %}
+
+{% block header %}
+<!-- BUYER NAV — overrides base.html navbar for buyer pages -->
+<nav class="buyer-nav">
+  <a href="/" class="buyer-nav-logo">
+    <img class="logo-dark"  src="{% static 'images/logoo.png' %}"      alt="Vendopage">
+    <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage">
+  </a>
+  <div class="buyer-nav-dots">
+    <button class="buyer-dots-btn" id="dotsBtn" aria-label="Menu" onclick="toggleDotsMenu()">
+      <!-- three dots (vertical ellipsis) -->
+      <svg fill="currentColor" viewBox="0 0 24 24">
+        <circle cx="12" cy="5"  r="1.5"/>
+        <circle cx="12" cy="12" r="1.5"/>
+        <circle cx="12" cy="19" r="1.5"/>
+      </svg>
+    </button>
+    <div class="buyer-dots-menu" id="dotsMenu">
+      <a href="{% url 'register' %}" class="buyer-dots-item highlight">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Become a Seller
+      </a>
+      <a href="{% url 'sellers_directory' %}" class="buyer-dots-item">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        Browse Stores
+      </a>
+      <a href="{% url 'home' %}" class="buyer-dots-item">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+        Back to Home
+      </a>
+    </div>
+  </div>
+</nav>
 {% endblock %}
 
 {% block content %}
@@ -122,18 +349,17 @@
   </div>
 
   <div id="emptyCartNotice" style="display:none; text-align:center; padding:80px 20px;">
-    <div style="font-size:56px;margin-bottom:16px;">🛒</div>
-    <h3 style="font-family:var(--font-d);font-weight:700;font-size:20px;margin-bottom:8px;">Your cart is empty</h3>
-    <p style="color:var(--gray-lt);margin-bottom:20px;">Go back and add some products.</p>
+    <div style="font-size:48px;margin-bottom:14px;">🛒</div>
+    <h3 style="font-family:var(--font-d);font-weight:700;font-size:20px;color:var(--ink);margin-bottom:8px;">Your cart is empty</h3>
+    <p style="color:var(--muted);margin-bottom:20px;">Go back and add some products.</p>
     <a href="/order/{{ seller.slug }}/cart/" class="btn btn-primary">Back to Cart</a>
   </div>
 
   <div class="checkout-layout" id="checkoutLayout">
 
-    <!-- Checkout Form -->
+    <!-- LEFT: Form -->
     <div>
 
-      <!-- Payment type banner (populated by JS) -->
       <div id="ptBanner" class="pt-banner escrow" style="display:none;">
         <div class="pt-banner-left">
           <span id="ptBannerIcon">🔒</span>
@@ -169,11 +395,11 @@
             <div class="form-group">
               <label class="form-label">Email Address <span class="req">*</span></label>
               <input type="email" name="buyer_email" class="form-input" placeholder="you@example.com" required>
-              <p style="font-size:12px;color:var(--gray-lt);margin-top:5px;">Order confirmation and tracking will be sent here.</p>
+              <p class="form-hint">Order confirmation and tracking will be sent here.</p>
             </div>
           </div>
 
-          <!-- Section 2: Delivery (shown/hidden based on delivery_required) -->
+          <!-- Section 2: Delivery address -->
           <div class="form-section" id="deliverySection">
             <div class="form-section-title">
               <span class="sec-num">2</span>
@@ -189,13 +415,13 @@
             </div>
           </div>
 
-          <!-- Delivery skipped notice (shown when delivery_required = false) -->
+          <!-- Delivery skipped notice -->
           <div class="form-section" id="deliverySkipSection" style="display:none;">
             <div class="delivery-skip-notice">
               <span class="wa-icon">💬</span>
               <div>
                 <strong>No delivery address needed right now.</strong><br>
-                {{ seller.business_name }} will contact you on WhatsApp after payment to arrange delivery details.
+                {{ seller.business_name }} will contact you on WhatsApp after payment to arrange delivery.
               </div>
             </div>
           </div>
@@ -204,7 +430,7 @@
       </form>
     </div>
 
-    <!-- Order Review -->
+    <!-- RIGHT: Order summary -->
     <div>
       <div class="order-review-card">
         <div class="order-review-head">
@@ -225,12 +451,11 @@
             <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
             Powered by Flutterwave
           </div>
-          <!-- Dynamic info box (escrow vs direct) -->
-          <div class="escrow-info" id="payInfoEscrow">
-            🔒 <strong>Escrow Protection:</strong> Your payment is held securely until you confirm receipt of your order.
+          <div class="pay-info escrow" id="payInfoEscrow">
+            🔒 <strong>Escrow:</strong> Your payment is held safely until you confirm you've received your order.
           </div>
-          <div class="direct-info" id="payInfoDirect" style="display:none;">
-            ⚡ <strong>Direct Payment:</strong> Payment goes straight to the vendor immediately after confirmation.
+          <div class="pay-info direct" id="payInfoDirect" style="display:none;">
+            ⚡ <strong>Direct Pay:</strong> Payment goes straight to the vendor after checkout.
           </div>
         </div>
       </div>
@@ -240,6 +465,7 @@
 </div>
 </div>
 {% block footer %}{% endblock %}
+
 <script id="productDataEl" type="application/json">
 {
   {% for pid, product in product_map.items %}
@@ -254,37 +480,49 @@
 </script>
 
 <script>
+/* ── THREE-DOT MENU ── */
+function toggleDotsMenu() {
+  const menu = document.getElementById('dotsMenu');
+  menu.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('dotsBtn')?.closest('.buyer-nav-dots');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('dotsMenu')?.classList.remove('open');
+  }
+});
+
+/* ── CHECKOUT LOGIC (unchanged from original) ── */
 const CURRENCY = '{{ currency|escapejs }}';
 const SLUG = '{{ seller.slug|escapejs }}';
- 
-/* Load server-side product data (for price verification) */
+
 let PRODUCTS = {};
 try {
   const el = document.getElementById('productDataEl');
   if (el) PRODUCTS = JSON.parse(el.textContent);
 } catch(e) {}
- 
+
 function formatAmount(n) {
   const num = parseFloat(n);
   if (isNaN(num)) return CURRENCY + '0';
   return CURRENCY + num.toLocaleString('en-NG', {minimumFractionDigits: 0, maximumFractionDigits: 0});
 }
- 
+
 function getPaymentPrefs() {
   return {
     paymentType:      sessionStorage.getItem('vp_payment_type_' + SLUG) || 'escrow',
     deliveryRequired: sessionStorage.getItem('vp_delivery_required_' + SLUG) !== '0',
   };
 }
- 
+
 function applyPaymentPrefs() {
   const prefs = getPaymentPrefs();
   const isEscrow = prefs.paymentType === 'escrow';
   const needDelivery = prefs.deliveryRequired;
- 
+
   document.getElementById('paymentTypeInput').value = prefs.paymentType;
   document.getElementById('deliveryRequiredInput').value = needDelivery ? '1' : '0';
- 
+
   const banner = document.getElementById('ptBanner');
   banner.style.display = 'flex';
   if (isEscrow) {
@@ -296,7 +534,7 @@ function applyPaymentPrefs() {
     document.getElementById('ptBannerIcon').textContent = '⚡';
     document.getElementById('ptBannerText').innerHTML = '<strong>Direct Pay</strong> — payment goes straight to vendor';
   }
- 
+
   const btn = document.getElementById('placeOrderBtn');
   const label = document.getElementById('placeOrderLabel');
   if (isEscrow) {
@@ -306,14 +544,14 @@ function applyPaymentPrefs() {
     btn.classList.add('direct');
     label.textContent = 'Pay Now (Direct)';
   }
- 
+
   document.getElementById('payInfoEscrow').style.display = isEscrow ? '' : 'none';
-  document.getElementById('payInfoDirect').style.display = isEscrow ? 'none' : '';
- 
+  document.getElementById('payInfoDirect').style.display  = isEscrow ? 'none' : '';
+
   const deliverySection = document.getElementById('deliverySection');
-  const skipSection = document.getElementById('deliverySkipSection');
-  const addrInput = document.getElementById('deliveryAddressInput');
- 
+  const skipSection     = document.getElementById('deliverySkipSection');
+  const addrInput       = document.getElementById('deliveryAddressInput');
+
   if (needDelivery) {
     deliverySection.style.display = '';
     skipSection.style.display = 'none';
@@ -326,180 +564,82 @@ function applyPaymentPrefs() {
     document.getElementById('reviewDeliveryRow').textContent = 'Via WhatsApp';
   }
 }
- 
+
 function goBackToCart() {
-  window.location.href = '/order/{{ seller.slug }}/cart/';
+  window.location.href = '/order/' + SLUG + '/cart/';
 }
- 
-/*
-  resolveCartItems — handles ALL three cart formats:
- 
-  Format A (seller_page.html saves this):
-    cart[id] = { name: "...", price: 18000, qty: 2, imageUrl: "..." }
- 
-  Format B (cart.html new format):
-    cart[id] = 3   (just a quantity number)
- 
-  Format C (cart.html object format, same as A but possibly different keys):
-    cart[id] = { name: "...", price: 18000, qty: 1, imageUrl: "..." }
- 
-  Priority: always use server-side PRODUCTS price if available (security).
-  Fallback: use client-side price from the cart object itself.
-  This means checkout works even when product_map has no items.
-*/
+
 function resolveCartItems(rawCart) {
   const items = [];
- 
   Object.keys(rawCart).forEach(function(id) {
     const val = rawCart[id];
     let qty, price, name, imageUrl;
- 
     if (typeof val === 'number') {
-      /* Format B: value is just qty — MUST have PRODUCTS data */
       qty = Math.max(1, parseInt(val, 10) || 1);
       const p = PRODUCTS[id];
-      if (!p || p.price === null || p.price === undefined) {
-        /* No server data and no client data — skip */
-        return;
-      }
-      price    = parseFloat(p.price);
-      name     = p.name  || 'Product';
-      imageUrl = p.image || '';
- 
+      if (!p || p.price === null || p.price === undefined) return;
+      price = parseFloat(p.price); name = p.name || 'Product'; imageUrl = p.image || '';
     } else if (val && typeof val === 'object') {
-      /* Formats A/C: full object — use client data as base */
-      qty      = Math.max(1, parseInt(val.qty, 10) || 1);
-      price    = parseFloat(val.price) || 0;
-      name     = val.name || val.desc || 'Product';
-      imageUrl = val.imageUrl || val.image || '';
- 
-      /* Override with server price if we have it (prevents client-side tampering) */
+      qty = Math.max(1, parseInt(val.qty, 10) || 1);
+      price = parseFloat(val.price) || 0; name = val.name || val.desc || 'Product'; imageUrl = val.imageUrl || val.image || '';
       const p = PRODUCTS[id];
-      if (p && p.price !== null && p.price !== undefined) {
-        price    = parseFloat(p.price);
-        name     = p.name  || name;
-        imageUrl = p.image || imageUrl;
-      }
-      /* If no server data, client price is fine — seller_page already set it correctly */
- 
-    } else {
-      /* Unknown format — skip */
-      return;
-    }
- 
-    /* Only skip if price is truly missing/zero */
-    if (qty < 1 || isNaN(price)) return;
-    /* Allow price = 0 only if it's genuinely free — but skip negative */
-    if (price < 0) return;
- 
+      if (p && p.price !== null && p.price !== undefined) { price = parseFloat(p.price); name = p.name || name; imageUrl = p.image || imageUrl; }
+    } else return;
+    if (qty < 1 || isNaN(price) || price < 0) return;
     items.push({ id, name, price, qty, imageUrl });
   });
- 
   return items;
 }
- 
+
 function loadAndRender() {
   let rawCart = {};
-  try {
-    const stored = sessionStorage.getItem('vp_cart_' + SLUG);
-    if (stored) rawCart = JSON.parse(stored);
-  } catch(e) {}
- 
+  try { const stored = sessionStorage.getItem('vp_cart_' + SLUG); if (stored) rawCart = JSON.parse(stored); } catch(e) {}
+
   const layout = document.getElementById('checkoutLayout');
   const notice = document.getElementById('emptyCartNotice');
   const btn    = document.getElementById('placeOrderBtn');
- 
-  const items = resolveCartItems(rawCart);
- 
-  if (items.length === 0) {
-    layout.style.display = 'none';
-    notice.style.display = 'block';
-    return;
-  }
- 
-  /* Build cart JSON for the backend
-     Backend initiate_payment() handles both formats,
-     but we send full objects to be safe */
+  const items  = resolveCartItems(rawCart);
+
+  if (items.length === 0) { layout.style.display = 'none'; notice.style.display = 'block'; return; }
+
   const cartForBackend = {};
-  items.forEach(function(item) {
-    cartForBackend[item.id] = {
-      name:     item.name,
-      price:    item.price,
-      qty:      item.qty,
-      imageUrl: item.imageUrl,
-    };
-  });
+  items.forEach(function(item) { cartForBackend[item.id] = { name: item.name, price: item.price, qty: item.qty, imageUrl: item.imageUrl }; });
   document.getElementById('cartJsonInput').value = JSON.stringify(cartForBackend);
- 
-  /* Render order review */
-  let subtotal = 0;
-  let html     = '';
-  let count    = 0;
- 
+
+  let subtotal = 0, html = '', count = 0;
   items.forEach(function(item) {
     const lineTotal = item.price * item.qty;
-    subtotal += lineTotal;
-    count    += item.qty;
- 
-    const imgHtml = item.imageUrl
-      ? `<img class="oi-img" src="${item.imageUrl}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-      : '';
-    const phHtml = `<div class="oi-img-ph" ${item.imageUrl ? 'style="display:none"' : ''}>📦</div>`;
- 
-    html += `
-      <div class="order-item-row">
-        ${imgHtml}${phHtml}
-        <div class="oi-info">
-          <div class="oi-name">${item.name}</div>
-          <div class="oi-meta">Qty: ${item.qty} · ${formatAmount(item.price)} each</div>
-        </div>
-        <div class="oi-price">${formatAmount(lineTotal)}</div>
-      </div>`;
+    subtotal += lineTotal; count += item.qty;
+    const imgHtml = item.imageUrl ? `<img class="oi-img" src="${item.imageUrl}" alt="${item.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">` : '';
+    const phHtml  = `<div class="oi-img-ph" ${item.imageUrl ? 'style="display:none"' : ''}>📦</div>`;
+    html += `<div class="order-item-row">${imgHtml}${phHtml}<div class="oi-info"><div class="oi-name">${item.name}</div><div class="oi-meta">Qty: ${item.qty} · ${formatAmount(item.price)} each</div></div><div class="oi-price">${formatAmount(lineTotal)}</div></div>`;
   });
- 
+
   document.getElementById('reviewItemsList').innerHTML = html;
   document.getElementById('reviewCount').textContent    = count;
   document.getElementById('reviewSubtotal').textContent = formatAmount(subtotal);
   document.getElementById('reviewTotal').textContent    = formatAmount(subtotal);
   btn.disabled = false;
 }
- 
+
 function submitOrder() {
-  /* Re-resolve on submit as a safety net */
   let rawCart = {};
-  try {
-    const stored = sessionStorage.getItem('vp_cart_' + SLUG);
-    if (stored) rawCart = JSON.parse(stored);
-  } catch(e) {}
- 
+  try { const stored = sessionStorage.getItem('vp_cart_' + SLUG); if (stored) rawCart = JSON.parse(stored); } catch(e) {}
   const items = resolveCartItems(rawCart);
   if (items.length === 0) return;
- 
   const cartForBackend = {};
-  items.forEach(function(item) {
-    cartForBackend[item.id] = {
-      name:     item.name,
-      price:    item.price,
-      qty:      item.qty,
-      imageUrl: item.imageUrl,
-    };
-  });
+  items.forEach(function(item) { cartForBackend[item.id] = { name: item.name, price: item.price, qty: item.qty, imageUrl: item.imageUrl }; });
   document.getElementById('cartJsonInput').value = JSON.stringify(cartForBackend);
- 
   const prefs = getPaymentPrefs();
   document.getElementById('paymentTypeInput').value      = prefs.paymentType;
   document.getElementById('deliveryRequiredInput').value = prefs.deliveryRequired ? '1' : '0';
- 
-  const btn = document.getElementById('placeOrderBtn');
   document.getElementById('placeOrderLabel').textContent = 'Redirecting to payment…';
-  btn.disabled = true;
- 
+  document.getElementById('placeOrderBtn').disabled = true;
   document.getElementById('checkoutForm').submit();
 }
- 
+
 loadAndRender();
 applyPaymentPrefs();
 </script>
-
 {% endblock %}
 
