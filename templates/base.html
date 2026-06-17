@@ -64,7 +64,7 @@
         const dark = mode==='auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : mode==='dark';
         document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
       }
-      const saved = localStorage.getItem('vp-theme') || 'dark';
+      const saved = localStorage.getItem('vp-theme') || 'light';
       applyTheme(saved);
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(){
         if(localStorage.getItem('vp-theme')==='auto') applyTheme('auto');
