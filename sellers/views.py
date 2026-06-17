@@ -236,7 +236,11 @@ def sellers_directory(request):
         'premium_count':         premium_count,
         'category_count':        len(categories),
     })
+
+
 def seller_page(request, slug):
+    from django.db.models import Avg
+
     seller = get_object_or_404(Seller, slug=slug, is_active=True)
 
     if not request.user.is_authenticated or request.user.id != seller.id:
@@ -248,12 +252,28 @@ def seller_page(request, slug):
         seller=seller, is_archived=False,
     ).prefetch_related('images').order_by('-created_at')
 
-    return render(request, 'seller_page.html', {
-        'seller':   seller,
-        'products': products,
-        'is_owner': request.user.is_authenticated and request.user.id == seller.id,
-    })
+    # ── Reviews ──────────────────────────────────────────────
+    reviews  = Review.objects.filter(seller=seller).select_related('order')
+    total    = reviews.count()
+    avg_raw  = reviews.aggregate(avg=Avg('rating'))['avg'] or 0
 
+    breakdown = []
+    for star in [5, 4, 3, 2, 1]:
+        cnt = reviews.filter(rating=star).count()
+        pct = round(cnt / total * 100) if total else 0
+        breakdown.append({'star': star, 'count': cnt, 'pct': pct})
+    # ─────────────────────────────────────────────────────────
+
+    return render(request, 'seller_page.html', {
+        'seller':           seller,
+        'products':         products,
+        'is_owner':         request.user.is_authenticated and request.user.id == seller.id,
+        'reviews':          reviews,
+        'avg_rating':       round(avg_raw, 1),
+        'avg_rating_int':   round(avg_raw),
+        'total_reviews':    total,
+        'rating_breakdown': breakdown,
+    })
 
 def logout_view(request):
     logout(request)
