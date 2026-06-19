@@ -314,6 +314,23 @@ class Command(BaseCommand):
     def _execute_transfer(self, order: Order, flw: FlutterwavePayment) -> bool:
         ref_short = str(order.order_ref)[:8].upper()
 
+
+        # Flutterwave minimum transfer is ₦100
+        if order.vendor_payout < Decimal("100.00"):
+            self.stdout.write(self.style.WARNING(
+                f"  ⏭  SKIPPED — vendor_payout ₦{order.vendor_payout} is below "
+                f"Flutterwave's ₦100 minimum. Marking completed to clear queue."
+            ))
+            logger.warning(
+                "PAYOUT BELOW MINIMUM | order=%s | amount=₦%s — marking completed",
+                ref_short, order.vendor_payout,
+            )
+            order.payout_triggered = True
+            order.payout_at = timezone.now()
+            order.status = "completed"
+            order.save(update_fields=["payout_triggered", "payout_at", "status"])
+            return True  # don't retry — it will never pass ₦100 minimum
+
         try:
             with transaction.atomic():
                 result = flw.transfer_to_vendor(order)
@@ -360,5 +377,3 @@ class Command(BaseCommand):
     def _abort(self, reason: str):
         logger.warning("PAYOUT ABORTED — %s", reason)
         self.stdout.write(self.style.ERROR(f"\n  ⚠  ABORT: {reason}\n"))
-PYEOF
-echo "File written successfully."

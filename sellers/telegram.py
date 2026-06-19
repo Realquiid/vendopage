@@ -26,5 +26,3 @@ def notify_telegram(message: str):
         )
     except requests.RequestException as exc:
         logger.error("Telegram notify failed: %s", exc)
-PYEOF
-echo "Updated."
