@@ -12,14 +12,10 @@ app.conf.timezone = 'Africa/Lagos'
 app.conf.enable_utc = False
 
 app.conf.beat_schedule = {
-    # ── Payout: 6 AM Monday–Friday only ──────────────────────────────────────
-    # Flutterwave does not settle on weekends. Saturday/Sunday transactions
-    # settle on Monday. Running on weekdays only means:
-    #   - We never accidentally pay sellers from our own 5% revenue pool
-    #   - Monday 6AM picks up ALL queued orders from Fri/Sat/Sun at once
-    'daily-payout-6am-weekdays': {
+    
+    'payout-check-every-30min-weekdays': {
         'task': 'sellers.tasks.run_daily_payout',
-        'schedule': crontab(minute=0, hour=6, day_of_week='1-5'),  # Mon–Fri
+        'schedule': crontab(minute='*/30', hour='6-22', day_of_week='1-5'),
     },
 
     # ── Auto-release: every 6 hours, all week ────────────────────────────────

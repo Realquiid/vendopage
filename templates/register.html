@@ -6,9 +6,40 @@
 
 {% block extra_css %}
 <style>
+/* ══════════════════════════════════════
+   THEME-AWARE AUTH TOKENS
+   Light mode: bright page, dark glass card stays dark (premium look)
+   Dark mode: page and card both dark, blends with base.html dark theme
+══════════════════════════════════════ */
+:root {
+  --auth-bg:        #0A0A0A;
+  --auth-card-bg:   rgba(255,255,255,.06);
+  --auth-card-bd:   rgba(255,255,255,.1);
+  --auth-text:      #ffffff;
+  --auth-text-65:   rgba(255,255,255,.65);
+  --auth-text-45:   rgba(255,255,255,.45);
+  --auth-text-40:   rgba(255,255,255,.4);
+  --auth-text-35:   rgba(255,255,255,.35);
+  --auth-text-30:   rgba(255,255,255,.3);
+  --auth-text-25:   rgba(255,255,255,.25);
+  --auth-field-bg:  rgba(0,0,0,.25);
+  --auth-field-bd:  rgba(255,255,255,.12);
+  --auth-tabs-bg:   rgba(255,255,255,.07);
+  --auth-tabs-bd:   rgba(255,255,255,.1);
+  --auth-tab-active-bg: rgba(255,255,255,.12);
+  --auth-grid-line: rgba(255,255,255,.03);
+  --auth-dd-bg:     #1a1a1a;
+}
+/* In light mode the page itself can lighten slightly while the card keeps
+   its premium dark-glass identity — this is a deliberate brand choice,
+   not a contrast bug. Card legibility is preserved either way. */
+[data-theme="dark"] {
+  --auth-bg: #050505;
+}
+
 .auth-page {
   min-height: 100vh;
-  background: #0A0A0A;
+  background: var(--auth-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,8 +80,8 @@
 .a-grid {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+    linear-gradient(var(--auth-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--auth-grid-line) 1px, transparent 1px);
   background-size: 48px 48px;
   pointer-events: none;
 }
@@ -59,8 +90,8 @@
 .auth-card {
   position: relative; z-index: 2;
   width: 100%; max-width: 420px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.1);
+  background: var(--auth-card-bg);
+  border: 1px solid var(--auth-card-bd);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 24px;
@@ -75,28 +106,29 @@
   text-decoration: none; margin-bottom: 32px;
 }
 .auth-logo img { height: 38px; width: auto; display: block; }
-.auth-logo .logo-dark  { display: block; }
-.auth-logo .logo-light { display: none; }
+/* This card is always dark-glass, so always show the light logo variant */
+.auth-logo .logo-dark  { display: none; }
+.auth-logo .logo-light { display: block; }
 
 .auth-hl {
   font-family: var(--font-d);
   font-size: 26px; font-weight: 800;
-  color: #fff; letter-spacing: -1px;
+  color: var(--auth-text); letter-spacing: -1px;
   line-height: 1.15; margin-bottom: 6px;
 }
 .auth-hl .hl-green { color: #00C853; }
 
 .auth-sl {
   font-size: 14px;
-  color: rgba(255,255,255,.45);
+  color: var(--auth-text-45);
   margin-bottom: 28px; line-height: 1.6;
 }
 
 /* ── TABS ── */
 .auth-tabs {
   display: flex;
-  background: rgba(255,255,255,.07);
-  border: 1px solid rgba(255,255,255,.1);
+  background: var(--auth-tabs-bg);
+  border: 1px solid var(--auth-tabs-bd);
   border-radius: 10px;
   padding: 4px;
   margin-bottom: 24px;
@@ -105,13 +137,13 @@
   flex: 1; padding: 9px 14px;
   border: none; border-radius: 7px;
   font-family: var(--font-b); font-size: 13px; font-weight: 600;
-  color: rgba(255,255,255,.4);
+  color: var(--auth-text-40);
   cursor: pointer; background: transparent;
   transition: all .2s;
 }
 .auth-tab.active {
-  background: rgba(255,255,255,.12);
-  color: #fff;
+  background: var(--auth-tab-active-bg);
+  color: var(--auth-text);
 }
 
 .tab-panel { display: none; }
@@ -121,7 +153,7 @@
 .f-group { margin-bottom: 14px; }
 .f-label {
   display: block; font-size: 11px; font-weight: 700;
-  color: rgba(255,255,255,.4);
+  color: var(--auth-text-40);
   text-transform: uppercase; letter-spacing: .5px;
   margin-bottom: 5px;
 }
@@ -131,7 +163,7 @@
 }
 .label-row .f-label { margin-bottom: 0; }
 .forgot-link {
-  font-size: 12px; color: rgba(255,255,255,.35);
+  font-size: 12px; color: var(--auth-text-35);
   text-decoration: none; font-weight: 500;
   transition: color .15s;
 }
@@ -139,9 +171,9 @@
 
 .f-wrap {
   display: flex; align-items: center;
-  border: 1.5px solid rgba(255,255,255,.12);
+  border: 1.5px solid var(--auth-field-bd);
   border-radius: 9px;
-  background: rgba(0,0,0,.25);
+  background: var(--auth-field-bg);
   overflow: hidden;
   transition: border-color .2s, box-shadow .2s;
 }
@@ -151,7 +183,7 @@
 }
 .f-icon {
   padding: 0 9px 0 12px;
-  color: rgba(255,255,255,.3);
+  color: var(--auth-text-30);
   display: flex; align-items: center; flex-shrink: 0;
 }
 .f-input {
@@ -160,25 +192,25 @@
   border: none; outline: none;
   background: transparent;
   font-family: var(--font-b); font-size: 14px;
-  color: #fff;
+  color: var(--auth-text);
 }
-.f-input::placeholder { color: rgba(255,255,255,.25); }
+.f-input::placeholder { color: var(--auth-text-25); }
 .f-pass-toggle {
   padding: 0 12px; background: none; border: none;
-  cursor: pointer; color: rgba(255,255,255,.3);
+  cursor: pointer; color: var(--auth-text-30);
   display: flex; align-items: center;
   transition: color .15s;
 }
-.f-pass-toggle:hover { color: rgba(255,255,255,.7); }
-.f-hint { font-size: 11px; color: rgba(255,255,255,.25); margin-top: 4px; }
+.f-pass-toggle:hover { color: var(--auth-text-65); }
+.f-hint { font-size: 11px; color: var(--auth-text-25); margin-top: 4px; }
 
 /* ── PHONE ── */
 .phone-field-wrap { position: relative; }
 .phone-field {
   display: flex;
-  border: 1.5px solid rgba(255,255,255,.12);
+  border: 1.5px solid var(--auth-field-bd);
   border-radius: 9px;
-  background: rgba(0,0,0,.25);
+  background: var(--auth-field-bg);
   overflow: hidden;
   transition: border-color .2s, box-shadow .2s;
 }
@@ -189,31 +221,31 @@
 .cc-btn {
   display: flex; align-items: center; gap: 5px;
   padding: 11px 10px 11px 12px;
-  border: none; border-right: 1px solid rgba(255,255,255,.1);
+  border: none; border-right: 1px solid var(--auth-field-bd);
   background: rgba(255,255,255,.05);
   cursor: pointer;
   font-family: var(--font-b); font-size: 13px; font-weight: 600;
-  color: #fff; white-space: nowrap; flex-shrink: 0;
+  color: var(--auth-text); white-space: nowrap; flex-shrink: 0;
   min-width: 88px; transition: background .15s;
 }
 .cc-btn:hover { background: rgba(255,255,255,.1); }
 .cc-flag img, .ci-flag img { display: block; border-radius: 2px; }
-.cc-dial { font-size: 13px; font-weight: 700; color: #fff; }
-.cc-caret { color: rgba(255,255,255,.3); }
+.cc-dial { font-size: 13px; font-weight: 700; color: var(--auth-text); }
+.cc-caret { color: var(--auth-text-30); }
 .cc-number {
   flex: 1; padding: 11px 12px; border: none; outline: none;
   background: transparent; font-family: var(--font-b);
-  font-size: 14px; color: #fff; min-width: 0;
+  font-size: 14px; color: var(--auth-text); min-width: 0;
 }
-.cc-number::placeholder { color: rgba(255,255,255,.25); }
+.cc-number::placeholder { color: var(--auth-text-25); }
 
 /* ── COUNTRY DROPDOWN ── */
 .cc-dropdown {
   display: none; position: absolute;
   top: calc(100% + 6px); left: 0; width: 100%;
   min-width: 260px;
-  background: #1a1a1a;
-  border: 1.5px solid rgba(255,255,255,.12);
+  background: var(--auth-dd-bg);
+  border: 1.5px solid var(--auth-field-bd);
   border-radius: 12px;
   box-shadow: 0 16px 40px rgba(0,0,0,.6);
   z-index: 9999; overflow: hidden;
@@ -224,9 +256,9 @@
 .cc-search input {
   width: 100%; border: none; outline: none;
   font-family: var(--font-b); font-size: 13px;
-  background: transparent; color: #fff;
+  background: transparent; color: var(--auth-text);
 }
-.cc-search input::placeholder { color: rgba(255,255,255,.3); }
+.cc-search input::placeholder { color: var(--auth-text-30); }
 .cc-list { overflow-y: auto; flex: 1; }
 .cc-item {
   display: flex; align-items: center; gap: 10px;
@@ -235,8 +267,8 @@
 }
 .cc-item:hover { background: rgba(255,255,255,.07); }
 .cc-item.active { background: rgba(0,200,83,.12); }
-.cc-item .ci-name { flex: 1; font-weight: 500; color: #fff; }
-.cc-item .ci-dial { color: rgba(255,255,255,.35); font-size: 12px; }
+.cc-item .ci-name { flex: 1; font-weight: 500; color: var(--auth-text); }
+.cc-item .ci-dial { color: var(--auth-text-35); font-size: 12px; }
 
 /* ── SUBMIT ── */
 .auth-submit {
@@ -252,10 +284,10 @@
 .auth-submit:active { transform: none; }
 
 .auth-terms {
-  font-size: 11px; color: rgba(255,255,255,.25);
+  font-size: 11px; color: var(--auth-text-25);
   text-align: center; margin-top: 12px; line-height: 1.6;
 }
-.auth-terms a { color: rgba(255,255,255,.45); font-weight: 500; text-decoration: underline; }
+.auth-terms a { color: var(--auth-text-45); font-weight: 500; text-decoration: underline; }
 .auth-terms a:hover { color: #00C853; }
 
 @media (max-width: 480px) {

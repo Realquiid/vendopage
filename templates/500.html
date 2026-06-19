@@ -4,22 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Something Went Wrong — Vendopage</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    function applyTheme(mode){
+      const dark = mode==='auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : mode==='dark';
+      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    }
+    const saved = localStorage.getItem('vp-theme') || 'dark';
+    applyTheme(saved);
+  })();
+</script>
 <style>
 :root {
-  --green: #00C853; --green-dk: #00a844;
-  --dark: #0A0A0A; --gray: #6B6B6B;
-  --light: #F7F7F5; --border: #E8E8E4; --white: #ffffff;
-  --red: #FF4444;
-  --font-d: 'Syne', sans-serif; --font-b: 'DM Sans', sans-serif;
+  --green: #00873D; --green-pop: #00C853;
+  --ink: #0D0D0D; --muted: #6B6B6B;
+  --surface: #F5F4F0; --surface-2: #EDECEA;
+  --border: #E2E1DC; --white: #FFFFFF;
+  --red: #DC2626;
+  --font-d: 'Cabinet Grotesk', sans-serif; --font-b: 'Satoshi', sans-serif;
   --r-pill: 100px; --r-lg: 16px;
+}
+[data-theme="dark"] {
+  --ink: #F0EFE9; --muted: #888880;
+  --surface: #111110; --surface-2: #1A1A18;
+  --border: #2A2A28; --white: #1A1A18;
 }
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  font-family: var(--font-b); background: var(--light); color: var(--dark);
+  font-family: var(--font-b); background: var(--surface); color: var(--ink);
   min-height: 100vh; display: flex; flex-direction: column;
   -webkit-font-smoothing: antialiased;
+  transition: background .2s, color .2s;
 }
 
 nav {
@@ -27,8 +44,8 @@ nav {
   padding: 0 32px; height: 60px;
   display: flex; align-items: center; justify-content: space-between;
 }
-.logo { font-family: var(--font-d); font-weight: 800; font-size: 18px; text-decoration: none; color: var(--dark); }
-.logo span { color: var(--green); }
+.logo { font-family: var(--font-d); font-weight: 800; font-size: 18px; text-decoration: none; color: var(--ink); }
+.logo span { color: var(--green-pop); }
 
 main {
   flex: 1; display: flex; align-items: center; justify-content: center;
@@ -50,9 +67,9 @@ main {
   position: absolute; inset: 0;
   -webkit-text-stroke: 0;
   color: transparent;
-  background: linear-gradient(135deg, var(--red) 0%, var(--dark) 100%);
+  background: linear-gradient(135deg, var(--red) 0%, var(--ink) 100%);
   -webkit-background-clip: text; background-clip: text;
-  opacity: .12;
+  opacity: .14;
 }
 
 .error-emoji { font-size: 56px; margin-bottom: 20px; display: block; animation: shake 2.5s ease-in-out infinite; }
@@ -65,11 +82,10 @@ main {
 
 .error-title {
   font-family: var(--font-d); font-weight: 800; font-size: 28px;
-  letter-spacing: -1px; margin-bottom: 12px;
+  letter-spacing: -1px; margin-bottom: 12px; color: var(--ink);
 }
-.error-sub { font-size: 15px; color: var(--gray); line-height: 1.7; margin-bottom: 36px; }
+.error-sub { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; }
 
-/* Status card */
 .status-card {
   background: var(--white); border: 1px solid var(--border);
   border-radius: var(--r-lg); padding: 20px 24px;
@@ -78,37 +94,36 @@ main {
 }
 .status-icon {
   width: 40px; height: 40px; border-radius: 10px;
-  background: #fff3f3; border: 1px solid #fecaca;
+  background: rgba(220,38,38,.08); border: 1px solid rgba(220,38,38,.2);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
 .status-icon svg { color: var(--red); }
-.status-text h4 { font-family: var(--font-d); font-weight: 700; font-size: 14px; margin-bottom: 4px; }
-.status-text p { font-size: 13px; color: var(--gray); line-height: 1.5; }
+.status-text h4 { font-family: var(--font-d); font-weight: 700; font-size: 14px; margin-bottom: 4px; color: var(--ink); }
+.status-text p { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
 .error-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .btn-retry {
   padding: 14px 28px; border-radius: var(--r-pill);
-  background: var(--dark); color: var(--white); border: none;
+  background: var(--ink); color: var(--surface); border: none;
   font-family: var(--font-b); font-size: 15px; font-weight: 700;
-  text-decoration: none; cursor: pointer; transition: background .18s;
+  text-decoration: none; cursor: pointer; transition: opacity .18s;
   display: inline-flex; align-items: center; gap: 7px;
 }
-.btn-retry:hover { background: var(--green); }
+.btn-retry:hover { opacity: .85; }
 .btn-home {
   padding: 14px 28px; border-radius: var(--r-pill);
-  background: var(--white); color: var(--dark);
+  background: var(--white); color: var(--ink);
   border: 1.5px solid var(--border);
   font-family: var(--font-b); font-size: 15px; font-weight: 600;
   text-decoration: none; transition: all .18s;
   display: inline-flex; align-items: center; gap: 7px;
 }
-.btn-home:hover { border-color: var(--dark); }
+.btn-home:hover { border-color: var(--muted); }
 
-/* Checklist */
 .checklist { margin-top: 44px; text-align: left; }
 .checklist-title {
-  font-size: 13px; font-weight: 600; color: var(--gray);
+  font-size: 13px; font-weight: 600; color: var(--muted);
   text-transform: uppercase; letter-spacing: 1px;
   margin-bottom: 14px; text-align: center;
 }
@@ -117,17 +132,17 @@ main {
   display: flex; align-items: center; gap: 12px;
   background: var(--white); border: 1px solid var(--border);
   border-radius: var(--r-lg); padding: 13px 16px;
-  font-size: 14px; color: var(--gray);
+  font-size: 14px; color: var(--muted);
 }
-.check-item svg { flex-shrink: 0; color: var(--green); }
-.check-item strong { color: var(--dark); }
+.check-item svg { flex-shrink: 0; color: var(--green-pop); }
+.check-item strong { color: var(--ink); }
 
 footer {
   text-align: center; padding: 20px;
-  font-size: 12px; color: var(--gray);
+  font-size: 12px; color: var(--muted);
   border-top: 1px solid var(--border); background: var(--white);
 }
-footer a { color: var(--green); font-weight: 600; text-decoration: none; }
+footer a { color: var(--green-pop); font-weight: 600; text-decoration: none; }
 </style>
 </head>
 <body>
@@ -185,7 +200,7 @@ footer a { color: var(--green); font-weight: 600; text-decoration: none; }
 </main>
 
 <footer>
-  &copy; {% now "Y" %} <a href="/">Vendopage</a> · Made with ❤️ in Nigeria
+  &copy; {% now "Y" %} <a href="/">Vendopage</a> · Built for vendors across Africa
 </footer>
 
 </body>

@@ -1,3 +1,4 @@
+
 """
 management/commands/process_payouts.py
 
@@ -29,14 +30,9 @@ Key rules:
   - If buyer has NOT clicked received, the order is NEVER paid out.
   - If is_disputed=True, the order is NEVER paid out by cron.
 
-FLW Settlement schedule:
-  Mon transaction → settles Tue  → paid Tue 6AM
-  Tue transaction → settles Wed  → paid Wed 6AM
-  Wed transaction → settles Thu  → paid Thu 6AM
-  Thu transaction → settles Fri  → paid Fri 6AM
-  Fri transaction → settles Mon  → paid Mon 6AM
-  Sat transaction → settles Mon  → paid Mon 6AM
-  Sun transaction → settles Mon  → paid Mon 6AM
+Telegram notifications:
+  - On every live (non-dry-run) run, a summary is sent to the founder's Telegram
+    via TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID (set in .env).
 
 Usage
 ─────
@@ -55,6 +51,7 @@ from django.utils import timezone
 
 from sellers.flutterwave import FlutterwavePayment
 from sellers.models import Order
+from sellers.telegram import notify_telegram
 
 logger = logging.getLogger(__name__)
 CURRENCY = "NGN"
@@ -89,12 +86,6 @@ class Command(BaseCommand):
         ))
 
         # ── Weekend guard ──────────────────────────────────────────────────────
-        # Flutterwave does not settle buyer payments on Sat/Sun.
-        # Our balance on weekends contains only our accumulated 5% fees —
-        # not actual buyer funds. Paying sellers from that pool would drain
-        # our own revenue. Skip entirely and let Monday pick up the full queue.
-        #
-        # weekday(): 0=Mon 1=Tue 2=Wed 3=Thu 4=Fri 5=Sat 6=Sun
         if now.weekday() in (5, 6) and not dry_run:
             self.stdout.write(self.style.WARNING(
                 f"\n  ⏸  WEEKEND SKIP — today is {now.strftime('%A')}.\n"
@@ -111,7 +102,6 @@ class Command(BaseCommand):
 
         flw = FlutterwavePayment()
 
-        # Midnight at the start of today (WAT / server local time)
         today_midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
         # ── Build payout queue (disputed orders excluded) ──────────────────────
@@ -194,6 +184,13 @@ class Command(BaseCommand):
                 "Flutterwave balance is ₦0. No payouts possible today. "
                 "All orders remain in queue for tomorrow."
             )
+            if not dry_run:
+                notify_telegram(
+                    "⚠️ <b>Vendopage Payout Run</b>\n"
+                    f"{now.strftime('%a %d %b, %I:%M %p')}\n\n"
+                    "Balance is ₦0 — no payouts possible today.\n"
+                    f"{len(queue)} order(s) still queued, total owed ₦{total_owed:,.2f}"
+                )
             return
 
         if spendable < total_owed:
@@ -280,6 +277,18 @@ class Command(BaseCommand):
                 success_count, skipped_count, failure_count, disputed_count, remaining_balance,
             )
 
+        if not dry_run:
+            emoji = "✅" if (success_count and not failure_count and not skipped_count) else (
+                "⚠️" if skipped_count or failure_count else "ℹ️"
+            )
+            notify_telegram(
+                f"{emoji} <b>Vendopage Payout Run</b>\n"
+                f"{now.strftime('%a %d %b, %I:%M %p')}\n\n"
+                f"Paid: {success_count} | Skipped: {skipped_count} | Failed: {failure_count}\n"
+                f"Disputed (locked): {disputed_count}\n"
+                f"Balance left: ₦{remaining_balance:,.2f}"
+            )
+
     # ── Flutterwave balance ────────────────────────────────────────────────────
     def _get_balance(self, flw: FlutterwavePayment) -> Decimal:
         try:
@@ -351,3 +360,5 @@ class Command(BaseCommand):
     def _abort(self, reason: str):
         logger.warning("PAYOUT ABORTED — %s", reason)
         self.stdout.write(self.style.ERROR(f"\n  ⚠  ABORT: {reason}\n"))
+PYEOF
+echo "File written successfully."
