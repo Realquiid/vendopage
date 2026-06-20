@@ -506,21 +506,22 @@
     <div>
       <div class="vp-greeting-time">
         <span class="vp-greeting-line"></span>
-        {{ time_icon }} {{ time_greeting }}, {{ user.username }}
+        {{ time_icon }} {{ time_greeting }}
       </div>
       <h1 class="vp-greeting-name">{{ user.business_name|truncatewords:4 }}</h1>
-      <p class="vp-greeting-sub">Your store is live · here's what's happening</p>
     </div>
     <div class="vp-topbar-right">
       <a href="/{{ user.slug }}" target="_blank" class="vp-icon-btn" title="View store">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       </a>
+      {% comment %}
       {% if user.store_mode %}
       <div class="vp-icon-btn" title="Notifications" style="position:relative;">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
         {% if pending_orders %}<span class="vp-notif-dot"></span>{% endif %}
       </div>
       {% endif %}
+      {% endcomment %}
       <a href="{% url 'settings' %}" class="vp-avatar" title="Settings">
         {% if user.profile_picture %}
           <img src="{{ user.profile_picture.url }}" alt="{{ user.business_name }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
@@ -542,10 +543,6 @@
             <span class="sym">{{ user.currency_symbol|default:"₦" }}</span>{{ total_earnings|floatformat:0|default:"0" }}
           </div>
           <div class="vp-wallet-sub">Paid to your bank account</div>
-        </div>
-        <div class="vp-wallet-badge">
-          <span class="vp-wallet-badge-dot"></span>
-          Store Live
         </div>
       </div>
     </div>
@@ -571,7 +568,7 @@
         Processing
       </div>
       <div class="vp-stat-value amber">{{ user.currency_symbol|default:"₦" }}{{ buffer_earnings|floatformat:0 }}</div>
-      <div class="vp-stat-change amber">Pays out tonight 2 AM</div>
+      <div class="vp-stat-change amber">Pays out next business day</div>
     </div>
     {% endif %}
 
@@ -649,7 +646,7 @@
   {% if user.store_mode %}
   <div class="vp-info-chip">
     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    Payouts run every night at 2 AM after buyers confirm receipt — no action needed from you
+    Payouts are sent the next business day after buyers confirm receipt — no action needed from you
   </div>
 
   {% if payout_queue %}
@@ -672,10 +669,10 @@
           <div class="vp-payout-meta">Confirmed {{ order.delivered_at|date:"d M, g:i A" }} &nbsp;·&nbsp; #{{ order.order_ref|slice:":8"|upper }}</div>
         </div>
         <div class="vp-payout-right">
-          <div class="vp-payout-amount">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
-          <div class="vp-badge vp-badge-processing">
+         <div class="vp-payout-amount">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
+         <div class="vp-badge vp-badge-processing">
             <span class="vp-badge-dot"></span>
-            {% if order.payout_eta %}by {{ order.payout_eta|date:"D g A" }}{% else %}Tonight 2 AM{% endif %}
+            {% if order.payout_eta %}by {{ order.payout_eta|date:"D, M j" }}{% else %}Next business day{% endif %}
           </div>
         </div>
       </div>

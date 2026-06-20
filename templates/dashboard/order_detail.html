@@ -25,14 +25,18 @@
 }
 
 /* ─────────────────────────────────────
-   PAGE
+   PAGE — locked to viewport, no sideways drag
 ───────────────────────────────────── */
+html, body { max-width: 100%; overflow-x: hidden; }
+
 .vp-order-page{
   background:var(--surface);
   min-height:100vh;
   padding:40px 24px 90px;
   position:relative;
   overflow-x:hidden;
+  width:100%;
+  box-sizing:border-box;
 }
 .vp-order-page::before{
   content:'';
@@ -45,8 +49,10 @@
 }
 .vp-order-inner{
   max-width:1160px;
+  width:100%;
   margin:0 auto;
   position:relative; z-index:2;
+  box-sizing:border-box;
 }
 
 /* ─────────────────────────────────────
@@ -69,12 +75,13 @@
 }
 .vp-title{
   font-family:var(--font-d);
-  font-size:clamp(28px,4vw,40px);
+  font-size:clamp(26px,6vw,40px);
   font-weight:800; line-height:1;
   letter-spacing:-2px; color:var(--ink);
   margin-bottom:10px;
+  word-break:break-word;
 }
-.vp-sub{ font-size:14px; color:var(--muted); }
+.vp-sub{ font-size:14px; color:var(--muted); word-break:break-word; }
 .vp-back{
   height:48px; padding:0 18px;
   border-radius:100px;
@@ -84,6 +91,7 @@
   text-decoration:none; color:var(--ink);
   font-size:13px; font-weight:700;
   transition:.18s;
+  white-space:nowrap;
 }
 .vp-back:hover{ transform:translateY(-1px); border-color:var(--muted-lt); }
 
@@ -95,8 +103,9 @@
   padding:6px 14px; border-radius:100px;
   font-size:11px; text-transform:uppercase;
   letter-spacing:.6px; font-weight:700;
+  white-space:nowrap;
 }
-.vp-status-dot{ width:6px; height:6px; border-radius:50%; background:currentColor; }
+.vp-status-dot{ width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
 .status-paid    { background:rgba(180,83,9,.1);   color:var(--status-amber); }
 .status-shipped { background:rgba(37,99,235,.1);  color:var(--status-blue); }
 .status-completed,.status-delivered,.status-RECEIVED{
@@ -111,14 +120,17 @@
   display:grid;
   grid-template-columns:minmax(0,1fr) 300px;
   gap:20px; align-items:start;
+  width:100%;
 }
 .vp-aside{
   position:sticky; top:90px;
   display:flex; flex-direction:column; gap:18px;
+  min-width:0;
 }
 
 /* ─────────────────────────────────────
-   CARDS
+   CARDS — explicitly capped so nothing
+   can push wider than its grid column
 ───────────────────────────────────── */
 .vp-card{
   background:var(--white);
@@ -126,6 +138,9 @@
   border-radius:24px;
   overflow:hidden;
   margin-bottom:18px;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
 }
 .vp-card:last-child{ margin-bottom:0; }
 .vp-card-head{
@@ -133,6 +148,7 @@
   border-bottom:1px solid var(--border);
   display:flex; align-items:center;
   justify-content:space-between; gap:12px;
+  flex-wrap:wrap;
 }
 .vp-card-title{
   font-family:var(--font-d);
@@ -141,12 +157,20 @@
 .vp-card-body{ padding:24px; }
 
 /* ─────────────────────────────────────
-   ITEMS TABLE (scrollable)
+   ITEMS TABLE — the ONLY thing that
+   should scroll horizontally, isolated
+   from the rest of the page width
 ───────────────────────────────────── */
 .vp-items-scroll{
   overflow-x:auto;
   -webkit-overflow-scrolling:touch;
   scrollbar-width:thin;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  /* establishes its own scroll context so the table's min-width
+     never leaks out and drags the whole page sideways */
+  display:block;
 }
 .vp-items-table{
   width:100%; min-width:480px;
@@ -182,19 +206,21 @@
   display:flex; align-items:center;
   justify-content:center; font-size:22px;
 }
-.vp-item-name{ font-size:14px; font-weight:700; color:var(--ink); }
+.vp-item-name{ font-size:14px; font-weight:700; color:var(--ink); white-space:nowrap; }
 .vp-item-meta{ font-size:12px; color:var(--muted); margin-top:2px; }
 .vp-item-price{
   font-family:var(--font-d);
   font-size:16px; font-weight:800; color:var(--ink);
+  white-space:nowrap;
 }
-.vp-table-muted{ color:var(--muted); font-size:13px; }
+.vp-table-muted{ color:var(--muted); font-size:13px; white-space:nowrap; }
 
 .vp-total{
   display:flex; justify-content:space-between; align-items:center;
   padding:18px 24px;
   border-top:1px solid var(--border);
   font-size:15px; font-weight:800; color:var(--ink);
+  flex-wrap:wrap; gap:8px;
 }
 
 /* scroll hint */
@@ -212,7 +238,9 @@
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:18px;
+  min-width:0;
 }
+.vp-field { min-width:0; }
 .vp-field label{
   display:block; margin-bottom:6px;
   font-size:11px; text-transform:uppercase;
@@ -222,6 +250,7 @@
 .vp-field span{
   font-size:14px; color:var(--ink);
   line-height:1.7; word-break:break-word;
+  display:block;
 }
 
 /* ─────────────────────────────────────
@@ -232,6 +261,7 @@
   border:1px solid var(--border);
   border-radius:16px; padding:18px;
   line-height:2; font-size:14px; color:var(--ink);
+  word-break:break-word;
 }
 .vp-ship-box strong{ color:var(--ink); }
 
@@ -243,6 +273,8 @@
   border:1px solid rgba(220,38,38,.15);
   border-radius:24px; padding:26px;
   margin-bottom:22px;
+  max-width:100%;
+  box-sizing:border-box;
 }
 [data-theme="dark"] .vp-dispute{ background:rgba(220,38,38,.08); }
 .vp-dispute h3{
@@ -259,7 +291,7 @@
   font-size:11px; text-transform:uppercase;
   letter-spacing:1px; color:var(--status-red);
 }
-.vp-dispute-box p{ margin:0; line-height:1.8; font-size:14px; color:var(--ink); }
+.vp-dispute-box p{ margin:0; line-height:1.8; font-size:14px; color:var(--ink); word-break:break-word; }
 .vp-reply{ margin-top:18px; }
 .vp-dispute-label{
   display:block; margin-bottom:8px;
@@ -311,6 +343,7 @@
   display:flex; justify-content:space-between;
   align-items:center; padding:13px 0;
   border-bottom:1px solid var(--border);
+  gap:10px; flex-wrap:wrap;
 }
 .vp-pay-row:last-child{ border-bottom:none; }
 .vp-pay-label{ font-size:13px; color:var(--muted); }
@@ -324,6 +357,7 @@
 .vp-info-box{
   border-radius:20px; padding:20px;
   line-height:1.8; font-size:13px;
+  max-width:100%; box-sizing:border-box;
 }
 .vp-info-box strong{
   display:block; margin-bottom:6px; font-size:14px;
@@ -342,10 +376,15 @@
 
 /* ─────────────────────────────────────
    RESPONSIVE
+   Fixed: grid now collapses at 980px
+   (the same breakpoint the layout itself
+   collapses at), not left stuck at 1fr 1fr
+   all the way down to 640px.
 ───────────────────────────────────── */
 @media(max-width:980px){
   .vp-layout{ grid-template-columns:1fr; }
   .vp-aside{ position:static; }
+  .vp-grid{ grid-template-columns:1fr 1fr; }
 }
 @media(max-width:640px){
   .vp-order-page{ padding:24px 16px 90px; }
@@ -353,6 +392,12 @@
   .vp-card-body, .vp-card-head{ padding:18px; }
   .vp-total{ padding:16px 18px; }
   .vp-scroll-hint{ display:flex; }
+  .vp-header{ gap:12px; }
+  .vp-back{ height:42px; padding:0 14px; font-size:12px; }
+}
+@media(max-width:420px){
+  .vp-pill{ font-size:10px; padding:6px 11px; }
+  .vp-status{ font-size:10px; padding:5px 11px; }
 }
 
 </style>
@@ -442,7 +487,7 @@
   <div class="vp-layout">
 
     <!-- MAIN -->
-    <div>
+    <div style="min-width:0;">
 
       <!-- ITEMS TABLE -->
       <div class="vp-card">
