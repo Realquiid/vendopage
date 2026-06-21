@@ -1,58 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Page Not Found — Vendopage</title>
-<link rel="preconnect" href="https://api.fontshare.com">
-<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
-<script>
-  (function(){
-    function applyTheme(mode){
-      const dark = mode==='auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : mode==='dark';
-      document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-    }
-    const saved = localStorage.getItem('vp-theme') || 'dark';
-    applyTheme(saved);
-  })();
-</script>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Page Not Found — Vendopage{% endblock %}
+
+{% block extra_css %}
 <style>
-:root {
-  --green: #00873D; --green-pop: #00C853;
-  --ink: #0D0D0D; --muted: #6B6B6B;
-  --surface: #F5F4F0; --surface-2: #EDECEA;
-  --border: #E2E1DC; --white: #FFFFFF;
-  --font-d: 'Cabinet Grotesk', sans-serif; --font-b: 'Satoshi', sans-serif;
-  --r-pill: 100px; --r-lg: 16px;
-}
-[data-theme="dark"] {
-  --ink: #F0EFE9; --muted: #888880;
-  --surface: #111110; --surface-2: #1A1A18;
-  --border: #2A2A28; --white: #1A1A18;
-}
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  font-family: var(--font-b); background: var(--surface); color: var(--ink);
-  min-height: 100vh; display: flex; flex-direction: column;
-  -webkit-font-smoothing: antialiased;
-  transition: background .2s, color .2s;
-}
-
-nav {
-  background: var(--white); border-bottom: 1px solid var(--border);
-  padding: 0 32px; height: 60px;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.logo { font-family: var(--font-d); font-weight: 800; font-size: 18px; text-decoration: none; color: var(--ink); }
-.logo span { color: var(--green-pop); }
-
-main {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  padding: 40px 20px;
+.error-wrap {
+  min-height: calc(100vh - var(--nav-h));
+  display: flex; align-items: center; justify-content: center;
+  padding: 60px 20px;
+  background: var(--surface);
 }
 .error-box { text-align: center; max-width: 520px; }
 
-.big-num {
+.error-num {
   font-family: var(--font-d); font-weight: 800;
   font-size: clamp(100px, 20vw, 160px);
   letter-spacing: -8px; line-height: 1;
@@ -62,7 +23,7 @@ main {
   position: relative;
   user-select: none;
 }
-.big-num::after {
+.error-num::after {
   content: '404';
   position: absolute; inset: 0;
   -webkit-text-stroke: 0;
@@ -73,101 +34,74 @@ main {
   opacity: .14;
 }
 
-.error-emoji { font-size: 56px; margin-bottom: 20px; display: block; animation: float 3s ease-in-out infinite; }
-@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.error-emoji { font-size: 52px; margin-bottom: 18px; display: block; animation: errFloat 3s ease-in-out infinite; }
+@keyframes errFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
 .error-title {
   font-family: var(--font-d); font-weight: 800; font-size: 28px;
   letter-spacing: -1px; margin-bottom: 12px; color: var(--ink);
 }
-.error-sub { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; }
+.error-sub { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 32px; }
 
-.error-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.btn-home {
-  padding: 14px 28px; border-radius: var(--r-pill);
-  background: var(--ink); color: var(--surface); border: none;
-  font-family: var(--font-b); font-size: 15px; font-weight: 700;
-  text-decoration: none; transition: opacity .18s; display: inline-flex; align-items: center; gap: 7px;
-}
-.btn-home:hover { opacity: .85; }
-.btn-upload {
-  padding: 14px 28px; border-radius: var(--r-pill);
-  background: var(--white); color: var(--ink);
-  border: 1.5px solid var(--border);
-  font-family: var(--font-b); font-size: 15px; font-weight: 600;
-  text-decoration: none; transition: all .18s; display: inline-flex; align-items: center; gap: 7px;
-}
-.btn-upload:hover { border-color: var(--muted); }
+.error-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 48px; }
 
-.suggestions { margin-top: 48px; text-align: left; }
-.suggestions-title { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; text-align: center; }
-.suggestion-links { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
-.suggestion-link {
-  padding: 8px 16px; border-radius: var(--r-pill);
+.error-suggestions-title {
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px;
+}
+.error-links { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.error-link {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 16px; border-radius: var(--r-pill);
   background: var(--white); border: 1px solid var(--border);
   font-size: 13px; font-weight: 500; color: var(--muted);
   text-decoration: none; transition: all .18s;
-  display: flex; align-items: center; gap: 6px;
 }
-.suggestion-link:hover { border-color: var(--green-pop); color: var(--ink); }
+.error-link svg { stroke: currentColor; fill: none; flex-shrink: 0; }
+.error-link:hover { border-color: var(--green); color: var(--ink); }
 
-footer {
-  text-align: center; padding: 20px;
-  font-size: 12px; color: var(--muted);
-  border-top: 1px solid var(--border); background: var(--white);
+@media (max-width: 480px) {
+  .error-actions, .error-links { flex-direction: column; align-items: stretch; }
 }
-footer a { color: var(--green-pop); font-weight: 600; text-decoration: none; }
 </style>
-</head>
-<body>
+{% endblock %}
 
-<nav>
-  <a href="/" class="logo">Vendo<span>page</span></a>
-</nav>
-
-<main>
+{% block content %}
+<section class="error-wrap">
   <div class="error-box">
-    <div class="big-num">404</div>
+    <div class="error-num">404</div>
     <span class="error-emoji">🔍</span>
     <h1 class="error-title">This page doesn't exist</h1>
     <p class="error-sub">
-      The page you're looking for may have been moved, deleted, or you might have typed the wrong URL.<br>
-      If you're looking for a seller's store, double-check the store link.
+      The page you're looking for may have been moved, deleted, or the URL might be mistyped.<br>
+      Looking for a seller's store? Double-check the store link.
     </p>
 
     <div class="error-actions">
-      <a href="/" class="btn-home">
-        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+      <a href="/" class="btn btn-primary">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
         Go Home
       </a>
-      <a href="/upload/" class="btn-upload">
-        Start Uploading
-      </a>
+      <a href="{% url 'upload_product' %}" class="btn btn-green">Start Uploading</a>
     </div>
 
-    <div class="suggestions">
-      <p class="suggestions-title">Or try one of these</p>
-      <div class="suggestion-links">
-        <a href="/register/" class="suggestion-link">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <div>
+      <p class="error-suggestions-title">Or try one of these</p>
+      <div class="error-links">
+        <a href="{% url 'register' %}" class="error-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Create Account
         </a>
-        <a href="/login/" class="suggestion-link">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <a href="{% url 'login' %}" class="error-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
           Sign In
         </a>
-        <a href="/dashboard/" class="suggestion-link">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <a href="{% url 'dashboard' %}" class="error-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           Dashboard
         </a>
       </div>
     </div>
   </div>
-</main>
-
-<footer>
-  &copy; {% now "Y" %} <a href="/">Vendopage</a> · Built for vendors across Africa
-</footer>
-
-</body>
-</html>
+</section>
+{% endblock %}

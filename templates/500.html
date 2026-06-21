@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,10 +10,11 @@
 <script>
   (function(){
     function applyTheme(mode){
-      const dark = mode==='auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : mode==='dark';
+      var dark = mode==='auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : mode==='dark';
       document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
     }
-    const saved = localStorage.getItem('vp-theme') || 'dark';
+    var saved;
+    try { saved = localStorage.getItem('vp-theme') || 'light'; } catch(e){ saved = 'light'; }
     applyTheme(saved);
   })();
 </script>
@@ -22,58 +24,56 @@
   --ink: #0D0D0D; --muted: #6B6B6B;
   --surface: #F5F4F0; --surface-2: #EDECEA;
   --border: #E2E1DC; --white: #FFFFFF;
-  --red: #DC2626;
+  --red: #E53E3E;
   --font-d: 'Cabinet Grotesk', sans-serif; --font-b: 'Satoshi', sans-serif;
-  --r-pill: 100px; --r-lg: 16px;
+  --r-pill: 100px; --r-lg: 16px; --r-md: 10px;
 }
 [data-theme="dark"] {
   --ink: #F0EFE9; --muted: #888880;
   --surface: #111110; --surface-2: #1A1A18;
   --border: #2A2A28; --white: #1A1A18;
 }
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 body {
   font-family: var(--font-b); background: var(--surface); color: var(--ink);
   min-height: 100vh; display: flex; flex-direction: column;
   -webkit-font-smoothing: antialiased;
-  transition: background .2s, color .2s;
 }
 
 nav {
   background: var(--white); border-bottom: 1px solid var(--border);
-  padding: 0 32px; height: 60px;
-  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 76px;
+  display: flex; align-items: center;
 }
-.logo { font-family: var(--font-d); font-weight: 800; font-size: 18px; text-decoration: none; color: var(--ink); }
-.logo span { color: var(--green-pop); }
+.nav-logo { display: flex; align-items: center; text-decoration: none; }
+.nav-logo img { height: 65px; width: auto; display: block; }
+.nav-logo .logo-dark  { display: block; }
+.nav-logo .logo-light { display: none; }
+[data-theme="dark"] .nav-logo .logo-dark  { display: none; }
+[data-theme="dark"] .nav-logo .logo-light { display: block; }
 
-main {
-  flex: 1; display: flex; align-items: center; justify-content: center;
-  padding: 40px 20px;
-}
+main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 20px; }
 .error-box { text-align: center; max-width: 540px; }
 
-.big-num {
+.error-num {
   font-family: var(--font-d); font-weight: 800;
   font-size: clamp(100px, 20vw, 160px);
   letter-spacing: -8px; line-height: 1;
   color: transparent;
   -webkit-text-stroke: 3px var(--border);
-  margin-bottom: 8px;
-  position: relative; user-select: none;
+  margin-bottom: 8px; position: relative; user-select: none;
 }
-.big-num::after {
+.error-num::after {
   content: '500';
   position: absolute; inset: 0;
-  -webkit-text-stroke: 0;
-  color: transparent;
+  -webkit-text-stroke: 0; color: transparent;
   background: linear-gradient(135deg, var(--red) 0%, var(--ink) 100%);
   -webkit-background-clip: text; background-clip: text;
   opacity: .14;
 }
 
-.error-emoji { font-size: 56px; margin-bottom: 20px; display: block; animation: shake 2.5s ease-in-out infinite; }
-@keyframes shake {
+.error-emoji { font-size: 52px; margin-bottom: 18px; display: block; animation: errShake 2.5s ease-in-out infinite; }
+@keyframes errShake {
   0%,100% { transform: rotate(0deg); }
   10%,30%,50% { transform: rotate(-6deg); }
   20%,40%,60% { transform: rotate(6deg); }
@@ -84,7 +84,7 @@ main {
   font-family: var(--font-d); font-weight: 800; font-size: 28px;
   letter-spacing: -1px; margin-bottom: 12px; color: var(--ink);
 }
-.error-sub { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; }
+.error-sub { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 32px; }
 
 .status-card {
   background: var(--white); border: 1px solid var(--border);
@@ -94,36 +94,29 @@ main {
 }
 .status-icon {
   width: 40px; height: 40px; border-radius: 10px;
-  background: rgba(220,38,38,.08); border: 1px solid rgba(220,38,38,.2);
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  background: #FFF5F5; border: 1px solid rgba(229,62,62,.2);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
+[data-theme="dark"] .status-icon { background: rgba(229,62,62,.09); }
 .status-icon svg { color: var(--red); }
 .status-text h4 { font-family: var(--font-d); font-weight: 700; font-size: 14px; margin-bottom: 4px; color: var(--ink); }
 .status-text p { font-size: 13px; color: var(--muted); line-height: 1.5; }
 
 .error-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-.btn-retry {
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
   padding: 14px 28px; border-radius: var(--r-pill);
-  background: var(--ink); color: var(--surface); border: none;
   font-family: var(--font-b); font-size: 15px; font-weight: 700;
-  text-decoration: none; cursor: pointer; transition: opacity .18s;
-  display: inline-flex; align-items: center; gap: 7px;
+  border: none; cursor: pointer; text-decoration: none; transition: all .18s;
 }
-.btn-retry:hover { opacity: .85; }
-.btn-home {
-  padding: 14px 28px; border-radius: var(--r-pill);
-  background: var(--white); color: var(--ink);
-  border: 1.5px solid var(--border);
-  font-family: var(--font-b); font-size: 15px; font-weight: 600;
-  text-decoration: none; transition: all .18s;
-  display: inline-flex; align-items: center; gap: 7px;
-}
-.btn-home:hover { border-color: var(--muted); }
+.btn-primary { background: var(--ink); color: var(--surface); }
+.btn-primary:hover { opacity: .85; }
+.btn-ghost { background: var(--white); color: var(--ink); border: 1.5px solid var(--border); font-weight: 600; }
+.btn-ghost:hover { border-color: var(--muted); }
 
 .checklist { margin-top: 44px; text-align: left; }
 .checklist-title {
-  font-size: 13px; font-weight: 600; color: var(--muted);
+  font-size: 12px; font-weight: 700; color: var(--muted);
   text-transform: uppercase; letter-spacing: 1px;
   margin-bottom: 14px; text-align: center;
 }
@@ -143,17 +136,22 @@ footer {
   border-top: 1px solid var(--border); background: var(--white);
 }
 footer a { color: var(--green-pop); font-weight: 600; text-decoration: none; }
+
+@media (max-width: 480px) { nav { padding: 0 20px; } }
 </style>
 </head>
 <body>
 
 <nav>
-  <a href="/" class="logo">Vendo<span>page</span></a>
+  <a href="/" class="nav-logo">
+    <img class="logo-dark"  src="{% static 'images/logoo.png' %}"      alt="Vendopage">
+    <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage">
+  </a>
 </nav>
 
 <main>
   <div class="error-box">
-    <div class="big-num">500</div>
+    <div class="error-num">500</div>
     <span class="error-emoji">⚙️</span>
     <h1 class="error-title">Something went wrong on our end</h1>
     <p class="error-sub">
@@ -171,11 +169,11 @@ footer a { color: var(--green-pop); font-weight: 600; text-decoration: none; }
     </div>
 
     <div class="error-actions">
-      <button class="btn-retry" onclick="window.location.reload()">
+      <button class="btn btn-primary" onclick="window.location.reload()">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
         Refresh Page
       </button>
-      <a href="/" class="btn-home">Go to Homepage</a>
+      <a href="/" class="btn btn-ghost">Go to Homepage</a>
     </div>
 
     <div class="checklist">
