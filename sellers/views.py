@@ -2173,37 +2173,43 @@ def _trigger_payout(order):
 # ─────────────────────────────────────────────
 @require_http_methods(["GET"])
 def get_banks(request):
+    country = request.GET.get('country', 'NG').strip().upper()
     try:
         flw   = FlutterwavePayment()
-        banks = flw.get_banks()
+        banks = flw.get_banks(country)
         if banks:
             return JsonResponse({
                 'success': True,
+                'country': country,
                 'banks': [{'code': b['code'], 'name': b['name']} for b in banks]
             })
         raise Exception("Empty response")
     except Exception as e:
-        logger.error(f"get_banks error: {e}")
-        fallback = [
-            {'code': '044', 'name': 'Access Bank'},
-            {'code': '011', 'name': 'First Bank of Nigeria'},
-            {'code': '058', 'name': 'Guaranty Trust Bank (GTB)'},
-            {'code': '057', 'name': 'Zenith Bank'},
-            {'code': '033', 'name': 'United Bank for Africa (UBA)'},
-            {'code': '214', 'name': 'First City Monument Bank (FCMB)'},
-            {'code': '070', 'name': 'Fidelity Bank'},
-            {'code': '221', 'name': 'Stanbic IBTC Bank'},
-            {'code': '232', 'name': 'Sterling Bank'},
-            {'code': '076', 'name': 'Polaris Bank'},
-            {'code': '082', 'name': 'Keystone Bank'},
-            {'code': '101', 'name': 'Providus Bank'},
-            {'code': '090267', 'name': 'Kuda Bank'},
-            {'code': '090405', 'name': 'OPay'},
-            {'code': '090175', 'name': 'PalmPay'},
-            {'code': '090304', 'name': 'Moniepoint'},
-        ]
-        return JsonResponse({'success': True, 'banks': fallback, 'fallback': True})
-
+        logger.error(f"get_banks error ({country}): {e}")
+        if country == 'NG':
+            fallback = [
+                {'code': '044', 'name': 'Access Bank'},
+                {'code': '011', 'name': 'First Bank of Nigeria'},
+                {'code': '058', 'name': 'Guaranty Trust Bank (GTB)'},
+                {'code': '057', 'name': 'Zenith Bank'},
+                {'code': '033', 'name': 'United Bank for Africa (UBA)'},
+                {'code': '214', 'name': 'First City Monument Bank (FCMB)'},
+                {'code': '070', 'name': 'Fidelity Bank'},
+                {'code': '221', 'name': 'Stanbic IBTC Bank'},
+                {'code': '232', 'name': 'Sterling Bank'},
+                {'code': '076', 'name': 'Polaris Bank'},
+                {'code': '082', 'name': 'Keystone Bank'},
+                {'code': '101', 'name': 'Providus Bank'},
+                {'code': '090267', 'name': 'Kuda Bank'},
+                {'code': '090405', 'name': 'OPay'},
+                {'code': '090175', 'name': 'PalmPay'},
+                {'code': '090304', 'name': 'Moniepoint'},
+            ]
+            return JsonResponse({'success': True, 'country': country, 'banks': fallback, 'fallback': True})
+        return JsonResponse({
+            'success': False, 'country': country,
+            'error': f'Could not load banks for {country} right now.'
+        }, status=502)
 
 @require_http_methods(["POST"])
 def verify_bank_account(request):

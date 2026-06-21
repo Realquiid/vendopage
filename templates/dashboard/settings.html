@@ -263,6 +263,39 @@
 .vps-acct-banner.error { background:rgba(220,38,38,.08); border:1px solid rgba(220,38,38,.2); color:#dc2626; }
 [data-theme="dark"] .vps-acct-banner.error { color:#f87171; }
 
+/* ── COUNTRY / BANK PICKER (shared dropdown style) ── */
+.vps-cp-wrap { position:relative; }
+.vps-cp-field { border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.vps-cp-btn { width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; border:none; background:var(--surface-2); cursor:pointer; text-align:left; }
+.vps-cp-symbol { font-family:var(--font-d); font-size:18px; font-weight:800; color:var(--green); width:28px; text-align:center; flex-shrink:0; }
+.vps-cp-code { font-family:var(--font-b); font-size:14px; font-weight:700; color:var(--ink); }
+.vps-cp-preview { padding:8px 16px 12px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); }
+.vps-cp-dropdown {
+  display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:60;
+  background:var(--white); border:1px solid var(--border);
+  border-radius:12px; box-shadow:var(--sh-lg); overflow:hidden;
+}
+.vps-cp-dropdown.open { display:block; }
+.vps-cp-search { padding:10px; border-bottom:1px solid var(--border); }
+.vps-cp-search input {
+  width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px;
+  border:1px solid var(--border); background:var(--surface-2);
+  font-family:var(--font-b); font-size:13px; color:var(--ink); outline:none;
+}
+.vps-cp-search input:focus { border-color:var(--green); }
+.vps-cp-list { max-height:240px; overflow-y:auto; }
+.vps-cp-item { display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; font-family:var(--font-b); font-size:13px; border-bottom:1px solid var(--border); transition:background .12s; }
+.vps-cp-item:last-child { border-bottom:none; }
+.vps-cp-item:hover { background:rgba(0,135,61,.08); }
+.vps-cp-item-name { flex:1; color:var(--ink); font-weight:500; }
+.vps-cp-item-code { color:var(--muted); font-weight:600; font-size:12px; }
+
+/* Bank-country picker specific tweaks (reuses .vps-cp-* base styles above) */
+.vps-cp-btn .vps-cp-flag { width:22px; height:16px; border-radius:3px; overflow:hidden; flex-shrink:0; display:flex; align-items:center; }
+.vps-cp-btn .vps-cp-flag img { width:100%; height:100%; object-fit:cover; display:block; }
+.vps-cp-item .vps-cp-flag { width:20px; height:15px; border-radius:2px; overflow:hidden; flex-shrink:0; }
+.vps-cp-item .vps-cp-flag img { width:100%; height:100%; object-fit:cover; display:block; }
+
 /* ── BANK PICKER ── */
 .vps-bank-picker { position:relative; }
 .vps-bp-selected { display:none; align-items:center; gap:10px; padding:11px 16px; border:1px solid rgba(0,135,61,.25); background:rgba(0,135,61,.05); border-radius:10px; }
@@ -329,31 +362,6 @@
 .vps-currency-info { flex:1; min-width:140px; }
 .vps-currency-name { font-family:var(--font-d); font-size:16px; font-weight:800; letter-spacing:-.3px; color:var(--ink); }
 .vps-currency-meta { font-size:12px; color:var(--muted); margin-top:2px; }
-.vps-cp-wrap { position:relative; }
-.vps-cp-field { border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-.vps-cp-btn { width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; border:none; background:var(--surface-2); cursor:pointer; text-align:left; }
-.vps-cp-symbol { font-family:var(--font-d); font-size:18px; font-weight:800; color:var(--green); width:28px; text-align:center; flex-shrink:0; }
-.vps-cp-code { font-family:var(--font-b); font-size:14px; font-weight:700; color:var(--ink); }
-.vps-cp-preview { padding:8px 16px 12px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); }
-.vps-cp-dropdown {
-  display:none; position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:60;
-  background:var(--white); border:1px solid var(--border);
-  border-radius:12px; box-shadow:var(--sh-lg); overflow:hidden;
-}
-.vps-cp-dropdown.open { display:block; }
-.vps-cp-search { padding:10px; border-bottom:1px solid var(--border); }
-.vps-cp-search input {
-  width:100%; box-sizing:border-box; padding:9px 12px; border-radius:8px;
-  border:1px solid var(--border); background:var(--surface-2);
-  font-family:var(--font-b); font-size:13px; color:var(--ink); outline:none;
-}
-.vps-cp-search input:focus { border-color:var(--green); }
-.vps-cp-list { max-height:240px; overflow-y:auto; }
-.vps-cp-item { display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; font-family:var(--font-b); font-size:13px; border-bottom:1px solid var(--border); transition:background .12s; }
-.vps-cp-item:last-child { border-bottom:none; }
-.vps-cp-item:hover { background:rgba(0,135,61,.08); }
-.vps-cp-item-name { flex:1; color:var(--ink); font-weight:500; }
-.vps-cp-item-code { color:var(--muted); font-weight:600; font-size:12px; }
 
 /* ── THEME PILLS ── */
 .vps-mode-pills {
@@ -642,6 +650,27 @@
           <input type="hidden" id="hBankCode" name="bank_code"    value="{{ user.bank_account.bank_code|default:'' }}">
           <input type="hidden" id="hBankName" name="bank_name"    value="{{ user.bank_account.bank_name|default:'' }}">
           <input type="hidden" id="hAcctName" name="account_name" value="{{ user.bank_account.account_name|default:'' }}">
+
+          <!-- ── COUNTRY SELECTOR (new) ─────────────────────────────────── -->
+          <div class="vps-form-group">
+            <label class="vps-label">Country</label>
+            <div class="vps-cp-wrap" id="bankCountryWrap">
+              <div class="vps-cp-field">
+                <button type="button" class="vps-cp-btn" onclick="toggleBankCountryDropdown()">
+                  <span class="vps-cp-flag" id="bcFlag"></span>
+                  <span class="vps-cp-code" id="bcCountryLabel">Nigeria</span>
+                  <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="margin-left:auto;color:var(--muted)"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+              </div>
+              <div class="vps-cp-dropdown" id="bcDropdown">
+                <div class="vps-cp-search"><input type="text" id="bcSearch" placeholder="Search country…" autocomplete="off" oninput="filterBankCountries(this.value)"></div>
+                <div class="vps-cp-list" id="bcList"></div>
+              </div>
+            </div>
+            <span class="vps-hint" id="bcHint">Select your country to see only its banks.</span>
+          </div>
+          <!-- ──────────────────────────────────────────────────────────── -->
+
           <div class="vps-form-group">
             <label class="vps-label">Account Number</label>
             <div class="vps-acct-wrap">
@@ -991,10 +1020,83 @@ function closeCpOutside(e){const wrap=document.getElementById('cpDropdown');if(w
 function selectCp(code){const c=COUNTRIES.find(x=>x.f===code);if(!c)return;document.getElementById('cpCurrencyCode').value=c.c;document.getElementById('cpCurrencySymbol').value=c.s;document.getElementById('cpSymbol').textContent=c.s;document.getElementById('cpCodeLabel').textContent=c.c;document.getElementById('cpPreview').textContent=c.n+' — '+c.c;document.getElementById('cpDropdown').classList.remove('open');}
 function toggleCurrencyForm(){const form=document.getElementById('currencyForm');const disp=document.getElementById('currencyDisplay');const show=form.style.display==='none';form.style.display=show?'':'none';disp.style.display=show?'none':'';if(show)renderCpList(COUNTRIES);}
 
+/* ── BANK COUNTRY PICKER (new) ──────────────────────────────────────────
+   Maps to Flutterwave's GET /v3/banks/{country} endpoint — codes below
+   are the ISO-2 codes Flutterwave expects in the path parameter.       */
+const BANK_COUNTRIES=[
+  {n:'Nigeria',f:'ng',c:'NG'},
+  {n:'Ghana',f:'gh',c:'GH'},
+  {n:'Kenya',f:'ke',c:'KE'},
+  {n:'Uganda',f:'ug',c:'UG'},
+  {n:'Tanzania',f:'tz',c:'TZ'},
+  {n:'South Africa',f:'za',c:'ZA'},
+  {n:'Rwanda',f:'rw',c:'RW'},
+  {n:'Zambia',f:'zm',c:'ZM'},
+  {n:'Sierra Leone',f:'sl',c:'SL'},
+  {n:'Cameroon',f:'cm',c:'CM'},
+  {n:"Côte d'Ivoire",f:'ci',c:'CI'},
+  {n:'Senegal',f:'sn',c:'SN'},
+  {n:'Egypt',f:'eg',c:'EG'},
+  {n:'United States',f:'us',c:'US'},
+  {n:'United Kingdom',f:'gb',c:'GB'},
+];
+let selectedBankCountry={n:'Nigeria',f:'ng',c:'NG'};
+
+function bcFlagImg(f){return`<img src="https://flagcdn.com/24x18/${f}.png" width="22" height="16" alt="${f}" style="border-radius:3px;display:block;">`;}
+function renderBcList(list){
+  document.getElementById('bcList').innerHTML=list.map(c=>
+    `<div class="vps-cp-item" onclick="selectBankCountry('${c.c}')"><span class="vps-cp-flag">${bcFlagImg(c.f)}</span><span class="vps-cp-item-name">${c.n}</span><span class="vps-cp-item-code">${c.c}</span></div>`
+  ).join('');
+}
+function filterBankCountries(q){
+  const ql=q.toLowerCase();
+  renderBcList(ql?BANK_COUNTRIES.filter(c=>c.n.toLowerCase().includes(ql)||c.c.toLowerCase().includes(ql)):BANK_COUNTRIES);
+}
+function toggleBankCountryDropdown(){
+  const dd=document.getElementById('bcDropdown');
+  if(dd.classList.contains('open')){dd.classList.remove('open');return;}
+  renderBcList(BANK_COUNTRIES);
+  dd.classList.add('open');
+  setTimeout(()=>{const s=document.getElementById('bcSearch');if(s){s.value='';s.focus();}document.addEventListener('click',closeBcOutside,{once:true});},60);
+}
+function closeBcOutside(e){const wrap=document.getElementById('bcDropdown');if(wrap&&!wrap.parentElement.contains(e.target))wrap.classList.remove('open');}
+function selectBankCountry(code){
+  const c=BANK_COUNTRIES.find(x=>x.c===code);
+  if(!c)return;
+  selectedBankCountry=c;
+  document.getElementById('bcFlag').innerHTML=bcFlagImg(c.f);
+  document.getElementById('bcCountryLabel').textContent=c.n;
+  document.getElementById('bcDropdown').classList.remove('open');
+  resetBank();            // clears any previously selected bank + verification state
+  banksLoaded=false;
+  fetchBanks();            // refetch banks scoped to the new country
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const flagEl=document.getElementById('bcFlag');
+  if(flagEl)flagEl.innerHTML=bcFlagImg('ng');
+});
+/* ──────────────────────────────────────────────────────────────────── */
+
 let allBanks=[],banksLoaded=false,verifyTimer=null,kbdIdx=-1,acctOk=false;
 let selBank={code:'{{ user.bank_account.bank_code|default:""|escapejs }}',name:'{{ user.bank_account.bank_name|default:""|escapejs }}'};
 function showPayoutForm(){const sr=document.getElementById('payoutSavedRow');if(sr)sr.style.display='none';document.getElementById('payoutForm').style.display='';if(!banksLoaded)fetchBanks();if(selBank.code)showBpPill(selBank.name);const acc=document.getElementById('acctNum').value.trim();if(acc.length===10&&selBank.code)doVerify(acc,selBank.code);}
-async function fetchBanks(){setBpEmpty('Loading banks…');try{const r=await fetch('/api/banks/');const data=await r.json();if(data.success&&data.banks&&data.banks.length){allBanks=data.banks;banksLoaded=true;renderBpItems(allBanks);const cr=document.getElementById('bpCountRow');cr.style.display='block';cr.textContent=`${allBanks.length} banks available`;document.getElementById('bpHint').textContent=`${allBanks.length} banks — type to search`;}else throw new Error();}catch{setBpEmpty('Could not load banks. Please refresh.');}}
+async function fetchBanks(){
+  setBpEmpty('Loading banks…');
+  try{
+    const r=await fetch('/api/banks/?country='+selectedBankCountry.c);
+    const data=await r.json();
+    if(data.success&&data.banks&&data.banks.length){
+      allBanks=data.banks;banksLoaded=true;renderBpItems(allBanks);
+      const cr=document.getElementById('bpCountRow');
+      cr.style.display='block';
+      cr.textContent=`${allBanks.length} banks in ${selectedBankCountry.n}`;
+      document.getElementById('bpHint').textContent=`${allBanks.length} banks in ${selectedBankCountry.n} — type to search`;
+    } else throw new Error();
+  }catch{
+    setBpEmpty('Could not load banks for '+selectedBankCountry.n+'.');
+    document.getElementById('bpHint').textContent='Could not load banks for '+selectedBankCountry.n+'.';
+  }
+}
 function renderBpItems(banks){const list=document.getElementById('bpList');document.getElementById('bpEmpty').style.display='none';if(!banks.length){list.innerHTML='<div class="vps-bp-empty">No banks match your search</div>';return;}list.innerHTML=banks.map((b,i)=>`<div class="vps-bp-item" data-idx="${i}" onclick="selectBank('${esc(b.code)}','${esc(b.name)}')" onmouseenter="kbdIdx=${i}">${escHtml(b.name)}</div>`).join('');}
 function setBpEmpty(msg){const el=document.getElementById('bpEmpty');el.textContent=msg;el.style.display='flex';document.getElementById('bpList').innerHTML='';document.getElementById('bpList').appendChild(el);}
 function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
@@ -1004,7 +1106,7 @@ function openBpList(){if(!banksLoaded)fetchBanks();document.getElementById('bpLi
 function closeBpOutside(e){if(!document.getElementById('bankPicker').contains(e.target))document.getElementById('bpList').classList.remove('open');}
 function selectBank(code,name){selBank={code,name};document.getElementById('hBankCode').value=code;document.getElementById('hBankName').value=name;document.getElementById('bpList').classList.remove('open');showBpPill(name);document.getElementById('bpHint').textContent=name+' ✓';const acc=document.getElementById('acctNum').value.trim();if(acc.length===10)doVerify(acc,code);else updateSaveBtn();}
 function showBpPill(name){document.getElementById('bpSearchRow').style.display='none';document.getElementById('bpSelected').classList.add('show');document.getElementById('bpSelectedName').textContent=name;}
-function resetBank(){selBank={code:'',name:''};document.getElementById('hBankCode').value='';document.getElementById('hBankName').value='';document.getElementById('bpSearchRow').style.display='';document.getElementById('bpSelected').classList.remove('show');document.getElementById('bpInput').value='';document.getElementById('bpClear').style.display='none';document.getElementById('bpHint').textContent='All Nigerian banks — commercial, microfinance & fintech';renderBpItems(allBanks);acctOk=false;clearBanner();setBadge('');updateSaveBtn();document.getElementById('bpInput').focus();openBpList();}
+function resetBank(){selBank={code:'',name:''};document.getElementById('hBankCode').value='';document.getElementById('hBankName').value='';document.getElementById('bpSearchRow').style.display='';document.getElementById('bpSelected').classList.remove('show');document.getElementById('bpInput').value='';document.getElementById('bpClear').style.display='none';document.getElementById('bpHint').textContent='Select your bank below.';renderBpItems(allBanks);acctOk=false;clearBanner();setBadge('');updateSaveBtn();}
 function clearBpSearch(){document.getElementById('bpInput').value='';document.getElementById('bpClear').style.display='none';renderBpItems(allBanks);}
 document.addEventListener('keydown',function(e){const list=document.getElementById('bpList');if(!list.classList.contains('open'))return;const items=list.querySelectorAll('.vps-bp-item');if(!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();kbdIdx=Math.min(kbdIdx+1,items.length-1);hlKbd(items);}if(e.key==='ArrowUp'){e.preventDefault();kbdIdx=Math.max(kbdIdx-1,0);hlKbd(items);}if(e.key==='Enter'&&kbdIdx>=0){e.preventDefault();items[kbdIdx].click();}if(e.key==='Escape')list.classList.remove('open');});
 function hlKbd(items){items.forEach(i=>i.classList.remove('kbdfocus'));if(kbdIdx>=0){items[kbdIdx].classList.add('kbdfocus');items[kbdIdx].scrollIntoView({block:'nearest'});}}
