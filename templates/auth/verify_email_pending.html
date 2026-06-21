@@ -6,9 +6,25 @@
 
 {% block extra_css %}
 <style>
+/* ══════════════════════════════════════
+   THEME-AWARE AUTH TOKENS — same pattern as register.html
+══════════════════════════════════════ */
+:root {
+  --auth-bg:        #0A0A0A;
+  --auth-card-bg:   rgba(255,255,255,.06);
+  --auth-card-bd:   rgba(255,255,255,.1);
+  --auth-text-85:   rgba(255,255,255,.85);
+  --auth-text-45:   rgba(255,255,255,.45);
+  --auth-text-35:   rgba(255,255,255,.35);
+  --auth-grid-line: rgba(255,255,255,.03);
+}
+[data-theme="dark"] {
+  --auth-bg: #050505;
+}
+
 .verify-page {
   min-height: 100vh;
-  background: #0A0A0A;
+  background: var(--auth-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,8 +65,8 @@
 .v-grid {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+    linear-gradient(var(--auth-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--auth-grid-line) 1px, transparent 1px);
   background-size: 48px 48px;
   pointer-events: none;
 }
@@ -64,15 +80,15 @@
 }
 @keyframes vIn { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
 
-.verify-wordmark {
-  font-family: var(--font-d);
-  font-size: 18px; font-weight: 800;
-  color: #fff; letter-spacing: -.4px;
+/* Logo — card area is always dark-glass, so always show the light logo */
+.verify-logo {
+  display: inline-flex; align-items: center;
   text-decoration: none;
-  display: block;
   margin-bottom: 40px;
 }
-.verify-wordmark span { color: #00C853; }
+.verify-logo img { height: 75px; width: auto; display: block; }
+.verify-logo .logo-dark  { display: none; }
+.verify-logo .logo-light { display: block; }
 
 .verify-icon {
   width: 68px; height: 68px;
@@ -88,14 +104,14 @@
 .verify-title {
   font-family: var(--font-d);
   font-size: 30px; font-weight: 800;
-  color: #fff; letter-spacing: -1px;
+  color: var(--auth-text-85); letter-spacing: -1px;
   line-height: 1.15; margin-bottom: 12px;
 }
 .verify-title span { color: #00C853; }
 
 .verify-sub {
   font-size: 14px;
-  color: rgba(255,255,255,.45);
+  color: var(--auth-text-45);
   line-height: 1.75;
   margin-bottom: 32px;
   max-width: 320px;
@@ -103,8 +119,8 @@
 }
 
 .verify-info {
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.1);
+  background: var(--auth-card-bg);
+  border: 1px solid var(--auth-card-bd);
   border-radius: 14px;
   padding: 20px 24px;
   margin-bottom: 32px;
@@ -112,16 +128,16 @@
 }
 .verify-info p {
   font-size: 13px;
-  color: rgba(255,255,255,.45);
+  color: var(--auth-text-45);
   line-height: 1.7; margin: 0;
 }
 .verify-info p + p { margin-top: 8px; }
-.verify-info strong { color: rgba(255,255,255,.85); font-weight: 600; }
+.verify-info strong { color: var(--auth-text-85); font-weight: 600; }
 
 .verify-back {
   display: inline-block;
   font-size: 13px; font-weight: 500;
-  color: rgba(255,255,255,.35);
+  color: var(--auth-text-35);
   text-decoration: none;
   transition: color .15s;
 }
@@ -144,7 +160,10 @@
 
   <div class="verify-inner">
 
-    <a href="/" class="verify-wordmark">Vendo<span>Page</span></a>
+    <a href="/" class="verify-logo">
+      <img class="logo-dark"  src="{% static 'images/logoo.png' %}"      alt="Vendopage">
+      <img class="logo-light" src="{% static 'images/logo-white.png' %}" alt="Vendopage">
+    </a>
 
     <div class="verify-icon">
       <svg width="28" height="28" fill="none" stroke="#00C853" stroke-width="1.8" viewBox="0 0 24 24">
