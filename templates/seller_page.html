@@ -1432,16 +1432,6 @@ document.addEventListener('DOMContentLoaded', function() {
   renderLastSeen();
 });
 
-/* ══════════════════════════════════════
-   LAST SEEN
-   < 5 min   → Online now (green)
-   < 1 hr    → Active Xm ago (amber)
-   < 24 hr   → Active Xh ago (amber)
-   < 7 days  → Active Xd ago (grey)
-   7–30 days → Last seen recently (grey)
-   > 30 days → Last seen [Mon D] (grey)
-   > 7 days  badge stays visible (never hidden)
-══════════════════════════════════════ */
 function renderLastSeen() {
   var badge = document.getElementById('lastSeenBadge');
   if (!badge) return;
@@ -1455,6 +1445,13 @@ function renderLastSeen() {
 
   var dot  = document.getElementById('lastSeenDot');
   var text = document.getElementById('lastSeenText');
+
+  var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function formatDate(d) {
+    var str = months[d.getMonth()] + ' ' + d.getDate();
+    if (d.getFullYear() !== now.getFullYear()) str += ', ' + d.getFullYear();
+    return str;
+  }
 
   if (diff < 300) {
     /* under 5 minutes — treat as online */
@@ -1479,16 +1476,10 @@ function renderLastSeen() {
     dot.className    = 'last-seen-dot away';
     text.textContent = 'Active ' + days + 'd ago';
 
-  } else if (diff < 2592000) {
-    /* 7 days – 30 days */
-    dot.className    = 'last-seen-dot away';
-    text.textContent = 'Last seen recently';
-
   } else {
-    /* over 30 days — show the month + day */
-    var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    /* 7+ days — always show the real date now, never a vague label */
     dot.className    = 'last-seen-dot away';
-    text.textContent = 'Last seen ' + months[last.getMonth()] + ' ' + last.getDate();
+    text.textContent = 'Last seen ' + formatDate(last);
   }
 }
 </script>
