@@ -1,5 +1,3 @@
-
-
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from datetime import timedelta
@@ -40,15 +38,11 @@ class Command(BaseCommand):
 
         cutoff = timezone.now() - timedelta(days=days)
 
-        # Find sellers whose most recent product upload is older than cutoff
-        # We use a subquery approach: get seller IDs who have at least one product
-        # but none uploaded after the cutoff date.
         sellers = Seller.objects.filter(
             is_active=True,
             is_staff=False,
             is_superuser=False,
         )
-
         if seller_id:
             sellers = sellers.filter(id=seller_id)
 
@@ -58,22 +52,27 @@ class Command(BaseCommand):
 
         for seller in sellers:
             try:
-                # Check if they have any products at all
+                # Skip sellers with no products at all
                 total_products = Product.objects.filter(seller=seller).count()
                 if total_products == 0:
-                    # Brand new seller — skip, welcome email already handled this
                     skipped += 1
                     continue
 
-                # Check if their most recent upload is older than the cutoff
+                # Skip if uploaded recently
                 latest_product = Product.objects.filter(
                     seller=seller
                 ).order_by('-created_at').first()
 
                 if not latest_product or latest_product.created_at > cutoff:
-                    # Uploaded recently — not inactive
                     skipped += 1
                     continue
+
+                # Skip if already emailed within the last 7 days
+                if seller.last_reengagement_sent:
+                    days_since_last = (timezone.now() - seller.last_reengagement_sent).days
+                    if days_since_last < 7:
+                        skipped += 1
+                        continue
 
                 days_inactive = (timezone.now() - latest_product.created_at).days
                 store_url     = f'https://www.vendopage.com/{seller.slug}'
@@ -96,6 +95,8 @@ class Command(BaseCommand):
 
                 if success:
                     sent += 1
+                    seller.last_reengagement_sent = timezone.now()
+                    seller.save(update_fields=['last_reengagement_sent'])
                     self.stdout.write(f'✅ Sent to {seller.email} ({days_inactive} days inactive)')
                 else:
                     errors += 1

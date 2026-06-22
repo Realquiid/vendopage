@@ -48,3 +48,33 @@ def reset_monthly_volumes():
     )
     logger.info(f"Reset monthly_volume_processed for {updated} seller(s) on {today}")
     return f"Reset {updated} seller(s)"
+
+@shared_task(name='sellers.tasks.send_weekly_summaries')
+def send_weekly_summaries():
+    try:
+        logger.info("Starting weekly summaries task...")
+        call_command('send_weekly_summary')
+        logger.info("Weekly summaries task complete.")
+    except Exception as e:
+        logger.exception("send_weekly_summaries FAILED: %s", e)
+        raise
+
+@shared_task(name='sellers.tasks.send_reengagement_emails')
+def send_reengagement_emails():
+    try:
+        logger.info("Starting re-engagement emails task...")
+        call_command('send_reengagement')
+        logger.info("Re-engagement emails task complete.")
+    except Exception as e:
+        logger.exception("send_reengagement_emails FAILED: %s", e)
+        raise
+
+@shared_task(name='sellers.tasks.send_premium_expiry_warnings')
+def send_premium_expiry_warnings():
+    try:
+        logger.info("Starting premium expiry warnings task...")
+        call_command('send_premium_expiry_warnings')
+        logger.info("Premium expiry warnings task complete.")
+    except Exception as e:
+        logger.exception("send_premium_expiry_warnings FAILED: %s", e)
+        raise

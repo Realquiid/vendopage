@@ -125,6 +125,7 @@ class Seller(AbstractUser):
     weekly_whatsapp_clicks = models.IntegerField(default=0)
     last_analytics_reset = models.DateTimeField(default=timezone.now)
     last_seen = models.DateTimeField(null=True, blank=True,help_text="Last time this seller made any request to the platform.")
+    last_reengagement_sent = models.DateTimeField(null=True, blank=True, help_text="Last time a re-engagement email was sent to this seller.")
     email_verified = models.BooleanField(default=False)
     email_verify_token = models.CharField(max_length=64, blank=True, null=True)
 
