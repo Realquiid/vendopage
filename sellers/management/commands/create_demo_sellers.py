@@ -183,7 +183,7 @@ class Command(BaseCommand):
                     pass
 
         self._create_seller(
-            business_name='Couture Collection',
+            business_name='Couture Collections',
             username='couturecollection',
             email='couture.collection.ng@gmail.com',
             whatsapp='2348012345678',
@@ -205,7 +205,7 @@ class Command(BaseCommand):
         )
 
         self.stdout.write(self.style.SUCCESS('\n✅ Done!'))
-        self.stdout.write('   Couture Collection → vendopage.com/couture-collection')
+        self.stdout.write('   Couture Collections → vendopage.com/couture-collections')
         self.stdout.write('   PeakForm Sports    → vendopage.com/peakform-sports')
         self.stdout.write('   Password for both  → DemoSeller2024!')
 
