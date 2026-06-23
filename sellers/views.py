@@ -19,7 +19,6 @@ from products.models import Product, ProductImage
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from sellers.geo_currency import detect_currency
 from django.views.decorators.csrf import csrf_exempt
 from decimal import Decimal, InvalidOperation
 import uuid
@@ -1677,8 +1676,8 @@ def product_edit_api(request, product_id):
 
 def checkout_view(request, slug):
     seller          = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)
-    currency_symbol = request.session.get('buyer_currency_symbol', seller.currency_symbol or '₦')
-    currency_code   = request.session.get('buyer_currency_code',   seller.currency_code   or 'NGN')
+    currency_symbol = seller.currency_symbol or '₦'
+    currency_code   = seller.currency_code   or 'NGN'
     if not request.session.get('buyer_currency_code'):
         currency_info   = detect_currency(request, seller)
         currency_symbol = currency_info['symbol']
