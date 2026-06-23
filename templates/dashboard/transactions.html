@@ -563,7 +563,7 @@
       <div class="vp-sum-amount amber">
         {{ user.currency_symbol|default:"₦" }}{{ summary.total_in_buffer|default:0|floatformat:0 }}
       </div>
-      <div class="vp-sum-count">{{ summary.count_received|default:0 }} releasing tonight</div>
+      <div class="vp-sum-count">{{ summary.count_received|default:0 }} releasing next business day</div>
     </div>
     {% if summary.total_failed %}
     <div class="vp-tx-sum-card">
@@ -579,7 +579,7 @@
   <!-- ESCROW INFO CHIP -->
   <div class="vp-escrow-chip">
     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-    Payouts run every night at 2 AM · 5% platform fee is deducted automatically
+    Payouts process each business day morning · weekends hold until next business day · 5% platform fee
   </div>
 
   <!-- FILTER TABS -->
@@ -649,12 +649,12 @@
             <div class="vp-tx-payout amber">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
             <div class="vp-tx-eta">
               <span class="vp-tx-eta-dot"></span>
-              {% if order.payout_eta %}by {{ order.payout_eta|date:"D g A" }}{% else %}Tonight 2 AM{% endif %}
+             {% if order.payout_eta %}by {{ order.payout_eta|date:"D g A" }}{% else %}Next business day morning{% endif %}
             </div>
             <div class="vp-tx-prog"><div class="vp-tx-prog-fill prog-amber" style="width:{{ order.payout_progress|default:50 }}%"></div></div>
           {% elif order.status == 'FAILED_PAYOUT' %}
             <div class="vp-tx-payout" style="color:#f87171;">{{ order.currency }} {{ order.vendor_payout|floatformat:0 }}</div>
-            <div class="vp-tx-eta" style="color:#f87171;">Retrying tonight</div>
+            <div class="vp-tx-eta" style="color:#f87171;">Retrying next business day morning</div>
           {% elif order.status == 'refunded' %}
             <div class="vp-tx-payout muted">Refunded</div>
           {% else %}

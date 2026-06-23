@@ -90,12 +90,13 @@
   background:var(--white);
   border:1px solid var(--border);
   border-radius:18px; padding:24px; margin-bottom:16px;
-  position:relative; overflow:hidden;
+  position:relative; 
 }
 .vps-card::before {
   content:''; position:absolute; top:0; left:0; right:0; height:1px;
   background:linear-gradient(90deg,transparent,rgba(0,200,83,.3),transparent);
   pointer-events:none;
+  border-radius: 18px 18px 0 0;
 }
 .vps-card-header { margin-bottom:18px; }
 .vps-card-header h2 { font-family:var(--font-d); font-size:17px; font-weight:800; letter-spacing:-.4px; color:var(--ink); margin-bottom:4px; }
@@ -265,8 +266,8 @@
 
 /* ── COUNTRY / BANK PICKER (shared dropdown style) ── */
 .vps-cp-wrap { position:relative; }
-.vps-cp-field { border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-.vps-cp-btn { width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; border:none; background:var(--surface-2); cursor:pointer; text-align:left; }
+.vps-cp-field { border:1px solid var(--border); border-radius:12px; }
+.vps-cp-btn { width:100%; display:flex; align-items:center; gap:10px; padding:12px 16px; border:none; background:var(--surface-2); cursor:pointer; text-align:left; border-radius: 12px; }
 .vps-cp-symbol { font-family:var(--font-d); font-size:18px; font-weight:800; color:var(--green); width:28px; text-align:center; flex-shrink:0; }
 .vps-cp-code { font-family:var(--font-b); font-size:14px; font-weight:700; color:var(--ink); }
 .vps-cp-preview { padding:8px 16px 12px; font-size:12px; color:var(--muted); border-top:1px solid var(--border); }

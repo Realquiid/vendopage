@@ -7,19 +7,22 @@
 {% block extra_css %}
 <style>
 /* ══════════════════════════════════════
-   THEME-AWARE AUTH TOKENS — same pattern as register.html
+   AUTH TOKENS — mapped to base.html's
+   shared light/dark variables, same fix
+   as register.html, so this page flips
+   with the site-wide toggle.
 ══════════════════════════════════════ */
 :root {
-  --auth-bg:        #0A0A0A;
-  --auth-card-bg:   rgba(255,255,255,.06);
-  --auth-card-bd:   rgba(255,255,255,.1);
-  --auth-text-85:   rgba(255,255,255,.85);
-  --auth-text-45:   rgba(255,255,255,.45);
-  --auth-text-35:   rgba(255,255,255,.35);
-  --auth-grid-line: rgba(255,255,255,.03);
+  --auth-bg:        var(--surface);
+  --auth-card-bg:   var(--white);
+  --auth-card-bd:   var(--border);
+  --auth-text-85:   var(--ink);
+  --auth-text-45:   var(--muted);
+  --auth-text-35:   var(--muted-lt);
+  --auth-grid-line: rgba(13,13,13,.03);
 }
 [data-theme="dark"] {
-  --auth-bg: #050505;
+  --auth-grid-line: rgba(255,255,255,.03);
 }
 
 .verify-page {
@@ -80,15 +83,17 @@
 }
 @keyframes vIn { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
 
-/* Logo — card area is always dark-glass, so always show the light logo */
+/* Logo — now flips with theme like every other page */
 .verify-logo {
   display: inline-flex; align-items: center;
   text-decoration: none;
   margin-bottom: 40px;
 }
 .verify-logo img { height: 75px; width: auto; display: block; }
-.verify-logo .logo-dark  { display: none; }
-.verify-logo .logo-light { display: block; }
+.verify-logo .logo-dark  { display: block; }
+.verify-logo .logo-light { display: none; }
+[data-theme="dark"] .verify-logo .logo-dark  { display: none; }
+[data-theme="dark"] .verify-logo .logo-light { display: block; }
 
 .verify-icon {
   width: 68px; height: 68px;
@@ -107,7 +112,7 @@
   color: var(--auth-text-85); letter-spacing: -1px;
   line-height: 1.15; margin-bottom: 12px;
 }
-.verify-title span { color: #00C853; }
+.verify-title span { color: var(--green-pop); }
 
 .verify-sub {
   font-size: 14px;
@@ -125,6 +130,7 @@
   padding: 20px 24px;
   margin-bottom: 32px;
   text-align: left;
+  box-shadow: var(--sh-sm);
 }
 .verify-info p {
   font-size: 13px;
@@ -141,7 +147,7 @@
   text-decoration: none;
   transition: color .15s;
 }
-.verify-back:hover { color: #00C853; }
+.verify-back:hover { color: var(--green-pop); }
 
 @media (max-width: 480px) {
   .verify-title { font-size: 26px; }
