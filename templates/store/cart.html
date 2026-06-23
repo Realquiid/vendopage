@@ -200,7 +200,7 @@
 .pm-overlay.open { opacity: 1; pointer-events: auto; }
 .pm-modal {
   background: var(--white); border-radius: 24px;
-  width: 100%; max-width: 480px;
+  width: 100%; max-width: 400px;
   box-shadow: var(--sh-lg);
   transform: translateY(20px) scale(.97);
   transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s;
@@ -208,10 +208,10 @@
 }
 .pm-overlay.open .pm-modal { transform: translateY(0) scale(1); opacity: 1; }
 .pm-header {
-  padding: 22px 22px 0;
+  padding: 18px 20px 0;
   display: flex; align-items: flex-start; justify-content: space-between;
 }
-.pm-title { font-family: var(--font-d); font-weight: 800; font-size: 19px; letter-spacing: -.5px; color: var(--ink); }
+.pm-title { font-family: var(--font-d); font-weight: 700; font-size: 16px; letter-spacing: -.5px; color: var(--ink); }
 .pm-subtitle { font-size: 13px; color: var(--muted); margin-top: 3px; }
 .pm-close {
   width: 32px; height: 32px; border-radius: 50%;
@@ -225,18 +225,18 @@
 
 .pm-cards {
   display: grid; grid-template-columns: 1fr 1fr;
-  gap: 12px; padding: 18px 22px;
+  gap: 10px; padding: 14px 20px;
 }
 .pm-card {
   border: 2px solid var(--border); border-radius: 16px;
-  padding: 16px 14px; cursor: pointer; transition: all .2s;
+  padding: 14px 12px; cursor: pointer; transition: all .2s;
   text-align: left; background: var(--white); position: relative; overflow: hidden;
 }
 .pm-card:hover { border-color: var(--muted-lt); box-shadow: var(--sh-sm); }
 .pm-card.selected { border-color: var(--green); background: rgba(0,135,61,.05); }
 .pm-card-icon { font-size: 26px; margin-bottom: 8px; display: block; }
-.pm-card-title { font-family: var(--font-d); font-weight: 700; font-size: 14px; margin-bottom: 4px; color: var(--ink); }
-.pm-card-desc { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+.pm-card-title { font-family: var(--font-d); font-weight: 700; font-size: 13px; margin-bottom: 4px; color: var(--ink); }
+.pm-card-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
 .pm-card-badge {
   position: absolute; top: 10px; right: 10px;
   font-size: 10px; font-weight: 700; padding: 2px 8px;
@@ -252,7 +252,7 @@
 }
 .pm-card.selected .pm-selected-check { display: flex; }
 
-.pm-delivery { padding: 0 22px 4px; }
+.pm-delivery { padding: 0 20px 4px; }
 .pm-delivery-toggle {
   display: flex; align-items: center; justify-content: space-between;
   padding: 13px 15px; border: 1.5px solid var(--border);
@@ -283,20 +283,20 @@
 }
 .pm-delivery-note.show { display: block; }
 
-.pm-actions { padding: 14px 22px 22px; display: flex; flex-direction: column; gap: 10px; }
+.pm-actions { padding: 12px 20px 20px; display: flex; flex-direction: column; gap: 8px; }
 .pm-proceed-btn {
-  width: 100%; padding: 13px; border-radius: var(--r-pill); border: none;
+  width: 100%; padding: 12px; border-radius: var(--r-pill); border: none;
   background: var(--ink); color: var(--surface);
-  font-family: var(--font-b); font-size: 15px; font-weight: 700;
+  font-family: var(--font-b); font-size: 14px; font-weight: 700;
   cursor: pointer; transition: all .2s;
   display: flex; align-items: center; justify-content: center; gap: 8px;
 }
 .pm-proceed-btn:hover { opacity: .88; transform: translateY(-1px); box-shadow: var(--sh-md); }
 .pm-cancel-btn {
-  width: 100%; padding: 11px; border-radius: var(--r-pill);
+  width: 100%; padding: 10px; border-radius: var(--r-pill);
   border: 1.5px solid var(--border); background: none;
   color: var(--muted); font-family: var(--font-b);
-  font-size: 14px; font-weight: 500; cursor: pointer; transition: all .18s;
+  font-size: 13px; font-weight: 500; cursor: pointer; transition: all .18s;
 }
 .pm-cancel-btn:hover { border-color: var(--muted-lt); color: var(--ink); }
 
@@ -422,34 +422,34 @@
 <div class="pm-overlay" id="pmOverlay" onclick="handleOverlayClick(event)">
   <div class="pm-modal" id="pmModal">
     <div class="pm-header">
-      <div>
-        <div class="pm-title">How do you want to pay?</div>
-        <div class="pm-subtitle">Choose a payment method that works for you</div>
-      </div>
+      <div class="pm-title">Select payment method</div>
       <button class="pm-close" onclick="closePaymentModal()">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
       </button>
     </div>
+
     <div class="pm-cards">
       <div class="pm-card selected" id="pmCardEscrow" onclick="selectPaymentType('escrow')">
         <span class="pm-card-badge safe">Recommended</span>
-        <span class="pm-card-icon">🔒</span>
         <div class="pm-card-title">Protected Pay</div>
-        <div class="pm-card-desc">Funds held securely until you confirm delivery. 72hr auto-release.</div>
-        <div class="pm-selected-check"><svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="pm-card-desc">Funds held securely until you confirm delivery. Auto-releases after 72hrs.</div>
+        <div class="pm-selected-check">
+          <svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
       </div>
       <div class="pm-card" id="pmCardDirect" onclick="selectPaymentType('direct')">
         <span class="pm-card-badge fast">Instant</span>
-        <span class="pm-card-icon">⚡</span>
         <div class="pm-card-title">Direct Pay</div>
-        <div class="pm-card-desc">Payment goes straight to the vendor. Best for trusted vendors.</div>
-        <div class="pm-selected-check"><svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="pm-card-desc">Payment goes straight to the vendor. Best for trusted sellers.</div>
+        <div class="pm-selected-check">
+          <svg width="11" height="11" fill="none" stroke="#fff" stroke-width="3" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
       </div>
     </div>
+
     <div class="pm-delivery">
       <div class="pm-delivery-toggle active" id="pmDeliveryToggle" onclick="toggleDelivery()">
         <div class="pm-delivery-left">
-          <span class="pm-delivery-icon">📦</span>
           <div>
             <div class="pm-delivery-label">Include delivery details</div>
             <div class="pm-delivery-hint">Fill address now — vendor ships to you</div>
@@ -458,9 +458,10 @@
         <div class="toggle-pill on" id="deliveryPill"></div>
       </div>
       <div class="pm-delivery-note" id="pmDeliveryNote">
-        💬 Vendor will contact you on WhatsApp after payment to arrange delivery.
+        Vendor will contact you on WhatsApp after payment to arrange delivery.
       </div>
     </div>
+
     <div class="pm-actions">
       <button class="pm-proceed-btn" id="pmProceedBtn" onclick="proceedToCheckout()">
         <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -470,7 +471,6 @@
     </div>
   </div>
 </div>
-
 {% block footer %}{% endblock %}
 
 <script>
@@ -579,10 +579,6 @@ function selectPaymentType(type) {
   selectedPaymentType = type;
   document.getElementById('pmCardEscrow').classList.toggle('selected', type === 'escrow');
   document.getElementById('pmCardDirect').classList.toggle('selected', type === 'direct');
-  const btn = document.getElementById('pmProceedBtn');
-  btn.innerHTML = type === 'direct'
-    ? `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Pay Directly`
-    : `<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg> Continue to Checkout`;
 }
 function toggleDelivery() {
   deliveryRequired = !deliveryRequired;

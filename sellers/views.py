@@ -1564,18 +1564,15 @@ def seller_transactions(request):
 # CART + CHECKOUT
 # ─────────────────────────────────────────────
 def cart_view(request, slug):
-    seller       = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)
-    products     = Product.objects.filter(seller=seller, is_archived=False).prefetch_related('images')
-    product_map  = {str(p.id): p for p in products}
-    currency_info = detect_currency(request, seller)
-    request.session['buyer_currency_code']   = currency_info['code']
-    request.session['buyer_currency_symbol'] = currency_info['symbol']
+    seller      = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)
+    products    = Product.objects.filter(seller=seller, is_archived=False).prefetch_related('images')
+    product_map = {str(p.id): p for p in products}
+
     return render(request, 'store/cart.html', {
         'seller':        seller,
         'product_map':   product_map,
-        'currency':      currency_info['symbol'],
-        'currency_code': currency_info['code'],
-        'currency_name': currency_info['name'],
+        'currency':      seller.currency_symbol or '₦',
+        'currency_code': seller.currency_code or 'NGN',
     })
 # ─────────────────────────────────────────────────────────────────────────────
 # ADD THESE TWO VIEWS to sellers/views.py
