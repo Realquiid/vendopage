@@ -1678,12 +1678,6 @@ def checkout_view(request, slug):
     seller          = get_object_or_404(Seller, slug=slug, is_active=True, store_mode=True)
     currency_symbol = seller.currency_symbol or '₦'
     currency_code   = seller.currency_code   or 'NGN'
-    if not request.session.get('buyer_currency_code'):
-        currency_info   = detect_currency(request, seller)
-        currency_symbol = currency_info['symbol']
-        currency_code   = currency_info['code']
-        request.session['buyer_currency_code']   = currency_code
-        request.session['buyer_currency_symbol'] = currency_symbol
     products    = Product.objects.filter(seller=seller, is_archived=False).prefetch_related('images')
     product_map = {str(p.id): p for p in products}
     return render(request, 'store/checkout.html', {
@@ -1692,7 +1686,6 @@ def checkout_view(request, slug):
         'currency_code': currency_code,
         'product_map':   product_map,
     })
-
 
 @require_http_methods(["POST"])
 def initiate_payment(request, slug):
