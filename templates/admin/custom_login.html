@@ -3,286 +3,243 @@
 
 {% block extrastyle %}
 {{ block.super }}
-<link rel="preconnect" href="https://api.fontshare.com">
-<link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700&f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@800;900&family=Satoshi:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* Same dark-theme token values as base_admin.html, so this screen
-     reads as part of the same product instead of a one-off skin. */
+  /* ── Hide Django chrome ── */
+  a[href="#content"] {
+    position: absolute !important; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  #header, #nav-sidebar, .breadcrumbs,
+  #footer, .help, p.help, .password-link { display: none !important; }
+  #container { background: transparent !important; min-width: unset !important; width: 100% !important; padding: 0 !important; }
+  #content-main { float: none !important; width: 100% !important; padding: 0 !important; }
+  #content { padding: 0 !important; }
+
+  /* ── Tokens ── */
   :root {
-    --bg:        #0D0D0D;
-    --card:      #1A1A18;
-    --border:    rgba(255,255,255,.08);
-    --border-2:  rgba(255,255,255,.12);
-    --field-bg:  #222220;
-    --ink:       #F5F4F0;
-    --ink-60:    rgba(245,244,240,.6);
-    --ink-40:    rgba(245,244,240,.4);
-    --ink-25:    rgba(245,244,240,.25);
-    --green:     #00C853;
-    --red:       #ef4444;
-    --red-dim:   rgba(239,68,68,.12);
-    --red-ring:  rgba(239,68,68,.3);
-    --font-d:    'Cabinet Grotesk', sans-serif;
-    --font-b:    'Satoshi', sans-serif;
-    --font-m:    'DM Mono', monospace;
+    --bg:       #0D0D0D;
+    --card:     #1A1A18;
+    --field:    #222220;
+    --border:   rgba(255,255,255,.08);
+    --border-2: rgba(255,255,255,.13);
+    --ink:      #F5F4F0;
+    --ink-40:   rgba(245,244,240,.4);
+    --ink-25:   rgba(245,244,240,.25);
+    --green:    #00C853;
+    --red-dim:  rgba(239,68,68,.12);
+    --red-ring: rgba(239,68,68,.3);
+    --red:      #ef4444;
+    --font-d:   'Cabinet Grotesk', sans-serif;
+    --font-b:   'Satoshi', sans-serif;
+    --font-m:   'DM Mono', monospace;
   }
 
+  /* ── Page ── */
   body {
     background: var(--bg) !important;
     font-family: var(--font-b) !important;
-    color: var(--ink);
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     padding: 24px 16px;
-    overflow-y: auto;
   }
 
-  #container {
-    background: transparent !important;
-    min-width: unset !important;
-    width: 100% !important;
-    padding: 20px !important;
-  }
-
-  #header, #nav-sidebar, .breadcrumbs { display: none !important; }
-
-  #content-main {
-    float: none !important;
-    width: 100% !important;
-  }
-
+  /* ── Card ── */
   .login {
     background: var(--card) !important;
-    border-radius: 20px !important;
     border: 1px solid var(--border-2) !important;
-    padding: 44px !important;
-    max-width: 420px !important;
+    border-radius: 20px !important;
+    padding: 44px 40px 36px !important;
     width: 100% !important;
+    max-width: 400px !important;
     margin: 0 auto !important;
-    box-shadow: 0 4px 32px rgba(0,0,0,.4) !important;
-    position: relative;
-    overflow: hidden;
+    box-shadow: 0 32px 64px rgba(0,0,0,.5) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    float: none !important;
   }
-  /* Subtle brand accent line — matches .card::before in base_admin.html */
+  /* Green shimmer top edge */
   .login::before {
     content: '';
     position: absolute; top: 0; left: 0; right: 0; height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0,200,83,.4), transparent);
+    background: linear-gradient(90deg, transparent, rgba(0,200,83,.45), transparent);
   }
 
-  /* Logo */
-  .login h1 { margin-bottom: 0 !important; }
-  .login-logo-link {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    text-decoration: none; margin-bottom: 20px;
-  }
-  .login-logo-img { height: 40px; width: auto; display: block; }
-  .login-admin-pill {
-    font-family: var(--font-m); font-size: 9px; font-weight: 500;
-    letter-spacing: 1.2px; text-transform: uppercase;
-    color: var(--ink-40); padding: 3px 7px; border-radius: 6px;
-    border: 1px solid var(--border-2);
-  }
+  /* ── Logo ── */
+  .login h1 { display: none !important; }
+  .vp-logo-wrap { text-align: center; margin-bottom: 32px; }
+  .vp-logo { height: 32px; width: auto; display: inline-block; }
+  /* dark logo = white version (default); light = dark version */
+  .vp-logo-dark  { display: inline-block; }
+  .vp-logo-light { display: none; }
 
-  .login-eyebrow {
+  /* ── Eyebrow ── */
+  .vp-eyebrow {
     display: flex; align-items: center; justify-content: center; gap: 7px;
-    font-family: var(--font-m); font-size: 10px; font-weight: 500;
-    letter-spacing: 1.5px; text-transform: uppercase;
-    color: var(--green); margin-bottom: 14px;
+    font-family: var(--font-m); font-size: 10px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--green); margin-bottom: 12px;
   }
-  .login-eyebrow-dot {
+  .vp-eyebrow-dot {
     width: 5px; height: 5px; border-radius: 50%;
     background: var(--green); box-shadow: 0 0 6px rgba(0,200,83,.6);
+    animation: pulse 2s infinite;
   }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-  .login-heading {
-    font-family: var(--font-d); font-weight: 800; font-size: 24px;
-    letter-spacing: -0.6px; color: var(--ink);
+  /* ── Heading ── */
+  .vp-heading {
+    font-family: var(--font-d); font-size: 30px; font-weight: 800;
+    letter-spacing: -1px; color: var(--ink);
     text-align: center; margin-bottom: 6px;
   }
-  .login-subtitle {
+  .vp-sub {
     text-align: center; color: var(--ink-40);
-    font-family: var(--font-b); font-size: 13.5px;
-    margin-bottom: 28px;
+    font-size: 14px; margin-bottom: 32px;
   }
 
-  /* Form rows */
-  .form-row {
-    margin-bottom: 16px !important;
-    padding: 0 !important;
-    border: none !important;
-  }
-
+  /* ── Form rows ── */
+  .form-row { margin-bottom: 16px !important; padding: 0 !important; border: none !important; }
   .form-row label {
     display: block !important;
-    font-family: var(--font-m) !important;
-    color: var(--ink-40) !important;
-    font-size: 10px !important;
-    font-weight: 500 !important;
-    text-transform: uppercase !important;
-    letter-spacing: .8px !important;
+    font-family: var(--font-m) !important; font-size: 10px !important;
+    font-weight: 500 !important; text-transform: uppercase !important;
+    letter-spacing: .8px !important; color: var(--ink-40) !important;
     margin-bottom: 7px !important;
   }
-
-  /* Input wrapper for password toggle */
-  .input-wrap {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-
+  .input-wrap { position: relative; display: flex; align-items: center; }
   .form-row input[type="text"],
   .form-row input[type="password"] {
-    background: var(--field-bg) !important;
+    background: var(--field) !important;
     border: 1.5px solid var(--border-2) !important;
-    border-radius: 12px !important;
-    color: var(--ink) !important;
-    padding: 12px 44px 12px 14px !important;
-    font-size: 14px !important;
-    font-family: var(--font-b) !important;
-    width: 100% !important;
+    border-radius: 12px !important; color: var(--ink) !important;
+    padding: 13px 46px 13px 15px !important;
+    font-size: 14px !important; font-family: var(--font-b) !important;
+    width: 100% !important; outline: none !important;
     transition: border-color .2s, box-shadow .2s !important;
-    outline: none !important;
   }
-
   .form-row input[type="text"]:focus,
   .form-row input[type="password"]:focus {
     border-color: var(--green) !important;
     box-shadow: 0 0 0 3px rgba(0,200,83,.1) !important;
   }
-
   .form-row input::placeholder { color: var(--ink-25) !important; }
 
-  /* Password toggle button */
+  /* Eye toggle */
   .pass-toggle {
-    position: absolute;
-    right: 12px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--ink-40);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px;
-    transition: color .18s;
-    z-index: 2;
+    position: absolute; right: 13px; background: none; border: none;
+    cursor: pointer; color: var(--ink-40); display: flex;
+    align-items: center; padding: 4px; transition: color .18s; z-index: 2;
   }
   .pass-toggle:hover { color: var(--green); }
 
-  /* Submit button — same dark-text-on-green as .btn-green in base_admin.html */
+  /* ── Submit ── */
   .submit-row {
-    margin-top: 6px !important;
-    padding: 0 !important;
-    background: transparent !important;
-    border: none !important;
-    float: none !important;
-    overflow: visible !important;
+    margin-top: 8px !important; padding: 0 !important;
+    background: transparent !important; border: none !important;
+    float: none !important; overflow: visible !important;
   }
-
   .submit-row input[type="submit"] {
-    background: var(--green) !important;
-    border: none !important;
-    border-radius: 12px !important;
-    color: #0D0D0D !important;
-    font-family: var(--font-b) !important;
-    font-size: 14px !important;
-    font-weight: 700 !important;
-    padding: 13px !important;
-    width: 100% !important;
-    cursor: pointer !important;
-    transition: filter .18s, transform .15s !important;
-    letter-spacing: .1px !important;
+    background: var(--green) !important; border: none !important;
+    border-radius: 100px !important; color: #0D0D0D !important;
+    font-family: var(--font-b) !important; font-size: 15px !important;
+    font-weight: 800 !important; padding: 14px !important;
+    width: 100% !important; cursor: pointer !important;
+    transition: filter .18s, transform .15s, box-shadow .18s !important;
+    box-shadow: 0 0 20px rgba(0,200,83,.18) !important;
   }
   .submit-row input[type="submit"]:hover {
-    filter: brightness(1.08) !important;
-    transform: translateY(-1px) !important;
+    filter: brightness(1.08) !important; transform: translateY(-1px) !important;
+    box-shadow: 0 6px 24px rgba(0,200,83,.3) !important;
   }
-  .submit-row input[type="submit"]:active {
-    transform: translateY(0) !important;
-  }
+  .submit-row input[type="submit"]:active { transform: translateY(0) !important; }
 
-  /* Error */
+  /* ── Error ── */
   .errornote {
-    background: var(--red-dim) !important;
-    border: 1px solid var(--red-ring) !important;
-    border-radius: 12px !important;
-    color: var(--red) !important;
-    padding: 11px 15px !important;
-    font-size: 12.5px !important;
-    font-family: var(--font-b) !important;
-    margin-bottom: 18px !important;
+    background: var(--red-dim) !important; border: 1px solid var(--red-ring) !important;
+    border-radius: 12px !important; color: var(--red) !important;
+    padding: 11px 15px !important; font-size: 13px !important;
+    margin-bottom: 18px !important; display: flex !important;
+    align-items: center !important; gap: 8px !important;
   }
 
-  /* Footer */
-  .login-footer {
-    text-align: center;
-    margin-top: 24px;
-    color: var(--ink-25);
-    font-size: 11.5px;
-    font-family: var(--font-b);
+  /* ── Footer ── */
+  .vp-footer {
+    text-align: center; margin-top: 24px;
+    font-size: 12px; color: var(--ink-25);
   }
-  .login-footer a { color: var(--green) !important; text-decoration: none; }
+  .vp-footer a { color: var(--green) !important; text-decoration: none; font-weight: 600; }
+  .vp-footer a:hover { text-decoration: underline; }
 
-  /* Forgot password link area */
-  .password-link { display: none !important; }
-
-  /* Hide default Django extras */
-  #content { padding: 0 !important; }
-  #footer { display: none !important; }
-  .help, p.help { display: none !important; }
-
+  /* ── Mobile: full-screen ── */
   @media (max-width: 480px) {
-    .login { padding: 32px 24px !important; border-radius: 18px !important; }
-    .login-logo-img { height: 34px; }
-    .login-heading { font-size: 21px; }
+    body { padding: 0; align-items: stretch !important; }
+    .login {
+      border-radius: 0 !important;
+      border-left: none !important; border-right: none !important;
+      border-bottom: none !important;
+      min-height: 100vh !important; max-width: 100% !important;
+      padding: 56px 28px 40px !important;
+      display: flex !important; flex-direction: column !important;
+      justify-content: center !important;
+      box-shadow: none !important;
+    }
+    .vp-heading { font-size: 28px; }
   }
 
-  @media (max-width: 360px) {
-    .login { padding: 26px 18px !important; border-radius: 16px !important; }
-    .login-logo-img { height: 30px; }
-    .login-heading { font-size: 19px; }
-    .login-subtitle { font-size: 12.5px; }
-    .form-row input[type="text"],
-    .form-row input[type="password"] { padding: 10px 40px 10px 12px !important; font-size: 13px !important; }
+  /* ── Light mode logo swap ── */
+  @media (prefers-color-scheme: light) {
+    .vp-logo-dark  { display: none; }
+    .vp-logo-light { display: inline-block; }
   }
+  /* Also respond to JS-set data-theme on <html> */
+  [data-theme="light"] .vp-logo-dark  { display: none; }
+  [data-theme="light"] .vp-logo-light { display: inline-block; }
+  [data-theme="dark"]  .vp-logo-dark  { display: inline-block; }
+  [data-theme="dark"]  .vp-logo-light { display: none; }
 </style>
 {% endblock %}
 
 {% block branding %}{% endblock %}
-
 {% block content_title %}{% endblock %}
-
 {% block nav_global %}{% endblock %}
 
 {% block content %}
 <div class="login">
 
-  <a href="/" class="login-logo-link">
-    <img class="login-logo-img" src="{% static 'images/logo-white.png' %}" alt="Vendopage">
-    <span class="login-admin-pill">Admin</span>
-  </a>
+  <!-- Logo -->
+  <div class="vp-logo-wrap">
+    <a href="/">
+      <img class="vp-logo vp-logo-dark"  src="{% static 'images/logo-white.png' %}" alt="Vendopage">
+      <img class="vp-logo vp-logo-light" src="{% static 'images/logo-dark.png' %}"  alt="Vendopage">
+    </a>
+  </div>
 
-  <div class="login-eyebrow">
-    <span class="login-eyebrow-dot"></span>
+  <!-- Eyebrow -->
+  <div class="vp-eyebrow">
+    <span class="vp-eyebrow-dot"></span>
     Admin Portal
   </div>
 
-  <h1 class="login-heading">Welcome back.</h1>
-  <p class="login-subtitle">Sign in to manage your platform.</p>
+  <!-- Headline -->
+  <div class="vp-heading">Welcome back.</div>
+  <p class="vp-sub">Sign in to manage your platform.</p>
 
+  <!-- Error -->
   {% if form.errors %}
   <div class="errornote">
-    ⚠️ Incorrect username or password. Please try again.
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    Incorrect username or password. Please try again.
   </div>
   {% endif %}
 
+  <!-- Form -->
   <form method="post" action="{{ app_path }}" id="login-form">
     {% csrf_token %}
     <input type="hidden" name="next" value="{{ next }}">
@@ -303,10 +260,9 @@
         <input type="password" name="password" id="id_password"
                placeholder="Enter your password"
                autocomplete="current-password" required>
-        <button type="button" class="pass-toggle" onclick="togglePass()" id="toggleBtn">
+        <button type="button" class="pass-toggle" onclick="togglePass()" aria-label="Toggle password">
           <svg id="eyeOpen" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
           </svg>
           <svg id="eyeClosed" style="display:none" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
@@ -321,20 +277,27 @@
     </div>
   </form>
 
-  <div class="login-footer">
-    <p>© 2026 VendoPage &nbsp;·&nbsp; <a href="/">Back to site</a></p>
+  <div class="vp-footer">
+    © 2026 VendoPage &nbsp;·&nbsp; <a href="/">Back to site</a>
   </div>
+
 </div>
 
 <script>
-function togglePass() {
-  const input = document.getElementById('id_password');
-  const eyeOpen = document.getElementById('eyeOpen');
-  const eyeClosed = document.getElementById('eyeClosed');
-  const isHidden = input.type === 'password';
-  input.type = isHidden ? 'text' : 'password';
-  eyeOpen.style.display = isHidden ? 'none' : 'block';
-  eyeClosed.style.display = isHidden ? 'block' : 'none';
+// Sync logo with saved admin theme preference (set by base_admin.html)
+(function(){
+  var t = localStorage.getItem('vp_admin_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+
+function togglePass(){
+  var i  = document.getElementById('id_password');
+  var e1 = document.getElementById('eyeOpen');
+  var e2 = document.getElementById('eyeClosed');
+  var h  = i.type === 'password';
+  i.type = h ? 'text' : 'password';
+  e1.style.display = h ? 'none'  : 'block';
+  e2.style.display = h ? 'block' : 'none';
 }
 </script>
 {% endblock %}
